@@ -1,0 +1,14 @@
+
+<-- Mark -->
+Performing Crontab Functions. Please Wait.
+Executed at Mon Aug 06th, 2012 @ 04:31:51pm
+1. Running Device Status Checkup
+	581fd5de035aa606 -> Offline for more then 5 minutes. Would send notice to System Administrator but sending notices about this device have been disabled.
+	ad97eeae15a66841 -> Online.
+	a864e4a4b8df4d66 -> Online.
+	65805e811f1170ce -> Online.
+	a527b4ee16d2aebf -> Online.
+	6432f3633f9b2c70 -> Online.
+	76ebd638eb978dc1 -> Online.
+	2d7dfd3b875c489f -> Online.
+All checks ran without any errors.
