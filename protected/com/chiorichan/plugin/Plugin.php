@@ -1,20 +1,16 @@
 <?
 	Class Plugin
 	{
-		private protected $plugins = array();
-		
-		public function callEvent(Event $event)
+		protected $pluginName = "{Plugin Error}";
+
+		public function getPluginName ()
 		{
-			
+			return $this->pluginName;
 		}
 		
-		public function getPlugin(String $name)
+		// EventHandler: Called when 
+		public function PreUserLoginEvent(PreUserCallEvent $event)
 		{
 			
-		}
-		
-		public function getPlugin(int $name)
-		{
-				
 		}
 	}

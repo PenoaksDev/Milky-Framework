@@ -30,27 +30,27 @@
 		const HL_CYAN = "\033[46m";
 		const HL_LIGHT_GRAY = "\033[47m";
 		
-		public function translateAlternateColor(String $textToTranslate)
+		public function translateAlternateColors($textToTranslate)
 		{
 			$colors = array();
 			
-			$colors["&r"] == $this::RESET;
-			$colors["&0"] == $this::BLACK;
-			$colors["&8"] == $this::DARK_GRAY;
-			$colors["&1"] == $this::BLUE;
-			$colors["&9"] == $this::LIGHT_BLUE;
-			$colors["&2"] == $this::GREEN;
-			$colors["&a"] == $this::LIGHT_GREEN;
-			$colors["&5"] == $this::CYAN; //
-			$colors["&6"] == $this::LIGHT_CYAN; //
-			$colors["&4"] == $this::RED;
-			$colors["&c"] == $this::LIGHT_RED;
-			$colors["&p"] == $this::PURPLE; //
-			$colors["&l"] == $this::LIGHT_PURPLE; //
-			$colors["&b"] == $this::BROWN; //
-			$colors["&e"] == $this::YELLOW;
-			$colors["&7"] == $this::LIGHT_GRAY;
-			$colors["&f"] == $this::WHITE;
+			$colors["&r"] = self::RESET;
+			$colors["&0"] = self::BLACK;
+			$colors["&8"] = self::DARK_GRAY;
+			$colors["&1"] = self::BLUE;
+			$colors["&9"] = self::LIGHT_BLUE;
+			$colors["&2"] = self::GREEN;
+			$colors["&a"] = self::LIGHT_GREEN;
+			$colors["&5"] = self::CYAN; //
+			$colors["&6"] = self::LIGHT_CYAN; //
+			$colors["&4"] = self::RED;
+			$colors["&c"] = self::LIGHT_RED;
+			$colors["&p"] = self::PURPLE; //
+			$colors["&l"] = self::LIGHT_PURPLE; //
+			$colors["&b"] = self::BROWN; //
+			$colors["&e"] = self::YELLOW;
+			$colors["&7"] = self::LIGHT_GRAY;
+			$colors["&f"] = self::WHITE;
 			
 			foreach ( $colors as $key => $value )
 			{
@@ -64,37 +64,42 @@
 		{
 			$colors = array();
 				
-			$colors["RESET"] == $this::RESET;
-			$colors["BLACK"] == $this::BLACK;
-			$colors["DARK_GRAY"] == $this::DARK_GRAY;
-			$colors["BLUE"] == $this::BLUE;
-			$colors["LIGHT_BLUE"] == $this::LIGHT_BLUE;
-			$colors["GREEN"] == $this::GREEN;
-			$colors["LIGHT_GREEN"] == $this::LIGHT_GREEN;
-			$colors["CYAN"] == $this::CYAN;
-			$colors["LIGHT_CYAN"] == $this::LIGHT_CYAN;
-			$colors["RED"] == $this::RED;
-			$colors["LIGHT_RED"] == $this::LIGHT_RED;
-			$colors["PURPLE"] == $this::PURPLE;
-			$colors["LIGHT_PURPLE"] == $this::LIGHT_PURPLE;
-			$colors["BROWN"] == $this::BROWN;
-			$colors["YELLOW"] == $this::YELLOW;
-			$colors["LIGHT_GRAY"] == $this::LIGHT_GRAY;
-			$colors["WHITE"] == $this::WHITE;
+			$colors["RESET"] = self::RESET;
+			$colors["BLACK"] = self::BLACK;
+			$colors["DARK_GRAY"] = self::DARK_GRAY;
+			$colors["BLUE"] = self::BLUE;
+			$colors["LIGHT_BLUE"] = self::LIGHT_BLUE;
+			$colors["GREEN"] = self::GREEN;
+			$colors["LIGHT_GREEN"] = self::LIGHT_GREEN;
+			$colors["CYAN"] = self::CYAN;
+			$colors["LIGHT_CYAN"] = self::LIGHT_CYAN;
+			$colors["RED"] = self::RED;
+			$colors["LIGHT_RED"] = self::LIGHT_RED;
+			$colors["PURPLE"] = self::PURPLE;
+			$colors["LIGHT_PURPLE"] = self::LIGHT_PURPLE;
+			$colors["BROWN"] = self::BROWN;
+			$colors["YELLOW"] = self::YELLOW;
+			$colors["LIGHT_GRAY"] = self::LIGHT_GRAY;
+			$colors["WHITE"] = self::WHITE;
 				
-			$colors["HL_BLACK"] == $this::HL_BLACK;
-			$colors["HL_RED"] == $this::HL_RED;
-			$colors["HL_GREEN"] == $this::HL_GREEN;
-			$colors["HL_YELLOW"] == $this::HL_YELLOW;
-			$colors["HL_BLUE"] == $this::HL_BLUE;
-			$colors["HL_MAGENTA"] == $this::HL_MAGENTA;
-			$colors["HL_CYAN"] == $this::HL_CYAN;
-			$colors["HL_LIGHT_GRAY"] == $this::HL_LIGHT_GRAY;
+			$colors["HL_BLACK"] = self::HL_BLACK;
+			$colors["HL_RED"] = self::HL_RED;
+			$colors["HL_GREEN"] = self::HL_GREEN;
+			$colors["HL_YELLOW"] = self::HL_YELLOW;
+			$colors["HL_BLUE"] = self::HL_BLUE;
+			$colors["HL_MAGENTA"] = self::HL_MAGENTA;
+			$colors["HL_CYAN"] = self::HL_CYAN;
+			$colors["HL_LIGHT_GRAY"] = self::HL_LIGHT_GRAY;
 			
 			return $colors;
 		}
 		
 		public function toString()
+		{
+			return implode(",", $this->values());
+		}
+		
+		public function __toString()
 		{
 			return implode(",", $this->values());
 		}
