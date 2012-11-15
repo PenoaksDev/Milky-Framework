@@ -16,4 +16,14 @@
 			
 			return substr($package, 0, strrpos($package, "."));
 		}
+		
+		public function exceptionHandler ( Exception $e )
+		{
+			
+		}
+		
+		public function errorHandler ( Exception $e )
+		{
+			
+		}
 	}

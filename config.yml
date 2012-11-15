@@ -1,0 +1,9 @@
+title: Unnamed Chiori Framework Site
+domain: example.com
+metatags: []
+protected: []
+source: /pages
+aliases:
+  css: /css
+  js: /js
+  img: /images

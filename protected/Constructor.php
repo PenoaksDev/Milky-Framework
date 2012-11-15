@@ -1,15 +1,15 @@
 <?
 	/**
-	 * Name: Chiori Framework API
-	 * Version: 5.0.1111 (Fluttershy)
-	 * Last Updated: November 11th, 2012
+	 * @Product: Chiori Framework API
+	 * @Version 5.0.1115 (Fluttershy)
+	 * @Last Updated: November 15th, 2012
+	 * @PHP Version: 5.4 or Newer
 	 *
-	 * (C) 2012 Chiori Greene
-	 * All Rights Reserved.
 	 * @Author: Chiori Greene
 	 * @E-Mail: chiorigreene@gmail.com
 	 * @Website: http://web.chiorichan.com
-	 * @Open Source License: GNU Public License Version 2
+	 * @License: GNU Public License Version 2
+	 * @Copyright (C) 2013 Chiori Greene. All Rights Reserved.
 	 *
 	 * This code is intellectual property of Chiori Greene and can only be distributed in whole with its
 	 * framework which is known as Chiori Framework.
@@ -19,10 +19,6 @@
 	 * On first use this framework needs no other files except this controller and be placed within
 	 * a PHP writtable directory -- /protected recommmended. Each time this framework is initalized,
 	 * this controller will attempt to automaticly download and update used components.
-	 *
-	 * On a production server we recommend disabling automatic updating and downloading of components.
-	 * But in exchange creating a cronjob to replace this need. See our wiki for instructions.
-	 *
 	 */
 
 	define ( "DIRSEP", "/" );
@@ -33,6 +29,25 @@
 	/* Define Yes and No as alternatives to True and False. */
 	define ( "yes", true );
 	define ( "no", false );
+	
+	// Define Configuration Sections
+	define ( "CONFIG_FW", "CONFIG_FW" );
+	define ( "CONFIG_SITE", "CONFIG_SITE" );
+	define ( "CONFIG_LOCAL0", "CONFIG_LOCAL0" );
+	define ( "CONFIG_LOCAL1", "CONFIG_LOCAL1" );
+	define ( "CONFIG_LOCAL2", "CONFIG_LOCAL2" );
+	define ( "CONFIG_LOCAL3", "CONFIG_LOCAL3" );
+	define ( "CONFIG_LOCAL4", "CONFIG_LOCAL4" );
+	define ( "CONFIG_LOCAL5", "CONFIG_LOCAL5" );
+	define ( "CONFIG_LOCAL6", "CONFIG_LOCAL6" );
+	define ( "CONFIG_LOCAL7", "CONFIG_LOCAL7" );
+	define ( "CONFIG_LOCAL8", "CONFIG_LOCAL8" );
+	define ( "CONFIG_LOCAL9", "CONFIG_LOCAL9" );
+	
+	define ( "LOG_DISABLED", -1 );
+	define ( "LOG_DEBUG1", 8 );
+	define ( "LOG_DEBUG2", 9 );
+	define ( "LOG_DEBUG3", 10 );
 	
 	// TODO: Be ready to implement scalar varable types.
 	
@@ -180,14 +195,38 @@
 		if ( $package == null || empty($package))
 			return false;
 		
-		$path = FW . str_replace(".", DIRSEP, $package) . ".php";
+		if ( !strpos($package, ".") )
+			$package = "com.chiorichan." . $package;
 		
-		// TODO: Add log tracking.
-		
-		if (file_exists($path))
+		if ( strpos($package, "*") !== false )
 		{
-			require_once( $path );
+			$path = FW . str_replace(".", DIRSEP, $package);
+			
+			$glob = glob($path);
+			
+			foreach ( $glob as $file )
+			{
+				if (file_exists($path))
+				{
+					if ( getFramework() != null )
+						getFramework()->getServer()->sendDebug("&1Loading \"" . $path . "\"");
+					require_once( $path );
+				}
+			}
+			
 			return true;
+		}
+		else
+		{
+			$path = FW . str_replace(".", DIRSEP, $package) . ".php";
+			
+			if (file_exists($path))
+			{
+				if ( getFramework() != null )
+					getFramework()->getServer()->Debug3("&1Loading \"" . $path . "\"");
+				require_once( $path );
+				return true;
+			}
 		}
 		
 		return false;
@@ -211,13 +250,14 @@
 	}
 	
 	/**
-	 * Return first object that is an instance of Framework Class.
+	 * Return first object that has ChioriFramework as Parent Class.
+	 * No longer do we search $chiori in the global scope =).
 	 */
 	function getFramework ()
 	{
 		foreach ( $GLOBALS as $var )
 		{
-			if ( is_object($var) && get_class($var) == "ChioriFramework" )
+			if ( is_object($var) && ( get_parent_class($var) == "ChioriFramework" || get_class($var) == "ChioriFramework" ) )
 				return $var;
 		}
 		
@@ -232,3 +272,5 @@
 	register_shutdown_function("__classCaller", "shutdown");
 	
 	__require("com.chiorichan.ChioriFramework");
+	
+	

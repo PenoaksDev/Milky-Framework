@@ -1,25 +1,10 @@
 <?
 	require( "protected/Constructor.php" );
 	
-	phpinfo();
-	die();
-	
-	$arr = array(
-			"database" => array(
-					"type" => "mySQL",
-					"database" => "example",
-					"username" => "example",
-					"password" => "example",
-					"prefix" => "fw_"
-					)
-			);
-	
-	yaml_emit_file( "./config.yml", $arr );
-	
 	$chiori = new ChioriFramework();
 	
+	// Initalize Framework Class plus Load Configuration
 	$chiori->initalizeFramework(dirname(__FILE__) . "/config.yml");
 	
-	//$chiori->getPluginManager()->addPluginByName("com.chiorichan.plugin.db", $config);
-	
-	$chiori->shutdown();
+	// Add Template Plugin
+	$chiori->getPluginManager()->addPluginByName("com.chiorichan.plugin.Template");

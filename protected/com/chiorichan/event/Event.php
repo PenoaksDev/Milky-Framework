@@ -22,4 +22,4 @@
 			$this->functionName = null; // Define event function
 			$this->eventName = null; // Define event name
 		}
-	}		
+	}

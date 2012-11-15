@@ -9,7 +9,8 @@
 	__Require("com.chiorichan.UserService");
 	__Require("com.chiorichan.plugin.Plugin");
 	__Require("com.chiorichan.event.Event");
-	__Require("com.chiorichan.exception.Config");
+	
+	__Require("com.chiorichan.exception.*");
 	
 	Class ChioriFramework
 	{
@@ -20,109 +21,177 @@
 		protected $pluginManager;
 		protected $userService;
 		protected $config;
-		protected $version = "5.0.1111 (Fluttershy)";
-		protected $copyright = "Copyright © 2012 Apple Bloom Company (Chiori Greene)";
+		protected $version = "5.0.1115 (Fluttershy)";
+		protected $copyright = "Copyright © 2013 Apple Bloom Company (Chiori Greene)";
 		protected $product = "Chiori Framework";
-		private $initFinished = false;
+		protected $initFinished = false;
 		
-		public function __construct($config)
+		protected $log_levels = array("dump", "sql", "syslog", "file"); 
+				
+		/**
+		 * Check that only one instance of this class has been created.
+		 */
+		public function __construct()
 		{
-			/*
-			 * Check that only one instance of this class has been created.
-			 */
 			if ( getFramework() != null )
 				return getFramework();
-			
-			// Load Basic Classes
-			$this->functions = new Functions();
-			$this->server = new Server();
-			$this->daemonSender = new DaemonSender();
-			
-			// Report Debug that Framework is Loading
-			$this->daemonSender->sendDebug("&5Now Initalizing " . $this->product . " " . $this->version, LOG_DEBUG);
-			$this->daemonSender->sendDebug("&5" . $this->copyright, LOG_DEBUG);
-			
-			$this->databaseEngine = new DatabaseEngine();
-
-			$this->daemonSender->sendDebug("&5Loading Configuration");
-			$this->config = new ConfigurationManager();
-			
-			try
-			{
-				$this->getConfig()->loadConfig( $config );				
-			}
-			catch ( ConfigException $exception )
-			{
-				throw $exception;
-			}
-			
-			$this->pluginManager = new PluginManager();
-			$this->userService = new UserService();
 		}
 		
+		public function getVersion() { return $this->version; }
+		public function getCopyright() { return $this->copyright; }
+		public function getProduct() { return $this->product; }
+		
 		/**
-		 * Call this once framework varable is initalized.
-		 * Use this space to load fw config and add fw plugins.
+		 * Call this method to initalize framework after varable was created.
+		 * Use this space to load nested classes, fw config and add fw plugins.
 		 */
-		public function initalizeFramework()
+		public function initalizeFramework($config = null)
 		{
 			if ( $this->initFinished )
 				return false;
-			
-			
-			
 			$this->initFinished = true;
+			
+			$this->functions = new Functions();
+			$this->server = new Server();
+			$this->daemonSender = new DaemonSender();
+			$this->databaseEngine = new DatabaseEngine();
+			$this->config = new ConfigurationManager();
+			$this->pluginManager = new PluginManager();
+			$this->userService = new UserService();
+			
+			// Report Debug that Framework is Loading
+			$this->server->Debug3("&5Now Initalizing " . $this->product . " " . $this->version, LOG_DEBUG);
+			$this->server->Debug3("&5" . $this->copyright, LOG_DEBUG);
+			$this->server->Debug3("&5Framework Spawned as PID: " . getmypid(), LOG_DEBUG);
+			
+			// Attempt to load default framework configuration
+			$this->server->Debug3("&5Loading Framework Configuration");
+			
+			try
+			{
+				$this->getConfig()->loadConfig( FW . "framework.yml", CONFIG_FW );
+			}
+			catch ( Exception $e )
+			{
+				getFramework()->server->sendException("&4" . $e);
+				$this->shutdown();
+			}
+			
+			if ( $config != null )
+			{
+				$this->server->Debug3("&5Loading Site Configuration");
+					
+				try
+				{
+					$this->getConfig()->loadConfig( $config, CONFIG_SITE );
+				}
+				catch ( Exception $e )
+				{
+					getFramework()->server->sendException("&4" . $e);
+					$this->shutdown();
+				}
+			}
+			
+			// Analize configuration and take action
+			if ( $this->getConfig()->getBoolean("exception-handling", CONFIG_FW) )
+			{
+				set_exception_handler(function($e) { getFramework()->getFunctions()->exceptionHandler($e); });
+			}
+			
+			if ( $this->getConfig()->getBoolean("error-handling", CONFIG_FW) )
+			{
+				set_error_handler(function($no,$str,$file,$line){ $e = new ErrorException($str,$no,0,$file,$line); getFramework()->getFunctions()->exceptionHandler($e); });
+			}
+			
+			$this->log_levels["dump"] = $this->getConfig()->getInt("debug.dump", -1, CONFIG_FW);
+			$this->log_levels["sql"] = $this->getConfig()->getInt("debug.sql", -1, CONFIG_FW);
+			$this->log_levels["syslog"] = $this->getConfig()->getInt("debug.syslog", -1, CONFIG_FW);
+			$this->log_levels["file"] = $this->getConfig()->getInt("debug.file", -1, CONFIG_FW);
+			
+			$log_path = $this->getConfig()->getString("debug.file-path", "/var/log/chiori.log", CONFIG_FW);
+			
+			if ( !file_exists( $log_path ) && !is_dir( $log_path ) && $this->log_levels["file"] > -1 )
+				throw new LogException("No valid log location defined!");
+			
+			if ( !is_writable( $log_path ) && $this->log_levels["file"] > -1 )
+				throw new LogException("Log location is not writeable by the webserver user!");
+			
 			return true;
 		}
 		
 		public function shutdown()
 		{
-			if ( !$initFinished )
+			if ( !$this->initFinished )
 				return false;
-			
+
 			// TODO: Make call to several plugins and execute a shutdown event
 			$this->getPluginManager()->raiseEventbyName("FrameworkShutdown");
 			
-			$initFinished = false;
+			$this->initFinished = false;
+			die();
 		}
 		
 		public function getDaemonSender()
 		{
+			if ( !$this->initFinished )
+				return null;
+			
 			return $this->daemonSender;
 		}
 		
 		public function getPluginManager()
 		{
+			if ( !$this->initFinished )
+				return null;
+			
 			return $this->pluginManager;
 		}
 		
 		public function getUserService()
 		{
+			if ( !$this->initFinished )
+				return null;
+			
 			return $this->userService;
 		}
 		
 		public function getConfig()
 		{
+			if ( !$this->initFinished )
+				return null;
+			
 			return $this->config;
 		}
 		
 		public function getServer()
 		{
+			if ( !$this->initFinished )
+				return null;
+			
 			return $this->server;
 		}
 		
 		public function getFunctions()
 		{
+			if ( !$this->initFinished )
+				return null;
+
 			return $this->functions;
 		}
 		
 		public function getDatabaseEngine()
 		{
+			if ( !$this->initFinished )
+				return null;
+			
 			return $this->databaseEngine;
 		}
 		
 		public function buildPlugin (string $pluginName)
 		{
+			if ( !$this->initFinished )
+				return null;
+			
 			if ( strpos($pluginName, ".") === false )
 				$pluginName = "com.chiorichan.plugin." . $pluginName;
 			
@@ -139,6 +208,9 @@
 		
 		public function buildEvent (string $eventName)
 		{
+			if ( !$this->initFinished )
+				return null;
+			
 			if ( strpos($eventName, ".") === false )
 				$eventName = "com.chiorichan.event." . $eventName;
 				
@@ -151,27 +223,5 @@
 				return new $event();
 				
 			return null;
-		}
-		
-		public function banIP()
-		{
-			
-		}
-		
-		public function unbanIP()
-		{
-			
-		}
-		
-		public function setWhitelist($bool)
-		{
-			if ( typeof($bool) != "Boolean" )
-				return false;
-			
-		}
-		
-		public function getServerName()
-		{
-			return  $this->getServer()->serverName();
 		}
 	}

@@ -10,7 +10,7 @@
 			
 			$function = $event->getFunctionName();
 			
-			getFramework()->getDaemonSender()->sendDebug("&4Raising Event \"" . $event->getEventName() . "\".");
+			getFramework()->getServer()->Debug3("&4Raising Event \"" . $event->getEventName() . "\".");
 			
 			foreach ( $this->plugins as $plugin )
 			{
@@ -38,7 +38,7 @@
 			if ( $plugin == null )
 				return false;
 			
-			getFramework()->getDaemonSender()->sendDebug("&1Enabling Plugin \"" . $plugin->getPluginName() . "\".");
+			getFramework()->getServer()->Debug3("&1Enabling Plugin \"" . $plugin->getPluginName() . "\".");
 			
 			$this->plugins[] = $plugin;
 			$event = getFramework()->buildEvent("pluginEnable");
