@@ -1,8 +1,8 @@
 <?
 	/**
 	 * @Product: Chiori Framework API
-	 * @Version 5.0.1115 (Fluttershy)
-	 * @Last Updated: November 15th, 2012
+	 * @Version 5.0.1116 (Fluttershy)
+	 * @Last Updated: November 16th, 2012
 	 * @PHP Version: 5.4 or Newer
 	 *
 	 * @Author: Chiori Greene
@@ -23,8 +23,11 @@
 
 	define ( "DIRSEP", "/" );
 	define ( "__BEGIN_TIME__", time() );
-	define ( "__FW__", dirname(__FILE__) );
+	define ( "__FW__", dirname(__FILE__) . DIRSEP );
 	define ( "FW", dirname(__FILE__) . DIRSEP );
+	
+	defined("__ROOT__") or
+		define("__ROOT__", dirname(__FILE__) . "/..");
 	
 	/* Define Yes and No as alternatives to True and False. */
 	define ( "yes", true );
@@ -44,6 +47,7 @@
 	define ( "CONFIG_LOCAL8", "CONFIG_LOCAL8" );
 	define ( "CONFIG_LOCAL9", "CONFIG_LOCAL9" );
 	
+	// Define extra log levels
 	define ( "LOG_DISABLED", -1 );
 	define ( "LOG_DEBUG1", 8 );
 	define ( "LOG_DEBUG2", 9 );

@@ -7,8 +7,8 @@
 	__Require("com.chiorichan.Server");
 	__Require("com.chiorichan.DatabaseEngine");
 	__Require("com.chiorichan.UserService");
-	__Require("com.chiorichan.plugin.Plugin");
 	__Require("com.chiorichan.event.Event");
+	__Require("com.chiorichan.plugin.Plugin");
 	
 	__Require("com.chiorichan.exception.*");
 	
@@ -21,12 +21,20 @@
 		protected $pluginManager;
 		protected $userService;
 		protected $config;
-		protected $version = "5.0.1115 (Fluttershy)";
+		protected $version = "5.0.1116 (Fluttershy)";
 		protected $copyright = "Copyright © 2013 Apple Bloom Company (Chiori Greene)";
 		protected $product = "Chiori Framework";
 		protected $initFinished = false;
 		
-		protected $log_levels = array("dump", "sql", "syslog", "file"); 
+		protected $log_levels = array("dump", "sql", "syslog", "file");
+		
+		protected $siteID = "";
+		protected $siteTitle = "Unnamed Chiori Framework Site";
+		protected $domainName = "example.com";
+		protected $siteData = "/pages";
+		protected $metaTags = array();
+		protected $protected = array();
+		protected $aliases = array();
 				
 		/**
 		 * Check that only one instance of this class has been created.
@@ -90,6 +98,13 @@
 					getFramework()->server->sendException("&4" . $e);
 					$this->shutdown();
 				}
+				
+				$this->siteTitle = $this->getConfig()->getString("title", "Unnamed Chiori Framework Site");
+				$this->domainName = $this->getConfig()->getString("domain", "example.com");
+				$this->megaTags = $this->getConfig()->getArray("metatags", array());
+				$this->siteData = $this->getConfig()->getString("source", "/pages");
+				$this->aliases = $this->getConfig()->getArray("aliases", array());
+				$this->protected = $this->getConfig()->getArray("protected", array());
 			}
 			
 			// Analize configuration and take action
@@ -114,9 +129,75 @@
 				throw new LogException("No valid log location defined!");
 			
 			if ( !is_writable( $log_path ) && $this->log_levels["file"] > -1 )
-				throw new LogException("Log location is not writeable by the webserver user!");
+				throw new LogException("Log location is not writeable by the webserver!");
+			
+			$siteID = $this->getConfig()->getString("siteID", CONFIG_SITE);
+			
+			if ( $siteID != null )
+			{
+				if ( $this->getDatabaseEngine()->getPDO(CONFIG_FW) == null )
+				{
+					$this->getServer()->Warning("&4Site configuration defines a site id but this framework has no database configured. Database required.");
+				}
+				else
+				{
+					$result = $this->getDatabaseEngine()->selectOne("sites", array( "siteID" => $siteID ), CONFIG_FW );
+					
+					$this->siteID = $siteID;
+					
+					if ( !empty($result["title"]) )
+						$this->siteTitle = $result["title"];
+					if ( !empty($result["domain"]) )
+						$this->domainName = $result["domain"];
+					if ( !empty($result["metatags"]) )
+						$this->metaTags = arrayMerge($this->metaTags, json_decode($result["metatags"], true));
+					if ( !empty($result["source"]) )
+						$this->siteData = $result["source"];
+					if ( !empty($result["aliases"]) )
+						$this->aliases = arrayMerge($this->aliases, json_decode($result["aliases"], true));
+					if ( !empty($result["protected"]) )
+						$this->protected = arrayMerge($this->protected, json_decode($result["protected"], true));
+					
+					$result = $this->getDatabaseEngine()->select("plugins", array( "siteID" => $siteID ), array(), CONFIG_FW);
+					
+					foreach ( $result as $plugin )
+					{
+						$this->getPluginManager()->addPluginByName($plugin["namespace"], json_decode($plugin["config"], true));
+					}
+				}
+			}
 			
 			return true;
+		}
+		
+		public function getSiteTitle ()
+		{
+			return $this->siteTitle;
+		}
+		
+		public function getDomainName ()
+		{
+			return $this->domainName;
+		}
+		
+		public function getMetaTags ()
+		{
+			return $this->metaTags;
+		}
+		
+		public function getSource ()
+		{
+			return $this->siteData;
+		}
+		
+		public function getAliases ()
+		{
+			return $this->aliases;
+		}
+		
+		public function getProtected ()
+		{
+			return $this->protected;
 		}
 		
 		public function shutdown()
@@ -187,11 +268,8 @@
 			return $this->databaseEngine;
 		}
 		
-		public function buildPlugin (string $pluginName)
+		public function createPlugin (string $pluginName, $config = null)
 		{
-			if ( !$this->initFinished )
-				return null;
-			
 			if ( strpos($pluginName, ".") === false )
 				$pluginName = "com.chiorichan.plugin." . $pluginName;
 			
@@ -199,14 +277,14 @@
 				return false;
 				
 			$plugin = getFramework()->getFunctions()->getPackageName($pluginName);
-	
+			
 			if ( class_exists($plugin) )
-				return new $plugin();
+				return new $plugin($config);
 		
 			return null;
 		}
 		
-		public function buildEvent (string $eventName)
+		public function createEvent (string $eventName)
 		{
 			if ( !$this->initFinished )
 				return null;

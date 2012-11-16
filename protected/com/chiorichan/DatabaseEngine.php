@@ -39,7 +39,7 @@
 				return false;
 			}
 			
-			getFramework()->getDaemonSender()->Debug("&1Made successful connection to \"" . $database . "\".");
+			getFramework()->getServer()->Debug("&1Made successful connection to \"" . $database . "\".");
 			
 			$pdo->exec("SET CHARACTER SET utf8");
 			
@@ -72,7 +72,7 @@
 			$pdo = $this->getPDO($pdo);
 			
 			if ( $pdo == null )
-				return null;
+				return false;
 			
 			if (is_array($where))
 			{
@@ -139,11 +139,11 @@
 			
 			$this->SQLInjectionDetection($query);
 			
-			$out = $this->db->query($query);
+			$out = $pdo->query($query);
 			
 			if ($out === false)
 			{
-				$error = $this->db->errorInfo();
+				$error = $pdo->errorInfo();
 				getFramework()->getServer()->Warning("&4Making SELECT query \"" . $query . "\" which returned with error: \"" . $error[2] . "\".");
 				return array();
 			}
@@ -154,7 +154,7 @@
 				$result[] = $row;
 			}
 			
-			$this->chiori->Debug1("ChioriDB: Making SELECT query \"" . $query . "\" which returned " . count($result) . " row(s).");
+			getFramework()->getServer()->Debug2("&5Making SELECT query \"" . $query . "\" which returned " . count($result) . " row(s).");
 			
 			if ($opt["debug"]) var_dump($query);
 			if ($opt["debugr"]) var_dump($result);
@@ -164,7 +164,7 @@
 		
 		public function selectOne($table, $where = "", $pdo = CONFIG_SITE)
 		{
-			$result = $this->select($table, $where, array("limit" => 1));
+			$result = $this->select($table, $where, array("limit" => 1), $pdo);
 			
 			if (count($result) < 1)
 				return false;
@@ -193,15 +193,20 @@
 		
 		public function query($query, $debug = false, $pdo = CONFIG_SITE)
 		{
+			$pdo = $this->getPDO($pdo);
+				
+			if ( $pdo == null )
+				return false;
+			
 			$this->chiori->Debug1("ChioriDB: Manual Query: " . $query);
 	
 			$this->SQLInjectionDetection($query);
 			
-			$out = $this->db->query($query);
+			$out = $pdo->query($query);
 			
 			if ($out === false)
 			{
-				$error = $this->db->errorInfo();
+				$error = $pdo->errorInfo();
 				$this->chiori->Warning("ChioriDB: Making query \"" . $query . "\" which returned with error: \"" . $error[2] . "\".");
 				return array();
 			}
@@ -253,6 +258,11 @@
 		
 		function update($table, $data, $where = "", $limit = 0, $pdo = CONFIG_SITE, $DisableInjectionCheck = false) // $data accepts JSON String and Array.
 		{
+			$pdo = $this->getPDO($pdo);
+				
+			if ( $pdo == null )
+				return false;
+			
 			if (is_array($where))
 			{
 				$tmp = "";
@@ -319,7 +329,7 @@
 			
 			if (!$DisableInjectionCheck) $this->SQLInjectionDetection($query);
 			
-			$result = $this->db->exec($query);
+			$result = $pdo->exec($query);
 			if ($result !== false)
 			{
 				$this->chiori->Debug1("ChioriDB: Making UPDATE query \"" . $query . "\" which affected " . $result . " rows.");
@@ -327,7 +337,7 @@
 			}
 			else
 			{
-				$error = $this->db->errorInfo();
+				$error = $pdo->errorInfo();
 				$this->chiori->Debug1("ChioriDB: Making UPDATE query \"" . $query . "\" which had no affect on the database, Error: " . $error[2] . ".");
 				return false;
 			}
@@ -335,6 +345,11 @@
 		
 		function delete($table, $where = "", $limit = 0, $pdo = CONFIG_SITE)
 		{
+			$pdo = $this->getPDO($pdo);
+				
+			if ( $pdo == null )
+				return false;
+			
 			if (is_array($where))
 			{
 				$tmp = "";
@@ -383,7 +398,7 @@
 			$this->SQLInjectionDetection($query);
 			$this->chiori->Debug1("ChioriDB: " . $query);
 			
-			$result = $this->db->exec($query);
+			$result = $pdo->exec($query);
 			if ($result !== false)
 			{
 				$this->chiori->Debug1("ChioriDB: Making DELETE query \"" . $query . "\" which affected " . $result . " rows.");
@@ -391,7 +406,7 @@
 			}
 			else
 			{
-				$error = $this->db->errorInfo();
+				$error = $pdo->errorInfo();
 				$this->chiori->Debug1("ChioriDB: Making DELETE query \"" . $query . "\" which had no affect on the database, Error: " . $error[2] . ".");
 				return false;
 			}
@@ -399,6 +414,11 @@
 		
 		function insert($table, $data, $pdo = CONFIG_SITE, $DisableInjectionCheck = false) // $data accepts JSON String and Array.
 		{
+			$pdo = $this->getPDO($pdo);
+				
+			if ( $pdo == null )
+				return false;
+			
 			$keys = "";
 			$values = "";
 			
@@ -432,7 +452,7 @@
 			
 			if (!$DisableInjectionCheck && mb_strlen($query, "latin1") < 255) $this->SQLInjectionDetection($query);
 			
-			$result = $this->db->exec($query);
+			$result = $pdo->exec($query);
 			if ($result !== false)
 			{
 				$this->chiori->Debug1("ChioriDB: Making INSERT query \"" . $query . "\" which affected " . $result . " rows.");
@@ -440,7 +460,7 @@
 			}
 			else
 			{
-				$error = $this->db->errorInfo();
+				$error = $pdo->errorInfo();
 				$this->chiori->Debug1("ChioriDB: Making INSERT query \"" . $query . "\" which had no affect on the database, Error: \"" . $error[2] . "\".");
 				return false;
 			}

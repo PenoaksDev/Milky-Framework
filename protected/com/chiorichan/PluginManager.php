@@ -33,6 +33,25 @@
 			$this->raiseEvent($event);
 		}
 		
+		public function getPluginbyName ( $pluginName )
+		{
+			if ( $pluginName == null || empty( $pluginName ) )
+				return null;
+			
+			if ( strpos($pluginName, ".") === false )
+				$pluginName = "com.chiorichan.plugin." . $pluginName;
+			
+			foreach ( $this->plugins as $plugin )
+			{
+				if ( $plugin->getPackage() == $pluginName || $plugin->getPluginName() == $pluginName )
+				{
+					return $plugin;
+				}
+			}
+			
+			return null;
+		}
+		
 		public function addPlugin (Plugin $plugin = null)
 		{
 			if ( $plugin == null )
@@ -41,14 +60,15 @@
 			getFramework()->getServer()->Debug3("&1Enabling Plugin \"" . $plugin->getPluginName() . "\".");
 			
 			$this->plugins[] = $plugin;
-			$event = getFramework()->buildEvent("pluginEnable");
+			
+			$event = getFramework()->createEvent("pluginEnable");
 			if ( $event != null )
 				$plugin->raiseEvent($event);
 		}
 		
-		public function addPluginByName (string $pluginName)
+		public function addPluginByName ($pluginName, $config = null)
 		{
-			$plugin = getFramework()->buildPlugin($pluginName);
+			$plugin = getFramework()->createPlugin($pluginName, $config);
 			
 			if ( $plugin == null || $plugin === false )
 				return false;

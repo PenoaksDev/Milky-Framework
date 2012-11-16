@@ -7,3 +7,12 @@ aliases:
   css: /css
   js: /js
   img: /images
+database:
+  type: mysql
+  host: localhost
+  port: 3306
+  database: chiori
+  username: 'fwuser'
+  password: 'fwpass'
+  prefix: ''
+siteID: applebloom
