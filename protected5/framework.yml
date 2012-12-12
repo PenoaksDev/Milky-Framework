@@ -1,0 +1,24 @@
+debug:
+  dump: -1
+  sql: -1
+  sql-table: ~
+  syslog: -1
+  file: -1
+  file-path: logs/fw.log
+  log-date-format: Y-m-d G:i:s
+  log-on-error-only: true
+exception-handling: true
+error-handling: true
+database:
+  type: mysql
+  host: localhost
+  port: 3306
+  database: chiorifw
+  username: 'fwuser'
+  password: 'fwpass'
+  prefix: ''
+users:
+  scripts:
+    login-form: http://web.chiorichan.com/login
+    login-post: http://web.chiorichan.com/
+  sql-table: users
