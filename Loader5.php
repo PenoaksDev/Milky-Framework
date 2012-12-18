@@ -13,7 +13,17 @@
 	$template = $template_plugin->rewriteVirtual( $_SERVER["REQUEST_URI"], "", true );
 	
 	if ( $template == null )
-		$template_plugin->localFile( $_SERVER["REQUEST_URI"] );
+	{
+		try
+		{
+			$template_plugin->localFile( $_SERVER["REQUEST_URI"] );
+		}
+		catch ( TemplateException $e )
+		{
+			getFramework()->getServer()->Panic(404);
+		}
+	}
+		
 	
 	if ( $template["compat_mode"] == "1" )
 	{

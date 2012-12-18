@@ -21,7 +21,7 @@
 		protected $pluginManager;
 		protected $userService;
 		protected $config;
-		protected $version = "5.0.1210 (Fluttershy)";
+		protected $version = "5.0.1215 (Fluttershy)";
 		protected $copyright = "Copyright © 2013 Apple Bloom Company (Chiori Greene)";
 		protected $product = "Chiori Framework";
 		protected $initFinished = false;
@@ -29,8 +29,8 @@
 		protected $log_levels = array("dump", "sql", "syslog", "file");
 		
 		protected $siteID = "";
-		protected $siteTitle = "Unnamed Chiori Framework Site";
-		protected $domainName = "example.com";
+		public $siteTitle = "Unnamed Chiori Framework Site";
+		public $domainName = "example.com";
 		protected $siteData = "/pages";
 		protected $metaTags = array();
 		protected $protected = array();
@@ -170,6 +170,8 @@
 				}
 			}
 			
+			$this->server->initSession();
+			
 			return true;
 		}
 		
@@ -245,6 +247,11 @@
 				return null;
 			
 			return $this->config;
+		}
+		
+		public function getConfigurationManager()
+		{
+			return $this->getConfig();
 		}
 		
 		public function getServer()

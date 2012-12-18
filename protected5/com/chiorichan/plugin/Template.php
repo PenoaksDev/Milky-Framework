@@ -129,8 +129,9 @@
 		{
 			$echo_please = false;
 			
-			// TODO: Check if webuser is allowed to see this page.
 			$authorized = true;
+			
+			$authorized = getFramework()->getUserService()->initalize( $reqlevel );
 			
 			$pages = getFramework()->getSource();
 			if ( substr($pages, 0, 1) != "/" && !empty($pages) )

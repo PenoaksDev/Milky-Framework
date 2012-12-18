@@ -6,21 +6,39 @@
 		protected $whitelist = false;
 		protected $serverName = "Unnamed Chiori Framework Server";
 		
+		private $default_session_lifetime = 604800; // 43200 = 12 hours
+		private $data = array();
+		private $domain;
+		
 		protected $firstCall = true;
 		
 		function __construct()
 		{
-			// TODO: Remove
+			// TODO: Temp
 			$this->serverName = "Apple Bloom Framework Server #1";
-			
-			
-			
-			
+		}
+		
+		public function initSession ()
+		{
+			session_set_cookie_params( $this->default_session_lifetime, "/", "." . getFramework()->domainName );
+			session_start();
 		}
 		
 		public function banIP($addr)
 		{
 			$this->denyIPs[] = $ipaddr;
+		}
+		
+		public function Panic ( $status, $desc = null )
+		{
+			if ( !headers_sent() )
+				header("Status: " . $status . " " . $this->statusMessage( $status ));
+			
+			if ( $desc == null )
+				$desc = $this->statusMessage( $status );
+			
+			echo $status . ": " . $desc;
+			exit;
 		}
 		
 		public function unbanIP($addr)
@@ -43,6 +61,11 @@
 		public function getServerName()
 		{
 			return $this->serverName;
+		}
+		
+		public function getPackage ( $package )
+		{
+			return $this->includePackage( $package, true );
 		}
 		
 		public function includePackage ( $package, $return = false )
@@ -97,10 +120,28 @@
 			
 			$chiori = getFramework();
 			
+			$keys = array();
+			$vals = array();
+			
+			foreach ($chiori->getConfigurationManager()->getArray("aliases") as $key => $val)
+			{
+				$keys[] = "%" . $key . "%";
+				$vals[] = $val;
+			}
+			
+			foreach ($chiori->getConfigurationManager()->getArray("aliases", CONFIG_FW) as $key => $val)
+			{
+				$keys[] = "%" . $key . "%";
+				$vals[] = $val;
+			}
+			
 			ob_start(); // Start Output Buffer Session.
 			include($filename); // Include requested file to to be captured by ob.
 			$result = ob_get_contents(); // Retreive output buffer contents.
 			ob_end_clean(); // Erase ob contents.
+			
+			$result = str_replace($keys, $vals, $result);
+			
 			return $result; // Return output to requesting subroutine.
 		}
 		
@@ -336,5 +377,41 @@
 		public function dummyRedirect($url)
 		{
 			echo("<script>window.location = '" . $url . "';</script>");
+		}
+		
+		// Sessions Section
+		// TODO: Work Needed
+		
+		public function getSessionString ( $key, $default = null )
+		{
+			if ( empty( $_SESSION[$key] ) && $default != null )
+			{
+				return $default;
+			}
+			else
+			{
+				return $_SESSION[$key];
+			}
+		}
+		
+		public function setSessionString ( $key, $value = "" )
+		{
+			$_SESSION[$key] = $value;
+			
+			//$this->Info("[ChioriSessions] Updated sessions varable \"" . $key . "\" to \"" . $value . "\"");
+			//$this->data = arrayJoin($this->data, array($key => $value));
+			//$this->__SetSession($this->data["SessID"]);
+				
+			return true;
+		}
+		
+		public function setCookieExpiry ($valid)
+		{
+			session_set_cookie_params( time() + $valid, "/", "." . getFramework()->domainName );
+		}
+		
+		public function destroySession ($SessID = "")
+		{
+			session_destroy();
 		}
 	}

@@ -4,9 +4,17 @@ metatags: []
 protected: []
 source: /pages
 aliases:
-  css: /css
-  js: /js
-  img: /images
+  css: 'http://css.applebloom.co'
+  js: 'http://js.applebloom.co'
+  img: 'http://images.applebloom.co'
+scripts:
+  login-form: 'http://accounts.applebloom.co/login'
+  login-post: 'http://accounts.applebloom.co'
+login-fields:
+  - 'username'
+  - 'userID'
+  - 'phone'
+  - 'email'
 database:
   type: mysql
   host: localhost

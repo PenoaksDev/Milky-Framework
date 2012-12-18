@@ -1,3 +1,15 @@
 .settings
 .buildpath
 .project
+thirdparty
+static
+adminer.php
+crossdomain.xml
+js
+images
+pages
+protected
+css
+Loader.php
+protected5/co
+protected5/logs

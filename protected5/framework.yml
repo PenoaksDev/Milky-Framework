@@ -9,6 +9,7 @@ debug:
   log-on-error-only: true
 exception-handling: true
 error-handling: true
+aliases: []
 database:
   type: mysql
   host: localhost

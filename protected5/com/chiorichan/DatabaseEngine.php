@@ -344,7 +344,7 @@
 			}
 		}
 		
-		function delete($table, $where = "", $limit = 0, $pdo = CONFIG_SITE)
+		public function delete($table, $where = "", $limit = 0, $pdo = CONFIG_SITE)
 		{
 			$pdo = $this->getPDO($pdo);
 				
