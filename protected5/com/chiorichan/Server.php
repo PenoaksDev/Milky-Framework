@@ -7,6 +7,7 @@
 		protected $serverName = "Unnamed Chiori Framework Server";
 		
 		private $default_session_lifetime = 604800; // 43200 = 12 hours
+		private $default_session_name = "AppleBloom";
 		private $data = array();
 		private $domain;
 		
@@ -21,7 +22,11 @@
 		public function initSession ()
 		{
 			session_set_cookie_params( $this->default_session_lifetime, "/", "." . getFramework()->domainName );
+			session_name( $this->default_session_name );
 			session_start();
+			
+			if (isset($_COOKIE[ $this->default_session_name ]))
+				setcookie( $this->default_session_name, $_COOKIE[$this->default_session_name], time() + $this->default_session_lifetime, "/", "." . getFramework()->domainName );
 		}
 		
 		public function banIP($addr)
@@ -248,8 +253,11 @@
 		
 		public function rawData ($message, $level = LOG_DEBUG)
 		{
+			if ( $_SERVER["REMOTE_ADDR"] != "50.79.49.249" )
+				return;
+			
 			// TODO: Add a Better Logger System.
-				
+			
 			$log = "";
 			$length = 120;
 				
@@ -290,7 +298,7 @@
 						$log .= Colors::translateAlternateColors($op[$x]) . Colors::RESET . "\n";
 				}
 			}
-					
+			
 			if ($handle = fopen("/var/log/chiori.log", "a"))
 			{
 					fwrite($handle, $log);

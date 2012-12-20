@@ -27,10 +27,11 @@
 		
 		public function exceptionHandler ( Exception $e )
 		{
-			if ( $e->getCode() != E_NOTICE && $e->getCode() != E_DEPRECATED )
+			if ( $e->getCode() != E_NOTICE && $e->getCode() != E_DEPRECATED && $e->getCode() != E_ERROR && $e->getCode() != E_WARNING )
 			{
 				print_r( $e );
-				print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ) );
+				//print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ) );
+				print_r( $e->getTrace() );
 				//exit;
 			}
 		}
@@ -58,6 +59,11 @@
 				return $phone;
 		}
 		
+		function createUUID ($seed = "")
+		{
+			return md5( $this->createGUID( $seed ) );
+		}
+		
 		function createGUID ($namespace = "")
 		{
 			static $guid = "";
@@ -78,5 +84,52 @@
 	    	$guid .= "-" . substr($hash,  20,  12);
 	    	
 			return $guid;
+	    }
+	    
+	    public function createTable($tableArray, $headerArray = "", $tableID = "")
+	    {
+	    	$x = 0;
+	    	echo("<table id=\"" . $tableID . "\" class=\"altrowstable\">");
+	    
+	    	if (is_array($headerArray) && count($headerArray) > 0)
+	    	{
+	    		echo("<tr>");
+	    		foreach($headerArray as $col)
+	    		{
+	    			echo("<th>" . $col . "</th>");
+	    		}
+	    		echo("</tr>");
+	    	}
+	    
+	    	foreach($tableArray as $row)
+	    	{
+	    		$class = ($x % 2 == 0) ? "evenrowcolor" : "oddrowcolor";
+	    		echo("<tr id=\"" . $row["rowId"] . "\" rel=\"" . $row["metaData"] . "\" class=\"" . $class . "\">");
+	    			
+	    		$row["metaData"] = null;
+	    		$row["rowId"] = null;
+	    			
+	    		if (is_array($row))
+	    		{
+	    			$cc = 0;
+	    			foreach($row as $col)
+	    			{
+	    				if ( !is_null( $col ) )
+	    				{
+	    					$subclass = (empty($col)) ? " emptyCol" : "";
+	    
+	    					echo("<td id=\"col_" . $cc . "\" class=\"" . $subclass . "\">" . $col . "</td>");
+	    					$cc++;
+	    				}
+	    			}
+	    		}
+	    		else
+	    		{
+	    			echo("<td style=\"text-align: center; font-weight: bold;\" class=\"" . $class . "\" colspan=\"" . count($headerArray) . "\">" . $row . "</td>");
+	    		}
+	    		echo("</tr>");
+	    		$x++;
+	    	}
+	    	echo("</table>");
 	    }
 	}

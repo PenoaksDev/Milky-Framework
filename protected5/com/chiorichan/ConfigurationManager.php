@@ -149,4 +149,121 @@
 		{
 			return $this->db;
 		}
+		
+		function get($key, $idenifier = -1, $idenifier2 = "", $value_only = true, $default_value = "") // Returns setting string based on idenifier.
+		{
+			$users = getFramework()->getUserService();
+			$db = getFramework()->getDatabaseEngine();
+			
+			// Check if only one idenifier was provided. i.e. Called from a script not made for Version 2 of this subroutine.
+			if (is_bool($idenifier2))
+			{
+				if (!is_bool($value_only))
+					$default_value = $value_only;
+		
+				$value_only = $idenifier2;
+				$idenifier2 = "";
+		
+				getFramework()->getServer()->Warning("Subroutine: \"settings->get\" called with old arguments pattern.");
+			}
+				
+			$rtn = array("success" => false, "key" => strtoupper($key), "value" => $default_value);
+				
+			if ($idenifier == -1)
+			{
+				$idenifier = $users->getString("userID");
+				if ($idenifier === false) $idenifier = "";
+			}
+				
+			$result_default = $db->selectOne("settings_default", "`key` = '" . $rtn["key"] . "'");
+			if ($result_default === false)
+			{
+				getFramework()->getServer()->Error("ChioriSettings: Retriving \"" . $key . "\" from database was unsuccessfull, Error: \"Non-existent Setting\", Returning default value of: \"" . $rtn["value"] . "\"");
+				return ($value_only) ? $rtn["value"] : $rtn;
+			}
+				
+			$rtn = array_merge($rtn, $result_default);
+			$rtn["success"] = true;
+				
+			$result_custom = $db->selectOne("settings_custom", "`key` = '" . $rtn["key"] . "' AND `owner` = '" . $idenifier . "'");
+			if ($result_custom === false)
+			{
+				if (empty($idenifier2))
+				{
+					$rtn["isDefault"] = true;
+				}
+				else
+				{
+					$result_custom = $db->selectOne("settings_custom", "`key` = '" . $rtn["key"] . "' AND `owner` = '" . $idenifier2 . "'");
+						
+					if ($result_custom === false)
+					{
+						$rtn["isDefault"] = true;
+					}
+					else
+					{
+						$rtn["value"] = $result_custom["value"];
+						$rtn["isDefault"] = false;
+					}
+				}
+			}
+			else
+			{
+				$rtn["value"] = $result_custom["value"];
+				$rtn["isDefault"] = false;
+			}
+				
+			getFramework()->getServer()->Debug2("ChioriSettings: Retrived \"" . $key . "\" setting from database using idenifier \"" . $idenifier . "\", Result: \"" . $rtn["value"] . "\"");
+			return ($value_only) ? $rtn["value"] : $rtn;
+		}
+		
+		function set($key, $value = "", $idenifier = -1) // Empty value deletes setting.
+		{
+			$users = getFramework()->getUserService();
+			$db = getFramework()->getDatabaseEngine();
+			
+			$key = strtoupper($key);
+				
+			if ($idenifier == -1)
+			{
+				switch (substr($key, 0, 5))
+				{
+					case "TEXT_":
+					case "LOCAT":
+						$idenifier = $users->GetLocations(true);
+						break;
+					case "ACCOU":
+						$idenifier = $users->GetAccounts(true);
+						break;
+					default:
+						$idenifier = $users->CurrentUser["userID"];
+				}
+				if ($idenifier === false) $idenifier = "";
+			}
+				
+			$result = $db->selectOne("settings_default", "`key` = '" . $key . "'");
+				
+			if ($result === false)
+			{
+				getFramework()->getServer()->Error("ChioriSettings: Retriving \"" . $key . "\" from database was unsuccessfull, Error: \"Non-existent Setting\"");
+				return false;
+			}
+				
+			if (empty($value) || $result["value"] == $value)
+			{
+				return $db->delete("settings_custom", "`key` = '" . $key . "' AND `owner` = '" . $idenifier . "'");
+			}
+			else
+			{
+				$result = $db->selectOne("settings_custom", "`key` = '" . $key . "' AND `owner` = '" . $idenifier . "'");
+				if ($result !== false)
+				{
+					return $db->update("settings_custom", array("value" => $value), "`key` = '" . $key . "' AND `owner` = '" . $idenifier . "'", 1);
+				}
+				else
+				{
+					return $db->insert("settings_custom", array("key" => $key, "value" => $value, "owner" => $idenifier));
+				}
+			}
+		}
 	}

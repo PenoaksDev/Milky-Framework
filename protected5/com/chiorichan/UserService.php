@@ -72,7 +72,8 @@
 					$target = "/accounts/login";
 				}
 					
-				if ($target != $_SERVER["REQUEST_URI"])	getFramework()->getServer()->dummyRedirect($target);
+				if ($target != $_SERVER["REQUEST_URI"])
+					getFramework()->getServer()->dummyRedirect($target);
 			}
 			
 			if (!empty($username) && !empty($password))
@@ -380,6 +381,101 @@
 				echo("<h1>Unauthorized</h1>");
 				echo("<p class=\"warning\">This page is limited to members with access to the \"" . $perm_name . "\" permission or better. If access is required please contact us or see your account holder for help.</p>");
 				die();
+			}
+		}
+		
+		function GetMyLocations($rtn_one = false, $rtn_str = false, $where_alt = "")
+		{
+			$db = getFramework()->getDatabaseEngine();
+			
+			if ($this->GetPermission("ADMIN"))
+			{
+				$where = "";
+			}
+			else
+			{
+				$where = array();
+	
+				$result_acc = $db->select("accounts", "maintainers like '%" . $this->CurrentUser["userID"] . "%'");
+				if (count($result_acc) > 0)
+				{
+					foreach ($result_acc as $row_acc)
+					{
+						$where[] = "acctID = '" . $row_acc["acctID"] . "'";
+					}
+				}
+	
+				$result_acc = $db->select("locations", "maintainers like '%" . $this->CurrentUser["userID"] . "%'");
+				if (count($result_acc) > 0)
+				{
+					foreach ($result_acc as $row_acc)
+					{
+						$where[] = "locID = '" . $row_acc["locID"] . "'";
+					}
+				}
+	
+				$where = $db->array2Where($where, "OR");
+	
+				if (empty($where)) return false;
+			}
+				
+			if (!empty($where_alt))
+			{
+				if (is_array($where_alt)) $where_alt = $db->WhereArray($where);
+				$where = $db->array2Where(array("(" . $where . ")", "(" . $where_alt . ")"));
+			}
+				
+			if ($rtn_one || $rtn_str)
+			{
+				$result = $db->selectOne("locations", $where);
+				if ($rtn_one) return $result;
+				if ($rtn_str) return $result["locID"];
+			}
+			
+			return $db->Select("locations", $where);
+			getFramework()->getServer()->Debug1("[UserServices] Returning authorized locations array from database.");
+		}
+		
+		public function GetMyAccounts($acctNumbersOnly = false, $rtn_one = false, $rtn_str = false)
+		{
+			$db = getFramework()->getDatabaseEngine();
+			
+			if ($this->GetPermission("ADMIN"))
+			{
+				$where = "";
+			}
+			else
+			{
+				$where = "maintainers like '%" . $this->CurrentUser["userID"] . "%'";
+			}
+
+			$myAccounts = $db->select("accounts", $where, array(), CONFIG_SITE);
+			getFramework()->getServer()->Debug1("[UserServices] Returning authorized accounts array from database.");
+			
+			if ( $acctNumbersOnly )
+			{
+				$accounts = $myAccounts;
+				$myAccounts = array();
+				foreach ( $accounts as $acct )
+				{
+					$myAccounts[] = $acct["acctID"];
+				}
+			}
+			
+			if ($rtn_one)
+			{
+				if (count($myAccounts) > 0)
+				{
+					return $myAccounts[0];
+				}
+				else
+				{
+					return array();
+				}
+			}
+			else
+			{
+				return $myAccounts;
 			}
 		}
 	}

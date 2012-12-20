@@ -23,7 +23,6 @@
 			getFramework()->getServer()->Panic(404);
 		}
 	}
-		
 	
 	if ( $template["compat_mode"] == "1" )
 	{
