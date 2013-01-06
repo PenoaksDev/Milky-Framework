@@ -1,0 +1,4 @@
+====Chiori Framework====
+===Change Log===
+==Version 5.1.0106==
+* Inplemented Framework Hooks
