@@ -129,9 +129,14 @@
 		{
 			$echo_please = false;
 			
-			$authorized = true;
-			
-			$authorized = getFramework()->getUserService()->initalize( $reqlevel );
+			if ( getFramework()->getUserService() == null )
+			{
+				$authorized = true;
+			}
+			else
+			{
+				$authorized = getFramework()->getUserService()->initalize( $reqlevel );
+			}
 			
 			$pages = getFramework()->getSource();
 			if ( substr($pages, 0, 1) != "/" && !empty($pages) )

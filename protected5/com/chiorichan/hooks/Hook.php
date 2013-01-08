@@ -1,8 +1,8 @@
 <?
 	Class Hook
 	{
-		private $hookName = "{Plugin Error}";
-		private $hookPackage = "com.chiorichan.plugin";
+		private $hookName = "{Hook Error}";
+		private $hookPackage = "com.chiorichan.hooks";
 
 		public function __construct()
 		{

@@ -2,10 +2,9 @@
 	class UserService
 	{
 		protected $db;
-		protected $hooks = array();
 		
 		// Old Var - Do Not Use
-		private $CurrentUser = array();
+		protected $CurrentUser = array();
 		
 		function __construct()
 		{
@@ -17,26 +16,12 @@
 			return $this->CurrentUser["valid"];
 		}
 		
-		public function addHook ( $authMethod )
-		{
-			$hooks[] = $authMethod;
-		}
-		
 		public function getRank ( $userId = null, $rtn_title = false )
 		{
-			if ( $userId == null )
-			{
-				$accessId = $this->getString("userlevel");
-			}
-			else
-			{
-				$user = getFramework()->getDatabaseEngine()->selectOne("users", array("userID" => $this->getString( "userID" )));
-				
-				if ( $user == null )
-					return null;
-				
-				$accessId = $user["userlevel"];
-			}
+			$accessId = $this->getString( "userlevel", null, $userId );
+			
+			if ( $accessId == null || empty( $accessId ) )
+				return "";
 			
 			$rank = getFramework()->getDatabaseEngine()->selectOne("accounts_access", array("accessID" => $accessId));
 			
@@ -46,9 +31,16 @@
 			return $rank;
 		}
 		
-		public function getString ( $key, $default = "" )
+		public function getString ( $key, $default = "", $userId = null )
 		{
-			$value = $this->CurrentUser[$key];
+			if ( $userId == null )
+			{
+				$value = $this->CurrentUser[$key];
+			}
+			else
+			{
+				$value = "";
+			}
 			
 			if ( $value == null )
 				return $default;
@@ -56,7 +48,7 @@
 			return $value;
 		}
 		
-		public function getUserbyName (string $userName)
+		public function getUserbyName ( string $userName )
 		{
 			if ( $userName == null || empty($userName) )
 				return null;
@@ -206,7 +198,8 @@
 					"emptyUsername" => "The specified username was empty. Please try again.",
 					"emptyPassword" => "The specified password was empty. Please try again.",
 					"incorrectLogin" => "Username and Password provided did not match any users on file.",
-					"permissionsError" => "Fatel error was detected with your user permissions. Please notify an administrator ASAP."
+					"successLogin" => "Your login has been successfully authenticated.",
+					"permissionsError" => "Fatal error was detected with your user permissions. Please notify an administrator ASAP."
 			);
 			
 			$user = array(
@@ -233,6 +226,9 @@
 			}
 			*/
 			
+			if ( !empty( $user["msg"] ) )
+				return $user;
+			
 			$users = array();
 			foreach ($cfg->getArray("login-fields") as $field)
 			{
@@ -255,28 +251,58 @@
 			$passs = $obj->array2Where($passs, "OR");
 			
 			$result = $obj->selectOne("users", "(" . $users . ") AND (" . $passs . ")");
-				
-			if ($result === false && empty($user["msg"])) $user["msg"] = $msg["incorrectLogin"];
-				
-			if (md5($result["password"]) != $password && $result["password"] != $password && empty($user["msg"]))
-				$user["msg"] = $msg["incorrectLogin"];
-		
-			$level = $obj->selectOne("accounts_access", array("accessID" => $result["userlevel"]));
-		
-			if ($level === false && empty($user["msg"]))
-				$user["msg"] = $msg["permissionsError"];
-		
-			if (empty($user["msg"]))
+			
+			/*
+			 * Several fields are expected from any hooks that are called for auth.
+			 * 
+			 * Passed fields: username, password
+			 * 
+			 * Expected fields: valid, userID, userlevel
+			 * Optional fields: fname, name, displayname
+			 * 
+			 */
+			
+			if ( $result === false )
 			{
-				$user["valid"] = true;
+				getFramework()->getServer()->Warning("&4Inital User Login Failed. Attempting Third-Party Hooks");
+				
+				$result = getFramework()->doHook( "auth", $user );
+				
+				if (is_array( $result )
+					&& $result["valid"] === true
+					&& isset( $result["userID"] )
+					&& isset( $result["userlevel"] ))
+				{
+					$user["msg"] = "";
+					$user["valid"] = true;
+				}
+				else
+				{
+					$user["msg"] = $msg["incorrectLogin"];
+				}
 			}
-			else
-			{
+			
+			if ( !empty( $user["msg"] ) )
 				return $user;
+			
+			$user["msg"] = $msg["successLogin"];
+			
+			// Permissions
+			$level = $obj->selectOne("accounts_access", array("accessID" => $result["userlevel"]));
+			
+			if ( $level === false )
+			{
+				$user["msg"] = $msg["permissionsError"];
+				return $user["msg"];
 			}
+			
+			$user["valid"] = true;
 		
 			$user = arrayJoin($user, $result);
-			$user["displayname"] = (empty($result["fname"])) ? $result["name"] : $result["fname"]." ".$result["name"];
+			
+			if ( empty( $result["displayname"] ) )
+				$user["displayname"] = (empty($result["fname"])) ? $result["name"] : $result["fname"]." ".$result["name"];
+			
 			$user["displaylevel"] = $level["title"];
 		
 			$obj->update("users", Array("lastactive" => microtime(true)), "userID = '" . $result["userID"] . "'", 1);

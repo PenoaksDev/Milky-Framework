@@ -109,6 +109,7 @@
 			catch ( Exception $e )
 			{
 				getFramework()->server->sendException("&4" . $e);
+				getFramework()->generateExceptionPage( $e );
 				$this->shutdown();
 			}
 			
@@ -203,6 +204,41 @@
 			return true;
 		}
 		
+		public function initFrameworkInternal ()
+		{
+			$this->server->Warning("&4Fallover Framework Configuration Activated");
+			
+			// Reinit Components
+			$this->functions = new Functions();
+			$this->server = new Server();
+			$this->daemonSender = new DaemonSender();
+			$this->databaseEngine = null; // new DatabaseEngine();
+			$this->config = new ConfigurationManager();
+			$this->pluginManager = null; // new PluginManager();
+			$this->userService = null; // new UserService();
+			
+			$this->getConfig()->loadFalloverConfig();
+			
+			$this->siteTitle = "Chiori Framework";
+			$this->domainName = $_SERVER["SERVER_ADDR"];
+			$this->megaTags = array();
+			$this->siteData = "/protected5/pages";
+			$this->aliases = array();
+			$this->protected = array();
+		}
+		
+		public function generateExceptionPage ( $e )
+		{
+			$this->initFrameworkInternal();
+			
+			$this->server->Error("&4" . $e->getMessage());
+			$GLOBALS["lasterr"] = $e;
+			//$GLOBALS["stackTrace"] = $e->stackTrace();
+			
+			$plugin = $this->createPlugin( "com.chiorichan.plugin.Template" );
+			$plugin->loadPage ( "com.chiorichan.themes.error", "", "", "/panic.php" );
+		}
+		
 		/*
 		 * Add a hook to the Framework
 		 * Currently Supported Method Hooks: shutdown, auth, ...more to come
@@ -225,16 +261,25 @@
 			
 			if ( method_exists($newHook, "auth") )
 			{
-				$this->hooks[] = array("name" => "auth", "method" => $newHook->auth);
-				$this->userService->addHook( $newHook->auth );
+				$this->hooks[] = array("name" => "auth", "class" => $newHook, "method" => "auth");
+				/*
+				if ( $this->userService->addHook( $newHook ) )
+				{
+					$this->server->Debug3("&5Successfully Enabled Auth Hook: " . $nameSpace);
+				}
+				else
+				{
+					$this->server->Warning("&4Failure Enabling Auth Hook: " . $nameSpace);
+				}
+				*/
 			}
 			
 			if ( method_exists($newHook, "shutdown") )
-				$this->hooks[] = array("name" => "shutdown", "method" => $newHook->shutdown);
+				$this->hooks[] = array("name" => "shutdown", "class" => $newHook, "method" => "shutdown");
 			
 			if ( method_exists($newHook, "customHooks") )
 			{
-				$customHooks = customHooks();
+				$customHooks = $newHook->customHooks();
 				
 				if ( is_array( $customHooks ) )
 				{
@@ -242,7 +287,7 @@
 					{
 						if ( method_exists($newHook, $hook ) )
 						{
-							$this->hooks[] = array("name" => $hook, "method" => $newHook->$hook);
+							$this->hooks[] = array("name" => $hook, "class" => $newHook, "method" => $hook);
 						}
 					}
 				}
@@ -263,17 +308,20 @@
 			{
 				if ( $hook[0] == $hookName || $hook["name"] == $hookName )
 				{
-					$method = ( isset($hook["method"]) ) ? $hook["method"] : $hook[1];
+					$class = ( isset($hook["class"]) ) ? $hook["class"] : $hook[1];
+					$method = ( isset($hook["method"]) ) ? $hook["method"] : $hook[2];
 					
-					if ( $method != null )
+					if ( $class != null && $method != null )
 					{
-						$method( $parms );
-						return true;
+						$result = $class->$method( $parms );
+						
+						if ( $result != null && $result != false )
+							return $result;
 					}
 				}
 			}
 			
-			return false;
+			return null;
 		}
 		
 		public function getSiteTitle ()
@@ -312,7 +360,8 @@
 				return false;
 
 			// TODO: Make call to several plugins and execute a shutdown event
-			$this->getPluginManager()->raiseEventbyName("FrameworkShutdown");
+			//$this->getPluginManager()->raiseEventbyName("FrameworkShutdown");
+			$this->doHook("shutdown");
 			
 			$this->initFinished = false;
 			die();
