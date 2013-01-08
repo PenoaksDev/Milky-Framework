@@ -1,6 +1,6 @@
 =About=
 '''Chiori Framework''' is a PHP Framework API utilizing component based structure.
-I idea is to give you the power to create amazing websites in less but without reinventing the wheel.
+The idea is to give you the power to create amazing websites with less time and resources without reinventing the wheel.
 Since it's object oriented, you can choose which parts to use.
 Using this same system you can share your themes, views, templates or any other custom components
 from site A to site B, C, D, etc... just by defining it in the configuration because
@@ -74,13 +74,11 @@ Using ".htaccess" will require slightly different syntax, which can be found onl
 To fully utilize this framework (and minimize problems) you must have a fresh Apache 2.2 virtual host,
 PHP 5.4, mod_rewrite installed and the following in your Apache Virtual Host Configuration File.
 
-{{{
-ServerAlias *.[domainname] # Allows all subdomains to be routed to the framework
-RewriteEngine On # Turns apache rewrite engine on
-RewriteCond %{QUERY_STRING} (.*) # Saves query string for later injection
-RewriteCond %{REQUEST_URI} !^/favicon.ico # Excludes favicon.ico
-RewriteRule (.*) /Loader.php?page-requested=$1&%1 [L] # Rewrites request to the Framework Loader and forwards the query string
-}}}
+ <nowiki>ServerAlias *.[domainname] # Allows all subdomains to be routed to the framework
+ <nowiki>RewriteEngine On # Turns apache rewrite engine on
+ <nowiki>RewriteCond %{QUERY_STRING} (.*) # Saves query string for later injection
+ <nowiki>RewriteCond %{REQUEST_URI} !^/favicon.ico # Excludes favicon.ico
+ <nowiki>RewriteRule (.*) /Loader.php?page-requested=$1&%1 [L] # Rewrites request to the Framework Loader and forwards the query string
 
 If a requested page is not found the framework it will attempt to load it from the local file system
 but in order to reduce server inpact we recommend either using RewriteCond's to exclude things like images,
