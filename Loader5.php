@@ -3,7 +3,8 @@
 
 	require( "protected5/Constructor.php" );
 	
-	$chiori = new ChioriFramework5();
+	// Compatable 
+	$chiori = new CompatFramework();
 	
 	// Initalize Framework Class plus Load Configuration
 	$chiori->initalizeFramework(dirname(__FILE__) . "/config.yml");

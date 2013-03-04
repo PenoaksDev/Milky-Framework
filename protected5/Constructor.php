@@ -21,6 +21,8 @@
 	 * this controller will attempt to automaticly download and update used components.
 	 */
 
+	date_default_timezone_set("America/Chicago");
+	
 	define ( "DIRSEP", "/" );
 	define ( "__BEGIN_TIME__", time() );
 	//define ( "__FW__", dirname(__FILE__) );

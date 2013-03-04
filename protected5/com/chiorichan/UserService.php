@@ -21,9 +21,9 @@
 			$value = $this->CurrentUser[$key];
 			
 			if ( $value == null )
-				return $default;
+				return trim( $default );
 			
-			return $value;
+			return trim( $value );
 		}
 		
 		public function getUserbyName (string $userName)
@@ -114,7 +114,7 @@
 			{
 				$username = getFramework()->getServer()->getSessionString("User");
 				$password = getFramework()->getServer()->getSessionString("Pass");
-					
+				
 				$user = $this->checkLogin($username, $password);
 				
 				if ($user["valid"])
@@ -396,7 +396,7 @@
 			{
 				$where = array();
 	
-				$result_acc = $db->select("accounts", "maintainers like '%" . $this->CurrentUser["userID"] . "%'");
+				$result_acc = $db->select("accounts", "maintainers like '%" . $this->getString("userID") . "%'");
 				if (count($result_acc) > 0)
 				{
 					foreach ($result_acc as $row_acc)
@@ -405,7 +405,7 @@
 					}
 				}
 	
-				$result_acc = $db->select("locations", "maintainers like '%" . $this->CurrentUser["userID"] . "%'");
+				$result_acc = $db->select("locations", "maintainers like '%" . $this->getString("userID") . "%'", array("orderBy" => "`acctID` desc"));
 				if (count($result_acc) > 0)
 				{
 					foreach ($result_acc as $row_acc)
@@ -413,10 +413,10 @@
 						$where[] = "locID = '" . $row_acc["locID"] . "'";
 					}
 				}
-	
+				
 				$where = $db->array2Where($where, "OR");
-	
-				if (empty($where)) return false;
+				
+				if (empty($where)) return array();
 			}
 				
 			if (!empty($where_alt))
@@ -424,15 +424,17 @@
 				if (is_array($where_alt)) $where_alt = $db->WhereArray($where);
 				$where = $db->array2Where(array("(" . $where . ")", "(" . $where_alt . ")"));
 			}
-				
+			
 			if ($rtn_one || $rtn_str)
 			{
 				$result = $db->selectOne("locations", $where);
-				if ($rtn_one) return $result;
-				if ($rtn_str) return $result["locID"];
+				if ($rtn_one)
+					return $result;
+				if ($rtn_str)
+					return $result["locID"];
 			}
 			
-			return $db->Select("locations", $where);
+			return $db->Select("locations", $where, array("orderBy" => "`acctID` desc"));
 			getFramework()->getServer()->Debug1("[UserServices] Returning authorized locations array from database.");
 		}
 		

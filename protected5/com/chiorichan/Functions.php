@@ -105,12 +105,12 @@
 	    	{
 	    		$class = ($x % 2 == 0) ? "evenrowcolor" : "oddrowcolor";
 	    		echo("<tr id=\"" . $row["rowId"] . "\" rel=\"" . $row["metaData"] . "\" class=\"" . $class . "\">");
-	    			
-	    		$row["metaData"] = null;
-	    		$row["rowId"] = null;
-	    			
+	    		
 	    		if (is_array($row))
 	    		{
+	    			$row["metaData"] = null;
+	    			$row["rowId"] = null;
+	    			
 	    			$cc = 0;
 	    			foreach($row as $col)
 	    			{

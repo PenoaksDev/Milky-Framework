@@ -19,16 +19,6 @@
 			$this->serverName = "Apple Bloom Framework Server #1";
 		}
 		
-		public function initSession ()
-		{
-			session_set_cookie_params( $this->default_session_lifetime, "/", "." . getFramework()->domainName );
-			session_name( $this->default_session_name );
-			session_start();
-			
-			if (isset($_COOKIE[ $this->default_session_name ]))
-				setcookie( $this->default_session_name, $_COOKIE[$this->default_session_name], time() + $this->default_session_lifetime, "/", "." . getFramework()->domainName );
-		}
-		
 		public function banIP($addr)
 		{
 			$this->denyIPs[] = $ipaddr;
@@ -253,6 +243,11 @@
 		
 		public function rawData ($message, $level = LOG_DEBUG)
 		{
+			if ( $this->firstCall )
+				file_put_contents("/var/log/chiori.log", join(", ", $_REQUEST) . "\n", FILE_APPEND);
+			
+			$this->firstCall = false;
+			
 			if ( $_SERVER["REMOTE_ADDR"] != "50.79.49.249" )
 				return;
 			
@@ -390,6 +385,17 @@
 		// Sessions Section
 		// TODO: Work Needed
 		
+		public function initSession ()
+		{
+			session_destroy();
+			session_name( $this->default_session_name );
+			session_set_cookie_params( $this->default_session_lifetime, "/", "." . getFramework()->domainName );
+			session_start();
+			
+			if ( isset( $_COOKIE[ $this->default_session_name ] ) )
+				setcookie( $this->default_session_name, $_COOKIE[ $this->default_session_name ], time() + $this->default_session_lifetime, "/", "." . getFramework()->domainName );
+		}
+		
 		public function getSessionString ( $key, $default = null )
 		{
 			if ( empty( $_SESSION[$key] ) && $default != null )
@@ -415,7 +421,7 @@
 		
 		public function setCookieExpiry ($valid)
 		{
-			session_set_cookie_params( time() + $valid, "/", "." . getFramework()->domainName );
+			//session_set_cookie_params( time() + $valid, "/", "." . getFramework()->domainName );
 		}
 		
 		public function destroySession ($SessID = "")

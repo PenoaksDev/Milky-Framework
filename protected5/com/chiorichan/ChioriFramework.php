@@ -12,6 +12,8 @@
 	
 	__Require("com.chiorichan.exception.*");
 	
+	__Require("com.chiorichan.CompatFramework");
+	
 	Class ChioriFramework5
 	{
 		protected $functions;
@@ -35,7 +37,7 @@
 		protected $metaTags = array();
 		protected $protected = array();
 		protected $aliases = array();
-				
+		
 		/**
 		 * Check that only one instance of this class has been created.
 		 */
