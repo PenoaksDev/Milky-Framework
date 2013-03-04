@@ -1,8 +1,8 @@
 <?
 	/**
 	 * @Product: Chiori Framework API
-	 * @Version 5.0.1217 (Fluttershy)
-	 * @Last Updated: December 17th, 2012
+	 * @Version 5.1.0304 (Scootaloo)
+	 * @Last Updated: March 4th, 2013
 	 * @PHP Version: 5.4 or Newer
 	 *
 	 * @Author: Chiori Greene

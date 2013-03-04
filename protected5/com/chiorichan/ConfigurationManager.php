@@ -8,8 +8,25 @@
 		
 		function __construct()
 		{
-			$this->config = Array();
 			$this->db = new DatabaseEngine();
+			$this->config = Array(
+				CONFIG_SITE => array(),
+				CONFIG_FW => array(),
+				CONFIG_LOCAL0 => array(),
+				CONFIG_LOCAL1 => array(),
+				CONFIG_LOCAL2 => array(),
+				CONFIG_LOCAL3 => array(),
+				CONFIG_LOCAL4 => array(),
+				CONFIG_LOCAL5 => array(),
+				CONFIG_LOCAL6 => array(),
+				CONFIG_LOCAL7 => array(),
+				CONFIG_LOCAL8 => array(),
+				CONFIG_LOCAL9 => array());
+		}
+		
+		public function loadFalloverConfig ()
+		{
+			$this->config[CONFIG_FW] = array();
 		}
 		
 		public function loadConfig( $fileLocation, $configLevel = CONFIG_SITE )

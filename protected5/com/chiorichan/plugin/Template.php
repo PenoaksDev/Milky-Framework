@@ -30,7 +30,7 @@
 				$site = substr($domain, 0, strrpos($domain, ".", -6));
 				$domain = substr($domain, strrpos($domain, ".", -6) + 1);
 			}
-				
+			
 			$r1 = getFramework()->getDatabaseEngine()->select("pages", array(array("site" => "", "|site" => $site), "domain" => $domain), array(), CONFIG_FW);
 			$r2 = getFramework()->getDatabaseEngine()->select("pages", array(array("site" => "", "|site" => $site), "domain" => ""), array(), CONFIG_FW);
 			
@@ -51,7 +51,7 @@
 					
 					//$src = explode("/", $page);
 					//$desc = explode("/", $arr);
-			
+					
 					$whole_match = true;
 					for ($i = 0; $i < count($desc); $i++)
 					{
@@ -62,12 +62,12 @@
 							$lrtn = substr($desc[$i], 0, strpos($desc[$i], $exp));
 							if (!$rrtn = substr($desc[$i], strlen($exp) - strpos($desc[$i], $exp)))
 								$rrtn = "";
-		
+								
 							if ((empty($lrtn) || substr($src[$i], 0, strlen($lrtn)) == $lrtn) && (empty($rrtn) || substr($src[$i], 0 - strlen($rrtn)) == $rrtn))
 							{
 								$op = str_replace($lrtn, "", $src[$i]);
 								$op = str_replace($rrtn, "", $op);
-						
+								
 								$GLOBALS[$match[1]] = $op;
 								$_GET[$match[1]] = $op;
 								$_POST[$match[1]] = $op;
@@ -129,7 +129,14 @@
 		{
 			$echo_please = false;
 			
-			$authorized = true;
+			if ( getFramework()->getUserService() == null )
+			{
+				$authorized = true;
+			}
+			else
+			{
+				$authorized = getFramework()->getUserService()->initalize( $reqlevel );
+			}
 			
 			$authorized = getFramework()->getUserService()->initalize( $reqlevel );
 			
@@ -220,15 +227,15 @@
 		{
 			if (empty($docType)) $docType = "html";
 			if (empty($theme)) $theme = "com.chiorichan.themes.default";
-			if (empty($view)) $view = "com.chiorichan.views.default";
+			//if (empty($view)) $view = "com.chiorichan.views.default";
 			
 			$themeName = getFramework()->getFunctions()->getPackageName( $theme );
 			
 			if ( strpos( $theme, "." ) === false )
 				$theme = trim("com.chiorichan.themes." . $themeName);
 			
-			if ( strpos( $view, "." ) === false )
-				$theme = trim("com.chiorichan.views." . getFramework()->getFunctions()->getPackageName( $view ));
+			if ( strpos( $view, "." ) === false && !empty( $view ) )
+				$view = trim("com.chiorichan.views." . getFramework()->getFunctions()->getPackageName( $view ));
 			
 			// html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"
 			echo("<!DOCTYPE " . $docType . ">\n");
@@ -339,22 +346,22 @@
 								header("Content-type: application/x-shockwave-flash");
 								break;
 						}
-			
+						
 						//			header("Cache-Control: no-cache, must-revalidate");
 						//			header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
-			
+						
 						getFramework()->getServer()->Debug2("Outputing from local file \"" . $filename . "\" with mime type \"" . $ftype . "\"");
-			
+						
 						$handle = fopen($filename, "r");
 						// echo fread($handle, filesize($_SERVER["DOCUMENT_ROOT"] . "/" . $page));
-			
+						
 						// Fixed memory fill error by reading only 4096 byte at a time
 						$readsize = 4096;
 						while (!feof($handle))
 						{
 							echo fread($handle, $readsize);
 						}
-			
+						
 						fclose($handle);
 					}
 				}
@@ -371,13 +378,13 @@
 					getFramework()->getServer->sendRedirect( "/" . $page . "/" );
 					die ();
 				}
-			
+				
 				return $this->localFile ( $page . "/index.php" );
 			}
 			else
 			{
 				getFramework()->getServer()->Warning("&4Unable to locate a file that matched the provided URL.");
-			
+				
 				switch (substr($filename, -3))
 				{
 					case "jpg":
@@ -393,9 +400,9 @@
 						header("Content-type: text/javascript");
 						break;
 				}
-			
+				
 				header("Status: 404 Not Found");
-			
+				
 				throw new TemplateException("Unable to locate a file that matched the provided URL.");
 				return false;
 			}

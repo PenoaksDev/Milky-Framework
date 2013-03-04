@@ -14,12 +14,7 @@ database:
   type: mysql
   host: localhost
   port: 3306
-  database: chiorifw
+  database: 'chiorifw'
   username: 'fwuser'
   password: 'fwpass'
   prefix: ''
-users:
-  scripts:
-    login-form: http://web.chiorichan.com/login
-    login-post: http://web.chiorichan.com/
-  sql-table: users

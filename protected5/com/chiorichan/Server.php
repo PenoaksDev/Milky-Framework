@@ -81,7 +81,7 @@
 			if ( !file_exists( $path ) )
 			{
 				$path = FW . DIRSEP . str_replace(".", DIRSEP, $package) . ".inc.php";
-
+				
 				if ( !file_exists( $path ) )
 				{
 					if ( $return )
@@ -90,6 +90,8 @@
 					return false;
 				}
 			}
+			
+			$this->Debug3("Retrieving File: " . $path);
 			
 			//$source = file_get_contents( $path );
 			
@@ -294,7 +296,7 @@
 				}
 			}
 			
-			if ($handle = fopen("/var/log/chiori.log", "a"))
+			if ($handle = fopen(__ROOT__ . "/log/chiori.log", "a"))
 			{
 					fwrite($handle, $log);
 					fclose($handle);
@@ -421,7 +423,7 @@
 		
 		public function setCookieExpiry ($valid)
 		{
-			//session_set_cookie_params( time() + $valid, "/", "." . getFramework()->domainName );
+			session_set_cookie_params( time() + $valid, "/", "." . getFramework()->domainName );
 		}
 		
 		public function destroySession ($SessID = "")

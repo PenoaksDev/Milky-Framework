@@ -16,17 +16,39 @@
 			return $this->CurrentUser["valid"];
 		}
 		
-		public function getString ( $key, $default = "" )
+		public function getRank ( $userId = null, $rtn_title = false )
 		{
-			$value = $this->CurrentUser[$key];
+			$accessId = $this->getString( "userlevel", null, $userId );
 			
-			if ( $value == null )
-				return trim( $default );
+			if ( $accessId == null || empty( $accessId ) )
+				return "";
 			
-			return trim( $value );
+			$rank = getFramework()->getDatabaseEngine()->selectOne("accounts_access", array("accessID" => $accessId));
+			
+			if ( $rtn_title )
+				return $rank["title"];
+			
+			return $rank;
 		}
 		
-		public function getUserbyName (string $userName)
+		public function getString ( $key, $default = "", $userId = null )
+		{
+			if ( $userId == null )
+			{
+				$value = $this->CurrentUser[$key];
+			}
+			else
+			{
+				$value = "";
+			}
+			
+			if ( $value == null )
+				return $default;
+			
+			return $value;
+		}
+		
+		public function getUserbyName ( string $userName )
 		{
 			if ( $userName == null || empty($userName) )
 				return null;
@@ -83,7 +105,7 @@
 				if ($msg["valid"])
 				{
 					$this->CurrentUser = $msg;
-			
+					
 					if ( empty( $target ) )
 					{
 						$target = getFramework()->getConfigurationManager()->getString("scripts.login-post");
@@ -93,7 +115,7 @@
 					{
 						$target = "/panel";
 					}
-			
+					
 					getFramework()->getServer()->Info("Login Success: Username \"" . $username . "\", UserID \"" . $msg["userID"] . "\", Password \"" . $password . "\", Redirecting to \"" . $target . "\".");
 					if (!empty($target)) getFramework()->getServer()->dummyRedirect($target);
 				}
@@ -105,7 +127,7 @@
 					{
 						$login = "/login";
 					}
-			
+					
 					getFramework()->getServer()->Warning("Login Failed: Username \"" . $username . "\", UserID \"" . $msg["userID"] . "\", Password \"" . $password . "\", Error Message \"" . $msg["msg"] . "\"");
 					getFramework()->getServer()->dummyRedirect($login . "?msg=" . $msg["msg"] . "&target=" . $target . "&user=" . $username);
 				}
@@ -114,7 +136,6 @@
 			{
 				$username = getFramework()->getServer()->getSessionString("User");
 				$password = getFramework()->getServer()->getSessionString("Pass");
-				
 				$user = $this->checkLogin($username, $password);
 				
 				if ($user["valid"])
@@ -176,7 +197,8 @@
 					"emptyUsername" => "The specified username was empty. Please try again.",
 					"emptyPassword" => "The specified password was empty. Please try again.",
 					"incorrectLogin" => "Username and Password provided did not match any users on file.",
-					"permissionsError" => "Fatel error was detected with your user permissions. Please notify an administrator ASAP."
+					"successLogin" => "Your login has been successfully authenticated.",
+					"permissionsError" => "Fatal error was detected with your user permissions. Please notify an administrator ASAP."
 			);
 			
 			$user = array(
@@ -203,6 +225,9 @@
 			}
 			*/
 			
+			if ( !empty( $user["msg"] ) )
+				return $user;
+			
 			$users = array();
 			foreach ($cfg->getArray("login-fields") as $field)
 			{
@@ -225,32 +250,62 @@
 			$passs = $obj->array2Where($passs, "OR");
 			
 			$result = $obj->selectOne("users", "(" . $users . ") AND (" . $passs . ")");
-				
-			if ($result === false && empty($user["msg"])) $user["msg"] = $msg["incorrectLogin"];
-				
-			if (md5($result["password"]) != $password && $result["password"] != $password && empty($user["msg"]))
-				$user["msg"] = $msg["incorrectLogin"];
-		
-			$level = $obj->selectOne("accounts_access", array("accessID" => $result["userlevel"]));
-		
-			if ($level === false && empty($user["msg"]))
-				$user["msg"] = $msg["permissionsError"];
-		
-			if (empty($user["msg"]))
+			
+			/*
+			 * Several fields are expected from any hooks that are called for auth.
+			 * 
+			 * Passed fields: username, password
+			 * 
+			 * Expected fields: valid, userID, userlevel
+			 * Optional fields: fname, name, displayname
+			 * 
+			 */
+			
+			if ( $result === false )
 			{
-				$user["valid"] = true;
+				getFramework()->getServer()->Warning("&4Inital User Login Failed. Attempting Third-Party Hooks");
+				
+				$result = getFramework()->doHook( "auth", $user );
+				
+				if (is_array( $result )
+					&& $result["valid"] === true
+					&& isset( $result["userID"] )
+					&& isset( $result["userlevel"] ))
+				{
+					$user["msg"] = "";
+					$user["valid"] = true;
+				}
+				else
+				{
+					$user["msg"] = $msg["incorrectLogin"];
+				}
 			}
-			else
-			{
+			
+			if ( !empty( $user["msg"] ) )
 				return $user;
+			
+			$user["msg"] = $msg["successLogin"];
+			
+			// Permissions
+			$level = $obj->selectOne("accounts_access", array("accessID" => $result["userlevel"]));
+			
+			if ( $level === false )
+			{
+				$user["msg"] = $msg["permissionsError"];
+				return $user["msg"];
 			}
-		
+			
+			$user["valid"] = true;
+			
 			$user = arrayJoin($user, $result);
-			$user["displayname"] = (empty($result["fname"])) ? $result["name"] : $result["fname"]." ".$result["name"];
+			
+			if ( empty( $result["displayname"] ) )
+				$user["displayname"] = (empty($result["fname"])) ? $result["name"] : $result["fname"]." ".$result["name"];
+			
 			$user["displaylevel"] = $level["title"];
-		
+			
 			$obj->update("users", Array("lastactive" => microtime(true)), "userID = '" . $result["userID"] . "'", 1);
-		
+			
 			return $user;
 		}
 		
@@ -262,11 +317,11 @@
 					"accountNotActivated" => "Account is not activated.",
 					"underAttackPleaseWait" => "Max fail login tries reached. Account locked for 30 minutes."
 			);
-		
+			
 			$user = $this->checkLogin($username, $password);
-		
+			
 			if (!$user["valid"]) return $this->loginFailed($user, $user["msg"]);
-		
+			
 			if ($user["numloginfail"] > 5)
 			{
 				if ($user["lastloginfail"] > (time() - 1800))
@@ -274,16 +329,16 @@
 					return $this->loginFailed($user, $response["underAttackPleaseWait"]);
 				}
 			}
-		
+			
 			if ($user["actno"] != 0) return $this->loginFailed($user, $response["accountNotActivated"], $obj);
-		
+			
 			$obj->update("users", Array("lastlogin"=>microtime(true)), "userID = '" . $user["userID"] . "'", 1);
 			$obj->update("users", Array("numloginfail"=>0), "userID = '" . $user["userID"] . "'", 1);
 			
 			getFramework()->getServer()->setSessionString("User", $user["userID"]);
 			getFramework()->getServer()->setSessionString("Pass", md5($password));
 			//getFramework()->getServer()->setCookieExpiry( 604800 );
-		
+			
 			return $user;
 		}
 		
@@ -332,40 +387,40 @@
 			 * This function checks the users permission level againts the permissions table for if the requested permission is allowed by Current User.
 			*/
 			$db = getFramework()->getDatabaseEngine();
-		
+			
 			if (empty($perm_name)) $perm_name = array("ROOT"); // Set Requested Permision Name to ROOT if none was given.
-		
+			
 			if (!is_array($perm_name)) $perm_name = array($perm_name);
-		
+			
 			if (empty($username)) // Get Currently Open User Data if none specified.
 			{
 				$username = $this->CurrentUser["username"];
 				$userlevel = $this->CurrentUser["userlevel"];
 			}
-		
+			
 			if ($userlevel == null)
 			{
 				$user = $db->selectOne("users", "username = '" . $username . "'"); // Retrieve User Information.
 				if (count($user) < 1) return false; // Return false is there was an error retrieving users information.
 				$userlevel = $user["userlevel"];
 			}
-		
+			
 			$perm = $db->selectOne("accounts_access", "accessID = '" . $userlevel . "'"); // Retrive Permissions from SQL.
 			if (count($perm) < 1) return false; // Return false if there was an error retrieving Permissions from SQL.
-		
+			
 			$perm_list = explode("|", $perm["permissions"]); // Explode permissions into array.
-		
+			
 			$title = $perm["title"]; // Set &$title string with user level title.
-		
+			
 			if (in_array("ROOT", $perm_list)) return true; // Return true if user has ROOT Permissions.
 			if (in_array("ADMIN", $perm_list) && !in_array("ROOT", $perm_name)) return true; // Return true if user has ADMIN Permissions and anything other then ROOT is being requested.
-		
+			
 			foreach($perm_name as $val)
 			{
 				if (in_array($val, $perm_list))
 					return true; // Return true if one of the requested permission names exists in users allowed permissions list.
 			}
-		
+			
 			return false;
 		}
 		
@@ -395,8 +450,8 @@
 			else
 			{
 				$where = array();
-	
-				$result_acc = $db->select("accounts", "maintainers like '%" . $this->getString("userID") . "%'");
+				$result_acc = $db->select("accounts", "maintainers like '%" . $this->CurrentUser["userID"] . "%'");
+				
 				if (count($result_acc) > 0)
 				{
 					foreach ($result_acc as $row_acc)
@@ -404,8 +459,8 @@
 						$where[] = "acctID = '" . $row_acc["acctID"] . "'";
 					}
 				}
-	
-				$result_acc = $db->select("locations", "maintainers like '%" . $this->getString("userID") . "%'", array("orderBy" => "`acctID` desc"));
+				
+				$result_acc = $db->select("locations", "maintainers like '%" . $this->CurrentUser["userID"] . "%'");
 				if (count($result_acc) > 0)
 				{
 					foreach ($result_acc as $row_acc)
@@ -415,8 +470,7 @@
 				}
 				
 				$where = $db->array2Where($where, "OR");
-				
-				if (empty($where)) return array();
+				if (empty($where)) return false;
 			}
 				
 			if (!empty($where_alt))
@@ -424,17 +478,16 @@
 				if (is_array($where_alt)) $where_alt = $db->WhereArray($where);
 				$where = $db->array2Where(array("(" . $where . ")", "(" . $where_alt . ")"));
 			}
-			
+				
 			if ($rtn_one || $rtn_str)
 			{
 				$result = $db->selectOne("locations", $where);
-				if ($rtn_one)
-					return $result;
-				if ($rtn_str)
-					return $result["locID"];
+				if ($rtn_one) return $result;
+				if ($rtn_str) return $result["locID"];
 			}
 			
-			return $db->Select("locations", $where, array("orderBy" => "`acctID` desc"));
+			return $db->Select("locations", $where);
+			
 			getFramework()->getServer()->Debug1("[UserServices] Returning authorized locations array from database.");
 		}
 		
@@ -450,7 +503,7 @@
 			{
 				$where = "maintainers like '%" . $this->CurrentUser["userID"] . "%'";
 			}
-
+			
 			$myAccounts = $db->select("accounts", $where, array(), CONFIG_SITE);
 			getFramework()->getServer()->Debug1("[UserServices] Returning authorized accounts array from database.");
 			

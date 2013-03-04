@@ -1,4 +1,23 @@
 <?
+	/**
+	 * @Product: Chiori Framework API
+	 * @Version 5.1.0106 (Scootaloo)
+	 * @Last Updated: January 6th, 2013
+	 * @PHP Version: 5.4 or Newer
+	 *
+	 * @Author: Chiori Greene
+	 * @E-Mail: chiorigreene@gmail.com
+	 * @Website: http://web.chiorichan.com
+	 * @License: GNU Public License Version 2
+	 * @Copyright (C) 2013 Chiori Greene. All Rights Reserved.
+	 *
+	 * This code is intellectual property of Chiori Greene and can only be distributed in whole with its
+	 * framework which is known as Chiori Framework.
+	 *
+	 * Description:
+	 * This file is the sole core class to the Chiori Framework.
+	 */
+
 	__Require("com.chiorichan.Colors");	
 	__Require("com.chiorichan.ConfigurationManager");
 	__Require("com.chiorichan.DaemonSender");
@@ -9,9 +28,8 @@
 	__Require("com.chiorichan.UserService");
 	__Require("com.chiorichan.event.Event");
 	__Require("com.chiorichan.plugin.Plugin");
-	
+	__Require("com.chiorichan.hooks.Hook");
 	__Require("com.chiorichan.exception.*");
-	
 	__Require("com.chiorichan.CompatFramework");
 	
 	Class ChioriFramework5
@@ -23,10 +41,11 @@
 		protected $pluginManager;
 		protected $userService;
 		protected $config;
-		protected $version = "5.0.1215 (Fluttershy)";
-		protected $copyright = "Copyright © 2013 Apple Bloom Company (Chiori Greene)";
+		protected $version = "5.1.0304 (Scootaloo)";
+		protected $copyright = "Copyright © 2013 Apple Bloom Company";
 		protected $product = "Chiori Framework";
 		protected $initFinished = false;
+		protected $hooks = array();
 		
 		protected $log_levels = array("dump", "sql", "syslog", "file");
 		
@@ -90,6 +109,7 @@
 			catch ( Exception $e )
 			{
 				getFramework()->server->sendException("&4" . $e);
+				getFramework()->generateExceptionPage( $e );
 				$this->shutdown();
 			}
 			
@@ -169,12 +189,139 @@
 					{
 						$this->getPluginManager()->addPluginByName($plugin["namespace"], json_decode($plugin["config"]));
 					}
+					
+					$result = $this->getDatabaseEngine()->select("hooks", array( "siteID" => $siteID ), array(), CONFIG_FW);
+						
+					foreach ( $result as $hook )
+					{
+						$this->enableHook( $hook["namespace"] );
+					}
 				}
 			}
 			
 			$this->server->initSession();
 			
 			return true;
+		}
+		
+		public function initFrameworkInternal ()
+		{
+			$this->server->Warning("&4Fallover Framework Configuration Activated");
+			
+			// Reinit Components
+			$this->functions = new Functions();
+			$this->server = new Server();
+			$this->daemonSender = new DaemonSender();
+			$this->databaseEngine = null; // new DatabaseEngine();
+			$this->config = new ConfigurationManager();
+			$this->pluginManager = null; // new PluginManager();
+			$this->userService = null; // new UserService();
+			
+			$this->getConfig()->loadFalloverConfig();
+			
+			$this->siteTitle = "Chiori Framework";
+			$this->domainName = $_SERVER["SERVER_ADDR"];
+			$this->megaTags = array();
+			$this->siteData = "/protected5/pages";
+			$this->aliases = array();
+			$this->protected = array();
+		}
+		
+		public function generateExceptionPage ( $e )
+		{
+			$this->initFrameworkInternal();
+			
+			$this->server->Error("&4" . $e->getMessage());
+			$GLOBALS["lasterr"] = $e;
+			//$GLOBALS["stackTrace"] = $e->stackTrace();
+			
+			$plugin = $this->createPlugin( "com.chiorichan.plugin.Template" );
+			$plugin->loadPage ( "com.chiorichan.themes.error", "", "", "/panic.php" );
+		}
+		
+		/*
+		 * Add a hook to the Framework
+		 * Currently Supported Method Hooks: shutdown, auth, ...more to come
+		 */
+		public function enableHook ( $nameSpace )
+		{
+			if ( strpos($nameSpace, ".") === false )
+				$nameSpace = "com.chiorichan.hooks." . $nameSpace;
+			
+			if ( !__require($nameSpace) )
+				return false;
+			
+			$hookPackage = getFramework()->getFunctions()->getPackageName($nameSpace);
+			
+			if ( class_exists($hookPackage) )
+				$newHook = new $hookPackage();
+			
+			if ( $newHook == null || $newHook == false )
+				return false;
+			
+			if ( method_exists($newHook, "auth") )
+			{
+				$this->hooks[] = array("name" => "auth", "class" => $newHook, "method" => "auth");
+				/*
+				if ( $this->userService->addHook( $newHook ) )
+				{
+					$this->server->Debug3("&5Successfully Enabled Auth Hook: " . $nameSpace);
+				}
+				else
+				{
+					$this->server->Warning("&4Failure Enabling Auth Hook: " . $nameSpace);
+				}
+				*/
+			}
+			
+			if ( method_exists($newHook, "shutdown") )
+				$this->hooks[] = array("name" => "shutdown", "class" => $newHook, "method" => "shutdown");
+			
+			if ( method_exists($newHook, "customHooks") )
+			{
+				$customHooks = $newHook->customHooks();
+				
+				if ( is_array( $customHooks ) )
+				{
+					foreach ( $customHooks as $hook )
+					{
+						if ( method_exists($newHook, $hook ) )
+						{
+							$this->hooks[] = array("name" => $hook, "class" => $newHook, "method" => $hook);
+						}
+					}
+				}
+			}
+			
+			return true;
+		}
+		
+		/*
+		 * Allows your site or plugin to manually call hooks.
+		 * Primary use is for custom hooks.
+		 * Your hook class must return an array of custom hook names when a call
+		 * is made to the $hookClass->customHooks() method for custom hooks to work. 
+		 */
+		public function doHook ( $hookName, $parms = array() )
+		{
+			foreach ( $this->hooks as $hook )
+			{
+				if ( $hook[0] == $hookName || $hook["name"] == $hookName )
+				{
+					$class = ( isset($hook["class"]) ) ? $hook["class"] : $hook[1];
+					$method = ( isset($hook["method"]) ) ? $hook["method"] : $hook[2];
+					
+					if ( $class != null && $method != null )
+					{
+						$result = $class->$method( $parms );
+						
+						if ( $result != null && $result != false )
+							return $result;
+					}
+				}
+			}
+			
+			return null;
 		}
 		
 		public function getSiteTitle ()
@@ -211,9 +358,10 @@
 		{
 			if ( !$this->initFinished )
 				return false;
-
+			
 			// TODO: Make call to several plugins and execute a shutdown event
-			$this->getPluginManager()->raiseEventbyName("FrameworkShutdown");
+			//$this->getPluginManager()->raiseEventbyName("FrameworkShutdown");
+			$this->doHook("shutdown");
 			
 			$this->initFinished = false;
 			die();
