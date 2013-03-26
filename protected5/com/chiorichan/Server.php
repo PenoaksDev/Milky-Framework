@@ -246,7 +246,7 @@
 		public function rawData ($message, $level = LOG_DEBUG)
 		{
 			if ( $this->firstCall )
-				file_put_contents("/var/log/chiori.log", join(", ", $_REQUEST) . "\n", FILE_APPEND);
+				@file_put_contents("/var/log/chiori.log", join(", ", $_REQUEST) . "\n", FILE_APPEND);
 			
 			$this->firstCall = false;
 			
@@ -391,7 +391,7 @@
 		{
 			session_destroy();
 			session_name( $this->default_session_name );
-			session_set_cookie_params( $this->default_session_lifetime, "/", "." . getFramework()->domainName );
+			session_set_cookie_params( time() + $this->default_session_lifetime, "/", "." . getFramework()->domainName );
 			session_start();
 			
 			if ( isset( $_COOKIE[ $this->default_session_name ] ) )

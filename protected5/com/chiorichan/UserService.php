@@ -101,7 +101,7 @@
 			if (!empty($username) && !empty($password))
 			{
 				$msg = $this->validateLogin($username, $password);
-					
+				
 				if ($msg["valid"])
 				{
 					$this->CurrentUser = $msg;
@@ -272,6 +272,7 @@
 					&& isset( $result["userID"] )
 					&& isset( $result["userlevel"] ))
 				{
+					$user = $result;
 					$user["msg"] = "";
 					$user["valid"] = true;
 				}
@@ -375,7 +376,7 @@
 		*/
 		public function hasPermission ($perm_name)
 		{
-			if ( $this->CurrentUser["username"] == null || empty($this->CurrentUser["username"]) )
+			if ( !$this->getUserState() )
 				return false;
 		
 			return $this->GetPermission($perm_name, $this->CurrentUser["username"]);
@@ -390,7 +391,7 @@
 			
 			if (empty($perm_name)) $perm_name = array("ROOT"); // Set Requested Permision Name to ROOT if none was given.
 			
-			if (!is_array($perm_name)) $perm_name = array($perm_name);
+			if (!is_array($perm_name)) $perm_name = explode("|", $perm_name);
 			
 			if (empty($username)) // Get Currently Open User Data if none specified.
 			{
@@ -417,7 +418,38 @@
 			
 			foreach($perm_name as $val)
 			{
-				if (in_array($val, $perm_list))
+				$granted = false;
+				$perm_sub = explode("&", $val);
+				
+				foreach($perm_sub as $perm)
+				{
+					if ( substr( $perm, 0, 1) == "!" ) // Reverse check - NOT
+					{
+						if (in_array(substr( $perm, 1), $perm_list))
+						{
+							$granted = false;
+							break;
+						}
+						else
+						{
+							$granted = true;
+						}
+					}
+					else
+					{
+						if (in_array($perm, $perm_list))
+						{
+							$granted = true;
+						}
+						else
+						{
+							$granted = false;
+							break;
+						}
+					}
+				}
+				
+				if ( $granted )
 					return true; // Return true if one of the requested permission names exists in users allowed permissions list.
 			}
 			
@@ -469,8 +501,11 @@
 					}
 				}
 				
+				if ( $this->GetPermission("STORE") )
+					$where[] = "locID = '" . $this->getString("userID") . "'";
+				
 				$where = $db->array2Where($where, "OR");
-				if (empty($where)) return false;
+				if ( empty($where) ) return false;
 			}
 				
 			if (!empty($where_alt))

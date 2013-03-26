@@ -3,6 +3,8 @@
 
 	Class Template extends Plugin
 	{
+		public $titleOverride = null;
+		
 		public function __construct($config = null)
 		{
 			parent::__construct();
@@ -49,6 +51,11 @@
 					$src = preg_split("/[.\/]/", $page);
 					$desc = preg_split("/[.\/]/", $arr);
 					
+					$row["weight"] = count( $desc );
+					
+					if ( $row["site"] == $site )
+						$row["weight"] -= 1;
+					
 					//$src = explode("/", $page);
 					//$desc = explode("/", $arr);
 					
@@ -93,16 +100,21 @@
 							break;
 							}
 						}
-							
+
 					if ($whole_match)
-						$rows[] = $row;
+						$rows[ $row["weight"] ] = $row;
 				}
 			}
 			
+			rsort( $rows );
+			
 			if (count($rows) > 1)
 			{
+				getFramework()->getServer()->Warning("More then one result found for said query... \"" . $domain . "/" . $page . "\"");
+				
 				for ($i = 0; $i < count($rows); $i++)
 				{
+					// Remove preg matched urls. Solid matched ones have a higher value.
 					if ($rows[$i]["preg"] && count($rows) > 1)
 						unset($rows[$i]);
 				}
@@ -223,6 +235,11 @@
 			}
 		}
 		
+		public function setTitleOverride( $title )
+		{
+			$this->titleOverride = $title;
+		}
+		
 		public function createPage ( $source, $pageTitle = "", $theme = "com.chiorichan.themes.default", $view = "com.chiorichan.views.default", $docType = "", $obMarker = "<!-- PAGE DATA -->", $loadCommon = true )
 		{
 			if (empty($docType)) $docType = "html";
@@ -242,6 +259,9 @@
 			echo("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
 			echo("<head>\n");
 			echo("<meta charset=\"utf-8\">\n");
+			
+			if ( !is_null( $this->titleOverride ) )
+				$pageTitle = $this->titleOverride;
 			
 			echo ( empty( $pageTitle ) )
 			? "<title>" . getFramework()->getSiteTitle() . "</title>\n"

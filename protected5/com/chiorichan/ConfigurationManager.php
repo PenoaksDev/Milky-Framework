@@ -167,6 +167,69 @@
 			return $this->db;
 		}
 		
+		/**
+		 * Does a setting compare based on a string if
+		 * No expected mean is interped as a boolean of true.
+		 * ex. USER_BETA_TESTER&USER_RANK=USER|USER_RANK=ADMIN
+		 * 
+		 * @param String $settingString
+		 */
+		public function settingCompare ( $settingString ) 
+		{
+			if ( !is_array( $settingString ) )
+				$settingString = explode("|", $settingString);
+			
+			foreach ( $settingString as $entry )
+			{
+				$granted = false;
+				
+				foreach( explode( "&", $entry ) as $sub )
+				{
+					$params = explode( "=", $sub );
+					
+					if ( count( $params ) > 0 )
+					{
+						if ( empty( $params[1] ) )
+							$expected_value = "1";
+						else
+							$expected_value = $params[1];
+						
+						$key = $params[0];
+						
+						if ( substr( $key, 0, 1) == "!" ) // Reverse check - NOT
+						{
+							if ( $this->get( substr( $key, 1) ) == $expected_value )
+							{
+								$granted = false;
+								break;
+							}
+							else
+							{
+								$granted = true;
+							}
+						}
+						else
+						{
+							if ( $this->get( $key ) == $expected_value )
+							{
+								$granted = true;
+							}
+							else
+							{
+								$granted = false;
+								break;
+							}
+						}
+					}
+				}
+				
+				if ( $granted )
+					return true;
+			}
+			
+			return false;
+		}
+		
 		function get($key, $idenifier = -1, $idenifier2 = "", $value_only = true, $default_value = "") // Returns setting string based on idenifier.
 		{
 			$users = getFramework()->getUserService();
