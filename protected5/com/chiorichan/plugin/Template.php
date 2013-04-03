@@ -4,6 +4,7 @@
 	Class Template extends Plugin
 	{
 		public $titleOverride = null;
+		public $headExtra = null;
 		
 		public function __construct($config = null)
 		{
@@ -274,6 +275,9 @@
 				getFramework()->getServer()->includePackage( getFramework()->getFunctions()->getPackageDomain( $theme ) . ".includes.common" );
 			
 			getFramework()->getServer()->includePackage( getFramework()->getFunctions()->getPackageDomain( $theme ) . ".includes." . $themeName );
+			
+			if ( $this->headExtra != null )
+				echo $this->headExtra;
 			
 			//echo("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
 			echo("</head>\n");

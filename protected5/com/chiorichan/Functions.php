@@ -25,6 +25,20 @@
 			return substr($package, 0, strpos($package, ".", 4));
 		}
 		
+		function randomNum ($length = 8, $numbers = true, $letters = false, $allowed_chars = array())
+		{
+			if ($numbers) $allowed_chars = array_merge($allowed_chars, array("1","2","3","4","5","6","7","8","9","0"));
+			if ($letters) $allowed_chars = array_merge($allowed_chars, array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"));
+		
+			for ($i = 1; $i <= $length; $i++) {
+				$rtn = $rtn . $allowed_chars[mt_rand (0, count($allowed_chars)-1)];
+			}
+		
+			getFramework()->getServer()->Debug1("Random number generated, result \"" . $rtn . "\".");
+		
+			return $rtn;
+		}
+		
 		public function exceptionHandler ( Exception $e )
 		{
 			if ( $e->getCode() != E_NOTICE && $e->getCode() != E_DEPRECATED && $e->getCode() != E_ERROR && $e->getCode() != E_WARNING )

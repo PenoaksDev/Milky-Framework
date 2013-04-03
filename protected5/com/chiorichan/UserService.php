@@ -3,7 +3,7 @@
 	{
 		protected $db;
 		
-		// Old Var - Do Not Use
+		// Do Not Use Externally
 		private $CurrentUser = array();
 		
 		function __construct()
@@ -13,6 +13,9 @@
 		
 		public function getUserState () 
 		{
+			if ( is_null( $this->CurrentUser["valid"] ) )
+				$this->CurrentUser["valid"] = false;
+			
 			return $this->CurrentUser["valid"];
 		}
 		
@@ -69,8 +72,6 @@
 				
 				
 		}
-		
-		// OLD METHODS
 		
 		public function initalize ( $reqlevel = -1 )
 		{
@@ -338,7 +339,11 @@
 			
 			getFramework()->getServer()->setSessionString("User", $user["userID"]);
 			getFramework()->getServer()->setSessionString("Pass", md5($password));
-			//getFramework()->getServer()->setCookieExpiry( 604800 );
+			
+			if ( $_REQUEST["remember"] == true )
+				getFramework()->getServer()->setCookieExpiry( 5 * 365 * 24 * 60 * 60 );
+			else
+				getFramework()->getServer()->setCookieExpiry( 604800 );
 			
 			return $user;
 		}

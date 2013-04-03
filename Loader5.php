@@ -1,9 +1,9 @@
-<?php
+<?
 	define("__ROOT__", dirname(__FILE__));
 
 	require( "protected5/Constructor.php" );
 	
-	// Compatable 
+	// Compat Framework
 	$chiori = new CompatFramework();
 	
 	// Initalize Framework Class plus Load Configuration

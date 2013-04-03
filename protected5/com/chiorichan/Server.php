@@ -6,7 +6,7 @@
 		protected $whitelist = false;
 		protected $serverName = "Unnamed Chiori Framework Server";
 		
-		private $default_session_lifetime = 604800; // 43200 = 12 hours
+		private $default_session_lifetime = 604800; // 43200 = 12 hours, 604800 = 7 days
 		private $default_session_name = "AppleBloom";
 		private $data = array();
 		private $domain;
@@ -296,10 +296,12 @@
 				}
 			}
 			
-			if ($handle = fopen(__ROOT__ . "/log/chiori.log", "a"))
+			//if ( !file_exists( __ROOT__ . "/log/chiori.log" ) )
+			
+			if ( @$handle = fopen( __ROOT__ . "/log/chiori.log", "a" ) )
 			{
-					fwrite($handle, $log);
-					fclose($handle);
+				fwrite($handle, $log);
+				fclose($handle);
 			}
 		}
 		
@@ -389,13 +391,12 @@
 		
 		public function initSession ()
 		{
-			session_destroy();
-			session_name( $this->default_session_name );
-			session_set_cookie_params( time() + $this->default_session_lifetime, "/", "." . getFramework()->domainName );
-			session_start();
+			if ( !is_null( getFramework()->domainName ) && getFramework()->domainName != "example.com" )
+				session_set_cookie_params( null, "/", "." . getFramework()->domainName );
+				//ini_set("session.cookie_domain", "." . getFramework()->domainName );
 			
-			if ( isset( $_COOKIE[ $this->default_session_name ] ) )
-				setcookie( $this->default_session_name, $_COOKIE[ $this->default_session_name ], time() + $this->default_session_lifetime, "/", "." . getFramework()->domainName );
+			session_name( $this->default_session_name );
+			session_start();
 		}
 		
 		public function getSessionString ( $key, $default = null )
@@ -423,7 +424,13 @@
 		
 		public function setCookieExpiry ($valid)
 		{
+			if ( is_null( $valid ) || $valid < 1 )
+				$valid = $this->default_session_lifetime;
+			
 			session_set_cookie_params( time() + $valid, "/", "." . getFramework()->domainName );
+			
+			if ( isset( $_COOKIE[ $this->default_session_name ] ) )
+				setcookie( $this->default_session_name, $_COOKIE[ $this->default_session_name ], time() + $valid, "/", "." . getFramework()->domainName );
 		}
 		
 		public function destroySession ($SessID = "")
