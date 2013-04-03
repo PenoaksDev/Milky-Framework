@@ -65,6 +65,10 @@ Bug Fixes.
 ===Subversion 1 (Scootaloo)===
 ====Build 0106/0107====
 Introduced Hooks which are like event listeners. Bug Fixes.
+====Build 0304====
+Fixed some idenified cross-domain cookie issues and inplemented fallback auth into hooks.
+====Build 0326====
+Various Minor Bug Fixes and Improvements to Permissions and Template Systems.
 
 =Installation=
 ==Apache Configuration==
