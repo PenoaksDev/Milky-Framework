@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libs/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="libs/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="libs/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="libs/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/fluent-hc-4.2.3.jar"/>
+	<classpathentry kind="lib" path="libs/guava-14.0-rc1.jar"/>
+	<classpathentry kind="lib" path="libs/httpclient-4.2.3.jar"/>
+	<classpathentry kind="lib" path="libs/httpclient-cache-4.2.3.jar"/>
+	<classpathentry kind="lib" path="libs/httpcore-4.2.2.jar"/>
+	<classpathentry kind="lib" path="libs/httpmime-4.2.3.jar"/>
+	<classpathentry kind="lib" path="libs/jansi-1.9.jar"/>
+	<classpathentry kind="lib" path="libs/jetty-all-7.6.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="libs/jetty-websocket-7.6.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="libs/joda-time-2.2.jar"/>
+	<classpathentry kind="lib" path="libs/libphonenumber-5.2v1.5.jar"/>
+	<classpathentry kind="lib" path="libs/mysql-connector-java-5.1.22-bin.jar"/>
+	<classpathentry kind="lib" path="libs/servlet-api-2.5.jar"/>
+	<classpathentry kind="lib" path="libs/snakeyaml-1.11.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
