@@ -34,6 +34,7 @@ import com.chiorichan.event.EventHandler;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.server.PluginDisableEvent;
 import com.chiorichan.event.server.PluginEnableEvent;
+import com.chiorichan.plugin.AuthorNagException;
 import com.chiorichan.plugin.EventExecutor;
 import com.chiorichan.plugin.InvalidDescriptionException;
 import com.chiorichan.plugin.InvalidPluginException;
@@ -158,7 +159,7 @@ public class JavaPluginLoader implements PluginLoader
 		}
 		
 		PluginClassLoader loader = null;
-		JavaPlugin result = null;
+		Plugin result = null;
 		
 		try
 		{
@@ -177,9 +178,9 @@ public class JavaPluginLoader implements PluginLoader
 			}
 			
 			Class<?> jarClass = Class.forName( description.getMain(), true, loader );
-			Class<? extends JavaPlugin> plugin = jarClass.asSubclass( JavaPlugin.class );
+			Class<? extends Plugin> plugin = jarClass.asSubclass( Plugin.class );
 			
-			Constructor<? extends JavaPlugin> constructor = plugin.getConstructor();
+			Constructor<? extends Plugin> constructor = plugin.getConstructor();
 			
 			result = constructor.newInstance();
 			
@@ -518,13 +519,13 @@ public class JavaPluginLoader implements PluginLoader
 	
 	public void enablePlugin( final Plugin plugin )
 	{
-		Validate.isTrue( plugin instanceof JavaPlugin, "Plugin is not associated with this PluginLoader" );
+		Validate.isTrue( plugin instanceof Plugin, "Plugin is not associated with this PluginLoader" );
 		
 		if ( !plugin.isEnabled() )
 		{
 			plugin.getLogger().info( "Enabling " + plugin.getDescription().getFullName() );
 			
-			JavaPlugin jPlugin = (JavaPlugin) plugin;
+			Plugin jPlugin = (Plugin) plugin;
 			
 			String pluginName = jPlugin.getDescription().getName();
 			
@@ -550,7 +551,7 @@ public class JavaPluginLoader implements PluginLoader
 	
 	public void disablePlugin( Plugin plugin )
 	{
-		Validate.isTrue( plugin instanceof JavaPlugin, "Plugin is not associated with this PluginLoader" );
+		Validate.isTrue( plugin instanceof Plugin, "Plugin is not associated with this PluginLoader" );
 		
 		if ( plugin.isEnabled() )
 		{
@@ -559,7 +560,7 @@ public class JavaPluginLoader implements PluginLoader
 			
 			server.getPluginManager().callEvent( new PluginDisableEvent( plugin ) );
 			
-			JavaPlugin jPlugin = (JavaPlugin) plugin;
+			Plugin jPlugin = (Plugin) plugin;
 			ClassLoader cloader = jPlugin.getClassLoader();
 			
 			try

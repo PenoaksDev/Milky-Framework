@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
-import org.eclipse.jetty.util.StringUtil;
 
 import com.chiorichan.ChatColor;
 import com.chiorichan.ChioriFramework;
 import com.chiorichan.command.Command;
 import com.chiorichan.command.CommandSender;
+import com.chiorichan.entity.User;
+import com.chiorichan.util.StringUtil;
 import com.google.common.collect.ImmutableList;
 
 public class WhitelistCommand extends VanillaCommand
@@ -37,7 +38,7 @@ public class WhitelistCommand extends VanillaCommand
 				if ( badPerm( sender, "reload" ) )
 					return true;
 				
-				ChioriFramework.reloadWhitelist();
+				ChioriFramework.getServer().reloadWhitelist();
 				Command.broadcastCommandMessage( sender, "Reloaded white-list from file" );
 				return true;
 			}
@@ -46,7 +47,7 @@ public class WhitelistCommand extends VanillaCommand
 				if ( badPerm( sender, "enable" ) )
 					return true;
 				
-				ChioriFramework.setWhitelist( true );
+				ChioriFramework.getServer().setWhitelist( true );
 				Command.broadcastCommandMessage( sender, "Turned on white-listing" );
 				return true;
 			}
@@ -55,7 +56,7 @@ public class WhitelistCommand extends VanillaCommand
 				if ( badPerm( sender, "disable" ) )
 					return true;
 				
-				ChioriFramework.setWhitelist( false );
+				ChioriFramework.getServer().setWhitelist( false );
 				Command.broadcastCommandMessage( sender, "Turned off white-listing" );
 				return true;
 			}
@@ -66,14 +67,14 @@ public class WhitelistCommand extends VanillaCommand
 				
 				StringBuilder result = new StringBuilder();
 				
-				for ( OfflinePlayer player : ChioriFramework.getWhitelistedPlayers() )
+				for ( User user : ChioriFramework.getServer().getWhitelistedUsers() )
 				{
 					if ( result.length() > 0 )
 					{
 						result.append( ", " );
 					}
 					
-					result.append( player.getName() );
+					result.append( user.getName() );
 				}
 				
 				sender.sendMessage( "White-listed players: " + result.toString() );
@@ -87,7 +88,7 @@ public class WhitelistCommand extends VanillaCommand
 				if ( badPerm( sender, "add" ) )
 					return true;
 				
-				ChioriFramework.getOfflinePlayer( args[1] ).setWhitelisted( true );
+				ChioriFramework.getServer().getUser( args[1] ).setWhitelisted( true );
 				
 				Command.broadcastCommandMessage( sender, "Added " + args[1] + " to white-list" );
 				return true;
@@ -97,7 +98,7 @@ public class WhitelistCommand extends VanillaCommand
 				if ( badPerm( sender, "remove" ) )
 					return true;
 				
-				ChioriFramework.getOfflinePlayer( args[1] ).setWhitelisted( false );
+				ChioriFramework.getServer().getUser( args[1] ).setWhitelisted( false );
 				
 				Command.broadcastCommandMessage( sender, "Removed " + args[1] + " from white-list" );
 				return true;
@@ -110,7 +111,7 @@ public class WhitelistCommand extends VanillaCommand
 	
 	private boolean badPerm( CommandSender sender, String perm )
 	{
-		if ( !sender.hasPermission( "bukkit.command.whitelist." + perm ) )
+		if ( !sender.hasPermission( "framework.command.whitelist." + perm ) )
 		{
 			sender.sendMessage( ChatColor.RED + "You do not have permission to perform this action." );
 			return true;
@@ -135,10 +136,10 @@ public class WhitelistCommand extends VanillaCommand
 			if ( args[0].equalsIgnoreCase( "add" ) )
 			{
 				List<String> completions = new ArrayList<String>();
-				for ( OfflinePlayer player : ChioriFramework.getOfflinePlayers() )
+				for ( User user : ChioriFramework.getServer().getUsers() )
 				{
-					String name = player.getName();
-					if ( StringUtil.startsWithIgnoreCase( name, args[1] ) && !player.isWhitelisted() )
+					String name = user.getName();
+					if ( StringUtil.startsWithIgnoreCase( name, args[1] ) && !user.isWhitelisted() )
 					{
 						completions.add( name );
 					}
@@ -148,9 +149,9 @@ public class WhitelistCommand extends VanillaCommand
 			else if ( args[0].equalsIgnoreCase( "remove" ) )
 			{
 				List<String> completions = new ArrayList<String>();
-				for ( OfflinePlayer player : ChioriFramework.getWhitelistedPlayers() )
+				for ( User user : ChioriFramework.getServer().getWhitelistedUsers() )
 				{
-					String name = player.getName();
+					String name = user.getName();
 					if ( StringUtil.startsWithIgnoreCase( name, args[1] ) )
 					{
 						completions.add( name );

@@ -9,6 +9,8 @@ import java.util.logging.Level;
 
 import org.apache.commons.lang3.Validate;
 
+import com.chiorichan.plugin.AuthorNagException;
+
 /**
  * A ClassLoader for plugins, to allow shared classes across multiple plugins
  */

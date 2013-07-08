@@ -10,11 +10,10 @@ import java.util.logging.Logger;
 
 import jline.Terminal;
 import jline.console.ConsoleReader;
+import joptsimple.OptionSet;
 
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.Ansi.Attribute;
-
-import co.applebloom.apps.rewards.Asset;
 
 import com.chiorichan.OurWebsocketServlet.RewardsWebSocket;
 import com.google.common.base.Strings;
@@ -32,7 +31,7 @@ public class InteractiveConsole
 	
 	private static int lineCount = 999;
 	
-	public InteractiveConsole()
+	public InteractiveConsole( OptionSet options )
 	{
 		try
 		{
@@ -64,9 +63,21 @@ public class InteractiveConsole
 			
 			Boolean useJline = !( jline_UnsupportedTerminal ).equals( System.getProperty( jline_terminal ) );
 			
+			if ( options.has( "nojline" ) )
+			{
+				System.setProperty( "user.language", "en" );
+				useJline = false;
+			}
+			
 			if ( !useJline )
 			{
+				// This ensures the terminal literal will always match the jline implementation
 				System.setProperty( jline.TerminalFactory.JLINE_TERMINAL, jline.UnsupportedTerminal.class.getName() );
+			}
+			
+			if ( options.has( "noconsole" ) )
+			{
+				//useConsole = false;
 			}
 			
 			try

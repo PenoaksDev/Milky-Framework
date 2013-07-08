@@ -21,5 +21,6 @@
 	<classpathentry kind="lib" path="libs/servlet-api-2.5.jar"/>
 	<classpathentry kind="lib" path="libs/snakeyaml-1.11.jar"/>
 	<classpathentry kind="lib" path="libs/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="libs/jopt-simple-4.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

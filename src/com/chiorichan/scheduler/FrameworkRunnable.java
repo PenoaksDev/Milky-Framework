@@ -18,7 +18,7 @@ public abstract class FrameworkRunnable implements Runnable
 	 */
 	public synchronized void cancel() throws IllegalStateException
 	{
-		ChioriFramework.getScheduler().cancelTask( getTaskId() );
+		ChioriFramework.getServer().getScheduler().cancelTask( getTaskId() );
 	}
 	
 	/**
@@ -36,7 +36,7 @@ public abstract class FrameworkRunnable implements Runnable
 	public synchronized FrameworkTask runTask( Plugin plugin ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( ChioriFramework.getScheduler().runTask( plugin, this ) );
+		return setupId( ChioriFramework.getServer().getScheduler().runTask( plugin, this ) );
 	}
 	
 	/**
@@ -57,7 +57,7 @@ public abstract class FrameworkRunnable implements Runnable
 	public synchronized FrameworkTask runTaskAsynchronously( Plugin plugin ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( ChioriFramework.getScheduler().runTaskAsynchronously( plugin, this ) );
+		return setupId( ChioriFramework.getServer().getScheduler().runTaskAsynchronously( plugin, this ) );
 	}
 	
 	/**
@@ -77,7 +77,7 @@ public abstract class FrameworkRunnable implements Runnable
 	public synchronized FrameworkTask runTaskLater( Plugin plugin, long delay ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( ChioriFramework.getScheduler().runTaskLater( plugin, this, delay ) );
+		return setupId( ChioriFramework.getServer().getScheduler().runTaskLater( plugin, this, delay ) );
 	}
 	
 	/**
@@ -100,7 +100,7 @@ public abstract class FrameworkRunnable implements Runnable
 	public synchronized FrameworkTask runTaskLaterAsynchronously( Plugin plugin, long delay ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( ChioriFramework.getScheduler().runTaskLaterAsynchronously( plugin, this, delay ) );
+		return setupId( ChioriFramework.getServer().getScheduler().runTaskLaterAsynchronously( plugin, this, delay ) );
 	}
 	
 	/**
@@ -122,7 +122,7 @@ public abstract class FrameworkRunnable implements Runnable
 	public synchronized FrameworkTask runTaskTimer( Plugin plugin, long delay, long period ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( ChioriFramework.getScheduler().runTaskTimer( plugin, this, delay, period ) );
+		return setupId( ChioriFramework.getServer().getScheduler().runTaskTimer( plugin, this, delay, period ) );
 	}
 	
 	/**
@@ -148,7 +148,7 @@ public abstract class FrameworkRunnable implements Runnable
 	public synchronized FrameworkTask runTaskTimerAsynchronously( Plugin plugin, long delay, long period ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( ChioriFramework.getScheduler().runTaskTimerAsynchronously( plugin, this, delay, period ) );
+		return setupId( ChioriFramework.getServer().getScheduler().runTaskTimerAsynchronously( plugin, this, delay, period ) );
 	}
 	
 	/**

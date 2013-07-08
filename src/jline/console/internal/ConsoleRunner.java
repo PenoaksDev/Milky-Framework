@@ -72,7 +72,7 @@ public class ConsoleRunner
         ConsoleReaderInputStream.setIn(reader);
  
         try {
-            Class type = Class.forName(mainClass);
+            Class<?> type = Class.forName(mainClass);
             Method method = type.getMethod("main", new Class[]{String[].class});
             method.invoke(null);
         }
