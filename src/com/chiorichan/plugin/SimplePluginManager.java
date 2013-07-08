@@ -1,6 +1,7 @@
 package com.chiorichan.plugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.eclipse.jetty.server.Server;
 
@@ -385,9 +387,17 @@ public final class SimplePluginManager implements PluginManager
 		}
 		
 		File updateFile = new File( updateDirectory, file.getName() );
-		if ( updateFile.isFile() && FileUtil.copy( updateFile, file ) )
+		if ( updateFile.isFile() )
 		{
-			updateFile.delete();
+			try
+			{
+				FileUtils.copyFile( updateFile, file );
+				updateFile.delete();
+			}
+			catch ( IOException e )
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -590,17 +600,6 @@ public final class SimplePluginManager implements PluginManager
 			try
 			{
 				registration.callEvent( event );
-			}
-			catch ( AuthorNagException ex )
-			{
-				Plugin plugin = registration.getPlugin();
-				
-				if ( plugin.isNaggable() )
-				{
-					plugin.setNaggable( false );
-					
-					server.getLogger().log( Level.SEVERE, String.format( "Nag author(s): '%s' of '%s' about the following: %s", plugin.getDescription().getAuthors(), plugin.getDescription().getFullName(), ex.getMessage() ) );
-				}
 			}
 			catch ( Throwable ex )
 			{

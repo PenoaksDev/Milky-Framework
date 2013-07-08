@@ -8,7 +8,7 @@ public class CrossoverHandler
 	{
 		try
 		{
-			SqlConnector db = Main.getDatabase();
+			SqlConnector db = ChioriFramework.getDatabase();
 			
 			ResultSet rs1 = db.query( "SELECT * FROM `settings_default` WHERE `key` = '" + key + "';" );
 			

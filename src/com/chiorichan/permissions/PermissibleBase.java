@@ -92,7 +92,7 @@ public class PermissibleBase implements Permissible
 		}
 		else
 		{
-			Permission perm = ChioriFramework.getPluginManager().getPermission( name );
+			Permission perm = ChioriFramework.getServer().getPluginManager().getPermission( name );
 			
 			if ( perm != null )
 			{
@@ -191,14 +191,14 @@ public class PermissibleBase implements Permissible
 	public void recalculatePermissions()
 	{
 		clearPermissions();
-		Set<Permission> defaults = ChioriFramework.getPluginManager().getDefaultPermissions( isOp() );
-		ChioriFramework.getPluginManager().subscribeToDefaultPerms( isOp(), parent );
+		Set<Permission> defaults = ChioriFramework.getServer().getPluginManager().getDefaultPermissions( isOp() );
+		ChioriFramework.getServer().getPluginManager().subscribeToDefaultPerms( isOp(), parent );
 		
 		for ( Permission perm : defaults )
 		{
 			String name = perm.getName().toLowerCase();
 			permissions.put( name, new PermissionAttachmentInfo( parent, name, null, true ) );
-			ChioriFramework.getPluginManager().subscribeToPermission( name, parent );
+			ChioriFramework.getServer().getPluginManager().subscribeToPermission( name, parent );
 			calculateChildPermissions( perm.getChildren(), false, null );
 		}
 		
@@ -214,11 +214,11 @@ public class PermissibleBase implements Permissible
 		
 		for ( String name : perms )
 		{
-			ChioriFramework.getPluginManager().unsubscribeFromPermission( name, parent );
+			ChioriFramework.getServer().getPluginManager().unsubscribeFromPermission( name, parent );
 		}
 		
-		ChioriFramework.getPluginManager().unsubscribeFromDefaultPerms( false, parent );
-		ChioriFramework.getPluginManager().unsubscribeFromDefaultPerms( true, parent );
+		ChioriFramework.getServer().getPluginManager().unsubscribeFromDefaultPerms( false, parent );
+		ChioriFramework.getServer().getPluginManager().unsubscribeFromDefaultPerms( true, parent );
 		
 		permissions.clear();
 	}
@@ -229,12 +229,12 @@ public class PermissibleBase implements Permissible
 		
 		for ( String name : keys )
 		{
-			Permission perm = ChioriFramework.getPluginManager().getPermission( name );
+			Permission perm = ChioriFramework.getServer().getPluginManager().getPermission( name );
 			boolean value = children.get( name ) ^ invert;
 			String lname = name.toLowerCase();
 			
 			permissions.put( lname, new PermissionAttachmentInfo( parent, lname, attachment, value ) );
-			ChioriFramework.getPluginManager().subscribeToPermission( name, parent );
+			ChioriFramework.getServer().getPluginManager().subscribeToPermission( name, parent );
 			
 			if ( perm != null )
 			{
@@ -281,9 +281,9 @@ public class PermissibleBase implements Permissible
 		
 		PermissionAttachment result = addAttachment( plugin );
 		
-		if ( ChioriFramework.getScheduler().scheduleSyncDelayedTask( plugin, new RemoveAttachmentRunnable( result ), ticks ) == -1 )
+		if ( ChioriFramework.getServer().getScheduler().scheduleSyncDelayedTask( plugin, new RemoveAttachmentRunnable( result ), ticks ) == -1 )
 		{
-			ChioriFramework.getLogger().log( Level.WARNING, "Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1" );
+			ChioriFramework.getServer().getLogger().log( Level.WARNING, "Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1" );
 			result.remove();
 			return null;
 		}

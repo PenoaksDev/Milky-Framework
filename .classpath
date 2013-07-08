@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="libs/mysql-connector-java-5.1.22-bin.jar"/>
 	<classpathentry kind="lib" path="libs/servlet-api-2.5.jar"/>
 	<classpathentry kind="lib" path="libs/snakeyaml-1.11.jar"/>
+	<classpathentry kind="lib" path="libs/commons-io-2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

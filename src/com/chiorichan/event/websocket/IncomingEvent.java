@@ -6,6 +6,7 @@ import com.chiorichan.event.HandlerList;
 
 public class IncomingEvent extends Event implements Cancellable
 {
+	private HandlerList handlers = new HandlerList();
 	Boolean cancelled = false;
 	String response = null;
 	
@@ -32,7 +33,7 @@ public class IncomingEvent extends Event implements Cancellable
 	@Override
 	public HandlerList getHandlers()
 	{
-		return null;
+		return handlers;
 	}
 
 	@Override

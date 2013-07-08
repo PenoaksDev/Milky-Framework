@@ -1,6 +1,6 @@
 package com.chiorichan.event.server;
 
-import com.chiorichan.CommandSender;
+import com.chiorichan.command.CommandSender;
 import com.chiorichan.event.HandlerList;
 
 /**

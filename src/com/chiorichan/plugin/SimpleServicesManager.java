@@ -66,7 +66,7 @@ public class SimpleServicesManager implements ServicesManager
 			}
 			
 		}
-		ChioriFramework.getPluginManager().callEvent( new ServiceRegisterEvent( registeredProvider ) );
+		ChioriFramework.getServer().getPluginManager().callEvent( new ServiceRegisterEvent( registeredProvider ) );
 	}
 	
 	/**
@@ -120,7 +120,7 @@ public class SimpleServicesManager implements ServicesManager
 		}
 		for ( ServiceUnregisterEvent event : unregisteredEvents )
 		{
-			ChioriFramework.getPluginManager().callEvent( event );
+			ChioriFramework.getServer().getPluginManager().callEvent( event );
 		}
 	}
 	
@@ -184,7 +184,7 @@ public class SimpleServicesManager implements ServicesManager
 		}
 		for ( ServiceUnregisterEvent event : unregisteredEvents )
 		{
-			ChioriFramework.getPluginManager().callEvent( event );
+			ChioriFramework.getServer().getPluginManager().callEvent( event );
 		}
 	}
 	
@@ -239,7 +239,7 @@ public class SimpleServicesManager implements ServicesManager
 		}
 		for ( ServiceUnregisterEvent event : unregisteredEvents )
 		{
-			ChioriFramework.getPluginManager().callEvent( event );
+			ChioriFramework.getServer().getPluginManager().callEvent( event );
 		}
 	}
 	

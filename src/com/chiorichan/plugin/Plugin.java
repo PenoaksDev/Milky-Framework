@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.chiorichan.ChioriFramework;
+import com.chiorichan.command.CommandExecutor;
 import com.chiorichan.configuration.file.FileConfiguration;
 import com.chiorichan.configuration.file.YamlConfiguration;
 
@@ -19,7 +20,7 @@ import com.chiorichan.configuration.file.YamlConfiguration;
  * <p>
  * The use of {@link PluginBase} is recommended for actual Implementation
  */
-public abstract class Plugin
+public abstract class Plugin implements CommandExecutor
 {
 	private boolean isEnabled = false;
 	private boolean initialized = false;

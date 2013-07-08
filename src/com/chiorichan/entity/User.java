@@ -1,78 +1,112 @@
 package com.chiorichan.entity;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
 import java.util.Set;
 
 import com.chiorichan.ChioriFramework;
 import com.chiorichan.command.CommandSender;
+import com.chiorichan.configuration.serialization.ConfigurationSerializable;
+import com.chiorichan.configuration.serialization.SerializableAs;
+import com.chiorichan.event.entity.UserLoad;
 import com.chiorichan.permissions.Permission;
 import com.chiorichan.permissions.PermissionAttachment;
 import com.chiorichan.permissions.PermissionAttachmentInfo;
 import com.chiorichan.plugin.Plugin;
 import com.chiorichan.plugin.messaging.PluginMessageRecipient;
 
-public class User extends BaseEntity implements CommandSender, PluginMessageRecipient
+@SerializableAs( "User" )
+public class User extends BaseEntity implements CommandSender, PluginMessageRecipient, ConfigurationSerializable
 {
+	private boolean banned, whitelisted;
+	private long lastRequest = 0, sessionExpiration = 0, firstJoined = 0, lastJoined = 0;
+	private String username, userId, phone;
+	
+	public User( ResultSet rs ) throws SQLException
+	{
+		username = rs.getString( "username" );
+		userId = rs.getString( "userID" );
+		phone = rs.getString( "phone" );
+		
+		ChioriFramework.getServer().getPluginManager().callEvent( new UserLoad( this ) );
+		
+		// TODO: Add more fields.
+	}
+
+	@Override
+	public Map<String, Object> serialize()
+	{
+		
+		return null;
+	}
 	
 	@Override
 	public boolean isOnline()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		// Was active in the last 5 minutes.
+		return ( lastRequest - System.currentTimeMillis() < 300 );
 	}
 	
 	@Override
 	public String getName()
 	{
+		return username;
+	}
+
+	@Override
+	public String getPhone()
+	{
 		// TODO Auto-generated method stub
-		return null;
+		return phone;
+	}
+
+	@Override
+	public String getUserId()
+	{
+		// TODO Auto-generated method stub
+		return userId;
 	}
 	
 	@Override
 	public boolean isBanned()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return banned;
 	}
 	
 	@Override
 	public void setBanned( boolean banned )
 	{
-		// TODO Auto-generated method stub
-		
+		this.banned = banned;
 	}
 	
 	@Override
 	public boolean isWhitelisted()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return whitelisted;
 	}
 	
 	@Override
 	public void setWhitelisted( boolean value )
 	{
-		// TODO Auto-generated method stub
-		
+		whitelisted = value;
 	}
 	
 	@Override
 	public long getFirstJoined()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return firstJoined;
 	}
 	
 	@Override
 	public long getLastJoined()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return lastJoined;
 	}
 	
 	@Override
 	public boolean hasJoinedBefore()
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -206,5 +240,4 @@ public class User extends BaseEntity implements CommandSender, PluginMessageReci
 	{
 		// TODO Kick entity from the server
 	}
-	
 }

@@ -7,12 +7,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 
+import com.chiorichan.ChioriFramework;
 import com.chiorichan.InteractiveConsole;
 import com.chiorichan.OurWebsocketServlet;
-import com.chiorichan.SqlConnector;
 import com.chiorichan.OurWebsocketServlet.RewardsWebSocket;
-
-import co.applebloom.api.Main;
+import com.chiorichan.SqlConnector;
 
 public class AssetsHandler
 {
@@ -22,7 +21,7 @@ public class AssetsHandler
 	
 	public AssetsHandler()
 	{
-		sql = Main.getDatabase();
+		sql = ChioriFramework.getDatabase();
 	}
 	
 	public void loadAssets()

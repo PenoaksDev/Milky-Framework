@@ -169,7 +169,7 @@ public class Permission
 	 */
 	public Set<Permissible> getPermissibles()
 	{
-		return ChioriFramework.getPluginManager().getPermissionSubscriptions( name );
+		return ChioriFramework.getServer().getPluginManager().getPermissionSubscriptions( name );
 	}
 	
 	/**
@@ -181,7 +181,7 @@ public class Permission
 	{
 		Set<Permissible> perms = getPermissibles();
 		
-		ChioriFramework.getPluginManager().recalculatePermissionDefaults( this );
+		ChioriFramework.getServer().getPluginManager().recalculatePermissionDefaults( this );
 		
 		for ( Permissible p : perms )
 		{
@@ -202,7 +202,7 @@ public class Permission
 	 */
 	public Permission addParent( String name, boolean value )
 	{
-		PluginManager pm = ChioriFramework.getPluginManager();
+		PluginManager pm = ChioriFramework.getServer().getPluginManager();
 		String lname = name.toLowerCase();
 		
 		Permission perm = pm.getPermission( lname );
@@ -259,7 +259,7 @@ public class Permission
 			}
 			catch ( Throwable ex )
 			{
-				ChioriFramework.getLogger().log( Level.SEVERE, String.format( error, entry.getKey() ), ex );
+				ChioriFramework.getServer().getLogger().log( Level.SEVERE, String.format( error, entry.getKey() ), ex );
 			}
 		}
 		

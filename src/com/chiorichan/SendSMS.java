@@ -31,7 +31,7 @@ public class SendSMS extends HttpServlet
 	protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
 	{
 		PrintWriter op = response.getWriter();
-		SqlConnector db = Main.sql;
+		SqlConnector db = ChioriFramework.sql;
 		
 		if ( request.getParameter( "list" ) == null || request.getParameter( "list" ).equals( "" ) )
 		{

@@ -24,7 +24,7 @@ public class ServletHelper implements Runnable
 			{
 				try
 				{
-					SqlConnector db = Main.getDatabase();
+					SqlConnector db = ChioriFramework.getDatabase();
 					InteractiveConsole.info( "&1Parsing SMS Translog... OH YEAH!" );
 					
 					ResultSet rs = db.query( "SELECT * FROM `sms_translog` WHERE `pending` = '1';" );

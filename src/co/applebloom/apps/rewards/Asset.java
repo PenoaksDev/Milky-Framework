@@ -4,16 +4,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.chiorichan.InteractiveConsole;
-
-import co.applebloom.api.Main;
+import com.chiorichan.ChioriFramework;
 
 public class Asset
 {
@@ -89,9 +85,9 @@ public class Asset
 		
 		if ( locationId != null )
 		{
-			ResultSet rs = Main.getDatabase().query( "SELECT * FROM `locations` WHERE `locID` = '" + locationId + "';" );
+			ResultSet rs = ChioriFramework.getDatabase().query( "SELECT * FROM `locations` WHERE `locID` = '" + locationId + "';" );
 			
-			if ( Main.getDatabase().getRowCount( rs ) > 0 )
+			if ( ChioriFramework.getDatabase().getRowCount( rs ) > 0 )
 			{
 				try
 				{
@@ -100,8 +96,8 @@ public class Asset
 					address1 = rs.getString( "address1" ) + ", " + rs.getString( "address2" );
 					address2 = rs.getString( "city" ) + ", " + rs.getString( "state" ) + " " + rs.getString( "zipcode" );
 					
-					ResultSet rs1 = Main.getDatabase().query( "SELECT * FROM `franchises` WHERE `franID` = '" + rs.getString( "franID" ) + "';" );
-					if ( Main.getDatabase().getRowCount( rs1 ) > 0 )
+					ResultSet rs1 = ChioriFramework.getDatabase().query( "SELECT * FROM `franchises` WHERE `franID` = '" + rs.getString( "franID" ) + "';" );
+					if ( ChioriFramework.getDatabase().getRowCount( rs1 ) > 0 )
 						header = rs1.getString( "Img" );
 				}
 				catch ( SQLException e )
@@ -138,9 +134,9 @@ public class Asset
 		
 		if ( locationId != null )
 		{
-			ResultSet rs = Main.getDatabase().query( "SELECT * FROM `locations` WHERE `locID` = '" + locationId + "';" );
+			ResultSet rs = ChioriFramework.getDatabase().query( "SELECT * FROM `locations` WHERE `locID` = '" + locationId + "';" );
 			
-			if ( Main.getDatabase().getRowCount( rs ) > 0 )
+			if ( ChioriFramework.getDatabase().getRowCount( rs ) > 0 )
 			{
 				try
 				{
@@ -149,8 +145,8 @@ public class Asset
 					address1 = rs.getString( "address1" ) + ", " + rs.getString( "address2" );
 					address2 = rs.getString( "city" ) + ", " + rs.getString( "state" ) + " " + rs.getString( "zipcode" );
 					
-					ResultSet rs1 = Main.getDatabase().query( "SELECT * FROM `franchises` WHERE `franID` = '" + rs.getString( "franID" ) + "';" );
-					if ( Main.getDatabase().getRowCount( rs1 ) > 0 )
+					ResultSet rs1 = ChioriFramework.getDatabase().query( "SELECT * FROM `franchises` WHERE `franID` = '" + rs.getString( "franID" ) + "';" );
+					if ( ChioriFramework.getDatabase().getRowCount( rs1 ) > 0 )
 						header = rs1.getString( "Img" );
 				}
 				catch ( SQLException e )
@@ -191,9 +187,9 @@ public class Asset
 		
 		if ( locationId != null || !locationId.isEmpty() )
 		{
-			ResultSet rs = Main.getDatabase().query( "SELECT * FROM `locations` WHERE `locID` = '" + locationId + "';" );
+			ResultSet rs = ChioriFramework.getDatabase().query( "SELECT * FROM `locations` WHERE `locID` = '" + locationId + "';" );
 			
-			if ( Main.getDatabase().getRowCount( rs ) > 0 )
+			if ( ChioriFramework.getDatabase().getRowCount( rs ) > 0 )
 			{
 				try
 				{
@@ -217,14 +213,14 @@ public class Asset
 		if ( deviceId == null )
 			return;
 		
-		HashMap<String, Object> result = Main.getDatabase().selectOne( "devices", Arrays.asList( "deviceId" ), Arrays.asList( deviceId ) );
+		HashMap<String, Object> result = ChioriFramework.getDatabase().selectOne( "devices", Arrays.asList( "deviceId" ), Arrays.asList( deviceId ) );
 		
 		if ( result.size() < 1 )
 		{
-			Main.getDatabase().queryUpdate( "INSERT INTO `devices` ( `deviceId`, `lastIp`, `lastActive`, `created`, `status`, `type` ) VALUES ( '" + deviceId + "', '" + lastIp + "', '" + System.currentTimeMillis() + "', '" + System.currentTimeMillis() + "', '" + assigned + "', 'rewards' );" );
+			ChioriFramework.getDatabase().queryUpdate( "INSERT INTO `devices` ( `deviceId`, `lastIp`, `lastActive`, `created`, `status`, `type` ) VALUES ( '" + deviceId + "', '" + lastIp + "', '" + System.currentTimeMillis() + "', '" + System.currentTimeMillis() + "', '" + assigned + "', 'rewards' );" );
 		}
-
-		Main.getDatabase().queryUpdate( "UPDATE `devices` SET `deviceId` = '" + deviceId + "', `lastIp` = '" + lastIp + "', `serial` = '" + serial + "', `model` = '" + model + "', `lastActive` = '" + lastActive + "', `appVersion` = '" + appVersion + "', `state` = '" + state + "' WHERE `deviceId` = '" + deviceId + "';" );
+		
+		ChioriFramework.getDatabase().queryUpdate( "UPDATE `devices` SET `deviceId` = '" + deviceId + "', `lastIp` = '" + lastIp + "', `serial` = '" + serial + "', `model` = '" + model + "', `lastActive` = '" + lastActive + "', `appVersion` = '" + appVersion + "', `state` = '" + state + "' WHERE `deviceId` = '" + deviceId + "';" );
 	}
 	
 	public void updateInfo( String json )
@@ -260,7 +256,7 @@ public class Asset
 		}
 		finally
 		{
-			Main.getDatabase().queryUpdate( "UPDATE `devices` SET `lastIp` = '" + lastIp + "', `serial` = '" + serial + "', `model` = '" + model + "', `lastActive` = '" + lastActive + "', `appVersion` = '" + appVersion + "', `state` = '" + state + "' WHERE `deviceId` = '" + deviceId + "';" );
+			ChioriFramework.getDatabase().queryUpdate( "UPDATE `devices` SET `lastIp` = '" + lastIp + "', `serial` = '" + serial + "', `model` = '" + model + "', `lastActive` = '" + lastActive + "', `appVersion` = '" + appVersion + "', `state` = '" + state + "' WHERE `deviceId` = '" + deviceId + "';" );
 		}
 	}
 	

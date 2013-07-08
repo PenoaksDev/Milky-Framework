@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
-import org.eclipse.jetty.server.Authentication.User;
 import org.eclipse.jetty.util.StringUtil;
 
 import com.chiorichan.ChatColor;
 import com.chiorichan.ChioriFramework;
+import com.chiorichan.entity.User;
 import com.chiorichan.permissions.Permissible;
 import com.chiorichan.plugin.PluginDescriptionFile;
 import com.google.common.collect.ImmutableList;
@@ -98,7 +98,7 @@ public abstract class Command
 		User senderPlayer = (User) sender;
 		
 		ArrayList<String> matchedPlayers = new ArrayList<String>();
-		for ( User user : sender.getFramework().getOnlineUsers() )
+		for ( User user : sender.getFramework().getUsers() )
 		{
 			String name = user.getName();
 			if ( StringUtil.startsWithIgnoreCase( name, lastWord ) )

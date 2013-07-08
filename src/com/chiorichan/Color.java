@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 
+import com.chiorichan.configuration.serialization.ConfigurationSerializable;
 import com.chiorichan.configuration.serialization.SerializableAs;
 import com.google.common.collect.ImmutableMap;
 

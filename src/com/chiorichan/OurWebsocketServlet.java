@@ -65,7 +65,7 @@ public class OurWebsocketServlet extends HttpServlet
 	@Override
 	public void init() throws ServletException
 	{
-		sql = Main.getDatabase();
+		sql = ChioriFramework.getDatabase();
 		
 		_wsFactory = new WebSocketFactory( new WebSocketFactory.Acceptor()
 		{
@@ -108,7 +108,7 @@ public class OurWebsocketServlet extends HttpServlet
 		{
 			if ( rws != null )
 			{
-				if (query.matches("[0-9]+"))
+				if ( query.matches( "[0-9]+" ) )
 				{
 					if ( cnt == Integer.parseInt( query ) )
 						return rws;
@@ -248,22 +248,22 @@ public class OurWebsocketServlet extends HttpServlet
 				}
 				else
 				{
-					HashMap<String, Object> loc = Main.getDatabase().selectOne( "locations", "locID", myAsset.locationId );
+					HashMap<String, Object> loc = ChioriFramework.getDatabase().selectOne( "locations", "locID", myAsset.locationId );
 					
 					ResultSet rsSub = null;
-					ResultSet rs = Main.getDatabase().query( "SELECT * FROM `contacts_rewards` WHERE `locID` = '" + myAsset.locationId + "';" );
+					ResultSet rs = ChioriFramework.getDatabase().query( "SELECT * FROM `contacts_rewards` WHERE `locID` = '" + myAsset.locationId + "';" );
 					
 					ArrayList<String> lst = new ArrayList<String>();
 					
-					if ( Main.getDatabase().getRowCount( rs ) > 0 )
+					if ( ChioriFramework.getDatabase().getRowCount( rs ) > 0 )
 					{
 						try
 						{
 							do
 							{
-								rsSub = Main.getDatabase().query( "SELECT * FROM `contacts` WHERE `mobile_no` = '" + rs.getString( "mobile_no" ) + "';" );
+								rsSub = ChioriFramework.getDatabase().query( "SELECT * FROM `contacts` WHERE `mobile_no` = '" + rs.getString( "mobile_no" ) + "';" );
 								
-								if ( Main.getDatabase().getRowCount( rsSub ) > 0 )
+								if ( ChioriFramework.getDatabase().getRowCount( rsSub ) > 0 )
 									lst.add( "{'id': '" + rs.getString( "mobile_no" ) + "', 'name': '" + MySQLUtils.escape( rsSub.getString( "name" ) ) + "', 'email': '" + MySQLUtils.escape( rsSub.getString( "email" ) ) + "', 'first_added': '" + rsSub.getString( "first_added" ) + "', 'balance': '" + rs.getString( "balance" ) + "', 'last_instore_check': '" + rs.getString( "last_instore_check" ) + "'}" );
 							}
 							while ( rs.next() );
@@ -312,23 +312,23 @@ public class OurWebsocketServlet extends HttpServlet
 			{
 				String locId = myAsset.locationId;
 				
-				HashMap<String, Object> loc = Main.getDatabase().selectOne( "locations", "locID", myAsset.locationId );
+				HashMap<String, Object> loc = ChioriFramework.getDatabase().selectOne( "locations", "locID", myAsset.locationId );
 				
 				ResultSet rs = null;
 				
 				if ( locId == null || locId.equals( "" ) )
 				{
-					rs = Main.getDatabase().query( "SELECT * FROM `youtubeLibrary` WHERE `owner` = '' AND `disabled` = '0';" );
+					rs = ChioriFramework.getDatabase().query( "SELECT * FROM `youtubeLibrary` WHERE `owner` = '' AND `disabled` = '0';" );
 				}
 				else
 				{
-					rs = Main.getDatabase().query( "SELECT * FROM `youtubeLibrary` WHERE (`owner` = '" + myAsset.locationId + "' OR `owner` = '' OR `owner` = '" + loc.get( "acctID" ) + "') AND `disabled` = '0';" );
+					rs = ChioriFramework.getDatabase().query( "SELECT * FROM `youtubeLibrary` WHERE (`owner` = '" + myAsset.locationId + "' OR `owner` = '' OR `owner` = '" + loc.get( "acctID" ) + "') AND `disabled` = '0';" );
 				}
 				
 				ArrayList<String> lst = new ArrayList<String>();
 				
 				// Are there videos found
-				if ( Main.getDatabase().getRowCount( rs ) > 0 )
+				if ( ChioriFramework.getDatabase().getRowCount( rs ) > 0 )
 				{
 					try
 					{
@@ -468,7 +468,7 @@ public class OurWebsocketServlet extends HttpServlet
 			String cmd = arr[0].toUpperCase();
 			data = ( arr.length > 1 ) ? arr[1].trim() : "";
 			
-			SqlConnector db = Main.getDatabase();
+			SqlConnector db = ChioriFramework.getDatabase();
 			
 			// TODO: Make sure UUID's follow a format - At this point it's a MD5 Hash
 			try
@@ -571,26 +571,27 @@ public class OurWebsocketServlet extends HttpServlet
 				}
 				else if ( cmd.equals( "TXT" ) ) // Person permitted us to add them to our texting list. Double Opt-in.
 				{
-					//Welcome, To the SMS VIP Club. Please reply with YES to finish your opt-in process else don't reply and you will not receive anymore sms from us.;
+					// Welcome, To the SMS VIP Club. Please reply with YES to finish your opt-in process else don't reply and
+					// you will not receive anymore sms from us.;
 					String content = CrossoverHandler.getSetting( "TEXT_REWARDS_SUCCESS", myAsset.locationId, "Hello from %L% Rewards. To finish the SMS opt-in process you MUST:" );
 					
 					content = content.replace( "%L%", myAsset.getLocationArray().get( "title" ) );
-					//content = content.replace( "%D%", new SimpleDateFormater(). new Date() );
+					// content = content.replace( "%D%", new SimpleDateFormater(). new Date() );
 					
 					if ( myAsset.locationId != null && myAsset.locationId != "" )
 					{
 						ResultSet rs = db.query( "SELECT * FROM `locations` WHERE `locID` = '" + myAsset.locationId + "';" );
 						if ( db.getRowCount( rs ) > 0 )
 						{
-							HashMap<String,String> result = SMSHandler.inviteMobile( Arrays.asList( data ), rs.getString( "keyword" ), content );
+							HashMap<String, String> result = SMSHandler.inviteMobile( Arrays.asList( data ), rs.getString( "keyword" ), content );
 							
 							SMSHandler.sendSMS( Arrays.asList( "7089123702" ), "Invited \"" + data + "\" to group \"" + myAsset.locationId + "/" + rs.getString( "keyword" ) + "\" with result \"" + result.get( "resmsg" ) + "\"", "donut" );
 							
 							try
 							{
-								db.queryUpdate( "INSERT INTO `sms_translog` (`mobile_no`, `origin`, `class`, `operator`, `msg`, `created`, `pending`, `success`, `debug`) VALUES ('" + data + "', 'API_INVITE', '(rewards)', 'UNKNOWN', 'Invited \"" + data + "\" to group \"" + myAsset.locationId + "/" + rs.getString( "keyword" ) + "\" with result \"" + result.get( "resmsg" ) + "\"', '" + result.get("created") + "', '0', '1', '" + MySQLUtils.mysql_real_escape_string( db.con, result.get( "resmsg" ) ) + "');" );
+								db.queryUpdate( "INSERT INTO `sms_translog` (`mobile_no`, `origin`, `class`, `operator`, `msg`, `created`, `pending`, `success`, `debug`) VALUES ('" + data + "', 'API_INVITE', '(rewards)', 'UNKNOWN', 'Invited \"" + data + "\" to group \"" + myAsset.locationId + "/" + rs.getString( "keyword" ) + "\" with result \"" + result.get( "resmsg" ) + "\"', '" + result.get( "created" ) + "', '0', '1', '" + MySQLUtils.mysql_real_escape_string( db.con, result.get( "resmsg" ) ) + "');" );
 							}
-							catch ( Exception e ) 
+							catch ( Exception e )
 							{
 								e.printStackTrace();
 							}
@@ -630,15 +631,15 @@ public class OurWebsocketServlet extends HttpServlet
 						}
 						else
 						{
-							HashMap<String, Object> loc = Main.getDatabase().selectOne( "locations", "locID", myAsset.locationId );
+							HashMap<String, Object> loc = ChioriFramework.getDatabase().selectOne( "locations", "locID", myAsset.locationId );
 							
 							ResultSet rsSub = null;
-							ResultSet rs = Main.getDatabase().query( "SELECT * FROM `rewards_redeem` WHERE (`owner` = '" + myAsset.locationId + "' OR `owner` = '" + loc.get( "acctID" ) + "') AND `disabled` = '0';" );
+							ResultSet rs = ChioriFramework.getDatabase().query( "SELECT * FROM `rewards_redeem` WHERE (`owner` = '" + myAsset.locationId + "' OR `owner` = '" + loc.get( "acctID" ) + "') AND `disabled` = '0';" );
 							
 							ArrayList<String> lst = new ArrayList<String>();
 							
 							// Are there redeemables found
-							if ( Main.getDatabase().getRowCount( rs ) > 0 )
+							if ( ChioriFramework.getDatabase().getRowCount( rs ) > 0 )
 							{
 								try
 								{
@@ -647,8 +648,8 @@ public class OurWebsocketServlet extends HttpServlet
 										if ( rs.getString( "title" ).startsWith( "all:" ) )
 										{
 											String id = rs.getString( "title" ).substring( 4 );
-											rsSub = Main.getDatabase().query( "SELECT * FROM `rewards_redeem` WHERE `owner` = '" + id + "' AND `disabled` = '0';" );
-											if ( Main.getDatabase().getRowCount( rsSub ) > 0 )
+											rsSub = ChioriFramework.getDatabase().query( "SELECT * FROM `rewards_redeem` WHERE `owner` = '" + id + "' AND `disabled` = '0';" );
+											if ( ChioriFramework.getDatabase().getRowCount( rsSub ) > 0 )
 												do
 												{
 													lst.add( "{'id': '" + rsSub.getString( "redeemID" ) + "', 'title': '" + rsSub.getString( "title" ) + "', 'cost': '" + rsSub.getString( "cost" ) + "'}" );
@@ -658,8 +659,8 @@ public class OurWebsocketServlet extends HttpServlet
 										else if ( rs.getString( "title" ).startsWith( "one:" ) )
 										{
 											String id = rs.getString( "title" ).substring( 4 );
-											rsSub = Main.getDatabase().query( "SELECT * FROM `rewards_redeem` WHERE `owner` = '" + id + "' AND `disabled` = '0';" );
-											if ( Main.getDatabase().getRowCount( rsSub ) > 0 )
+											rsSub = ChioriFramework.getDatabase().query( "SELECT * FROM `rewards_redeem` WHERE `owner` = '" + id + "' AND `disabled` = '0';" );
+											if ( ChioriFramework.getDatabase().getRowCount( rsSub ) > 0 )
 												do
 												{
 													lst.add( "{'id': '" + rsSub.getString( "redeemID" ) + "', 'title': '" + rsSub.getString( "title" ) + "', 'cost': '" + rsSub.getString( "cost" ) + "'}" );

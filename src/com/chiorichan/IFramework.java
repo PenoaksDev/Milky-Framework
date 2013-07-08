@@ -187,20 +187,6 @@ public interface IFramework extends PluginMessageRecipient
 	public List<User> matchUser( String name );
 	
 	/**
-	 * Gets the PluginManager for interfacing with plugins
-	 * 
-	 * @return PluginManager for this Server instance
-	 */
-	public PluginManager getPluginManager();
-	
-	/**
-	 * Gets the Scheduler for managing scheduled events
-	 * 
-	 * @return Scheduler for this Server instance
-	 */
-	public FrameworkScheduler getScheduler();
-	
-	/**
 	 * Gets a services manager
 	 * 
 	 * @return Services manager
@@ -222,13 +208,6 @@ public interface IFramework extends PluginMessageRecipient
 	 * Reloads the server, refreshing settings and plugin information
 	 */
 	public void reload();
-	
-	/**
-	 * Returns the primary logger associated with this server instance
-	 * 
-	 * @return Logger associated with this server
-	 */
-	public Logger getLogger();
 	
 	/**
 	 * Gets a {@link PluginCommand} with the given name or alias
@@ -377,4 +356,12 @@ public interface IFramework extends PluginMessageRecipient
 	 * @return The configured WarningState
 	 */
 	public WarningState getWarningState();
+	
+	public EntityManager getEntityManager();
+	
+	public FrameworkScheduler getScheduler();
+	
+	public PluginManager getPluginManager();
+	
+	public Logger getLogger();
 }
