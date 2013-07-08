@@ -69,6 +69,7 @@ import com.chiorichan.plugin.SimpleServicesManager;
 import com.chiorichan.plugin.java.JavaPluginLoader;
 import com.chiorichan.plugin.messaging.Messenger;
 import com.chiorichan.plugin.messaging.StandardMessenger;
+import com.chiorichan.scheduler.ChioriScheduler;
 import com.chiorichan.scheduler.FrameworkScheduler;
 import com.chiorichan.updater.AutoUpdater;
 import com.chiorichan.updater.DLUpdaterService;
@@ -80,23 +81,18 @@ public class ChioriFramework implements IFramework
 {
 	private final String serverName = "AppleBloomServer";
 	private final String serverVersion;
-	private final String bukkitVersion = Versioning.getBukkitVersion();
+	private final String bukkitVersion = "6.0.0707 (Lyra Heartstring)";
 	private final ServicesManager servicesManager = new SimpleServicesManager();
-	private final CraftScheduler scheduler = new CraftScheduler();
+	private final ChioriScheduler scheduler = new ChioriScheduler();
 	private final SimpleCommandMap commandMap = new SimpleCommandMap( this );
-	private final SimpleHelpMap helpMap = new SimpleHelpMap( this );
 	private final StandardMessenger messenger = new StandardMessenger();
 	private final PluginManager pluginManager = new SimplePluginManager( this, commandMap );
 	private final EntityManager entityManager;
-	protected final DedicatedUserList entityManager;
 	private YamlConfiguration configuration;
 	private final Yaml yaml = new Yaml( new SafeConstructor() );
 	private final AutoUpdater updater;
-	private final EntityMetadataStore entityMetadata = new EntityMetadataStore();
-	private final UserMetadataStore playerMetadata = new UserMetadataStore();
 	private File container;
 	private WarningState warningState = WarningState.DEFAULT;
-	private final BooleanWrapper online = new BooleanWrapper();
 	
 	public final static InteractiveConsole console;
 	public static SqlConnector sql = new SqlConnector( "chiori", "chiori", "*****", "50.79.49.250" );
@@ -1310,7 +1306,7 @@ public class ChioriFramework implements IFramework
 	
 	public void onUserJoin( User player )
 	{
-		if ( ( updater.isEnabled() ) && ( updater.getCurrent() != null ) && ( player.hasPermission( Server.BROADCAST_CHANNEL_ADMINISTRATIVE ) ) )
+		if ( ( updater.isEnabled() ) && ( updater.getCurrent() != null ) && ( player.hasPermission( ChioriFramework.BROADCAST_CHANNEL_ADMINISTRATIVE ) ) )
 		{
 			if ( ( updater.getCurrent().isBroken() ) && ( updater.getOnBroken().contains( AutoUpdater.WARN_OPERATORS ) ) )
 			{

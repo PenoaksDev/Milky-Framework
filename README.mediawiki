@@ -69,6 +69,9 @@ Introduced Hooks which are like event listeners. Bug Fixes.
 Fixed some idenified cross-domain cookie issues and inplemented fallback auth into hooks.
 ====Build 0326====
 Various Minor Bug Fixes and Improvements to Permissions and Template Systems.
+==Version 6==
+===Subversion 0 (Lyra Heartstring)===
+A Java ported version. Future releases will use a Java base application instead of Apache but the user code can be either Java or a PHP Hybrid
 
 =Installation=
 ==Apache Configuration==

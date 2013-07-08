@@ -43,7 +43,7 @@ public abstract class Plugin implements CommandExecutor
 	
 	public ChioriFramework getFramework()
 	{
-		return ChioriFramework.instance;
+		return ChioriFramework.getFramework();
 	}
 	
 	public File getJarResource( String name )
