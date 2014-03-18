@@ -1,3 +1,10 @@
+=NEW VERSION=
+As of August 2013, Chiori Framework has been completely recoded as a Java Based Web Server.
+The development of Chiori Framework in the PHP form will be discontinued but it's evolution
+will continue as Chiori Web Server. Porting the framework to Java meant more potential and more control.
+The latest version now uses Groovy scripts verses PHP, Includes a feature rich extensive Plugin API and builtin TCP Server.
+https://github.com/AppleBloomDev/ChioriWebServer
+
 =About=
 '''Chiori Framework''' is a PHP Framework API utilizing component based structure.
 The idea is to give you the power to create amazing websites with less time and resources without reinventing the wheel.
