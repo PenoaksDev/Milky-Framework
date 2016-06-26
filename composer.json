@@ -1,0 +1,5 @@
+{
+    "require": {
+        "symfony/templating": "^3.1"
+    }
+}

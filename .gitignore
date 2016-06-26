@@ -1,3 +1,16 @@
-.settings
-.buildpath
-.project
+# Ignore certain development and dependency directories
+/dev
+/vendor
+/node_modules
+/public/storage
+/database/*.sqlite
+
+# Ignore error log files
+error_log
+
+# Ignore dangerous stuff
+.env
+
+#Ignore Vim swap files
+.swp
+.swo
