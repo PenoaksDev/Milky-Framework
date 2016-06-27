@@ -7,8 +7,6 @@
 [![Latest Unstable Version](https://poser.pugx.org/penoaks/framework/v/unstable.svg)](https://packagist.org/packages/penoaks/framework)
 [![License](https://poser.pugx.org/penoaks/framework/license.svg)](https://packagist.org/packages/penoaks/framework)
 
-> **Note:** This repository contains the core code of the Penoaks Framework. If you want to build an application using Penoaks 5, visit the main [Penoaks repository](https://github.com/penoaks/penoaks).
-
 ## Getting Started
 
 Penoaks Framework uses Composer to manage dependencies. So, before using Penoaks Framework, make sure you have Composer installed on your machine.
