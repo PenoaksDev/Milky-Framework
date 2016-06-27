@@ -70,7 +70,6 @@
 	"minimum-stability": "dev",
 	"perfer-stable": true,
 	"config": {
-		"preferred-install": "dist",
-		"vendor-dir": "composer"
+		"preferred-install": "dist"
 	}
 }
