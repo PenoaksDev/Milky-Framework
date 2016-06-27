@@ -41,7 +41,7 @@ composer update
 
 With Penoaks Framework, no application or user files are kept in the framework directory. Instead views, controllers, etc, are kept in the `src` (customizable) directory found in your webroot. Because of this you can simply update your installation by deleting the old framework directory and reinstalling. You should only need the `index.php` and `.htaccess` files to setup proper routing from there. Be sure you have the `mod_rewrite` apache module enabled.
 
-`.htaccess`
+#### .htaccess
 
 ```
 <IfModule mod_rewrite.c>
@@ -69,7 +69,7 @@ With Penoaks Framework, no application or user files are kept in the framework d
 </IfModule>
 ```
 
-`index.php`
+#### index.php
 
 ```php
 <?php
