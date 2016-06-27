@@ -1,40 +1,43 @@
 <?php
-
 define( 'FRAMEWORK_START', microtime( true ) );
-define ( "__FW__", __DIR__ );
-define ( "DIRSEP", "/" );
+define( '__DS__', DIRECTORY_SEPARATOR );
+define( '__FW__', __DIR__ );
 define ( "yes", true );
 define ( "no", false );
 
 error_reporting( E_ALL );
 
-/* --------------------------------------------------------------------------
- * Register The Composer Auto Loader
- * --------------------------------------------------------------------------
- *
- * Composer provides a convenient, automatically generated class loader
- * for our application. We just need to utilize it!
- */
-$loader = require __DIR__ . '/vendor/autoload.php';
-
-// Tell Composer where to find our framework classes
-$loader->set( 'Foundation', [__DIR__] );
-
-// Load framework built-in functions
-require __DIR__ . '/Functions.php';
-
-function initFramework( $basePath, $configPath = null )
+function initFramework( $paths )
 {
-	$fw = new Foundation\Constructor( $basePath, $configPath );
+	/* If $paths is not an array, make it one */
+	if ( !is_array( $paths ) )
+		$paths = ['base' => $paths];
 
-	/* --------------------------------------------------------------------------
-	 * Bind Important Interfaces
-	 * --------------------------------------------------------------------------
-	 *
-	 * Next, we need to bind some important interfaces into the container so
-	 * we will be able to resolve them when needed. The kernels serve the
-	 * incoming requests to this application from both the web and CLI.
-	 */
+	/* Make sure project base directory is set */
+	if ( !array_key_exists( 'base', $paths ) )
+		throw new RuntimeException( "You must specify the project base directory." );
+
+	/* Strip trailing slashes */
+	foreach ( $paths as $key => $val )
+		$paths[$key] = rtrim( $val, '\/' );
+
+	/* Set missing keys */
+	foreach ( ['src', 'config', 'vendor'] as $key )
+		if ( !array_key_exists( $key, $paths ) )
+			$paths[$key] = $paths['base'] . '/' . $key;
+
+	/* Register the Compose Auth Loader */
+	$loader = require $paths['vendor'] . '/autoload.php';
+
+	/* Since Composer already implements a decent autoloader, we'll just
+	 * utilize it by setting where it can find our classes */
+	$loader->set( 'Foundation', [__DIR__] );
+
+	/* Load all built-in functions */
+	require __DIR__ . '/Functions.php';
+
+	/* Initalize a new instance of the Framework Constructor */
+	$fw = new Foundation\Constructor( $paths );
 
 	$fw->singleton(
 		Foundation\Contracts\Http\Kernel::class,
@@ -51,5 +54,6 @@ function initFramework( $basePath, $configPath = null )
 		App\Exceptions\Handler::class
 	);
 
+	/* Return newly initialized framework */
 	return $fw;
 }

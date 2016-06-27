@@ -42,11 +42,11 @@ class Constructor extends Container implements ApplicationContract, HttpKernelIn
 	const VERSION = '6.0.0';
 
 	/**
-	 * The base path for the framework installation.
+	 * The paths for directories containing projects files, including the location of this framework.
 	 *
 	 * @var string
 	 */
-	protected $basePath;
+	protected $paths;
 
 	/**
 	 * Indicates if the application has been bootstrapped before.
@@ -146,15 +146,13 @@ class Constructor extends Container implements ApplicationContract, HttpKernelIn
 	 */
 	protected $namespace = null;
 
-	protected $configPath = null;
-
 	/**
 	 * Create a new Foundation application instance.
 	 *
 	 * @param  string|null  $basePath
 	 * @return void
 	 */
-	public function __construct( $basePath = null, $configPath = null )
+	public function __construct( $paths )
 	{
 		$this->registerBaseBindings();
 
@@ -162,7 +160,7 @@ class Constructor extends Container implements ApplicationContract, HttpKernelIn
 
 		$this->registerCoreContainerAliases();
 
-		$this->setPaths( $basePath, $configPath );
+		$this->setPaths( $paths );
 	}
 
 	/**
@@ -274,31 +272,22 @@ class Constructor extends Container implements ApplicationContract, HttpKernelIn
 	 * @param  string  $confPath
 	 * @return $this
 	 */
-	public function setPaths( $basePath = null, $confPath = null )
+	public function setPaths( $paths )
 	{
-		if ( $basePath )
-		{
-			$this->basePath = rtrim( $basePath, '\/' );
-			$this->bindPathsInContainer();
-			define( '__ROOT__', $this->basePath );
-		}
+		$this->paths = $paths = array_merge( $this->paths, $paths );
 
-		if ( $confPath )
-		{
-			$this->confPath = rtrim( $confPath, '\/' );
-			define( '__CONF__', $this->confPath );
-		}
-		else if ( $this->basePath )
-		{
-			$this->confPath = $this->basePath . '/config';
-			define( '__CONF__', $this->confPath );
-		}
+		$this->bindPathsInContainer();
 
-		if ( !file_exists( $this->confDir ) )
+		define( '__ROOT__', $paths['base'] );
+		define( '__CONF__', $paths['config'] );
+		define( '__SRC__', $paths['src'] );
+		define( '__VENDOR__', $paths['vendor'] );
+
+		if ( !file_exists( $paths['config'] ) )
 			throw new RuntimeException( "The configuration directory '" . $this->configDir . "' does not exist!" );
 
-		if ( !file_exists( $this->confDir . '/main.yaml' ) && !file_exists( $this->confDir . '/main.php' ) && !file_exists( $this->confDir . '/main.json' ) )
-			throw new RuntimeException( "The 'config/main.*' configuration file does not exist! It must be either a YAML, JSON, or PHP file." );
+		if ( !file_exists( $paths['config'] . '/main.yaml' ) && !file_exists( $paths['config'] . '/main.php' ) && !file_exists( $paths['config'] . '/main.json' ) )
+			throw new RuntimeException( "The '" . $paths['config'] . "/main.*' configuration file does not exist! It must be either a YAML, JSON, or PHP file." );
 
 		return $this;
 	}
@@ -327,7 +316,7 @@ class Constructor extends Container implements ApplicationContract, HttpKernelIn
 	 */
 	public function path()
 	{
-		return $this->basePath.DIRECTORY_SEPARATOR.'app';
+		return $this->paths['src'];
 	}
 
 	/**
