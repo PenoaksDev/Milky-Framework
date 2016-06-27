@@ -1,30 +1,55 @@
 <?php
-define("__ROOT__", __DIR__);
 
-require( "protected/Constructor.php" );
+define( 'FRAMEWORK_START', microtime( true ) );
+define ( "__FW__", __DIR__ );
+define ( "DIRSEP", "/" );
+define ( "yes", true );
+define ( "no", false );
 
-$framework = new \Framework\Loader();
+error_reporting( E_ALL );
 
-// Initalize Framework Class plus Load Configuration
-$framework->initalizeFramework(dirname(__FILE__) . "/config.yml");
+/* --------------------------------------------------------------------------
+ * Register The Composer Auto Loader
+ * --------------------------------------------------------------------------
+ *
+ * Composer provides a convenient, automatically generated class loader
+ * for our application. We just need to utilize it!
+ */
+$loader = require __DIR__ . '/vendor/autoload.php';
 
-$template = $chiori->getPluginManager()->getPluginbyName("Template");
+// Tell Composer where to find our framework classes
+$loader->set( 'Foundation', [__DIR__] );
 
-if ( !$template->rewriteVirtual( $_SERVER["REQUEST_URI"] ) )
-	$template->localFile( $_SERVER["REQUEST_URI"] );
+// Load framework built-in functions
+require __DIR__ . '/Functions.php';
 
-/*
-$template = $template->rewriteVirtual( $_SERVER["REQUEST_URI"], "", true );
-
-if ( $template == null )
-	$template->localFile( $_SERVER["REQUEST_URI"] );
-
-if ( $template["compat_mode"] == "1" )
+function initFramework( $basePath, $configPath = null )
 {
-	require( dirname(__FILE__) . "/Loader.php" );
+	$fw = new Foundation\Constructor( $basePath, $configPath );
+
+	/* --------------------------------------------------------------------------
+	 * Bind Important Interfaces
+	 * --------------------------------------------------------------------------
+	 *
+	 * Next, we need to bind some important interfaces into the container so
+	 * we will be able to resolve them when needed. The kernels serve the
+	 * incoming requests to this application from both the web and CLI.
+	 */
+
+	$fw->singleton(
+		Foundation\Contracts\Http\Kernel::class,
+		App\Http\Kernel::class
+	);
+
+	$fw->singleton(
+		Foundation\Contracts\Console\Kernel::class,
+		App\Console\Kernel::class
+	);
+
+	$fw->singleton(
+		Foundation\Contracts\Debug\ExceptionHandler::class,
+		App\Exceptions\Handler::class
+	);
+
+	return $fw;
 }
-else
-{
-	$this->loadPage($template["theme"], $template["view"], $template["title"], $template["file"], $template["html"], $template["reqlevel"]);
-}
-*/

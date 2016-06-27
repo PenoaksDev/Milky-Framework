@@ -1,9 +1,5 @@
 # Ignore certain development and dependency directories
-/dev
 /vendor
-/node_modules
-/public/storage
-/database/*.sqlite
 
 # Ignore error log files
 error_log
