@@ -11,7 +11,8 @@ trait RedirectsUsers
 	 */
 	public function redirectPath()
 	{
-		if (property_exists($this, 'redirectPath')) {
+		if (property_exists($this, 'redirectPath'))
+{
 			return $this->redirectPath;
 		}
 

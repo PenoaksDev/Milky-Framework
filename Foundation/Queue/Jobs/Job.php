@@ -16,11 +16,11 @@ abstract class Job
 	protected $instance;
 
 	/**
-	 * The IoC container instance.
+	 * The IoC bindings instance.
 	 *
-	 * @var \Foundation\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * The name of the queue the job belongs to.
@@ -151,7 +151,7 @@ abstract class Job
 	 */
 	protected function resolve($class)
 	{
-		return $this->container->make($class);
+		return $this->bindings->make($class);
 	}
 
 	/**
@@ -162,13 +162,17 @@ abstract class Job
 	 */
 	protected function resolveQueueableEntities($data)
 	{
-		if (is_string($data)) {
+		if (is_string($data))
+{
 			return $this->resolveQueueableEntity($data);
 		}
 
-		if (is_array($data)) {
-			$data = array_map(function ($d) {
-				if (is_array($d)) {
+		if (is_array($data))
+{
+			$data = array_map(function ($d)
+{
+				if (is_array($d))
+{
 					return $this->resolveQueueableEntities($d);
 				}
 
@@ -187,7 +191,8 @@ abstract class Job
 	 */
 	protected function resolveQueueableEntity($value)
 	{
-		if (is_string($value) && Str::startsWith($value, '::entity::')) {
+		if (is_string($value) && Str::startsWith($value, '::entity::'))
+{
 			list($marker, $type, $id) = explode('|', $value, 3);
 
 			return $this->getEntityResolver()->resolve($type, $id);
@@ -209,7 +214,8 @@ abstract class Job
 
 		$this->instance = $this->resolve($class);
 
-		if (method_exists($this->instance, 'failed')) {
+		if (method_exists($this->instance, 'failed'))
+{
 			$this->instance->failed($this->resolveQueueableEntities($payload['data']));
 		}
 	}
@@ -221,7 +227,7 @@ abstract class Job
 	 */
 	protected function getEntityResolver()
 	{
-		return $this->container->make('Foundation\Contracts\Queue\EntityResolver');
+		return $this->bindings->make('Foundation\Contracts\Queue\EntityResolver');
 	}
 
 	/**
@@ -232,7 +238,8 @@ abstract class Job
 	 */
 	protected function getSeconds($delay)
 	{
-		if ($delay instanceof DateTime) {
+		if ($delay instanceof DateTime)
+{
 			return max(0, $delay->getTimestamp() - $this->getTime());
 		}
 
@@ -270,11 +277,13 @@ abstract class Job
 
 		$payload = json_decode($this->getRawBody(), true);
 
-		if ($name === 'Foundation\Queue\CallQueuedHandler@call') {
+		if ($name === 'Foundation\Queue\CallQueuedHandler@call')
+{
 			return Arr::get($payload, 'data.commandName', $name);
 		}
 
-		if ($name === 'Foundation\Events\CallQueuedHandler@call') {
+		if ($name === 'Foundation\Events\CallQueuedHandler@call')
+{
 			return $payload['data']['class'].'@'.$payload['data']['method'];
 		}
 

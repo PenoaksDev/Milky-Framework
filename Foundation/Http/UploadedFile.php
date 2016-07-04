@@ -47,7 +47,8 @@ class UploadedFile extends SymfonyUploadedFile
 	 */
 	public function hashName($path = null)
 	{
-		if ($path) {
+		if ($path)
+{
 			$path = rtrim($path, '/').'/';
 		}
 

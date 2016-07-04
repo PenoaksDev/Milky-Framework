@@ -81,7 +81,8 @@ class PasswordBroker implements PasswordBrokerContract
 		// "flash" data in the session to indicate to the developers the errors.
 		$user = $this->getUser($credentials);
 
-		if (is_null($user)) {
+		if (is_null($user))
+{
 			return static::INVALID_USER;
 		}
 
@@ -110,10 +111,12 @@ class PasswordBroker implements PasswordBrokerContract
 		// so that it may be displayed for an user to click for password reset.
 		$view = $this->emailView;
 
-		return $this->mailer->send($view, compact('token', 'user'), function ($m) use ($user, $token, $callback) {
+		return $this->mailer->send($view, compact('token', 'user'), function ($m) use ($user, $token, $callback)
+{
 			$m->to($user->getEmailForPasswordReset());
 
-			if (! is_null($callback)) {
+			if (! is_null($callback))
+{
 				call_user_func($callback, $m, $user, $token);
 			}
 		});
@@ -133,7 +136,8 @@ class PasswordBroker implements PasswordBrokerContract
 		// the user is properly redirected having an error message on the post.
 		$user = $this->validateReset($credentials);
 
-		if (! $user instanceof CanResetPasswordContract) {
+		if (! $user instanceof CanResetPasswordContract)
+{
 			return $user;
 		}
 
@@ -157,15 +161,18 @@ class PasswordBroker implements PasswordBrokerContract
 	 */
 	protected function validateReset(array $credentials)
 	{
-		if (is_null($user = $this->getUser($credentials))) {
+		if (is_null($user = $this->getUser($credentials)))
+{
 			return static::INVALID_USER;
 		}
 
-		if (! $this->validateNewPassword($credentials)) {
+		if (! $this->validateNewPassword($credentials))
+{
 			return static::INVALID_PASSWORD;
 		}
 
-		if (! $this->tokens->exists($user, $credentials['token'])) {
+		if (! $this->tokens->exists($user, $credentials['token']))
+{
 			return static::INVALID_TOKEN;
 		}
 
@@ -196,7 +203,8 @@ class PasswordBroker implements PasswordBrokerContract
 			$credentials['password_confirmation'],
 		];
 
-		if (isset($this->passwordValidator)) {
+		if (isset($this->passwordValidator))
+{
 			return call_user_func(
 				$this->passwordValidator, $credentials) && $password === $confirm;
 		}
@@ -234,7 +242,8 @@ class PasswordBroker implements PasswordBrokerContract
 
 		$user = $this->users->retrieveByCredentials($credentials);
 
-		if ($user && ! $user instanceof CanResetPasswordContract) {
+		if ($user && ! $user instanceof CanResetPasswordContract)
+{
 			throw new UnexpectedValueException('User must implement CanResetPassword interface.');
 		}
 

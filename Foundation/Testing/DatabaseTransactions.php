@@ -11,14 +11,17 @@ trait DatabaseTransactions
 	 */
 	public function beginDatabaseTransaction()
 	{
-		$database = $this->app->make('db');
+		$database = $this->fw->make('db');
 
-		foreach ($this->connectionsToTransact() as $name) {
+		foreach ($this->connectionsToTransact() as $name)
+{
 			$database->connection($name)->beginTransaction();
 		}
 
-		$this->beforeApplicationDestroyed(function () use ($database) {
-			foreach ($this->connectionsToTransact() as $name) {
+		$this->beforeApplicationDestroyed(function () use ($database)
+{
+			foreach ($this->connectionsToTransact() as $name)
+{
 				$database->connection($name)->rollBack();
 			}
 		});

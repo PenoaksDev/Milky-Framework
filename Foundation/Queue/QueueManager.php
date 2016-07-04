@@ -12,9 +12,9 @@ class QueueManager implements FactoryContract, MonitorContract
 	/**
 	 * The application instance.
 	 *
-	 * @var \Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The array of resolved queue connections.
@@ -33,12 +33,12 @@ class QueueManager implements FactoryContract, MonitorContract
 	/**
 	 * Create a new queue manager instance.
 	 *
-	 * @param  \Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function __construct($app)
+	public function __construct($fw)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 	}
 
 	/**
@@ -49,7 +49,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function before($callback)
 	{
-		$this->app['events']->listen(Events\JobProcessing::class, $callback);
+		$this->fw->bindings['events']->listen(Events\JobProcessing::class, $callback);
 	}
 
 	/**
@@ -60,7 +60,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function after($callback)
 	{
-		$this->app['events']->listen(Events\JobProcessed::class, $callback);
+		$this->fw->bindings['events']->listen(Events\JobProcessed::class, $callback);
 	}
 
 	/**
@@ -71,7 +71,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function exceptionOccurred($callback)
 	{
-		$this->app['events']->listen(Events\JobExceptionOccurred::class, $callback);
+		$this->fw->bindings['events']->listen(Events\JobExceptionOccurred::class, $callback);
 	}
 
 	/**
@@ -82,7 +82,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function looping($callback)
 	{
-		$this->app['events']->listen('illuminate.queue.looping', $callback);
+		$this->fw->bindings['events']->listen('illuminate.queue.looping', $callback);
 	}
 
 	/**
@@ -93,7 +93,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function failing($callback)
 	{
-		$this->app['events']->listen(Events\JobFailed::class, $callback);
+		$this->fw->bindings['events']->listen(Events\JobFailed::class, $callback);
 	}
 
 	/**
@@ -104,7 +104,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function stopping($callback)
 	{
-		$this->app['events']->listen(Events\WorkerStopping::class, $callback);
+		$this->fw->bindings['events']->listen(Events\WorkerStopping::class, $callback);
 	}
 
 	/**
@@ -131,12 +131,13 @@ class QueueManager implements FactoryContract, MonitorContract
 		// If the connection has not been resolved yet we will resolve it now as all
 		// of the connections are resolved when they are actually needed so we do
 		// not make any unnecessary connection to the various queue end-points.
-		if (! isset($this->connections[$name])) {
+		if (! isset($this->connections[$name]))
+{
 			$this->connections[$name] = $this->resolve($name);
 
-			$this->connections[$name]->setContainer($this->app);
+			$this->connections[$name]->setBindings($this->fw);
 
-			$this->connections[$name]->setEncrypter($this->app['encrypter']);
+			$this->connections[$name]->setEncrypter($this->fw->bindings['encrypter']);
 		}
 
 		return $this->connections[$name];
@@ -165,7 +166,8 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	protected function getConnector($driver)
 	{
-		if (isset($this->connectors[$driver])) {
+		if (isset($this->connectors[$driver]))
+{
 			return call_user_func($this->connectors[$driver]);
 		}
 
@@ -204,11 +206,12 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	protected function getConfig($name)
 	{
-		if ($name === null || $name === 'null') {
+		if ($name === null || $name === 'null')
+{
 			return ['driver' => 'null'];
 		}
 
-		return $this->app['config']["queue.connections.{$name}"];
+		return $this->fw->bindings['config']["queue.connections.{$name}"];
 	}
 
 	/**
@@ -218,7 +221,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['queue.default'];
+		return $this->fw->bindings['config']['queue.default'];
 	}
 
 	/**
@@ -229,7 +232,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function setDefaultDriver($name)
 	{
-		$this->app['config']['queue.default'] = $name;
+		$this->fw->bindings['config']['queue.default'] = $name;
 	}
 
 	/**
@@ -250,7 +253,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function isDownForMaintenance()
 	{
-		return $this->app->isDownForMaintenance();
+		return $this->fw->isDownForMaintenance();
 	}
 
 	/**

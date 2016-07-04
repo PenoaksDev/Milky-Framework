@@ -73,7 +73,8 @@ class BelongsTo extends Relation
 	 */
 	public function addConstraints()
 	{
-		if (static::$constraints) {
+		if (static::$constraints)
+{
 			// For belongs to relationships, which are essentially the inverse of has one
 			// or has many relationships, we need to actually query on the primary key
 			// of the related models matching on the foreign key that's on a parent.
@@ -93,7 +94,8 @@ class BelongsTo extends Relation
 	 */
 	public function getRelationQuery(Builder $query, Builder $parent, $columns = ['*'])
 	{
-		if ($parent->getQuery()->from == $query->getQuery()->from) {
+		if ($parent->getQuery()->from == $query->getQuery()->from)
+{
 			return $this->getRelationQueryForSelfRelation($query, $parent, $columns);
 		}
 
@@ -132,7 +134,7 @@ class BelongsTo extends Relation
 	 */
 	public function getRelationCountHash()
 	{
-		return 'laravel_reserved_'.static::$selfJoinCount++;
+		return 'framework_reserved_'.static::$selfJoinCount++;
 	}
 
 	/**
@@ -164,8 +166,10 @@ class BelongsTo extends Relation
 		// First we need to gather all of the keys from the parent models so we know what
 		// to query for via the eager loading query. We will add them to an array then
 		// execute a "where in" statement to gather up all of those related records.
-		foreach ($models as $model) {
-			if (! is_null($value = $model->{$this->foreignKey})) {
+		foreach ($models as $model)
+{
+			if (! is_null($value = $model->{$this->foreignKey}))
+{
 				$keys[] = $value;
 			}
 		}
@@ -173,7 +177,8 @@ class BelongsTo extends Relation
 		// If there are no keys that were not null we will just return an array with either
 		// null or 0 in (depending on if incrementing keys are in use) so the query wont
 		// fail plus returns zero results, which should be what the developer expects.
-		if (count($keys) === 0) {
+		if (count($keys) === 0)
+{
 			return [$this->related->getIncrementing() ? 0 : null];
 		}
 
@@ -189,7 +194,8 @@ class BelongsTo extends Relation
 	 */
 	public function initRelation(array $models, $relation)
 	{
-		foreach ($models as $model) {
+		foreach ($models as $model)
+{
 			$model->setRelation($relation, null);
 		}
 
@@ -215,15 +221,18 @@ class BelongsTo extends Relation
 		// the parents using that dictionary and the primary key of the children.
 		$dictionary = [];
 
-		foreach ($results as $result) {
+		foreach ($results as $result)
+{
 			$dictionary[$result->getAttribute($other)] = $result;
 		}
 
 		// Once we have the dictionary constructed, we can loop through all the parents
 		// and match back onto their children using these keys of the dictionary and
 		// the primary key of the children to map them onto the correct instances.
-		foreach ($models as $model) {
-			if (isset($dictionary[$model->$foreign])) {
+		foreach ($models as $model)
+{
+			if (isset($dictionary[$model->$foreign]))
+{
 				$model->setRelation($relation, $dictionary[$model->$foreign]);
 			}
 		}
@@ -243,7 +252,8 @@ class BelongsTo extends Relation
 
 		$this->parent->setAttribute($this->foreignKey, $otherKey);
 
-		if ($model instanceof Model) {
+		if ($model instanceof Model)
+{
 			$this->parent->setRelation($this->relation, $model);
 		}
 

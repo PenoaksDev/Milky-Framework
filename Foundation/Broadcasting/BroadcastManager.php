@@ -16,9 +16,9 @@ class BroadcastManager implements FactoryContract
 	/**
 	 * The application instance.
 	 *
-	 * @var \Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The array of resolved broadcast drivers.
@@ -37,12 +37,12 @@ class BroadcastManager implements FactoryContract
 	/**
 	 * Create a new manager instance.
 	 *
-	 * @param  \Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function __construct($app)
+	public function __construct($fw)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 	}
 
 	/**
@@ -92,18 +92,25 @@ class BroadcastManager implements FactoryContract
 	{
 		$config = $this->getConfig($name);
 
-		if (is_null($config)) {
+		if (is_null($config))
+{
 			throw new InvalidArgumentException("Broadcaster [{$name}] is not defined.");
 		}
 
-		if (isset($this->customCreators[$config['driver']])) {
+		if (isset($this->customCreators[$config['driver']]))
+{
 			return $this->callCustomCreator($config);
-		} else {
+		}
+else
+{
 			$driverMethod = 'create'.ucfirst($config['driver']).'Driver';
 
-			if (method_exists($this, $driverMethod)) {
+			if (method_exists($this, $driverMethod))
+{
 				return $this->{$driverMethod}($config);
-			} else {
+			}
+else
+{
 				throw new InvalidArgumentException("Driver [{$config['driver']}] is not supported.");
 			}
 		}
@@ -117,7 +124,7 @@ class BroadcastManager implements FactoryContract
 	 */
 	protected function callCustomCreator(array $config)
 	{
-		return $this->customCreators[$config['driver']]($this->app, $config);
+		return $this->customCreators[$config['driver']]($this->fw, $config);
 	}
 
 	/**
@@ -142,7 +149,7 @@ class BroadcastManager implements FactoryContract
 	protected function createRedisDriver(array $config)
 	{
 		return new RedisBroadcaster(
-			$this->app->make('redis'), Arr::get($config, 'connection')
+			$this->fw->make('redis'), Arr::get($config, 'connection')
 		);
 	}
 
@@ -155,7 +162,7 @@ class BroadcastManager implements FactoryContract
 	protected function createLogDriver(array $config)
 	{
 		return new LogBroadcaster(
-			$this->app->make('Psr\Log\LoggerInterface')
+			$this->fw->make('Psr\Log\LoggerInterface')
 		);
 	}
 
@@ -167,7 +174,7 @@ class BroadcastManager implements FactoryContract
 	 */
 	protected function getConfig($name)
 	{
-		return $this->app['config']["broadcasting.connections.{$name}"];
+		return $this->fw->bindings['config']["broadcasting.connections.{$name}"];
 	}
 
 	/**
@@ -177,7 +184,7 @@ class BroadcastManager implements FactoryContract
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['broadcasting.default'];
+		return $this->fw->bindings['config']['broadcasting.default'];
 	}
 
 	/**
@@ -188,7 +195,7 @@ class BroadcastManager implements FactoryContract
 	 */
 	public function setDefaultDriver($name)
 	{
-		$this->app['config']['broadcasting.default'] = $name;
+		$this->fw->bindings['config']['broadcasting.default'] = $name;
 	}
 
 	/**

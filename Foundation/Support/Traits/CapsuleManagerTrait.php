@@ -3,7 +3,7 @@
 namespace Foundation\Support\Traits;
 
 use Foundation\Support\Fluent;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 
 trait CapsuleManagerTrait
 {
@@ -15,24 +15,25 @@ trait CapsuleManagerTrait
 	protected static $instance;
 
 	/**
-	 * The container instance.
+	 * The bindings instance.
 	 *
-	 * @var \Foundation\Contracts\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
-	 * Setup the IoC container instance.
+	 * Setup the IoC bindings instance.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	protected function setupContainer(Container $container)
+	protected function setupBindings(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 
-		if (! $this->container->bound('config')) {
-			$this->container->instance('config', new Fluent);
+		if (! $this->bindings->bound('config'))
+{
+			$this->bindings->instance('config', new Fluent);
 		}
 	}
 
@@ -47,23 +48,23 @@ trait CapsuleManagerTrait
 	}
 
 	/**
-	 * Get the IoC container instance.
+	 * Get the IoC bindings instance.
 	 *
-	 * @return \Foundation\Contracts\Container\Container
+	 * @return \Foundation\Framework
 	 */
-	public function getContainer()
+	public function getBindings()
 	{
-		return $this->container;
+		return $this->bindings;
 	}
 
 	/**
-	 * Set the IoC container instance.
+	 * Set the IoC bindings instance.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function setContainer(Container $container)
+	public function setBindings(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 }

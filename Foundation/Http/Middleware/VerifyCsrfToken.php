@@ -3,7 +3,7 @@
 namespace Foundation\Http\Middleware;
 
 use Closure;
-use Foundation\Application;
+use Foundation\Framework;
 use Symfony\Component\HttpFoundation\Cookie;
 use Foundation\Contracts\Encryption\Encrypter;
 use Foundation\Session\TokenMismatchException;
@@ -13,9 +13,9 @@ class VerifyCsrfToken
 	/**
 	 * The application instance.
 	 *
-	 * @var \Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The encrypter implementation.
@@ -34,13 +34,13 @@ class VerifyCsrfToken
 	/**
 	 * Create a new middleware instance.
 	 *
-	 * @param  \Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @param  \Foundation\Contracts\Encryption\Encrypter  $encrypter
 	 * @return void
 	 */
-	public function __construct(Application $app, Encrypter $encrypter)
+	public function __construct(Framework $fw, Encrypter $encrypter)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 		$this->encrypter = $encrypter;
 	}
 
@@ -60,7 +60,8 @@ class VerifyCsrfToken
 			$this->runningUnitTests() ||
 			$this->shouldPassThrough($request) ||
 			$this->tokensMatch($request)
-		) {
+		)
+{
 			return $this->addCookieToResponse($request, $next($request));
 		}
 
@@ -75,12 +76,15 @@ class VerifyCsrfToken
 	 */
 	protected function shouldPassThrough($request)
 	{
-		foreach ($this->except as $except) {
-			if ($except !== '/') {
+		foreach ($this->except as $except)
+{
+			if ($except !== '/')
+{
 				$except = trim($except, '/');
 			}
 
-			if ($request->is($except)) {
+			if ($request->is($except))
+{
 				return true;
 			}
 		}
@@ -95,7 +99,7 @@ class VerifyCsrfToken
 	 */
 	protected function runningUnitTests()
 	{
-		return $this->app->runningInConsole() && $this->app->runningUnitTests();
+		return $this->fw->runningInConsole() && $this->fw->runningUnitTests();
 	}
 
 	/**
@@ -110,11 +114,13 @@ class VerifyCsrfToken
 
 		$token = $request->input('_token') ?: $request->header('X-CSRF-TOKEN');
 
-		if (! $token && $header = $request->header('X-XSRF-TOKEN')) {
+		if (! $token && $header = $request->header('X-XSRF-TOKEN'))
+{
 			$token = $this->encrypter->decrypt($header);
 		}
 
-		if (! is_string($sessionToken) || ! is_string($token)) {
+		if (! is_string($sessionToken) || ! is_string($token))
+{
 			return false;
 		}
 

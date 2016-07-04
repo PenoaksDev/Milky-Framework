@@ -1,10 +1,9 @@
 <?php
-
 namespace Foundation\Bootstrap;
 
 use Exception;
 use ErrorException;
-use Foundation\Contracts\Foundation\Application;
+use Foundation\Framework;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
@@ -14,19 +13,19 @@ class HandleExceptions
 	/**
 	 * The application instance.
 	 *
-	 * @var \Foundation\Contracts\Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * Bootstrap the given application.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function bootstrap(Application $app)
+	public function bootstrap(Framework $fw)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 
 		error_reporting(-1);
 
@@ -36,7 +35,8 @@ class HandleExceptions
 
 		register_shutdown_function([$this, 'handleShutdown']);
 
-		if (! $app->environment('testing')) {
+		if (! $fw->environment('testing'))
+{
 			ini_set('display_errors', 'Off');
 		}
 	}
@@ -55,7 +55,8 @@ class HandleExceptions
 	 */
 	public function handleError($level, $message, $file = '', $line = 0, $context = [])
 	{
-		if (error_reporting() & $level) {
+		if (error_reporting() & $level)
+{
 			throw new ErrorException($message, 0, $level, $file, $line);
 		}
 	}
@@ -72,15 +73,19 @@ class HandleExceptions
 	 */
 	public function handleException($e)
 	{
-		if (! $e instanceof Exception) {
+		if (! $e instanceof Exception)
+{
 			$e = new FatalThrowableError($e);
 		}
 
 		$this->getExceptionHandler()->report($e);
 
-		if ($this->app->runningInConsole()) {
+		if ($this->fw->runningInConsole())
+{
 			$this->renderForConsole($e);
-		} else {
+		}
+else
+{
 			$this->renderHttpResponse($e);
 		}
 	}
@@ -104,7 +109,7 @@ class HandleExceptions
 	 */
 	protected function renderHttpResponse(Exception $e)
 	{
-		$this->getExceptionHandler()->render($this->app['request'], $e)->send();
+		$this->getExceptionHandler()->render($this->fw->bindings['request'], $e)->send();
 	}
 
 	/**
@@ -114,7 +119,8 @@ class HandleExceptions
 	 */
 	public function handleShutdown()
 	{
-		if (! is_null($error = error_get_last()) && $this->isFatal($error['type'])) {
+		if (! is_null($error = error_get_last()) && $this->isFatal($error['type']))
+{
 			$this->handleException($this->fatalExceptionFromError($error, 0));
 		}
 	}
@@ -151,6 +157,6 @@ class HandleExceptions
 	 */
 	protected function getExceptionHandler()
 	{
-		return $this->app->make('Foundation\Contracts\Debug\ExceptionHandler');
+		return $this->fw->make('Foundation\Contracts\Debug\ExceptionHandler');
 	}
 }

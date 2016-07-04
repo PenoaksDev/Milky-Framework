@@ -24,19 +24,23 @@ class ConsoleServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('command.queue.failed', function () {
+		$this->fw->bindings->singleton('command.queue.failed', function ()
+{
 			return new ListFailedCommand;
 		});
 
-		$this->app->singleton('command.queue.retry', function () {
+		$this->fw->bindings->singleton('command.queue.retry', function ()
+{
 			return new RetryCommand;
 		});
 
-		$this->app->singleton('command.queue.forget', function () {
+		$this->fw->bindings->singleton('command.queue.forget', function ()
+{
 			return new ForgetFailedCommand;
 		});
 
-		$this->app->singleton('command.queue.flush', function () {
+		$this->fw->bindings->singleton('command.queue.flush', function ()
+{
 			return new FlushFailedCommand;
 		});
 

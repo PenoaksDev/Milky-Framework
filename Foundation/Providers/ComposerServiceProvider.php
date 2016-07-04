@@ -21,8 +21,9 @@ class ComposerServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('composer', function ($app) {
-			return new Composer($app['files'], $app->basePath());
+		$this->fw->bindings->singleton('composer', function ($fw)
+{
+			return new Composer($fw->bindings['files'], $fw->basePath());
 		});
 	}
 

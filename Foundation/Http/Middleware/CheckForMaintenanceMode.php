@@ -3,7 +3,7 @@
 namespace Foundation\Http\Middleware;
 
 use Closure;
-use Foundation\Contracts\Foundation\Application;
+use Foundation\Framework;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CheckForMaintenanceMode
@@ -11,19 +11,19 @@ class CheckForMaintenanceMode
 	/**
 	 * The application implementation.
 	 *
-	 * @var \Foundation\Contracts\Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * Create a new middleware instance.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function __construct(Application $app)
+	public function __construct(Framework $fw)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 	}
 
 	/**
@@ -37,7 +37,8 @@ class CheckForMaintenanceMode
 	 */
 	public function handle($request, Closure $next)
 	{
-		if ($this->app->isDownForMaintenance()) {
+		if ($this->fw->isDownForMaintenance())
+{
 			throw new HttpException(503);
 		}
 

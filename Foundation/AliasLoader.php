@@ -43,7 +43,8 @@ class AliasLoader
 	 */
 	public static function getInstance(array $aliases = [])
 	{
-		if (is_null(static::$instance)) {
+		if (is_null(static::$instance))
+{
 			return static::$instance = new static($aliases);
 		}
 
@@ -62,7 +63,8 @@ class AliasLoader
 	 */
 	public function load($alias)
 	{
-		if (isset($this->aliases[$alias])) {
+		if (isset($this->aliases[$alias]))
+{
 			return class_alias($this->aliases[$alias], $alias);
 		}
 	}
@@ -86,7 +88,8 @@ class AliasLoader
 	 */
 	public function register()
 	{
-		if (! $this->registered) {
+		if (! $this->registered)
+{
 			$this->prependToLoaderStack();
 
 			$this->registered = true;

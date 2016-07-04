@@ -1,10 +1,9 @@
 <?php
-
-namespace Foundation\Contracts\Container;
+namespace Foundation\Contracts\Bindings;
 
 use Closure;
 
-interface Container
+interface Bindings
 {
 	/**
 	 * Determine if the given abstract type has been bound.
@@ -41,7 +40,7 @@ interface Container
 	public function tagged($tag);
 
 	/**
-	 * Register a binding with the container.
+	 * Register a binding with the bindings.
 	 *
 	 * @param  string|array  $abstract
 	 * @param  \Closure|string|null  $concrete
@@ -61,7 +60,7 @@ interface Container
 	public function bindIf($abstract, $concrete = null, $shared = false);
 
 	/**
-	 * Register a shared binding in the container.
+	 * Register a shared binding in the bindings.
 	 *
 	 * @param  string|array  $abstract
 	 * @param  \Closure|string|null  $concrete
@@ -70,7 +69,7 @@ interface Container
 	public function singleton($abstract, $concrete = null);
 
 	/**
-	 * "Extend" an abstract type in the container.
+	 * "Extend" an abstract type in the bindings.
 	 *
 	 * @param  string	$abstract
 	 * @param  \Closure  $closure
@@ -81,7 +80,7 @@ interface Container
 	public function extend($abstract, Closure $closure);
 
 	/**
-	 * Register an existing instance as shared in the container.
+	 * Register an existing instance as shared in the bindings.
 	 *
 	 * @param  string  $abstract
 	 * @param  mixed   $instance
@@ -93,12 +92,12 @@ interface Container
 	 * Define a contextual binding.
 	 *
 	 * @param  string  $concrete
-	 * @return \Foundation\Contracts\Container\ContextualBindingBuilder
+	 * @return \Illuminate\Contracts\Bindings\ContextualBindingBuilder
 	 */
 	public function when($concrete);
 
 	/**
-	 * Resolve the given type from the container.
+	 * Resolve the given type from the bindings.
 	 *
 	 * @param  string  $abstract
 	 * @param  array   $parameters

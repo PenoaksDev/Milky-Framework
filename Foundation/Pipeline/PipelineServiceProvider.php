@@ -20,7 +20,7 @@ class PipelineServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton(
+		$this->fw->bindings->singleton(
 			'Foundation\Contracts\Pipeline\Hub', 'Foundation\Pipeline\Hub'
 		);
 	}

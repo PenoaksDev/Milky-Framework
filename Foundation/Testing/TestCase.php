@@ -7,7 +7,7 @@ use PHPUnit_Framework_TestCase;
 
 abstract class TestCase extends PHPUnit_Framework_TestCase
 {
-	use Concerns\InteractsWithContainer,
+	use Concerns\InteractsWithBindings,
 		Concerns\MakesHttpRequests,
 		Concerns\ImpersonatesUsers,
 		Concerns\InteractsWithAuthentication,
@@ -17,11 +17,11 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 		Concerns\MocksApplicationServices;
 
 	/**
-	 * The Foundation application instance.
+	 * The Illuminate application instance.
 	 *
-	 * @var \Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The callbacks that should be run after the application is created.
@@ -60,13 +60,15 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 	 */
 	protected function setUp()
 	{
-		if (! $this->app) {
+		if (! $this->fw)
+{
 			$this->refreshApplication();
 		}
 
 		$this->setUpTraits();
 
-		foreach ($this->afterApplicationCreatedCallbacks as $callback) {
+		foreach ($this->afterApplicationCreatedCallbacks as $callback)
+{
 			call_user_func($callback);
 		}
 
@@ -82,7 +84,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 	{
 		putenv('APP_ENV=testing');
 
-		$this->app = $this->createApplication();
+		$this->fw = $this->createApplication();
 	}
 
 	/**
@@ -94,19 +96,23 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 	{
 		$uses = array_flip(class_uses_recursive(static::class));
 
-		if (isset($uses[DatabaseTransactions::class])) {
+		if (isset($uses[DatabaseTransactions::class]))
+{
 			$this->beginDatabaseTransaction();
 		}
 
-		if (isset($uses[DatabaseMigrations::class])) {
+		if (isset($uses[DatabaseMigrations::class]))
+{
 			$this->runDatabaseMigrations();
 		}
 
-		if (isset($uses[WithoutMiddleware::class])) {
+		if (isset($uses[WithoutMiddleware::class]))
+{
 			$this->disableMiddlewareForAllTests();
 		}
 
-		if (isset($uses[WithoutEvents::class])) {
+		if (isset($uses[WithoutEvents::class]))
+{
 			$this->disableEventsForAllTests();
 		}
 	}
@@ -118,23 +124,27 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 	 */
 	protected function tearDown()
 	{
-		if ($this->app) {
-			foreach ($this->beforeApplicationDestroyedCallbacks as $callback) {
+		if ($this->fw)
+{
+			foreach ($this->beforeApplicationDestroyedCallbacks as $callback)
+{
 				call_user_func($callback);
 			}
 
-			$this->app->flush();
+			$this->fw->flush();
 
-			$this->app = null;
+			$this->fw = null;
 		}
 
 		$this->setUpHasRun = false;
 
-		if (property_exists($this, 'serverVariables')) {
+		if (property_exists($this, 'serverVariables'))
+{
 			$this->serverVariables = [];
 		}
 
-		if (class_exists('Mockery')) {
+		if (class_exists('Mockery'))
+{
 			Mockery::close();
 		}
 
@@ -152,7 +162,8 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 	{
 		$this->afterApplicationCreatedCallbacks[] = $callback;
 
-		if ($this->setUpHasRun) {
+		if ($this->setUpHasRun)
+{
 			call_user_func($callback);
 		}
 	}

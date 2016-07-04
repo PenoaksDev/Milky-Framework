@@ -45,10 +45,12 @@ class HasInElement extends PageConstraint
 
 		$pattern = $this->getEscapedPattern($this->text);
 
-		foreach ($elements as $element) {
+		foreach ($elements as $element)
+{
 			$element = new Crawler($element);
 
-			if (preg_match("/$pattern/i", $element->html())) {
+			if (preg_match("/$pattern/i", $element->html()))
+{
 				return true;
 			}
 		}

@@ -4,22 +4,22 @@ namespace Foundation\Bootstrap;
 
 use Foundation\Support\Facades\Facade;
 use Foundation\AliasLoader;
-use Foundation\Contracts\Foundation\Application;
+use Foundation\Framework;
 
 class RegisterFacades
 {
 	/**
 	 * Bootstrap the given application.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function bootstrap(Application $app)
+	public function bootstrap(Framework $fw)
 	{
 		Facade::clearResolvedInstances();
 
-		Facade::setFacadeApplication($app);
+		Facade::setFacadeApplication($fw);
 
-		AliasLoader::getInstance($app->make('config')->get('app.aliases'))->register();
+		AliasLoader::getInstance($fw->bindings->make('config')->get('app.aliases'))->register();
 	}
 }

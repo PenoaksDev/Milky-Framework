@@ -47,7 +47,8 @@ abstract class MorphOneOrMany extends HasOneOrMany
 	 */
 	public function addConstraints()
 	{
-		if (static::$constraints) {
+		if (static::$constraints)
+{
 			parent::addConstraints();
 
 			$this->query->where($this->morphType, $this->morphClass);
@@ -104,7 +105,8 @@ abstract class MorphOneOrMany extends HasOneOrMany
 	 */
 	public function findOrNew($id, $columns = ['*'])
 	{
-		if (is_null($instance = $this->find($id, $columns))) {
+		if (is_null($instance = $this->find($id, $columns)))
+{
 			$instance = $this->related->newInstance();
 
 			// When saving a polymorphic relationship, we need to set not only the foreign
@@ -124,7 +126,8 @@ abstract class MorphOneOrMany extends HasOneOrMany
 	 */
 	public function firstOrNew(array $attributes)
 	{
-		if (is_null($instance = $this->where($attributes)->first())) {
+		if (is_null($instance = $this->where($attributes)->first()))
+{
 			$instance = $this->related->newInstance($attributes);
 
 			// When saving a polymorphic relationship, we need to set not only the foreign
@@ -144,7 +147,8 @@ abstract class MorphOneOrMany extends HasOneOrMany
 	 */
 	public function firstOrCreate(array $attributes)
 	{
-		if (is_null($instance = $this->where($attributes)->first())) {
+		if (is_null($instance = $this->where($attributes)->first()))
+{
 			$instance = $this->create($attributes);
 		}
 

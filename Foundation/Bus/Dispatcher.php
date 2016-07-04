@@ -7,18 +7,18 @@ use RuntimeException;
 use Foundation\Pipeline\Pipeline;
 use Foundation\Contracts\Queue\Queue;
 use Foundation\Contracts\Queue\ShouldQueue;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\Bus\QueueingDispatcher;
 use Foundation\Contracts\Bus\Dispatcher as DispatcherContract;
 
 class Dispatcher implements DispatcherContract, QueueingDispatcher
 {
 	/**
-	 * The container implementation.
+	 * The bindings implementation.
 	 *
-	 * @var \Foundation\Contracts\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * The pipeline instance for the bus.
@@ -44,15 +44,15 @@ class Dispatcher implements DispatcherContract, QueueingDispatcher
 	/**
 	 * Create a new command dispatcher instance.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @param  \Closure|null  $queueResolver
 	 * @return void
 	 */
-	public function __construct(Container $container, Closure $queueResolver = null)
+	public function __construct(Bindings $bindings, Closure $queueResolver = null)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 		$this->queueResolver = $queueResolver;
-		$this->pipeline = new Pipeline($container);
+		$this->pipeline = new Pipeline($bindings);
 	}
 
 	/**
@@ -63,9 +63,12 @@ class Dispatcher implements DispatcherContract, QueueingDispatcher
 	 */
 	public function dispatch($command)
 	{
-		if ($this->queueResolver && $this->commandShouldBeQueued($command)) {
+		if ($this->queueResolver && $this->commandShouldBeQueued($command))
+{
 			return $this->dispatchToQueue($command);
-		} else {
+		}
+else
+{
 			return $this->dispatchNow($command);
 		}
 	}
@@ -78,8 +81,9 @@ class Dispatcher implements DispatcherContract, QueueingDispatcher
 	 */
 	public function dispatchNow($command)
 	{
-		return $this->pipeline->send($command)->through($this->pipes)->then(function ($command) {
-			return $this->container->call([$command, 'handle']);
+		return $this->pipeline->send($command)->through($this->pipes)->then(function ($command)
+{
+			return $this->bindings->call([$command, 'handle']);
 		});
 	}
 
@@ -108,13 +112,17 @@ class Dispatcher implements DispatcherContract, QueueingDispatcher
 
 		$queue = call_user_func($this->queueResolver, $connection);
 
-		if (! $queue instanceof Queue) {
+		if (! $queue instanceof Queue)
+{
 			throw new RuntimeException('Queue resolver did not return a Queue implementation.');
 		}
 
-		if (method_exists($command, 'queue')) {
+		if (method_exists($command, 'queue'))
+{
 			return $command->queue($queue, $command);
-		} else {
+		}
+else
+{
 			return $this->pushCommandToQueue($queue, $command);
 		}
 	}
@@ -128,15 +136,18 @@ class Dispatcher implements DispatcherContract, QueueingDispatcher
 	 */
 	protected function pushCommandToQueue($queue, $command)
 	{
-		if (isset($command->queue, $command->delay)) {
+		if (isset($command->queue, $command->delay))
+{
 			return $queue->laterOn($command->queue, $command->delay, $command);
 		}
 
-		if (isset($command->queue)) {
+		if (isset($command->queue))
+{
 			return $queue->pushOn($command->queue, $command);
 		}
 
-		if (isset($command->delay)) {
+		if (isset($command->delay))
+{
 			return $queue->later($command->delay, $command);
 		}
 

@@ -72,12 +72,15 @@ class DatabaseStore implements Store
 		// If we have a cache record we will check the expiration time against current
 		// time on the system and see if the record has expired. If it has, we will
 		// remove the records from the database table so it isn't returned again.
-		if (! is_null($cache)) {
-			if (is_array($cache)) {
+		if (! is_null($cache))
+{
+			if (is_array($cache))
+{
 				$cache = (object) $cache;
 			}
 
-			if (time() >= $cache->expiration) {
+			if (time() >= $cache->expiration)
+{
 				$this->forget($key);
 
 				return;
@@ -106,9 +109,11 @@ class DatabaseStore implements Store
 
 		$expiration = $this->getTime() + ($minutes * 60);
 
-		try {
+		try
+{
 			$this->table()->insert(compact('key', 'value', 'expiration'));
-		} catch (Exception $e) {
+		} catch (Exception $e)
+{
 			$this->table()->where('key', '=', $key)->update(compact('value', 'expiration'));
 		}
 	}
@@ -122,7 +127,8 @@ class DatabaseStore implements Store
 	 */
 	public function increment($key, $value = 1)
 	{
-		return $this->incrementOrDecrement($key, $value, function ($current, $value) {
+		return $this->incrementOrDecrement($key, $value, function ($current, $value)
+{
 			return $current + $value;
 		});
 	}
@@ -136,7 +142,8 @@ class DatabaseStore implements Store
 	 */
 	public function decrement($key, $value = 1)
 	{
-		return $this->incrementOrDecrement($key, $value, function ($current, $value) {
+		return $this->incrementOrDecrement($key, $value, function ($current, $value)
+{
 			return $current - $value;
 		});
 	}
@@ -151,23 +158,27 @@ class DatabaseStore implements Store
 	 */
 	protected function incrementOrDecrement($key, $value, Closure $callback)
 	{
-		return $this->connection->transaction(function () use ($key, $value, $callback) {
+		return $this->connection->transaction(function () use ($key, $value, $callback)
+{
 			$prefixed = $this->prefix.$key;
 
 			$cache = $this->table()->where('key', $prefixed)->lockForUpdate()->first();
 
-			if (is_null($cache)) {
+			if (is_null($cache))
+{
 				return false;
 			}
 
-			if (is_array($cache)) {
+			if (is_array($cache))
+{
 				$cache = (object) $cache;
 			}
 
 			$current = $this->encrypter->decrypt($cache->value);
 			$new = $callback($current, $value);
 
-			if (! is_numeric($current)) {
+			if (! is_numeric($current))
+{
 				return false;
 			}
 

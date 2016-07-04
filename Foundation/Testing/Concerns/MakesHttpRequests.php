@@ -42,7 +42,7 @@ trait MakesHttpRequests
 	 */
 	public function withoutMiddleware()
 	{
-		$this->app->instance('middleware.disable', true);
+		$this->fw->bindings->instance('middleware.disable', true);
 
 		return $this;
 	}
@@ -85,8 +85,10 @@ trait MakesHttpRequests
 	{
 		$files = [];
 
-		foreach ($data as $key => $value) {
-			if ($value instanceof SymfonyUploadedFile) {
+		foreach ($data as $key => $value)
+{
+			if ($value instanceof SymfonyUploadedFile)
+{
 				$files[$key] = $value;
 
 				unset($data[$key]);
@@ -192,7 +194,7 @@ trait MakesHttpRequests
 	{
 		$this->currentUri = $request->fullUrl();
 
-		$this->response = $this->app->prepareResponse($this->app->handle($request));
+		$this->response = $this->fw->prepareResponse($this->fw->handle($request));
 
 		return $this;
 	}
@@ -245,7 +247,8 @@ trait MakesHttpRequests
 	 */
 	public function seeJson(array $data = null, $negate = false)
 	{
-		if (is_null($data)) {
+		if (is_null($data))
+{
 			$this->assertJson(
 				$this->response->getContent(), "JSON was not returned from [{$this->currentUri}]."
 			);
@@ -253,11 +256,13 @@ trait MakesHttpRequests
 			return $this;
 		}
 
-		try {
+		try
+{
 			$this->seeJsonEquals($data);
 
 			return $this;
-		} catch (PHPUnit_Framework_ExpectationFailedException $e) {
+		} catch (PHPUnit_Framework_ExpectationFailedException $e)
+{
 			return $this->seeJsonContains($data, $negate);
 		}
 	}
@@ -282,25 +287,34 @@ trait MakesHttpRequests
 	 */
 	public function seeJsonStructure(array $structure = null, $responseData = null)
 	{
-		if (is_null($structure)) {
+		if (is_null($structure))
+{
 			return $this->seeJson();
 		}
 
-		if (! $responseData) {
+		if (! $responseData)
+{
 			$responseData = json_decode($this->response->getContent(), true);
 		}
 
-		foreach ($structure as $key => $value) {
-			if (is_array($value) && $key === '*') {
+		foreach ($structure as $key => $value)
+{
+			if (is_array($value) && $key === '*')
+{
 				$this->assertInternalType('array', $responseData);
 
-				foreach ($responseData as $responseDataItem) {
+				foreach ($responseData as $responseDataItem)
+{
 					$this->seeJsonStructure($structure['*'], $responseDataItem);
 				}
-			} elseif (is_array($value)) {
+			}
+elseif (is_array($value))
+{
 				$this->assertArrayHasKey($key, $responseData);
 				$this->seeJsonStructure($structure[$key], $responseData[$key]);
-			} else {
+			}
+else
+{
 				$this->assertArrayHasKey($value, $responseData);
 			}
 		}
@@ -323,7 +337,8 @@ trait MakesHttpRequests
 			(array) $this->decodeResponseJson()
 		));
 
-		foreach (Arr::sortRecursive($data) as $key => $value) {
+		foreach (Arr::sortRecursive($data) as $key => $value)
+{
 			$expected = $this->formatToExpectedJson($key, $value);
 
 			$this->{$method}(
@@ -357,7 +372,8 @@ trait MakesHttpRequests
 	{
 		$decodedResponse = json_decode($this->response->getContent(), true);
 
-		if (is_null($decodedResponse) || $decodedResponse === false) {
+		if (is_null($decodedResponse) || $decodedResponse === false)
+{
 			$this->fail('Invalid JSON was returned from the route. Perhaps an exception was thrown?');
 		}
 
@@ -375,11 +391,13 @@ trait MakesHttpRequests
 	{
 		$expected = json_encode([$key => $value]);
 
-		if (Str::startsWith($expected, '{')) {
+		if (Str::startsWith($expected, '{'))
+{
 			$expected = substr($expected, 1);
 		}
 
-		if (Str::endsWith($expected, '}')) {
+		if (Str::endsWith($expected, '}'))
+{
 			$expected = substr($expected, 0, -1);
 		}
 
@@ -412,7 +430,8 @@ trait MakesHttpRequests
 
 		$this->assertTrue($headers->has($headerName), "Header [{$headerName}] not present on response.");
 
-		if (! is_null($value)) {
+		if (! is_null($value))
+{
 			$this->assertEquals(
 				$headers->get($headerName), $value,
 				"Header [{$headerName}] was found, but value [{$headers->get($headerName)}] does not match [{$value}]."
@@ -448,8 +467,10 @@ trait MakesHttpRequests
 
 		$exist = false;
 
-		foreach ($headers->getCookies() as $cookie) {
-			if ($cookie->getName() === $cookieName) {
+		foreach ($headers->getCookies() as $cookie)
+{
+			if ($cookie->getName() === $cookieName)
+{
 				$exist = true;
 				break;
 			}
@@ -457,14 +478,15 @@ trait MakesHttpRequests
 
 		$this->assertTrue($exist, "Cookie [{$cookieName}] not present on response.");
 
-		if (! $exist || is_null($value)) {
+		if (! $exist || is_null($value))
+{
 			return $this;
 		}
 
 		$cookieValue = $cookie->getValue();
 
 		$actual = $encrypted
-			? $this->app['encrypter']->decrypt($cookieValue) : $cookieValue;
+			? $this->fw->bindings['encrypter']->decrypt($cookieValue) : $cookieValue;
 
 		$this->assertEquals(
 			$actual, $value,
@@ -501,7 +523,7 @@ trait MakesHttpRequests
 	 */
 	public function call($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null)
 	{
-		$kernel = $this->app->make('Foundation\Contracts\Http\Kernel');
+		$kernel = $this->fw->make('Foundation\Contracts\Http\Kernel');
 
 		$this->currentUri = $this->prepareUrlForRequest($uri);
 
@@ -533,7 +555,7 @@ trait MakesHttpRequests
 	 */
 	public function callSecure($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null)
 	{
-		$uri = $this->app['url']->secure(ltrim($uri, '/'));
+		$uri = $this->fw->bindings['url']->secure(ltrim($uri, '/'));
 
 		return $this->response = $this->call($method, $uri, $parameters, $cookies, $files, $server, $content);
 	}
@@ -553,7 +575,7 @@ trait MakesHttpRequests
 	 */
 	public function action($method, $action, $wildcards = [], $parameters = [], $cookies = [], $files = [], $server = [], $content = null)
 	{
-		$uri = $this->app['url']->action($action, $wildcards, true);
+		$uri = $this->fw->bindings['url']->action($action, $wildcards, true);
 
 		return $this->response = $this->call($method, $uri, $parameters, $cookies, $files, $server, $content);
 	}
@@ -573,7 +595,7 @@ trait MakesHttpRequests
 	 */
 	public function route($method, $name, $routeParameters = [], $parameters = [], $cookies = [], $files = [], $server = [], $content = null)
 	{
-		$uri = $this->app['url']->route($name, $routeParameters);
+		$uri = $this->fw->bindings['url']->route($name, $routeParameters);
 
 		return $this->response = $this->call($method, $uri, $parameters, $cookies, $files, $server, $content);
 	}
@@ -586,11 +608,13 @@ trait MakesHttpRequests
 	 */
 	protected function prepareUrlForRequest($uri)
 	{
-		if (Str::startsWith($uri, '/')) {
+		if (Str::startsWith($uri, '/'))
+{
 			$uri = substr($uri, 1);
 		}
 
-		if (! Str::startsWith($uri, 'http')) {
+		if (! Str::startsWith($uri, 'http'))
+{
 			$uri = $this->baseUrl.'/'.$uri;
 		}
 
@@ -608,10 +632,12 @@ trait MakesHttpRequests
 		$server = [];
 		$prefix = 'HTTP_';
 
-		foreach ($headers as $name => $value) {
+		foreach ($headers as $name => $value)
+{
 			$name = strtr(strtoupper($name), '-', '_');
 
-			if (! Str::startsWith($name, $prefix) && $name != 'CONTENT_TYPE') {
+			if (! Str::startsWith($name, $prefix) && $name != 'CONTENT_TYPE')
+{
 				$name = $prefix.$name;
 			}
 
@@ -659,17 +685,22 @@ trait MakesHttpRequests
 	 */
 	public function assertViewHas($key, $value = null)
 	{
-		if (is_array($key)) {
+		if (is_array($key))
+{
 			return $this->assertViewHasAll($key);
 		}
 
-		if (! isset($this->response->original) || ! $this->response->original instanceof View) {
+		if (! isset($this->response->original) || ! $this->response->original instanceof View)
+{
 			return PHPUnit::assertTrue(false, 'The response was not a view.');
 		}
 
-		if (is_null($value)) {
+		if (is_null($value))
+{
 			PHPUnit::assertArrayHasKey($key, $this->response->original->getData());
-		} else {
+		}
+else
+{
 			PHPUnit::assertEquals($value, $this->response->original->$key);
 		}
 
@@ -684,10 +715,14 @@ trait MakesHttpRequests
 	 */
 	public function assertViewHasAll(array $bindings)
 	{
-		foreach ($bindings as $key => $value) {
-			if (is_int($key)) {
+		foreach ($bindings as $key => $value)
+{
+			if (is_int($key))
+{
 				$this->assertViewHas($value);
-			} else {
+			}
+else
+{
 				$this->assertViewHas($key, $value);
 			}
 		}
@@ -703,7 +738,8 @@ trait MakesHttpRequests
 	 */
 	public function assertViewMissing($key)
 	{
-		if (! isset($this->response->original) || ! $this->response->original instanceof View) {
+		if (! isset($this->response->original) || ! $this->response->original instanceof View)
+{
 			return PHPUnit::assertTrue(false, 'The response was not a view.');
 		}
 
@@ -723,7 +759,7 @@ trait MakesHttpRequests
 	{
 		PHPUnit::assertInstanceOf('Foundation\Http\RedirectResponse', $this->response);
 
-		PHPUnit::assertEquals($this->app['url']->to($uri), $this->response->headers->get('Location'));
+		PHPUnit::assertEquals($this->fw->bindings['url']->to($uri), $this->response->headers->get('Location'));
 
 		$this->assertSessionHasAll($with);
 
@@ -740,7 +776,7 @@ trait MakesHttpRequests
 	 */
 	public function assertRedirectedToRoute($name, $parameters = [], $with = [])
 	{
-		return $this->assertRedirectedTo($this->app['url']->route($name, $parameters), $with);
+		return $this->assertRedirectedTo($this->fw->bindings['url']->route($name, $parameters), $with);
 	}
 
 	/**
@@ -753,7 +789,7 @@ trait MakesHttpRequests
 	 */
 	public function assertRedirectedToAction($name, $parameters = [], $with = [])
 	{
-		return $this->assertRedirectedTo($this->app['url']->action($name, $parameters), $with);
+		return $this->assertRedirectedTo($this->fw->bindings['url']->action($name, $parameters), $with);
 	}
 
 	/**
@@ -767,7 +803,8 @@ trait MakesHttpRequests
 
 		$json = json_decode($content);
 
-		if (json_last_error() === JSON_ERROR_NONE) {
+		if (json_last_error() === JSON_ERROR_NONE)
+{
 			$content = $json;
 		}
 

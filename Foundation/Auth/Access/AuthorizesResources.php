@@ -16,7 +16,8 @@ trait AuthorizesResources
 	{
 		$parameter = $parameter ?: strtolower(class_basename($model));
 
-		foreach ($this->resourceAbilityMap() as $method => $ability) {
+		foreach ($this->resourceAbilityMap() as $method => $ability)
+{
 			$modelName = in_array($method, ['index', 'create', 'store']) ? $model : $parameter;
 
 			$this->middleware("can:{$ability},{$modelName}", $options)->only($method);

@@ -4,7 +4,7 @@ namespace Foundation\Queue\Jobs;
 
 use Foundation\Support\Arr;
 use Foundation\Queue\RedisQueue;
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\Queue\Job as JobContract;
 
 class RedisJob extends Job implements JobContract
@@ -26,18 +26,18 @@ class RedisJob extends Job implements JobContract
 	/**
 	 * Create a new job instance.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @param  \Foundation\Queue\RedisQueue  $redis
 	 * @param  string  $job
 	 * @param  string  $queue
 	 * @return void
 	 */
-	public function __construct(Container $container, RedisQueue $redis, $job, $queue)
+	public function __construct(Bindings $bindings, RedisQueue $redis, $job, $queue)
 	{
 		$this->job = $job;
 		$this->redis = $redis;
 		$this->queue = $queue;
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 
 	/**
@@ -108,13 +108,13 @@ class RedisJob extends Job implements JobContract
 	}
 
 	/**
-	 * Get the IoC container instance.
+	 * Get the IoC bindings instance.
 	 *
-	 * @return \Foundation\Container\Container
+	 * @return \Foundation\Framework
 	 */
-	public function getContainer()
+	public function getBindings()
 	{
-		return $this->container;
+		return $this->bindings;
 	}
 
 	/**

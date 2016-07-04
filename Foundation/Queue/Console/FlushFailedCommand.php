@@ -27,7 +27,7 @@ class FlushFailedCommand extends Command
 	 */
 	public function fire()
 	{
-		$this->laravel['queue.failer']->flush();
+		$this->framework['queue.failer']->flush();
 
 		$this->info('All failed jobs deleted successfully!');
 	}

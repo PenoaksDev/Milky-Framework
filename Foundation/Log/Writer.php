@@ -60,7 +60,8 @@ class Writer implements LogContract, PsrLoggerInterface
 	{
 		$this->monolog = $monolog;
 
-		if (isset($dispatcher)) {
+		if (isset($dispatcher))
+{
 			$this->dispatcher = $dispatcher;
 		}
 	}
@@ -240,7 +241,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	 * @param  string  $level
 	 * @return \Psr\Log\LoggerInterface
 	 */
-	public function useSyslog($name = 'laravel', $level = 'debug')
+	public function useSyslog($name = 'framework', $level = 'debug')
 	{
 		return $this->monolog->pushHandler(new SyslogHandler($name, LOG_USER, $level));
 	}
@@ -271,7 +272,8 @@ class Writer implements LogContract, PsrLoggerInterface
 	 */
 	public function listen(Closure $callback)
 	{
-		if (! isset($this->dispatcher)) {
+		if (! isset($this->dispatcher))
+{
 			throw new RuntimeException('Events dispatcher has not been set.');
 		}
 
@@ -291,7 +293,8 @@ class Writer implements LogContract, PsrLoggerInterface
 		// If the event dispatcher is set, we will pass along the parameters to the
 		// log listeners. These are useful for building profilers or other tools
 		// that aggregate all of the log messages for a given "request" cycle.
-		if (isset($this->dispatcher)) {
+		if (isset($this->dispatcher))
+{
 			$this->dispatcher->fire('illuminate.log', compact('level', 'message', 'context'));
 		}
 	}
@@ -304,11 +307,16 @@ class Writer implements LogContract, PsrLoggerInterface
 	 */
 	protected function formatMessage($message)
 	{
-		if (is_array($message)) {
+		if (is_array($message))
+{
 			return var_export($message, true);
-		} elseif ($message instanceof Jsonable) {
+		}
+elseif ($message instanceof Jsonable)
+{
 			return $message->toJson();
-		} elseif ($message instanceof Arrayable) {
+		}
+elseif ($message instanceof Arrayable)
+{
 			return var_export($message->toArray(), true);
 		}
 
@@ -325,7 +333,8 @@ class Writer implements LogContract, PsrLoggerInterface
 	 */
 	protected function parseLevel($level)
 	{
-		if (isset($this->levels[$level])) {
+		if (isset($this->levels[$level]))
+{
 			return $this->levels[$level];
 		}
 

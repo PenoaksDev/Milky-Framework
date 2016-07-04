@@ -53,7 +53,8 @@ abstract class GeneratorCommand extends Command
 
 		$path = $this->getPath($name);
 
-		if ($this->alreadyExists($this->getNameInput())) {
+		if ($this->alreadyExists($this->getNameInput()))
+{
 			$this->error($this->type.' already exists!');
 
 			return false;
@@ -87,9 +88,9 @@ abstract class GeneratorCommand extends Command
 	 */
 	protected function getPath($name)
 	{
-		$name = str_replace($this->laravel->getNamespace(), '', $name);
+		$name = str_replace($this->framework->getNamespace(), '', $name);
 
-		return $this->laravel['path'].'/'.str_replace('\\', '/', $name).'.php';
+		return $this->framework['path'].'/'.str_replace('\\', '/', $name).'.php';
 	}
 
 	/**
@@ -100,13 +101,15 @@ abstract class GeneratorCommand extends Command
 	 */
 	protected function parseName($name)
 	{
-		$rootNamespace = $this->laravel->getNamespace();
+		$rootNamespace = $this->framework->getNamespace();
 
-		if (Str::startsWith($name, $rootNamespace)) {
+		if (Str::startsWith($name, $rootNamespace))
+{
 			return $name;
 		}
 
-		if (Str::contains($name, '/')) {
+		if (Str::contains($name, '/'))
+{
 			$name = str_replace('/', '\\', $name);
 		}
 
@@ -132,7 +135,8 @@ abstract class GeneratorCommand extends Command
 	 */
 	protected function makeDirectory($path)
 	{
-		if (! $this->files->isDirectory(dirname($path))) {
+		if (! $this->files->isDirectory(dirname($path)))
+{
 			$this->files->makeDirectory(dirname($path), 0777, true, true);
 		}
 	}
@@ -164,7 +168,7 @@ abstract class GeneratorCommand extends Command
 		);
 
 		$stub = str_replace(
-			'DummyRootNamespace', $this->laravel->getNamespace(), $stub
+			'DummyRootNamespace', $this->framework->getNamespace(), $stub
 		);
 
 		return $this;

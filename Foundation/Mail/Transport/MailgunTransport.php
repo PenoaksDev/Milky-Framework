@@ -64,12 +64,15 @@ class MailgunTransport extends Transport
 
 		$message->setBcc([]);
 
-		if (version_compare(ClientInterface::VERSION, '6') === 1) {
+		if (version_compare(ClientInterface::VERSION, '6') === 1)
+{
 			$options['multipart'] = [
 				['name' => 'to', 'contents' => $to],
 				['name' => 'message', 'contents' => $message->toString(), 'filename' => 'message.mime'],
 			];
-		} else {
+		}
+else
+{
 			$options['body'] = [
 				'to' => $to,
 				'message' => new PostFile('message', $message->toString()),
@@ -93,7 +96,8 @@ class MailgunTransport extends Transport
 			(array) $message->getTo(), (array) $message->getCc(), (array) $message->getBcc()
 		);
 
-		foreach ($contacts as $address => $display) {
+		foreach ($contacts as $address => $display)
+{
 			$formatted[] = $display ? $display." <$address>" : $address;
 		}
 

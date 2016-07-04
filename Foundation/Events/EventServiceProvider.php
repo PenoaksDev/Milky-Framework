@@ -1,5 +1,4 @@
 <?php
-
 namespace Foundation\Events;
 
 use Foundation\Support\ServiceProvider;
@@ -13,9 +12,11 @@ class EventServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('events', function ($app) {
-			return (new Dispatcher($app))->setQueueResolver(function () use ($app) {
-				return $app->make('Foundation\Contracts\Queue\Factory');
+		$this->fw->bindings->singleton('events', function ($bindings)
+{
+			return (new Dispatcher($bindings))->setQueueResolver(function () use ($bindings)
+{
+				return $bindings->make('Foundation\Contracts\Queue\Factory');
 			});
 		});
 	}

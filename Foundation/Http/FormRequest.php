@@ -6,7 +6,7 @@ use Foundation\Http\Request;
 use Foundation\Http\Response;
 use Foundation\Http\JsonResponse;
 use Foundation\Routing\Redirector;
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\Validation\Validator;
 use Foundation\Http\Exception\HttpResponseException;
 use Foundation\Validation\ValidatesWhenResolvedTrait;
@@ -18,11 +18,11 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	use ValidatesWhenResolvedTrait;
 
 	/**
-	 * The container instance.
+	 * The bindings instance.
 	 *
-	 * @var \Foundation\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * The redirector instance.
@@ -73,14 +73,15 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	 */
 	protected function getValidatorInstance()
 	{
-		$factory = $this->container->make(ValidationFactory::class);
+		$factory = $this->bindings->make(ValidationFactory::class);
 
-		if (method_exists($this, 'validator')) {
-			return $this->container->call([$this, 'validator'], compact('factory'));
+		if (method_exists($this, 'validator'))
+{
+			return $this->bindings->call([$this, 'validator'], compact('factory'));
 		}
 
 		return $factory->make(
-			$this->validationData(), $this->container->call([$this, 'rules']), $this->messages(), $this->attributes()
+			$this->validationData(), $this->bindings->call([$this, 'rules']), $this->messages(), $this->attributes()
 		);
 	}
 
@@ -116,8 +117,9 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	 */
 	protected function passesAuthorization()
 	{
-		if (method_exists($this, 'authorize')) {
-			return $this->container->call([$this, 'authorize']);
+		if (method_exists($this, 'authorize'))
+{
+			return $this->bindings->call([$this, 'authorize']);
 		}
 
 		return false;
@@ -143,7 +145,8 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	 */
 	public function response(array $errors)
 	{
-		if (($this->ajax() && ! $this->pjax()) || $this->wantsJson()) {
+		if (($this->ajax() && ! $this->pjax()) || $this->wantsJson())
+{
 			return new JsonResponse($errors, 422);
 		}
 
@@ -182,11 +185,16 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	{
 		$url = $this->redirector->getUrlGenerator();
 
-		if ($this->redirect) {
+		if ($this->redirect)
+{
 			return $url->to($this->redirect);
-		} elseif ($this->redirectRoute) {
+		}
+elseif ($this->redirectRoute)
+{
 			return $url->route($this->redirectRoute);
-		} elseif ($this->redirectAction) {
+		}
+elseif ($this->redirectAction)
+{
 			return $url->action($this->redirectAction);
 		}
 
@@ -207,14 +215,14 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	}
 
 	/**
-	 * Set the container implementation.
+	 * Set the bindings implementation.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return $this
 	 */
-	public function setContainer(Container $container)
+	public function setBindings(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 
 		return $this;
 	}

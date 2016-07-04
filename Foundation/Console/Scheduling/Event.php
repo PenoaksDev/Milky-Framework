@@ -10,7 +10,7 @@ use GuzzleHttp\Client as HttpClient;
 use Foundation\Contracts\Mail\Mailer;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 
 class Event
 {
@@ -144,14 +144,17 @@ class Event
 	/**
 	 * Run the given event.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function run(Container $container)
+	public function run(Bindings $bindings)
 	{
-		if (! $this->runInBackground) {
-			$this->runCommandInForeground($container);
-		} else {
+		if (! $this->runInBackground)
+{
+			$this->runCommandInForeground($bindings);
+		}
+else
+{
 			$this->runCommandInBackground();
 		}
 	}
@@ -159,18 +162,18 @@ class Event
 	/**
 	 * Run the command in the foreground.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	protected function runCommandInForeground(Container $container)
+	protected function runCommandInForeground(Bindings $bindings)
 	{
-		$this->callBeforeCallbacks($container);
+		$this->callBeforeCallbacks($bindings);
 
 		(new Process(
 			trim($this->buildCommand(), '& '), base_path(), null, null, null
 		))->run();
 
-		$this->callAfterCallbacks($container);
+		$this->callAfterCallbacks($bindings);
 	}
 
 	/**
@@ -188,26 +191,28 @@ class Event
 	/**
 	 * Call all of the "before" callbacks for the event.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	protected function callBeforeCallbacks(Container $container)
+	protected function callBeforeCallbacks(Bindings $bindings)
 	{
-		foreach ($this->beforeCallbacks as $callback) {
-			$container->call($callback);
+		foreach ($this->beforeCallbacks as $callback)
+{
+			$bindings->call($callback);
 		}
 	}
 
 	/**
 	 * Call all of the "after" callbacks for the event.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	protected function callAfterCallbacks(Container $container)
+	protected function callAfterCallbacks(Bindings $bindings)
 	{
-		foreach ($this->afterCallbacks as $callback) {
-			$container->call($callback);
+		foreach ($this->afterCallbacks as $callback)
+{
+			$bindings->call($callback);
 		}
 	}
 
@@ -222,13 +227,19 @@ class Event
 
 		$redirect = $this->shouldAppendOutput ? ' >> ' : ' > ';
 
-		if ($this->withoutOverlapping) {
-			if (windows_os()) {
+		if ($this->withoutOverlapping)
+{
+			if (windows_os())
+{
 				$command = '(echo \'\' > "'.$this->mutexPath().'" & '.$this->command.' & del "'.$this->mutexPath().'")'.$redirect.$output.' 2>&1 &';
-			} else {
+			}
+else
+{
 				$command = '(touch '.$this->mutexPath().'; '.$this->command.'; rm '.$this->mutexPath().')'.$redirect.$output.' 2>&1 &';
 			}
-		} else {
+		}
+else
+{
 			$command = $this->command.$redirect.$output.' 2>&1 &';
 		}
 
@@ -248,17 +259,18 @@ class Event
 	/**
 	 * Determine if the given event should run based on the Cron expression.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return bool
 	 */
-	public function isDue($app)
+	public function isDue($fw)
 	{
-		if (! $this->runsInMaintenanceMode() && $app->isDownForMaintenance()) {
+		if (! $this->runsInMaintenanceMode() && $fw->isDownForMaintenance())
+{
 			return false;
 		}
 
 		return $this->expressionPasses() &&
-			   $this->runsInEnvironment($app->environment());
+			   $this->runsInEnvironment($fw->environment());
 	}
 
 	/**
@@ -270,7 +282,8 @@ class Event
 	{
 		$date = Carbon::now();
 
-		if ($this->timezone) {
+		if ($this->timezone)
+{
 			$date->setTimezone($this->timezone);
 		}
 
@@ -280,19 +293,23 @@ class Event
 	/**
 	 * Determine if the filters pass for the event.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return bool
 	 */
-	public function filtersPass($app)
+	public function filtersPass($fw)
 	{
-		foreach ($this->filters as $callback) {
-			if (! $app->call($callback)) {
+		foreach ($this->filters as $callback)
+{
+			if (! $fw->call($callback))
+{
 				return false;
 			}
 		}
 
-		foreach ($this->rejects as $callback) {
-			if ($app->call($callback)) {
+		foreach ($this->rejects as $callback)
+{
+			if ($fw->call($callback))
+{
 				return false;
 			}
 		}
@@ -667,7 +684,8 @@ class Event
 	{
 		$this->withoutOverlapping = true;
 
-		return $this->skip(function () {
+		return $this->skip(function ()
+{
 			return file_exists($this->mutexPath());
 		});
 	}
@@ -702,14 +720,14 @@ class Event
 	 * Send the output of the command to a given location.
 	 *
 	 * @param  string  $location
-	 * @param  bool  $append
+	 * @param  bool  $fwend
 	 * @return $this
 	 */
-	public function sendOutputTo($location, $append = false)
+	public function sendOutputTo($location, $fwend = false)
 	{
 		$this->output = $location;
 
-		$this->shouldAppendOutput = $append;
+		$this->shouldAppendOutput = $fwend;
 
 		return $this;
 	}
@@ -736,13 +754,15 @@ class Event
 	 */
 	public function emailOutputTo($addresses, $onlyIfOutputExists = false)
 	{
-		if (is_null($this->output) || $this->output == $this->getDefaultOutput()) {
+		if (is_null($this->output) || $this->output == $this->getDefaultOutput())
+{
 			throw new LogicException('Must direct output to a file in order to e-mail results.');
 		}
 
 		$addresses = is_array($addresses) ? $addresses : func_get_args();
 
-		return $this->then(function (Mailer $mailer) use ($addresses, $onlyIfOutputExists) {
+		return $this->then(function (Mailer $mailer) use ($addresses, $onlyIfOutputExists)
+{
 			$this->emailOutput($mailer, $addresses, $onlyIfOutputExists);
 		});
 	}
@@ -772,14 +792,17 @@ class Event
 	{
 		$text = file_get_contents($this->output);
 
-		if ($onlyIfOutputExists && empty($text)) {
+		if ($onlyIfOutputExists && empty($text))
+{
 			return;
 		}
 
-		$mailer->raw($text, function ($m) use ($addresses) {
+		$mailer->raw($text, function ($m) use ($addresses)
+{
 			$m->subject($this->getEmailSubject());
 
-			foreach ($addresses as $address) {
+			foreach ($addresses as $address)
+{
 				$m->to($address);
 			}
 		});
@@ -792,7 +815,8 @@ class Event
 	 */
 	protected function getEmailSubject()
 	{
-		if ($this->description) {
+		if ($this->description)
+{
 			return 'Scheduled Job Output ('.$this->description.')';
 		}
 
@@ -807,7 +831,8 @@ class Event
 	 */
 	public function pingBefore($url)
 	{
-		return $this->before(function () use ($url) {
+		return $this->before(function () use ($url)
+{
 			(new HttpClient)->get($url);
 		});
 	}
@@ -833,7 +858,8 @@ class Event
 	 */
 	public function thenPing($url)
 	{
-		return $this->then(function () use ($url) {
+		return $this->then(function () use ($url)
+{
 			(new HttpClient)->get($url);
 		});
 	}
@@ -909,7 +935,8 @@ class Event
 	 */
 	public function getSummaryForDisplay()
 	{
-		if (is_string($this->description)) {
+		if (is_string($this->description))
+{
 			return $this->description;
 		}
 

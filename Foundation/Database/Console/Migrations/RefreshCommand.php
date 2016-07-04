@@ -31,7 +31,8 @@ class RefreshCommand extends Command
 	 */
 	public function fire()
 	{
-		if (! $this->confirmToProceed()) {
+		if (! $this->confirmToProceed())
+{
 			return;
 		}
 
@@ -54,7 +55,8 @@ class RefreshCommand extends Command
 			'--path' => $path,
 		]);
 
-		if ($this->needsSeeding()) {
+		if ($this->needsSeeding())
+{
 			$this->runSeeder($database);
 		}
 	}

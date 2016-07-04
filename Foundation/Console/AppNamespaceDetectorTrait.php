@@ -2,7 +2,7 @@
 
 namespace Foundation\Console;
 
-use Foundation\Container\Container;
+use Foundation\Framework;
 
 trait AppNamespaceDetectorTrait
 {
@@ -13,6 +13,6 @@ trait AppNamespaceDetectorTrait
 	 */
 	protected function getAppNamespace()
 	{
-		return Container::getInstance()->getNamespace();
+		return Bindings::getInstance()->getNamespace();
 	}
 }

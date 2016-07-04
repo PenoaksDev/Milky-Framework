@@ -22,7 +22,8 @@ class MemcachedConnector
 		// For each server in the array, we'll just extract the configuration and add
 		// the server to the Memcached connection. Once we have added all of these
 		// servers we'll verify the connection is successful and return it back.
-		foreach ($servers as $server) {
+		foreach ($servers as $server)
+{
 			$memcached->addServer(
 				$server['host'], $server['port'], $server['weight']
 			);
@@ -30,11 +31,13 @@ class MemcachedConnector
 
 		$memcachedStatus = $memcached->getVersion();
 
-		if (! is_array($memcachedStatus)) {
+		if (! is_array($memcachedStatus))
+{
 			throw new RuntimeException('No Memcached servers added.');
 		}
 
-		if (in_array('255.255.255', $memcachedStatus) && count(array_unique($memcachedStatus)) === 1) {
+		if (in_array('255.255.255', $memcachedStatus) && count(array_unique($memcachedStatus)) === 1)
+{
 			throw new RuntimeException('Could not establish Memcached connection.');
 		}
 

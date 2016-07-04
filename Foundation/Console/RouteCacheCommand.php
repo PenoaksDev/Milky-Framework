@@ -53,16 +53,18 @@ class RouteCacheCommand extends Command
 
 		$routes = $this->getFreshApplicationRoutes();
 
-		if (count($routes) == 0) {
+		if (count($routes) == 0)
+{
 			return $this->error("Your application doesn't have any routes.");
 		}
 
-		foreach ($routes as $route) {
+		foreach ($routes as $route)
+{
 			$route->prepareForSerialization();
 		}
 
 		$this->files->put(
-			$this->laravel->getCachedRoutesPath(), $this->buildRouteCacheFile($routes)
+			$this->framework->getCachedRoutesPath(), $this->buildRouteCacheFile($routes)
 		);
 
 		$this->info('Routes cached successfully!');
@@ -75,11 +77,11 @@ class RouteCacheCommand extends Command
 	 */
 	protected function getFreshApplicationRoutes()
 	{
-		$app = require $this->laravel->bootstrapPath().'/app.php';
+		$fw = require $this->framework->bootstrapPath().'/app.php';
 
-		$app->make('Foundation\Contracts\Console\Kernel')->bootstrap();
+		$fw->make('Foundation\Contracts\Console\Kernel')->bootstrap();
 
-		return $app['router']->getRoutes();
+		return $fw->bindings['router']->getRoutes();
 	}
 
 	/**

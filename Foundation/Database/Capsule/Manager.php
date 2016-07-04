@@ -3,7 +3,7 @@
 namespace Foundation\Database\Capsule;
 
 use PDO;
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Foundation\Database\DatabaseManager;
 use Foundation\Contracts\Events\Dispatcher;
 use Foundation\Support\Traits\CapsuleManagerTrait;
@@ -24,15 +24,15 @@ class Manager
 	/**
 	 * Create a new database capsule manager.
 	 *
-	 * @param  \Foundation\Container\Container|null  $container
+	 * @param  \Foundation\Framework|null  $bindings
 	 * @return void
 	 */
-	public function __construct(Container $container = null)
+	public function __construct(Bindings $bindings = null)
 	{
-		$this->setupContainer($container ?: new Container);
+		$this->setupBindings($bindings ?: new Bindings);
 
-		// Once we have the container setup, we will setup the default configuration
-		// options in the container "config" binding. This will make the database
+		// Once we have the bindings setup, we will setup the default configuration
+		// options in the bindings "config" binding. This will make the database
 		// manager behave correctly since all the correct binding are in place.
 		$this->setupDefaultConfiguration();
 
@@ -46,9 +46,9 @@ class Manager
 	 */
 	protected function setupDefaultConfiguration()
 	{
-		$this->container['config']['database.fetch'] = PDO::FETCH_OBJ;
+		$this->bindings['config']['database.fetch'] = PDO::FETCH_OBJ;
 
-		$this->container['config']['database.default'] = 'default';
+		$this->bindings['config']['database.default'] = 'default';
 	}
 
 	/**
@@ -58,9 +58,9 @@ class Manager
 	 */
 	protected function setupManager()
 	{
-		$factory = new ConnectionFactory($this->container);
+		$factory = new ConnectionFactory($this->bindings);
 
-		$this->manager = new DatabaseManager($this->container, $factory);
+		$this->manager = new DatabaseManager($this->bindings, $factory);
 	}
 
 	/**
@@ -117,11 +117,11 @@ class Manager
 	 */
 	public function addConnection(array $config, $name = 'default')
 	{
-		$connections = $this->container['config']['database.connections'];
+		$connections = $this->bindings['config']['database.connections'];
 
 		$connections[$name] = $config;
 
-		$this->container['config']['database.connections'] = $connections;
+		$this->bindings['config']['database.connections'] = $connections;
 	}
 
 	/**
@@ -136,7 +136,8 @@ class Manager
 		// If we have an event dispatcher instance, we will go ahead and register it
 		// with the Eloquent ORM, allowing for model callbacks while creating and
 		// updating "model" instances; however, if it not necessary to operate.
-		if ($dispatcher = $this->getEventDispatcher()) {
+		if ($dispatcher = $this->getEventDispatcher())
+{
 			Eloquent::setEventDispatcher($dispatcher);
 		}
 	}
@@ -149,7 +150,7 @@ class Manager
 	 */
 	public function setFetchMode($fetchMode)
 	{
-		$this->container['config']['database.fetch'] = $fetchMode;
+		$this->bindings['config']['database.fetch'] = $fetchMode;
 
 		return $this;
 	}
@@ -171,8 +172,9 @@ class Manager
 	 */
 	public function getEventDispatcher()
 	{
-		if ($this->container->bound('events')) {
-			return $this->container['events'];
+		if ($this->bindings->bound('events'))
+{
+			return $this->bindings['events'];
 		}
 	}
 
@@ -184,7 +186,7 @@ class Manager
 	 */
 	public function setEventDispatcher(Dispatcher $dispatcher)
 	{
-		$this->container->instance('events', $dispatcher);
+		$this->bindings->instance('events', $dispatcher);
 	}
 
 	/**

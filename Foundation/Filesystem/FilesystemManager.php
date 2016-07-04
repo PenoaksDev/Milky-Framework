@@ -21,9 +21,9 @@ class FilesystemManager implements FactoryContract
 	/**
 	 * The application instance.
 	 *
-	 * @var \Foundation\Contracts\Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The array of resolved filesystem drivers.
@@ -42,12 +42,12 @@ class FilesystemManager implements FactoryContract
 	/**
 	 * Create a new filesystem manager instance.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function __construct($app)
+	public function __construct($fw)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 	}
 
 	/**
@@ -109,15 +109,19 @@ class FilesystemManager implements FactoryContract
 	{
 		$config = $this->getConfig($name);
 
-		if (isset($this->customCreators[$config['driver']])) {
+		if (isset($this->customCreators[$config['driver']]))
+{
 			return $this->callCustomCreator($config);
 		}
 
 		$driverMethod = 'create'.ucfirst($config['driver']).'Driver';
 
-		if (method_exists($this, $driverMethod)) {
+		if (method_exists($this, $driverMethod))
+{
 			return $this->{$driverMethod}($config);
-		} else {
+		}
+else
+{
 			throw new InvalidArgumentException("Driver [{$config['driver']}] is not supported.");
 		}
 	}
@@ -130,9 +134,10 @@ class FilesystemManager implements FactoryContract
 	 */
 	protected function callCustomCreator(array $config)
 	{
-		$driver = $this->customCreators[$config['driver']]($this->app, $config);
+		$driver = $this->customCreators[$config['driver']]($this->fw, $config);
 
-		if ($driver instanceof FilesystemInterface) {
+		if ($driver instanceof FilesystemInterface)
+{
 			return $this->adapt($driver);
 		}
 
@@ -204,7 +209,8 @@ class FilesystemManager implements FactoryContract
 	{
 		$config += ['version' => 'latest'];
 
-		if ($config['key'] && $config['secret']) {
+		if ($config['key'] && $config['secret'])
+{
 			$config['credentials'] = Arr::only($config, ['key', 'secret']);
 		}
 
@@ -226,24 +232,24 @@ class FilesystemManager implements FactoryContract
 		$root = isset($config['root']) ? $config['root'] : null;
 
 		return $this->adapt($this->createFlysystem(
-			new RackspaceAdapter($this->getRackspaceContainer($client, $config), $root), $config
+			new RackspaceAdapter($this->getRackspaceBindings($client, $config), $root), $config
 		));
 	}
 
 	/**
-	 * Get the Rackspace Cloud Files container.
+	 * Get the Rackspace Cloud Files bindings.
 	 *
 	 * @param  \OpenCloud\Rackspace  $client
 	 * @param  array  $config
-	 * @return \OpenCloud\ObjectStore\Resource\Container
+	 * @return \OpenCloud\ObjectStore\Resource\Bindings
 	 */
-	protected function getRackspaceContainer(Rackspace $client, array $config)
+	protected function getRackspaceBindings(Rackspace $client, array $config)
 	{
 		$urlType = Arr::get($config, 'url_type');
 
 		$store = $client->objectStoreService('cloudFiles', $config['region'], $urlType);
 
-		return $store->getContainer($config['container']);
+		return $store->getBindings($config['bindings']);
 	}
 
 	/**
@@ -279,7 +285,7 @@ class FilesystemManager implements FactoryContract
 	 */
 	protected function getConfig($name)
 	{
-		return $this->app['config']["filesystems.disks.{$name}"];
+		return $this->fw->bindings['config']["filesystems.disks.{$name}"];
 	}
 
 	/**
@@ -289,7 +295,7 @@ class FilesystemManager implements FactoryContract
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['filesystems.default'];
+		return $this->fw->bindings['config']['filesystems.default'];
 	}
 
 	/**
@@ -299,7 +305,7 @@ class FilesystemManager implements FactoryContract
 	 */
 	public function getDefaultCloudDriver()
 	{
-		return $this->app['config']['filesystems.cloud'];
+		return $this->fw->bindings['config']['filesystems.cloud'];
 	}
 
 	/**

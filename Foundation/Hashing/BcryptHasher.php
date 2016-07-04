@@ -29,7 +29,8 @@ class BcryptHasher implements HasherContract
 
 		$hash = password_hash($value, PASSWORD_BCRYPT, ['cost' => $cost]);
 
-		if ($hash === false) {
+		if ($hash === false)
+{
 			throw new RuntimeException('Bcrypt hashing not supported.');
 		}
 
@@ -46,7 +47,8 @@ class BcryptHasher implements HasherContract
 	 */
 	public function check($value, $hashedValue, array $options = [])
 	{
-		if (strlen($hashedValue) === 0) {
+		if (strlen($hashedValue) === 0)
+{
 			return false;
 		}
 

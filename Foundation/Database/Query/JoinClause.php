@@ -71,19 +71,23 @@ class JoinClause
 	 */
 	public function on($first, $operator = null, $second = null, $boolean = 'and', $where = false)
 	{
-		if ($first instanceof Closure) {
+		if ($first instanceof Closure)
+{
 			return $this->nest($first, $boolean);
 		}
 
-		if (func_num_args() < 3) {
+		if (func_num_args() < 3)
+{
 			throw new InvalidArgumentException('Not enough arguments for the on clause.');
 		}
 
-		if ($where) {
+		if ($where)
+{
 			$this->bindings[] = $second;
 		}
 
-		if ($where && ($operator === 'in' || $operator === 'not in') && is_array($second)) {
+		if ($where && ($operator === 'in' || $operator === 'not in') && is_array($second))
+{
 			$second = count($second);
 		}
 
@@ -241,7 +245,8 @@ class JoinClause
 
 		$callback($join);
 
-		if (count($join->clauses)) {
+		if (count($join->clauses))
+{
 			$nested = true;
 
 			$this->clauses[] = compact('nested', 'join', 'boolean');

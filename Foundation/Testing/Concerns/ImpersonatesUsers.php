@@ -29,6 +29,6 @@ trait ImpersonatesUsers
 	 */
 	public function be(UserContract $user, $driver = null)
 	{
-		$this->app['auth']->guard($driver)->setUser($user);
+		$this->fw->bindings['auth']->guard($driver)->setUser($user);
 	}
 }

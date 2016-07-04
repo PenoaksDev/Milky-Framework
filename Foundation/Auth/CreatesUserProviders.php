@@ -23,15 +23,17 @@ trait CreatesUserProviders
 	 */
 	public function createUserProvider($provider)
 	{
-		$config = $this->app['config']['auth.providers.'.$provider];
+		$config = $this->fw->bindings['config']['auth.providers.'.$provider];
 
-		if (isset($this->customProviderCreators[$config['driver']])) {
+		if (isset($this->customProviderCreators[$config['driver']]))
+{
 			return call_user_func(
-				$this->customProviderCreators[$config['driver']], $this->app, $config
+				$this->customProviderCreators[$config['driver']], $this->fw, $config
 			);
 		}
 
-		switch ($config['driver']) {
+		switch ($config['driver'])
+{
 			case 'database':
 				return $this->createDatabaseProvider($config);
 			case 'eloquent':
@@ -49,9 +51,9 @@ trait CreatesUserProviders
 	 */
 	protected function createDatabaseProvider($config)
 	{
-		$connection = $this->app['db']->connection();
+		$connection = $this->fw->bindings['db']->connection();
 
-		return new DatabaseUserProvider($connection, $this->app['hash'], $config['table']);
+		return new DatabaseUserProvider($connection, $this->fw->bindings['hash'], $config['table']);
 	}
 
 	/**
@@ -62,6 +64,6 @@ trait CreatesUserProviders
 	 */
 	protected function createEloquentProvider($config)
 	{
-		return new EloquentUserProvider($this->app['hash'], $config['model']);
+		return new EloquentUserProvider($this->fw->bindings['hash'], $config['model']);
 	}
 }

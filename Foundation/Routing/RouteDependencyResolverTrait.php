@@ -33,7 +33,8 @@ trait RouteDependencyResolverTrait
 	 */
 	protected function resolveClassMethodDependencies(array $parameters, $instance, $method)
 	{
-		if (! method_exists($instance, $method)) {
+		if (! method_exists($instance, $method))
+{
 			return $parameters;
 		}
 
@@ -53,12 +54,14 @@ trait RouteDependencyResolverTrait
 	{
 		$originalParameters = $parameters;
 
-		foreach ($reflector->getParameters() as $key => $parameter) {
+		foreach ($reflector->getParameters() as $key => $parameter)
+{
 			$instance = $this->transformDependency(
 				$parameter, $parameters, $originalParameters
 			);
 
-			if (! is_null($instance)) {
+			if (! is_null($instance))
+{
 				$this->spliceIntoParameters($parameters, $key, $instance);
 			}
 		}
@@ -81,8 +84,9 @@ trait RouteDependencyResolverTrait
 		// If the parameter has a type-hinted class, we will check to see if it is already in
 		// the list of parameters. If it is we will just skip it as it is probably a model
 		// binding and we do not want to mess with those; otherwise, we resolve it here.
-		if ($class && ! $this->alreadyInParameters($class->name, $parameters)) {
-			return $this->container->make($class->name);
+		if ($class && ! $this->alreadyInParameters($class->name, $parameters))
+{
+			return $this->bindings->make($class->name);
 		}
 	}
 
@@ -95,7 +99,8 @@ trait RouteDependencyResolverTrait
 	 */
 	protected function alreadyInParameters($class, array $parameters)
 	{
-		return ! is_null(Arr::first($parameters, function ($key, $value) use ($class) {
+		return ! is_null(Arr::first($parameters, function ($key, $value) use ($class)
+{
 			return $value instanceof $class;
 		}));
 	}

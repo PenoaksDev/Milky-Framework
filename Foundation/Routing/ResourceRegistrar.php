@@ -62,14 +62,16 @@ class ResourceRegistrar
 	 */
 	public function register($name, $controller, array $options = [])
 	{
-		if (isset($options['parameters']) && ! isset($this->parameters)) {
+		if (isset($options['parameters']) && ! isset($this->parameters))
+{
 			$this->parameters = $options['parameters'];
 		}
 
 		// If the resource name contains a slash, we will assume the developer wishes to
 		// register these resource routes with a prefix so we will set that up out of
 		// the box so they don't have to mess with it. Otherwise, we will continue.
-		if (Str::contains($name, '/')) {
+		if (Str::contains($name, '/'))
+{
 			$this->prefixedResource($name, $controller, $options);
 
 			return;
@@ -82,7 +84,8 @@ class ResourceRegistrar
 
 		$defaults = $this->resourceDefaults;
 
-		foreach ($this->getResourceMethods($defaults, $options) as $m) {
+		foreach ($this->getResourceMethods($defaults, $options) as $m)
+{
 			$this->{'addResource'.ucfirst($m)}($name, $base, $controller, $options);
 		}
 	}
@@ -102,7 +105,8 @@ class ResourceRegistrar
 		// We need to extract the base resource from the resource name. Nested resources
 		// are supported in the framework, but we need to know what name to use for a
 		// place-holder on the route parameters, which should be the base resources.
-		$callback = function ($me) use ($name, $controller, $options) {
+		$callback = function ($me) use ($name, $controller, $options)
+{
 			$me->resource($name, $controller, $options);
 		};
 
@@ -136,9 +140,12 @@ class ResourceRegistrar
 	 */
 	protected function getResourceMethods($defaults, $options)
 	{
-		if (isset($options['only'])) {
+		if (isset($options['only']))
+{
 			return array_intersect($defaults, (array) $options['only']);
-		} elseif (isset($options['except'])) {
+		}
+elseif (isset($options['except']))
+{
 			return array_diff($defaults, (array) $options['except']);
 		}
 
@@ -153,7 +160,8 @@ class ResourceRegistrar
 	 */
 	public function getResourceUri($resource)
 	{
-		if (! Str::contains($resource, '.')) {
+		if (! Str::contains($resource, '.'))
+{
 			return $resource;
 		}
 
@@ -178,7 +186,8 @@ class ResourceRegistrar
 		// We will spin through the segments and create a place-holder for each of the
 		// resource segments, as well as the resource itself. Then we should get an
 		// entire string for the resource URI that contains all nested resources.
-		return implode('/', array_map(function ($s) {
+		return implode('/', array_map(function ($s)
+{
 			return $s.'/{'.$this->getResourceWildcard($s).'}';
 		}, $segments));
 	}
@@ -209,7 +218,8 @@ class ResourceRegistrar
 	 */
 	protected function getResourceName($resource, $method, $options)
 	{
-		if (isset($options['names'][$method])) {
+		if (isset($options['names'][$method]))
+{
 			return $options['names'][$method];
 		}
 
@@ -218,7 +228,8 @@ class ResourceRegistrar
 		// the resource action. Otherwise we'll just use an empty string for here.
 		$prefix = isset($options['as']) ? $options['as'].'.' : '';
 
-		if (! $this->router->hasGroupStack()) {
+		if (! $this->router->hasGroupStack())
+{
 			return $prefix.$resource.'.'.$method;
 		}
 
@@ -237,7 +248,8 @@ class ResourceRegistrar
 	{
 		$group = trim(str_replace('/', '.', $this->router->getLastGroupPrefix()), '.');
 
-		if (empty($group)) {
+		if (empty($group))
+{
 			return trim("{$prefix}{$resource}.{$method}", '.');
 		}
 
@@ -252,11 +264,16 @@ class ResourceRegistrar
 	 */
 	public function getResourceWildcard($value)
 	{
-		if (isset($this->parameters[$value])) {
+		if (isset($this->parameters[$value]))
+{
 			$value = $this->parameters[$value];
-		} elseif (isset(static::$parameterMap[$value])) {
+		}
+elseif (isset(static::$parameterMap[$value]))
+{
 			$value = static::$parameterMap[$value];
-		} elseif ($this->parameters === 'singular' || static::$singularParameters) {
+		}
+elseif ($this->parameters === 'singular' || static::$singularParameters)
+{
 			$value = Str::singular($value);
 		}
 

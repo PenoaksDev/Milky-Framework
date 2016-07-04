@@ -24,16 +24,23 @@ class Pipeline extends BasePipeline
 	 */
 	protected function getSlice()
 	{
-		return function ($stack, $pipe) {
-			return function ($passable) use ($stack, $pipe) {
-				try {
+		return function ( $stack, $pipe )
+		{
+			return function ( $passable ) use ( $stack, $pipe )
+			{
+				try
+				{
 					$slice = parent::getSlice();
 
-					return call_user_func($slice($stack, $pipe), $passable);
-				} catch (Exception $e) {
-					return $this->handleException($passable, $e);
-				} catch (Throwable $e) {
-					return $this->handleException($passable, new FatalThrowableError($e));
+					return call_user_func( $slice( $stack, $pipe ), $passable );
+				}
+				catch ( Exception $e )
+				{
+					return $this->handleException( $passable, $e );
+				}
+				catch ( Throwable $e )
+				{
+					return $this->handleException( $passable, new FatalThrowableError( $e ) );
 				}
 			};
 		};
@@ -42,18 +49,24 @@ class Pipeline extends BasePipeline
 	/**
 	 * Get the initial slice to begin the stack call.
 	 *
-	 * @param  \Closure  $destination
+	 * @param  \Closure $destination
 	 * @return \Closure
 	 */
-	protected function getInitialSlice(Closure $destination)
+	protected function getInitialSlice( Closure $destination )
 	{
-		return function ($passable) use ($destination) {
-			try {
-				return call_user_func($destination, $passable);
-			} catch (Exception $e) {
-				return $this->handleException($passable, $e);
-			} catch (Throwable $e) {
-				return $this->handleException($passable, new FatalThrowableError($e));
+		return function ( $passable ) use ( $destination )
+		{
+			try
+			{
+				return call_user_func( $destination, $passable );
+			}
+			catch ( Exception $e )
+			{
+				return $this->handleException( $passable, $e );
+			}
+			catch ( Throwable $e )
+			{
+				return $this->handleException( $passable, new FatalThrowableError( $e ) );
 			}
 		};
 	}
@@ -61,28 +74,37 @@ class Pipeline extends BasePipeline
 	/**
 	 * Handle the given exception.
 	 *
-	 * @param  mixed  $passable
-	 * @param  \Exception  $e
+	 * @param  mixed $passable
+	 * @param  \Exception $e
 	 * @return mixed
 	 *
 	 * @throws \Exception
 	 */
-	protected function handleException($passable, Exception $e)
+	protected function handleException( $passable, Exception $e )
 	{
-		if (! $this->container->bound(ExceptionHandler::class) || ! $passable instanceof Request) {
+		if ( !$this->framework->bindings->bound( ExceptionHandler::class ) || !$passable instanceof Request )
+		{
 			throw $e;
 		}
 
-		$handler = $this->container->make(ExceptionHandler::class);
+		try
+		{
+			$handler = $this->framework->bindings->make( ExceptionHandler::class );
 
-		$handler->report($e);
+			$handler->report( $e );
 
-		$response = $handler->render($passable, $e);
+			$response = $handler->render( $passable, $e );
 
-		if (method_exists($response, 'withException')) {
-			$response->withException($e);
+			if ( method_exists( $response, 'withException' ) )
+			{
+				$response->withException( $e );
+			}
+
+			return $response;
 		}
-
-		return $response;
+		catch ( \Exception $ee )
+		{
+			throw $e;
+		}
 	}
 }

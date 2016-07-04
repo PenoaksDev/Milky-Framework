@@ -3,7 +3,7 @@
 namespace Foundation\Queue\Jobs;
 
 use Aws\Sqs\SqsClient;
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\Queue\Job as JobContract;
 
 class SqsJob extends Job implements JobContract
@@ -25,13 +25,13 @@ class SqsJob extends Job implements JobContract
 	/**
 	 * Create a new job instance.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @param  \Aws\Sqs\SqsClient  $sqs
 	 * @param  string  $queue
 	 * @param  array   $job
 	 * @return void
 	 */
-	public function __construct(Container $container,
+	public function __construct(Bindings $bindings,
 								SqsClient $sqs,
 								$queue,
 								array $job)
@@ -39,7 +39,7 @@ class SqsJob extends Job implements JobContract
 		$this->sqs = $sqs;
 		$this->job = $job;
 		$this->queue = $queue;
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 
 	/**
@@ -116,13 +116,13 @@ class SqsJob extends Job implements JobContract
 	}
 
 	/**
-	 * Get the IoC container instance.
+	 * Get the IoC bindings instance.
 	 *
-	 * @return \Foundation\Container\Container
+	 * @return \Foundation\Framework
 	 */
-	public function getContainer()
+	public function getBindings()
 	{
-		return $this->container;
+		return $this->bindings;
 	}
 
 	/**

@@ -187,7 +187,8 @@ class Redirector
 	{
 		$redirect = new RedirectResponse($path, $status, $headers);
 
-		if (isset($this->session)) {
+		if (isset($this->session))
+{
 			$redirect->setSession($this->session);
 		}
 

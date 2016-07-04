@@ -34,7 +34,8 @@ class Filesystem
 	 */
 	public function get($path, $lock = false)
 	{
-		if ($this->isFile($path)) {
+		if ($this->isFile($path))
+{
 			return $lock ? $this->sharedGet($path) : file_get_contents($path);
 		}
 
@@ -53,14 +54,19 @@ class Filesystem
 
 		$handle = fopen($path, 'r');
 
-		if ($handle) {
-			try {
-				if (flock($handle, LOCK_SH)) {
-					while (! feof($handle)) {
+		if ($handle)
+{
+			try
+{
+				if (flock($handle, LOCK_SH))
+{
+					while (! feof($handle))
+{
 						$contents .= fread($handle, 1048576);
 					}
 				}
-			} finally {
+			} finally
+{
 				fclose($handle);
 			}
 		}
@@ -78,7 +84,8 @@ class Filesystem
 	 */
 	public function getRequire($path)
 	{
-		if ($this->isFile($path)) {
+		if ($this->isFile($path))
+{
 			return require $path;
 		}
 
@@ -118,7 +125,8 @@ class Filesystem
 	 */
 	public function prepend($path, $data)
 	{
-		if ($this->exists($path)) {
+		if ($this->exists($path))
+{
 			return $this->put($path, $data.$this->get($path));
 		}
 
@@ -149,12 +157,16 @@ class Filesystem
 
 		$success = true;
 
-		foreach ($paths as $path) {
-			try {
-				if (! @unlink($path)) {
+		foreach ($paths as $path)
+{
+			try
+{
+				if (! @unlink($path))
+{
 					$success = false;
 				}
-			} catch (ErrorException $e) {
+			} catch (ErrorException $e)
+{
 				$success = false;
 			}
 		}
@@ -329,14 +341,16 @@ class Filesystem
 	{
 		$glob = glob($directory.'/*');
 
-		if ($glob === false) {
+		if ($glob === false)
+{
 			return [];
 		}
 
 		// To get the appropriate files, we'll simply glob the directory and filter
 		// out any "files" that are not truly files so we do not end up with any
 		// directories in our list, but only true files within the directory.
-		return array_filter($glob, function ($file) {
+		return array_filter($glob, function ($file)
+{
 			return filetype($file) == 'file';
 		});
 	}
@@ -363,7 +377,8 @@ class Filesystem
 	{
 		$directories = [];
 
-		foreach (Finder::create()->in($directory)->directories()->depth(0) as $dir) {
+		foreach (Finder::create()->in($directory)->directories()->depth(0) as $dir)
+{
 			$directories[] = $dir->getPathname();
 		}
 
@@ -381,7 +396,8 @@ class Filesystem
 	 */
 	public function makeDirectory($path, $mode = 0755, $recursive = false, $force = false)
 	{
-		if ($force) {
+		if ($force)
+{
 			return @mkdir($path, $mode, $recursive);
 		}
 
@@ -398,7 +414,8 @@ class Filesystem
 	 */
 	public function copyDirectory($directory, $destination, $options = null)
 	{
-		if (! $this->isDirectory($directory)) {
+		if (! $this->isDirectory($directory))
+{
 			return false;
 		}
 
@@ -407,22 +424,26 @@ class Filesystem
 		// If the destination directory does not actually exist, we will go ahead and
 		// create it recursively, which just gets the destination prepared to copy
 		// the files over. Once we make the directory we'll proceed the copying.
-		if (! $this->isDirectory($destination)) {
+		if (! $this->isDirectory($destination))
+{
 			$this->makeDirectory($destination, 0777, true);
 		}
 
 		$items = new FilesystemIterator($directory, $options);
 
-		foreach ($items as $item) {
+		foreach ($items as $item)
+{
 			// As we spin through items, we will check to see if the current file is actually
 			// a directory or a file. When it is actually a directory we will need to call
 			// back into this function recursively to keep copying these nested folders.
 			$target = $destination.'/'.$item->getBasename();
 
-			if ($item->isDir()) {
+			if ($item->isDir())
+{
 				$path = $item->getPathname();
 
-				if (! $this->copyDirectory($path, $target, $options)) {
+				if (! $this->copyDirectory($path, $target, $options))
+{
 					return false;
 				}
 			}
@@ -430,8 +451,10 @@ class Filesystem
 			// If the current items is just a regular file, we will just copy this to the new
 			// location and keep looping. If for some reason the copy fails we'll bail out
 			// and return false, so the developer is aware that the copy process failed.
-			else {
-				if (! $this->copy($item->getPathname(), $target)) {
+			else
+{
+				if (! $this->copy($item->getPathname(), $target))
+{
 					return false;
 				}
 			}
@@ -451,29 +474,34 @@ class Filesystem
 	 */
 	public function deleteDirectory($directory, $preserve = false)
 	{
-		if (! $this->isDirectory($directory)) {
+		if (! $this->isDirectory($directory))
+{
 			return false;
 		}
 
 		$items = new FilesystemIterator($directory);
 
-		foreach ($items as $item) {
+		foreach ($items as $item)
+{
 			// If the item is a directory, we can just recurse into the function and
 			// delete that sub-directory otherwise we'll just delete the file and
 			// keep iterating through each file until the directory is cleaned.
-			if ($item->isDir() && ! $item->isLink()) {
+			if ($item->isDir() && ! $item->isLink())
+{
 				$this->deleteDirectory($item->getPathname());
 			}
 
 			// If the item is just a file, we can go ahead and delete it since we're
 			// just looping through and waxing all of the files in this directory
 			// and calling directories recursively, so we delete the real path.
-			else {
+			else
+{
 				$this->delete($item->getPathname());
 			}
 		}
 
-		if (! $preserve) {
+		if (! $preserve)
+{
 			@rmdir($directory);
 		}
 

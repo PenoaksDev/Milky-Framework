@@ -17,7 +17,7 @@ trait ThrottlesLogins
 	 */
 	protected function hasTooManyLoginAttempts(Request $request)
 	{
-		return app(RateLimiter::class)->tooManyAttempts(
+		return fw(RateLimiter::class)->tooManyAttempts(
 			$this->getThrottleKey($request),
 			$this->maxLoginAttempts(), $this->lockoutTime() / 60
 		);
@@ -31,7 +31,7 @@ trait ThrottlesLogins
 	 */
 	protected function incrementLoginAttempts(Request $request)
 	{
-		app(RateLimiter::class)->hit(
+		fw(RateLimiter::class)->hit(
 			$this->getThrottleKey($request)
 		);
 	}
@@ -44,7 +44,7 @@ trait ThrottlesLogins
 	 */
 	protected function retriesLeft(Request $request)
 	{
-		return app(RateLimiter::class)->retriesLeft(
+		return fw(RateLimiter::class)->retriesLeft(
 			$this->getThrottleKey($request),
 			$this->maxLoginAttempts()
 		);
@@ -88,7 +88,7 @@ trait ThrottlesLogins
 	 */
 	protected function secondsRemainingOnLockout(Request $request)
 	{
-		return app(RateLimiter::class)->availableIn(
+		return fw(RateLimiter::class)->availableIn(
 			$this->getThrottleKey($request)
 		);
 	}
@@ -101,7 +101,7 @@ trait ThrottlesLogins
 	 */
 	protected function clearLoginAttempts(Request $request)
 	{
-		app(RateLimiter::class)->clear(
+		fw(RateLimiter::class)->clear(
 			$this->getThrottleKey($request)
 		);
 	}

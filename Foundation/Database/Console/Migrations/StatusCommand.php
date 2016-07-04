@@ -48,15 +48,19 @@ class StatusCommand extends BaseCommand
 	 */
 	public function fire()
 	{
-		if (! $this->migrator->repositoryExists()) {
+		if (! $this->migrator->repositoryExists())
+{
 			return $this->error('No migrations found.');
 		}
 
 		$this->migrator->setConnection($this->input->getOption('database'));
 
-		if (! is_null($path = $this->input->getOption('path'))) {
-			$path = $this->laravel->basePath().'/'.$path;
-		} else {
+		if (! is_null($path = $this->input->getOption('path')))
+{
+			$path = $this->framework->basePath().'/'.$path;
+		}
+else
+{
 			$path = $this->getMigrationPath();
 		}
 
@@ -64,13 +68,17 @@ class StatusCommand extends BaseCommand
 
 		$migrations = [];
 
-		foreach ($this->getAllMigrationFiles($path) as $migration) {
+		foreach ($this->getAllMigrationFiles($path) as $migration)
+{
 			$migrations[] = in_array($migration, $ran) ? ['<info>Y</info>', $migration] : ['<fg=red>N</fg=red>', $migration];
 		}
 
-		if (count($migrations) > 0) {
+		if (count($migrations) > 0)
+{
 			$this->table(['Ran?', 'Migration'], $migrations);
-		} else {
+		}
+else
+{
 			$this->error('No migrations found');
 		}
 	}

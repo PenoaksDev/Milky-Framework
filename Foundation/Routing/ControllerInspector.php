@@ -39,8 +39,10 @@ class ControllerInspector
 		// To get the routable methods, we will simply spin through all methods on the
 		// controller instance checking to see if it belongs to the given class and
 		// is a publicly routable method. If so, we will add it to this listings.
-		foreach ($methods as $method) {
-			if ($this->isRoutable($method)) {
+		foreach ($methods as $method)
+{
+			if ($this->isRoutable($method))
+{
 				$data = $this->getMethodData($method, $prefix);
 
 				$routable[$method->name][] = $data;
@@ -48,7 +50,8 @@ class ControllerInspector
 				// If the routable method is an index method, we will create a special index
 				// route which is simply the prefix and the verb and does not contain any
 				// the wildcard place-holders that each "typical" routes would contain.
-				if ($data['plain'] == $prefix.'/index') {
+				if ($data['plain'] == $prefix.'/index')
+{
 					$routable[$method->name][] = $this->getIndexData($data, $prefix);
 				}
 			}
@@ -65,7 +68,8 @@ class ControllerInspector
 	 */
 	public function isRoutable(ReflectionMethod $method)
 	{
-		if ($method->class == 'Foundation\Routing\Controller') {
+		if ($method->class == 'Foundation\Routing\Controller')
+{
 			return false;
 		}
 

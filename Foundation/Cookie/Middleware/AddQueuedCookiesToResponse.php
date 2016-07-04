@@ -36,7 +36,8 @@ class AddQueuedCookiesToResponse
 	{
 		$response = $next($request);
 
-		foreach ($this->cookies->getQueuedCookies() as $cookie) {
+		foreach ($this->cookies->getQueuedCookies() as $cookie)
+{
 			$response->headers->setCookie($cookie);
 		}
 

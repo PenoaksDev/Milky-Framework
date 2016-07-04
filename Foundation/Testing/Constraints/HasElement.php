@@ -43,15 +43,18 @@ class HasElement extends PageConstraint
 	{
 		$elements = $this->crawler($crawler)->filter($this->selector);
 
-		if ($elements->count() == 0) {
+		if ($elements->count() == 0)
+{
 			return false;
 		}
 
-		if (empty($this->attributes)) {
+		if (empty($this->attributes))
+{
 			return true;
 		}
 
-		$elements = $elements->reduce(function ($element) {
+		$elements = $elements->reduce(function ($element)
+{
 			return $this->hasAttributes($element);
 		});
 
@@ -66,13 +69,19 @@ class HasElement extends PageConstraint
 	 */
 	protected function hasAttributes(Crawler $element)
 	{
-		foreach ($this->attributes as $name => $value) {
-			if (is_numeric($name)) {
-				if ($element->attr($value) === null) {
+		foreach ($this->attributes as $name => $value)
+{
+			if (is_numeric($name))
+{
+				if ($element->attr($value) === null)
+{
 					return false;
 				}
-			} else {
-				if ($element->attr($name) != $value) {
+			}
+else
+{
+				if ($element->attr($name) != $value)
+{
 					return false;
 				}
 			}
@@ -90,7 +99,8 @@ class HasElement extends PageConstraint
 	{
 		$message = "the element [{$this->selector}]";
 
-		if (! empty($this->attributes)) {
+		if (! empty($this->attributes))
+{
 			$message .= ' with the attributes '.json_encode($this->attributes);
 		}
 

@@ -40,11 +40,14 @@ class McryptEncrypter extends BaseEncrypter implements EncrypterContract
 	{
 		$key = (string) $key;
 
-		if (static::supported($key, $cipher)) {
+		if (static::supported($key, $cipher))
+{
 			$this->key = $key;
 			$this->cipher = $cipher;
 			$this->block = mcrypt_get_iv_size($this->cipher, MCRYPT_MODE_CBC);
-		} else {
+		}
+else
+{
 			throw new RuntimeException('The only supported ciphers are MCRYPT_RIJNDAEL_128 and MCRYPT_RIJNDAEL_256.');
 		}
 	}
@@ -83,7 +86,8 @@ class McryptEncrypter extends BaseEncrypter implements EncrypterContract
 
 		$json = json_encode(compact('iv', 'value', 'mac'));
 
-		if (! is_string($json)) {
+		if (! is_string($json))
+{
 			throw new EncryptException('Could not encrypt the data.');
 		}
 
@@ -135,9 +139,11 @@ class McryptEncrypter extends BaseEncrypter implements EncrypterContract
 	 */
 	protected function mcryptDecrypt($value, $iv)
 	{
-		try {
+		try
+{
 			return mcrypt_decrypt($this->cipher, $this->key, $value, MCRYPT_MODE_CBC, $iv);
-		} catch (Exception $e) {
+		} catch (Exception $e)
+{
 			throw new DecryptException($e->getMessage());
 		}
 	}
@@ -199,11 +205,13 @@ class McryptEncrypter extends BaseEncrypter implements EncrypterContract
 	 */
 	protected function getRandomizer()
 	{
-		if (defined('MCRYPT_DEV_URANDOM')) {
+		if (defined('MCRYPT_DEV_URANDOM'))
+{
 			return MCRYPT_DEV_URANDOM;
 		}
 
-		if (defined('MCRYPT_DEV_RANDOM')) {
+		if (defined('MCRYPT_DEV_RANDOM'))
+{
 			return MCRYPT_DEV_RANDOM;
 		}
 

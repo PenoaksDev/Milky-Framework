@@ -16,11 +16,11 @@ use Symfony\Component\Console\Command\Command as SymfonyCommand;
 class Command extends SymfonyCommand
 {
 	/**
-	 * The framework application instance.
+	 * The Framework application instance.
 	 *
-	 * @var \Foundation\Contracts\Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $laravel;
+	protected $framework;
 
 	/**
 	 * The input interface implementation.
@@ -87,15 +87,19 @@ class Command extends SymfonyCommand
 		// We will go ahead and set the name, description, and parameters on console
 		// commands just to make things a little easier on the developer. This is
 		// so they don't have to all be manually specified in the constructors.
-		if (isset($this->signature)) {
+		if (isset($this->signature))
+{
 			$this->configureUsingFluentDefinition();
-		} else {
+		}
+else
+{
 			parent::__construct($this->name);
 		}
 
 		$this->setDescription($this->description);
 
-		if (! isset($this->signature)) {
+		if (! isset($this->signature))
+{
 			$this->specifyParameters();
 		}
 	}
@@ -111,11 +115,13 @@ class Command extends SymfonyCommand
 
 		parent::__construct($name);
 
-		foreach ($arguments as $argument) {
+		foreach ($arguments as $argument)
+{
 			$this->getDefinition()->addArgument($argument);
 		}
 
-		foreach ($options as $option) {
+		foreach ($options as $option)
+{
 			$this->getDefinition()->addOption($option);
 		}
 	}
@@ -130,11 +136,13 @@ class Command extends SymfonyCommand
 		// We will loop through all of the arguments and options for the command and
 		// set them all on the base command instance. This specifies what can get
 		// passed into these commands as "parameters" to control the execution.
-		foreach ($this->getArguments() as $arguments) {
+		foreach ($this->getArguments() as $arguments)
+{
 			call_user_func_array([$this, 'addArgument'], $arguments);
 		}
 
-		foreach ($this->getOptions() as $options) {
+		foreach ($this->getOptions() as $options)
+{
 			call_user_func_array([$this, 'addOption'], $options);
 		}
 	}
@@ -166,7 +174,7 @@ class Command extends SymfonyCommand
 	{
 		$method = method_exists($this, 'handle') ? 'handle' : 'fire';
 
-		return $this->laravel->call([$this, $method]);
+		return $this->framework->call([$this, $method]);
 	}
 
 	/**
@@ -220,7 +228,8 @@ class Command extends SymfonyCommand
 	 */
 	public function argument($key = null)
 	{
-		if (is_null($key)) {
+		if (is_null($key))
+{
 			return $this->input->getArguments();
 		}
 
@@ -246,7 +255,8 @@ class Command extends SymfonyCommand
 	 */
 	public function option($key = null)
 	{
-		if (is_null($key)) {
+		if (is_null($key))
+{
 			return $this->input->getOptions();
 		}
 
@@ -354,7 +364,8 @@ class Command extends SymfonyCommand
 	{
 		$table = new Table($this->output);
 
-		if ($rows instanceof Arrayable) {
+		if ($rows instanceof Arrayable)
+{
 			$rows = $rows->toArray();
 		}
 
@@ -433,7 +444,8 @@ class Command extends SymfonyCommand
 	 */
 	public function warn($string, $verbosity = null)
 	{
-		if (! $this->output->getFormatter()->hasStyle('warning')) {
+		if (! $this->output->getFormatter()->hasStyle('warning'))
+{
 			$style = new OutputFormatterStyle('yellow');
 
 			$this->output->getFormatter()->setStyle('warning', $style);
@@ -450,9 +462,12 @@ class Command extends SymfonyCommand
 	 */
 	protected function parseVerbosity($level = null)
 	{
-		if (isset($this->verbosityMap[$level])) {
+		if (isset($this->verbosityMap[$level]))
+{
 			$level = $this->verbosityMap[$level];
-		} elseif (! is_int($level)) {
+		}
+elseif (! is_int($level))
+{
 			$level = $this->verbosity;
 		}
 
@@ -501,23 +516,23 @@ class Command extends SymfonyCommand
 	}
 
 	/**
-	 * Get the framework application instance.
+	 * Get the Framework application instance.
 	 *
-	 * @return \Foundation\Contracts\Foundation\Application
+	 * @return \Foundation\Framework
 	 */
-	public function getframework()
+	public function getFramework()
 	{
-		return $this->laravel;
+		return $this->framework;
 	}
 
 	/**
-	 * Set the framework application instance.
+	 * Set the Framework application instance.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $laravel
+	 * @param  \Foundation\Framework  $framework
 	 * @return void
 	 */
-	public function setframework($laravel)
+	public function setFramework($framework)
 	{
-		$this->laravel = $laravel;
+		$this->framework = $framework;
 	}
 }

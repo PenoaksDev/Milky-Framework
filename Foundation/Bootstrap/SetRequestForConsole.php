@@ -3,20 +3,20 @@
 namespace Foundation\Bootstrap;
 
 use Foundation\Http\Request;
-use Foundation\Contracts\Foundation\Application;
+use Foundation\Framework;
 
 class SetRequestForConsole
 {
 	/**
 	 * Bootstrap the given application.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function bootstrap(Application $app)
+	public function bootstrap(Framework $fw)
 	{
-		$url = $app->make('config')->get('app.url', 'http://localhost');
+		$url = $fw->make('config')->get('app.url', 'http://localhost');
 
-		$app->instance('request', Request::create($url, 'GET', [], [], [], $_SERVER));
+		$fw->bindings->instance('request', Request::create($url, 'GET', [], [], [], $_SERVER));
 	}
 }

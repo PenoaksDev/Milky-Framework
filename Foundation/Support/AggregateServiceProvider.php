@@ -27,8 +27,9 @@ class AggregateServiceProvider extends ServiceProvider
 	{
 		$this->instances = [];
 
-		foreach ($this->providers as $provider) {
-			$this->instances[] = $this->app->register($provider);
+		foreach ($this->providers as $provider)
+{
+			$this->instances[] = $this->fw->register($provider);
 		}
 	}
 
@@ -41,8 +42,9 @@ class AggregateServiceProvider extends ServiceProvider
 	{
 		$provides = [];
 
-		foreach ($this->providers as $provider) {
-			$instance = $this->app->resolveProviderClass($provider);
+		foreach ($this->providers as $provider)
+{
+			$instance = $this->fw->resolveProviderClass($provider);
 
 			$provides = array_merge($provides, $instance->provides());
 		}

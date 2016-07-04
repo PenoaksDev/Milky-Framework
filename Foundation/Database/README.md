@@ -1,10 +1,10 @@
-## Foundation Database
+## Illuminate Database
 
-The Foundation Database component is a full database toolkit for PHP, providing an expressive query builder, ActiveRecord style ORM, and schema builder. It currently supports MySQL, Postgres, SQL Server, and SQLite. It also serves as the database layer of the framework PHP framework.
+The Illuminate Database component is a full database toolkit for PHP, providing an expressive query builder, ActiveRecord style ORM, and schema builder. It currently supports MySQL, Postgres, SQL Server, and SQLite. It also serves as the database layer of the Penoaks PHP framework.
 
 ### Usage Instructions
 
-First, create a new "Capsule" manager instance. Capsule aims to make configuring the library for usage outside of the Penoaks Framework as easy as possible.
+First, create a new "Capsule" manager instance. Capsule aims to make configuring the library for usage outside of the Framework framework as easy as possible.
 
 ```PHP
 use Foundation\Database\Capsule\Manager as Capsule;
@@ -24,8 +24,8 @@ $capsule->addConnection([
 
 // Set the event dispatcher used by Eloquent models... (optional)
 use Foundation\Events\Dispatcher;
-use Foundation\Container\Container;
-$capsule->setEventDispatcher(new Dispatcher(new Container));
+use Foundation\Framework;
+$capsule->setEventDispatcher(new Dispatcher(new Bindings));
 
 // Make this Capsule instance available globally via static methods... (optional)
 $capsule->setAsGlobal();
@@ -67,4 +67,4 @@ class User extends Foundation\Database\Eloquent\Model {}
 $users = User::where('votes', '>', 1)->get();
 ```
 
-For further documentation on using the various database facilities this library provides, consult the [Penoaks Framework documentation](http://laravel.com/docs).
+For further documentation on using the various database facilities this library provides, consult the [Framework framework documentation](http://framework.com/docs).

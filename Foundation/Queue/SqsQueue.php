@@ -114,11 +114,15 @@ class SqsQueue extends Queue implements QueueContract
 			['QueueUrl' => $queue, 'AttributeNames' => ['ApproximateReceiveCount']]
 		);
 
-		if (count($response['Messages']) > 0) {
-			if ($this->jobCreator) {
-				return call_user_func($this->jobCreator, $this->container, $this->sqs, $queue, $response);
-			} else {
-				return new SqsJob($this->container, $this->sqs, $queue, $response['Messages'][0]);
+		if (count($response['Messages']) > 0)
+{
+			if ($this->jobCreator)
+{
+				return call_user_func($this->jobCreator, $this->bindings, $this->sqs, $queue, $response);
+			}
+else
+{
+				return new SqsJob($this->bindings, $this->sqs, $queue, $response['Messages'][0]);
 			}
 		}
 	}
@@ -146,7 +150,8 @@ class SqsQueue extends Queue implements QueueContract
 	{
 		$queue = $queue ?: $this->default;
 
-		if (filter_var($queue, FILTER_VALIDATE_URL) !== false) {
+		if (filter_var($queue, FILTER_VALIDATE_URL) !== false)
+{
 			return $queue;
 		}
 

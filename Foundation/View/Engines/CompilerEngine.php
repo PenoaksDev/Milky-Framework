@@ -47,7 +47,8 @@ class CompilerEngine extends PhpEngine
 		// If this given view has expired, which means it has simply been edited since
 		// it was last compiled, we will re-compile the views so we can evaluate a
 		// fresh copy of the view. We'll pass the compiler the path of the view.
-		if ($this->compiler->isExpired($path)) {
+		if ($this->compiler->isExpired($path))
+{
 			$this->compiler->compile($path);
 		}
 

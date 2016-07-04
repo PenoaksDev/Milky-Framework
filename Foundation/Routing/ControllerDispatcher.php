@@ -4,7 +4,7 @@ namespace Foundation\Routing;
 
 use Foundation\Http\Request;
 use Foundation\Support\Collection;
-use Foundation\Container\Container;
+use Foundation\Framework;
 
 class ControllerDispatcher
 {
@@ -18,24 +18,24 @@ class ControllerDispatcher
 	protected $router;
 
 	/**
-	 * The IoC container instance.
+	 * The IoC bindings instance.
 	 *
-	 * @var \Foundation\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * Create a new controller dispatcher instance.
 	 *
 	 * @param  \Foundation\Routing\Router  $router
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
 	public function __construct(Router $router,
-								Container $container = null)
+								Bindings $bindings = null)
 	{
 		$this->router = $router;
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 
 	/**
@@ -55,7 +55,7 @@ class ControllerDispatcher
 	}
 
 	/**
-	 * Make a controller instance via the IoC container.
+	 * Make a controller instance via the IoC bindings.
 	 *
 	 * @param  string  $controller
 	 * @return mixed
@@ -64,7 +64,7 @@ class ControllerDispatcher
 	{
 		Controller::setRouter($this->router);
 
-		return $this->container->make($controller);
+		return $this->bindings->make($controller);
 	}
 
 	/**
@@ -78,18 +78,19 @@ class ControllerDispatcher
 	 */
 	protected function callWithinStack($instance, $route, $request, $method)
 	{
-		$shouldSkipMiddleware = $this->container->bound('middleware.disable') &&
-								$this->container->make('middleware.disable') === true;
+		$shouldSkipMiddleware = $this->bindings->bound('middleware.disable') &&
+								$this->bindings->make('middleware.disable') === true;
 
 		$middleware = $shouldSkipMiddleware ? [] : $this->getMiddleware($instance, $method);
 
 		// Here we will make a stack onion instance to execute this request in, which gives
 		// us the ability to define middlewares on controllers. We will return the given
 		// response back out so that "after" filters can be run after the middlewares.
-		return (new Pipeline($this->container))
+		return (new Pipeline($this->bindings))
 					->send($request)
 					->through($middleware)
-					->then(function ($request) use ($instance, $route, $method) {
+					->then(function ($request) use ($instance, $route, $method)
+{
 						return $this->router->prepareResponse(
 							$request, $this->call($instance, $route, $method)
 						);
@@ -107,8 +108,10 @@ class ControllerDispatcher
 	{
 		$results = new Collection;
 
-		foreach ($instance->getMiddleware() as $name => $options) {
-			if (! $this->methodExcludedByOptions($method, $options)) {
+		foreach ($instance->getMiddleware() as $name => $options)
+{
+			if (! $this->methodExcludedByOptions($method, $options))
+{
 				$results[] = $this->router->resolveMiddlewareClassName($name);
 			}
 		}

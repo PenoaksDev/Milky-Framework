@@ -3,7 +3,7 @@
 namespace Foundation\Queue\Jobs;
 
 use Foundation\Queue\DatabaseQueue;
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\Queue\Job as JobContract;
 
 class DatabaseJob extends Job implements JobContract
@@ -25,18 +25,18 @@ class DatabaseJob extends Job implements JobContract
 	/**
 	 * Create a new job instance.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @param  \Foundation\Queue\DatabaseQueue  $database
 	 * @param  \StdClass  $job
 	 * @param  string  $queue
 	 * @return void
 	 */
-	public function __construct(Container $container, DatabaseQueue $database, $job, $queue)
+	public function __construct(Bindings $bindings, DatabaseQueue $database, $job, $queue)
 	{
 		$this->job = $job;
 		$this->queue = $queue;
 		$this->database = $database;
-		$this->container = $container;
+		$this->bindings = $bindings;
 		$this->job->attempts = $this->job->attempts + 1;
 	}
 
@@ -108,13 +108,13 @@ class DatabaseJob extends Job implements JobContract
 	}
 
 	/**
-	 * Get the IoC container instance.
+	 * Get the IoC bindings instance.
 	 *
-	 * @return \Foundation\Container\Container
+	 * @return \Foundation\Framework
 	 */
-	public function getContainer()
+	public function getBindings()
 	{
-		return $this->container;
+		return $this->bindings;
 	}
 
 	/**

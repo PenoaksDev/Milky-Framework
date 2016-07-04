@@ -9,26 +9,26 @@ use Foundation\Database\MySqlConnection;
 use Foundation\Database\SQLiteConnection;
 use Foundation\Database\PostgresConnection;
 use Foundation\Database\SqlServerConnection;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 
 class ConnectionFactory
 {
 	/**
-	 * The IoC container instance.
+	 * The IoC bindings instance.
 	 *
-	 * @var \Foundation\Contracts\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * Create a new connection factory instance.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function __construct(Container $container)
+	public function __construct(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 
 	/**
@@ -42,7 +42,8 @@ class ConnectionFactory
 	{
 		$config = $this->parseConfig($config, $name);
 
-		if (isset($config['read'])) {
+		if (isset($config['read']))
+{
 			return $this->createReadWriteConnection($config);
 		}
 
@@ -57,7 +58,8 @@ class ConnectionFactory
 	 */
 	protected function createSingleConnection(array $config)
 	{
-		$pdo = function () use ($config) {
+		$pdo = function () use ($config)
+{
 			return $this->createConnector($config)->connect($config);
 		};
 
@@ -100,7 +102,8 @@ class ConnectionFactory
 	{
 		$readConfig = $this->getReadWriteConfig($config, 'read');
 
-		if (isset($readConfig['host']) && is_array($readConfig['host'])) {
+		if (isset($readConfig['host']) && is_array($readConfig['host']))
+{
 			$readConfig['host'] = count($readConfig['host']) > 1
 				? $readConfig['host'][array_rand($readConfig['host'])]
 				: $readConfig['host'][0];
@@ -131,7 +134,8 @@ class ConnectionFactory
 	 */
 	protected function getReadWriteConfig(array $config, $type)
 	{
-		if (isset($config[$type][0])) {
+		if (isset($config[$type][0]))
+{
 			return $config[$type][array_rand($config[$type])];
 		}
 
@@ -172,15 +176,18 @@ class ConnectionFactory
 	 */
 	public function createConnector(array $config)
 	{
-		if (! isset($config['driver'])) {
+		if (! isset($config['driver']))
+{
 			throw new InvalidArgumentException('A driver must be specified.');
 		}
 
-		if ($this->container->bound($key = "db.connector.{$config['driver']}")) {
-			return $this->container->make($key);
+		if ($this->bindings->bound($key = "db.connector.{$config['driver']}"))
+{
+			return $this->bindings->make($key);
 		}
 
-		switch ($config['driver']) {
+		switch ($config['driver'])
+{
 			case 'mysql':
 				return new MySqlConnector;
 			case 'pgsql':
@@ -208,11 +215,13 @@ class ConnectionFactory
 	 */
 	protected function createConnection($driver, $connection, $database, $prefix = '', array $config = [])
 	{
-		if ($this->container->bound($key = "db.connection.{$driver}")) {
-			return $this->container->make($key, [$connection, $database, $prefix, $config]);
+		if ($this->bindings->bound($key = "db.connection.{$driver}"))
+{
+			return $this->bindings->make($key, [$connection, $database, $prefix, $config]);
 		}
 
-		switch ($driver) {
+		switch ($driver)
+{
 			case 'mysql':
 				return new MySqlConnection($connection, $database, $prefix, $config);
 			case 'pgsql':

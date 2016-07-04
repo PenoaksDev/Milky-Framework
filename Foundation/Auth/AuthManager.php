@@ -13,9 +13,9 @@ class AuthManager implements FactoryContract
 	/**
 	 * The application instance.
 	 *
-	 * @var \Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The registered custom driver creators.
@@ -43,14 +43,15 @@ class AuthManager implements FactoryContract
 	/**
 	 * Create a new Auth manager instance.
 	 *
-	 * @param  \Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function __construct($app)
+	public function __construct($fw)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 
-		$this->userResolver = function ($guard = null) {
+		$this->userResolver = function ($guard = null)
+{
 			return $this->guard($guard)->user();
 		};
 	}
@@ -82,18 +83,25 @@ class AuthManager implements FactoryContract
 	{
 		$config = $this->getConfig($name);
 
-		if (is_null($config)) {
+		if (is_null($config))
+{
 			throw new InvalidArgumentException("Auth guard [{$name}] is not defined.");
 		}
 
-		if (isset($this->customCreators[$config['driver']])) {
+		if (isset($this->customCreators[$config['driver']]))
+{
 			return $this->callCustomCreator($name, $config);
-		} else {
+		}
+else
+{
 			$driverMethod = 'create'.ucfirst($config['driver']).'Driver';
 
-			if (method_exists($this, $driverMethod)) {
+			if (method_exists($this, $driverMethod))
+{
 				return $this->{$driverMethod}($name, $config);
-			} else {
+			}
+else
+{
 				throw new InvalidArgumentException("Auth guard driver [{$name}] is not defined.");
 			}
 		}
@@ -108,7 +116,7 @@ class AuthManager implements FactoryContract
 	 */
 	protected function callCustomCreator($name, array $config)
 	{
-		return $this->customCreators[$config['driver']]($this->app, $name, $config);
+		return $this->customCreators[$config['driver']]($this->fw, $name, $config);
 	}
 
 	/**
@@ -122,21 +130,24 @@ class AuthManager implements FactoryContract
 	{
 		$provider = $this->createUserProvider($config['provider']);
 
-		$guard = new SessionGuard($name, $provider, $this->app['session.store']);
+		$guard = new SessionGuard($name, $provider, $this->fw->bindings['session.store']);
 
 		// When using the remember me functionality of the authentication services we
 		// will need to be set the encryption instance of the guard, which allows
 		// secure, encrypted cookie values to get generated for those cookies.
-		if (method_exists($guard, 'setCookieJar')) {
-			$guard->setCookieJar($this->app['cookie']);
+		if (method_exists($guard, 'setCookieJar'))
+{
+			$guard->setCookieJar($this->fw->bindings['cookie']);
 		}
 
-		if (method_exists($guard, 'setDispatcher')) {
-			$guard->setDispatcher($this->app['events']);
+		if (method_exists($guard, 'setDispatcher'))
+{
+			$guard->setDispatcher($this->fw->bindings['events']);
 		}
 
-		if (method_exists($guard, 'setRequest')) {
-			$guard->setRequest($this->app->refresh('request', $guard, 'setRequest'));
+		if (method_exists($guard, 'setRequest'))
+{
+			$guard->setRequest($this->fw->refresh('request', $guard, 'setRequest'));
 		}
 
 		return $guard;
@@ -156,10 +167,10 @@ class AuthManager implements FactoryContract
 		// user in the database or another persistence layer where users are.
 		$guard = new TokenGuard(
 			$this->createUserProvider($config['provider']),
-			$this->app['request']
+			$this->fw->bindings['request']
 		);
 
-		$this->app->refresh('request', $guard, 'setRequest');
+		$this->fw->refresh('request', $guard, 'setRequest');
 
 		return $guard;
 	}
@@ -172,7 +183,7 @@ class AuthManager implements FactoryContract
 	 */
 	protected function getConfig($name)
 	{
-		return $this->app['config']["auth.guards.{$name}"];
+		return $this->fw->bindings['config']["auth.guards.{$name}"];
 	}
 
 	/**
@@ -182,7 +193,7 @@ class AuthManager implements FactoryContract
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['auth.defaults.guard'];
+		return $this->fw->bindings['config']['auth.defaults.guard'];
 	}
 
 	/**
@@ -195,7 +206,8 @@ class AuthManager implements FactoryContract
 	{
 		$this->setDefaultDriver($name);
 
-		$this->userResolver = function ($name = null) {
+		$this->userResolver = function ($name = null)
+{
 			return $this->guard($name)->user();
 		};
 	}
@@ -208,7 +220,7 @@ class AuthManager implements FactoryContract
 	 */
 	public function setDefaultDriver($name)
 	{
-		$this->app['config']['auth.defaults.guard'] = $name;
+		$this->fw->bindings['config']['auth.defaults.guard'] = $name;
 	}
 
 	/**
@@ -220,10 +232,11 @@ class AuthManager implements FactoryContract
 	 */
 	public function viaRequest($driver, callable $callback)
 	{
-		return $this->extend($driver, function () use ($callback) {
-			$guard = new RequestGuard($callback, $this->app['request']);
+		return $this->extend($driver, function () use ($callback)
+{
+			$guard = new RequestGuard($callback, $this->fw->bindings['request']);
 
-			$this->app->refresh('request', $guard, 'setRequest');
+			$this->fw->refresh('request', $guard, 'setRequest');
 
 			return $guard;
 		});

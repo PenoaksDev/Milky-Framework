@@ -39,7 +39,8 @@ class ThrottleRequests
 	{
 		$key = $this->resolveRequestSignature($request);
 
-		if ($this->limiter->tooManyAttempts($key, $maxAttempts, $decayMinutes)) {
+		if ($this->limiter->tooManyAttempts($key, $maxAttempts, $decayMinutes))
+{
 			return $this->buildResponse($key, $maxAttempts);
 		}
 
@@ -100,7 +101,8 @@ class ThrottleRequests
 			'X-RateLimit-Remaining' => $remainingAttempts,
 		];
 
-		if (! is_null($retryAfter)) {
+		if (! is_null($retryAfter))
+{
 			$headers['Retry-After'] = $retryAfter;
 		}
 
@@ -119,7 +121,8 @@ class ThrottleRequests
 	 */
 	protected function calculateRemainingAttempts($key, $maxAttempts, $retryAfter = null)
 	{
-		if (! is_null($retryAfter)) {
+		if (! is_null($retryAfter))
+{
 			return 0;
 		}
 

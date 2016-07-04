@@ -3,16 +3,16 @@
 namespace Foundation;
 
 use Foundation\Filesystem\Filesystem;
-use Foundation\Contracts\Foundation\Application as ApplicationContract;
+use Foundation\Framework as ApplicationContract;
 
 class ProviderRepository
 {
 	/**
 	 * The application implementation.
 	 *
-	 * @var \Foundation\Contracts\Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The filesystem instance.
@@ -31,14 +31,14 @@ class ProviderRepository
 	/**
 	 * Create a new service repository instance.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @param  \Foundation\Filesystem\Filesystem  $files
 	 * @param  string  $manifestPath
 	 * @return void
 	 */
-	public function __construct(ApplicationContract $app, Filesystem $files, $manifestPath)
+	public function __construct(FrameworkContract $fw, Filesystem $files, $manifestPath)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 		$this->files = $files;
 		$this->manifestPath = $manifestPath;
 	}
@@ -56,25 +56,28 @@ class ProviderRepository
 		// First we will load the service manifest, which contains information on all
 		// service providers registered with the application and which services it
 		// provides. This is used to know which services are "deferred" loaders.
-		if ($this->shouldRecompile($manifest, $providers)) {
+		if ($this->shouldRecompile($manifest, $providers))
+		{
 			$manifest = $this->compileManifest($providers);
 		}
 
 		// Next, we will register events to load the providers for each of the events
 		// that it has requested. This allows the service provider to defer itself
 		// while still getting automatically loaded when a certain event occurs.
-		foreach ($manifest['when'] as $provider => $events) {
+		foreach ($manifest['when'] as $provider => $events)
+		{
 			$this->registerLoadEvents($provider, $events);
 		}
 
 		// We will go ahead and register all of the eagerly loaded providers with the
 		// application so their services can be registered with the application as
 		// a provided service. Then we will set the deferred service list on it.
-		foreach ($manifest['eager'] as $provider) {
-			$this->app->register($this->createProvider($provider));
+		foreach ($manifest['eager'] as $provider)
+		{
+			$this->fw->register($this->createProvider($provider));
 		}
 
-		$this->app->addDeferredServices($manifest['deferred']);
+		$this->fw->addDeferredServices($manifest['deferred']);
 	}
 
 	/**
@@ -86,14 +89,16 @@ class ProviderRepository
 	 */
 	protected function registerLoadEvents($provider, array $events)
 	{
-		if (count($events) < 1) {
+		if (count($events) < 1)
+{
 			return;
 		}
 
-		$app = $this->app;
+		$fw = $this->fw;
 
-		$app->make('events')->listen($events, function () use ($app, $provider) {
-			$app->register($provider);
+		$fw->make('events')->listen($events, function () use ($fw, $provider)
+{
+			$fw->register($provider);
 		});
 	}
 
@@ -110,14 +115,17 @@ class ProviderRepository
 		// and determine if the manifest should be recompiled or is current.
 		$manifest = $this->freshManifest($providers);
 
-		foreach ($providers as $provider) {
+		foreach ($providers as $provider)
+{
 			$instance = $this->createProvider($provider);
 
 			// When recompiling the service manifest, we will spin through each of the
 			// providers and check if it's a deferred provider or not. If so we'll
 			// add it's provided services to the manifest and note the provider.
-			if ($instance->isDeferred()) {
-				foreach ($instance->provides() as $service) {
+			if ($instance->isDeferred())
+{
+				foreach ($instance->provides() as $service)
+{
 					$manifest['deferred'][$service] = $provider;
 				}
 
@@ -127,7 +135,8 @@ class ProviderRepository
 			// If the service providers are not deferred, we will simply add it to an
 			// array of eagerly loaded providers that will get registered on every
 			// request to this application instead of "lazy" loading every time.
-			else {
+			else
+{
 				$manifest['eager'][] = $provider;
 			}
 		}
@@ -143,7 +152,7 @@ class ProviderRepository
 	 */
 	public function createProvider($provider)
 	{
-		return new $provider($this->app);
+		return new $provider($this->fw);
 	}
 
 	/**
@@ -168,10 +177,12 @@ class ProviderRepository
 		// The service manifest is a file containing a JSON representation of every
 		// service provided by the application and whether its provider is using
 		// deferred loading or should be eagerly loaded on each request to us.
-		if ($this->files->exists($this->manifestPath)) {
+		if ($this->files->exists($this->manifestPath))
+{
 			$manifest = $this->files->getRequire($this->manifestPath);
 
-			if ($manifest) {
+			if ($manifest)
+{
 				return array_merge(['when' => []], $manifest);
 			}
 		}

@@ -81,7 +81,8 @@ class View implements ArrayAccess, ViewContract
 	 */
 	public function render(callable $callback = null)
 	{
-		try {
+		try
+{
 			$contents = $this->renderContents();
 
 			$response = isset($callback) ? call_user_func($callback, $this, $contents) : null;
@@ -92,11 +93,13 @@ class View implements ArrayAccess, ViewContract
 			$this->factory->flushSectionsIfDoneRendering();
 
 			return ! is_null($response) ? $response : $contents;
-		} catch (Exception $e) {
+		} catch (Exception $e)
+{
 			$this->factory->flushSections();
 
 			throw $e;
-		} catch (Throwable $e) {
+		} catch (Throwable $e)
+{
 			$this->factory->flushSections();
 
 			throw $e;
@@ -134,7 +137,8 @@ class View implements ArrayAccess, ViewContract
 	 */
 	public function renderSections()
 	{
-		return $this->render(function () {
+		return $this->render(function ()
+{
 			return $this->factory->getSections();
 		});
 	}
@@ -158,8 +162,10 @@ class View implements ArrayAccess, ViewContract
 	{
 		$data = array_merge($this->factory->getShared(), $this->data);
 
-		foreach ($data as $key => $value) {
-			if ($value instanceof Renderable) {
+		foreach ($data as $key => $value)
+{
+			if ($value instanceof Renderable)
+{
 				$data[$key] = $value->render();
 			}
 		}
@@ -176,9 +182,12 @@ class View implements ArrayAccess, ViewContract
 	 */
 	public function with($key, $value = null)
 	{
-		if (is_array($key)) {
+		if (is_array($key))
+{
 			$this->data = array_merge($this->data, $key);
-		} else {
+		}
+else
+{
 			$this->data[$key] = $value;
 		}
 
@@ -206,9 +215,12 @@ class View implements ArrayAccess, ViewContract
 	 */
 	public function withErrors($provider)
 	{
-		if ($provider instanceof MessageProvider) {
+		if ($provider instanceof MessageProvider)
+{
 			$this->with('errors', $provider->getMessageBag());
-		} else {
+		}
+else
+{
 			$this->with('errors', new MessageBag((array) $provider));
 		}
 
@@ -387,7 +399,8 @@ class View implements ArrayAccess, ViewContract
 	 */
 	public function __call($method, $parameters)
 	{
-		if (Str::startsWith($method, 'with')) {
+		if (Str::startsWith($method, 'with'))
+{
 			return $this->with(Str::snake(substr($method, 4)), $parameters[0]);
 		}
 

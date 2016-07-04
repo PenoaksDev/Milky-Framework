@@ -37,7 +37,8 @@ class ListFailedCommand extends Command
 	{
 		$jobs = $this->getFailedJobs();
 
-		if (count($jobs) == 0) {
+		if (count($jobs) == 0)
+{
 			return $this->info('No failed jobs!');
 		}
 
@@ -53,7 +54,8 @@ class ListFailedCommand extends Command
 	{
 		$results = [];
 
-		foreach ($this->laravel['queue.failer']->all() as $failed) {
+		foreach ($this->framework['queue.failer']->all() as $failed)
+{
 			$results[] = $this->parseFailedJob((array) $failed);
 		}
 
@@ -85,16 +87,21 @@ class ListFailedCommand extends Command
 	{
 		$payload = json_decode($payload, true);
 
-		if ($payload && (! isset($payload['data']['command']))) {
+		if ($payload && (! isset($payload['data']['command'])))
+{
 			return Arr::get($payload, 'job');
 		}
 
-		if ($payload && isset($payload['data']['command'])) {
+		if ($payload && isset($payload['data']['command']))
+{
 			preg_match('/"([^"]+)"/', $payload['data']['command'], $matches);
 
-			if (isset($matches[1])) {
+			if (isset($matches[1]))
+{
 				return $matches[1];
-			} else {
+			}
+else
+{
 				return Arr::get($payload, 'job');
 			}
 		}

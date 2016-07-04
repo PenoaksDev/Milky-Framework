@@ -22,9 +22,12 @@ class SqlServerProcessor extends Processor
 
 		$connection->insert($sql, $values);
 
-		if ($connection->getConfig('odbc') === true) {
+		if ($connection->getConfig('odbc') === true)
+{
 			$id = $this->processInsertGetIdForOdbc($connection);
-		} else {
+		}
+else
+{
 			$id = $connection->getPdo()->lastInsertId();
 		}
 
@@ -41,7 +44,8 @@ class SqlServerProcessor extends Processor
 	{
 		$result = $connection->select('SELECT CAST(COALESCE(SCOPE_IDENTITY(), @@IDENTITY) AS int) AS insertid');
 
-		if (! $result) {
+		if (! $result)
+{
 			throw new Exception('Unable to retrieve lastInsertID for ODBC.');
 		}
 
@@ -56,7 +60,8 @@ class SqlServerProcessor extends Processor
 	 */
 	public function processColumnListing($results)
 	{
-		$mapping = function ($r) {
+		$mapping = function ($r)
+{
 			$r = (object) $r;
 
 			return $r->name;

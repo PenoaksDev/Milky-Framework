@@ -62,7 +62,8 @@ class MorphTo extends BelongsTo
 	 */
 	public function getResults()
 	{
-		if (! $this->otherKey) {
+		if (! $this->otherKey)
+{
 			return;
 		}
 
@@ -88,8 +89,10 @@ class MorphTo extends BelongsTo
 	 */
 	protected function buildDictionary(Collection $models)
 	{
-		foreach ($models as $model) {
-			if ($model->{$this->morphType}) {
+		foreach ($models as $model)
+{
+			if ($model->{$this->morphType})
+{
 				$this->dictionary[$model->{$this->morphType}][$model->{$this->foreignKey}][] = $model;
 			}
 		}
@@ -146,7 +149,8 @@ class MorphTo extends BelongsTo
 	 */
 	public function getEager()
 	{
-		foreach (array_keys($this->dictionary) as $type) {
+		foreach (array_keys($this->dictionary) as $type)
+{
 			$this->matchToMorphParents($type, $this->getResultsByType($type));
 		}
 
@@ -162,9 +166,12 @@ class MorphTo extends BelongsTo
 	 */
 	protected function matchToMorphParents($type, Collection $results)
 	{
-		foreach ($results as $result) {
-			if (isset($this->dictionary[$type][$result->getKey()])) {
-				foreach ($this->dictionary[$type][$result->getKey()] as $model) {
+		foreach ($results as $result)
+{
+			if (isset($this->dictionary[$type][$result->getKey()]))
+{
+				foreach ($this->dictionary[$type][$result->getKey()] as $model)
+{
 					$model->setRelation($this->relation, $result);
 				}
 			}
@@ -202,7 +209,8 @@ class MorphTo extends BelongsTo
 	{
 		$foreign = $this->foreignKey;
 
-		return collect($this->dictionary[$type])->map(function ($models) use ($foreign) {
+		return collect($this->dictionary[$type])->map(function ($models) use ($foreign)
+{
 			return head($models)->{$foreign};
 		})->values()->unique();
 	}
@@ -248,7 +256,8 @@ class MorphTo extends BelongsTo
 	 */
 	protected function replayMacros(Builder $query)
 	{
-		foreach ($this->macroBuffer as $macro) {
+		foreach ($this->macroBuffer as $macro)
+{
 			call_user_func_array([$query, $macro['method']], $macro['parameters']);
 		}
 
@@ -264,14 +273,16 @@ class MorphTo extends BelongsTo
 	 */
 	public function __call($method, $parameters)
 	{
-		try {
+		try
+{
 			return parent::__call($method, $parameters);
 		}
 
 		// If we tried to call a method that does not exist on the parent Builder instance,
 		// we'll assume that we want to call a query macro (e.g. withTrashed) that only
 		// exists on related models. We will just store the call and replay it later.
-		catch (BadMethodCallException $e) {
+		catch (BadMethodCallException $e)
+{
 			$this->macroBuffer[] = compact('method', 'parameters');
 
 			return $this;

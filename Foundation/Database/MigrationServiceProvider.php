@@ -49,10 +49,11 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerRepository()
 	{
-		$this->app->singleton('migration.repository', function ($app) {
-			$table = $app['config']['database.migrations'];
+		$this->fw->bindings->singleton('migration.repository', function ($fw)
+{
+			$table = $fw->bindings['config']['database.migrations'];
 
-			return new DatabaseMigrationRepository($app['db'], $table);
+			return new DatabaseMigrationRepository($fw->bindings['db'], $table);
 		});
 	}
 
@@ -66,10 +67,11 @@ class MigrationServiceProvider extends ServiceProvider
 		// The migrator is responsible for actually running and rollback the migration
 		// files in the application. We'll pass in our database connection resolver
 		// so the migrator can resolve any of these connections when it needs to.
-		$this->app->singleton('migrator', function ($app) {
-			$repository = $app['migration.repository'];
+		$this->fw->bindings->singleton('migrator', function ($fw)
+{
+			$repository = $fw->bindings['migration.repository'];
 
-			return new Migrator($repository, $app['db'], $app['files']);
+			return new Migrator($repository, $fw->bindings['db'], $fw->bindings['files']);
 		});
 	}
 
@@ -80,8 +82,9 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerCreator()
 	{
-		$this->app->singleton('migration.creator', function ($app) {
-			return new MigrationCreator($app['files']);
+		$this->fw->bindings->singleton('migration.creator', function ($fw)
+{
+			return new MigrationCreator($fw->bindings['files']);
 		});
 	}
 
@@ -95,13 +98,14 @@ class MigrationServiceProvider extends ServiceProvider
 		$commands = ['Migrate', 'Rollback', 'Reset', 'Refresh', 'Install', 'Make', 'Status'];
 
 		// We'll simply spin through the list of commands that are migration related
-		// and register each one of them with an application container. They will
+		// and register each one of them with an application bindings. They will
 		// be resolved in the Artisan start file and registered on the console.
-		foreach ($commands as $command) {
+		foreach ($commands as $command)
+{
 			$this->{'register'.$command.'Command'}();
 		}
 
-		// Once the commands are registered in the application IoC container we will
+		// Once the commands are registered in the application IoC bindings we will
 		// register them with the Artisan start event so that these are available
 		// when the Artisan application actually starts up and is getting used.
 		$this->commands(
@@ -119,8 +123,9 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerMigrateCommand()
 	{
-		$this->app->singleton('command.migrate', function ($app) {
-			return new MigrateCommand($app['migrator']);
+		$this->fw->bindings->singleton('command.migrate', function ($fw)
+{
+			return new MigrateCommand($fw->bindings['migrator']);
 		});
 	}
 
@@ -131,8 +136,9 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerRollbackCommand()
 	{
-		$this->app->singleton('command.migrate.rollback', function ($app) {
-			return new RollbackCommand($app['migrator']);
+		$this->fw->bindings->singleton('command.migrate.rollback', function ($fw)
+{
+			return new RollbackCommand($fw->bindings['migrator']);
 		});
 	}
 
@@ -143,8 +149,9 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerResetCommand()
 	{
-		$this->app->singleton('command.migrate.reset', function ($app) {
-			return new ResetCommand($app['migrator']);
+		$this->fw->bindings->singleton('command.migrate.reset', function ($fw)
+{
+			return new ResetCommand($fw->bindings['migrator']);
 		});
 	}
 
@@ -155,7 +162,8 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerRefreshCommand()
 	{
-		$this->app->singleton('command.migrate.refresh', function () {
+		$this->fw->bindings->singleton('command.migrate.refresh', function ()
+{
 			return new RefreshCommand;
 		});
 	}
@@ -167,13 +175,14 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerMakeCommand()
 	{
-		$this->app->singleton('command.migrate.make', function ($app) {
+		$this->fw->bindings->singleton('command.migrate.make', function ($fw)
+{
 			// Once we have the migration creator registered, we will create the command
 			// and inject the creator. The creator is responsible for the actual file
 			// creation of the migrations, and may be extended by these developers.
-			$creator = $app['migration.creator'];
+			$creator = $fw->bindings['migration.creator'];
 
-			$composer = $app['composer'];
+			$composer = $fw->bindings['composer'];
 
 			return new MigrateMakeCommand($creator, $composer);
 		});
@@ -186,8 +195,9 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerStatusCommand()
 	{
-		$this->app->singleton('command.migrate.status', function ($app) {
-			return new StatusCommand($app['migrator']);
+		$this->fw->bindings->singleton('command.migrate.status', function ($fw)
+{
+			return new StatusCommand($fw->bindings['migrator']);
 		});
 	}
 
@@ -198,8 +208,9 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerInstallCommand()
 	{
-		$this->app->singleton('command.migrate.install', function ($app) {
-			return new InstallCommand($app['migration.repository']);
+		$this->fw->bindings->singleton('command.migrate.install', function ($fw)
+{
+			return new InstallCommand($fw->bindings['migration.repository']);
 		});
 	}
 

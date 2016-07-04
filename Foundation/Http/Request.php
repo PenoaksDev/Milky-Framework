@@ -46,7 +46,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	protected $routeResolver;
 
 	/**
-	 * Create a new Foundation HTTP request from server variables.
+	 * Create a new Illuminate HTTP request from server variables.
 	 *
 	 * @return static
 	 */
@@ -167,7 +167,8 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	{
 		$segments = explode('/', $this->path());
 
-		return array_values(array_filter($segments, function ($v) {
+		return array_values(array_filter($segments, function ($v)
+{
 			return $v != '';
 		}));
 	}
@@ -180,8 +181,10 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	public function is()
 	{
-		foreach (func_get_args() as $pattern) {
-			if (Str::is($pattern, urldecode($this->path()))) {
+		foreach (func_get_args() as $pattern)
+{
+			if (Str::is($pattern, urldecode($this->path())))
+{
 				return true;
 			}
 		}
@@ -199,8 +202,10 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	{
 		$url = $this->fullUrl();
 
-		foreach (func_get_args() as $pattern) {
-			if (Str::is($pattern, $url)) {
+		foreach (func_get_args() as $pattern)
+{
+			if (Str::is($pattern, $url))
+{
 				return true;
 			}
 		}
@@ -270,8 +275,10 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 
 		$input = $this->all();
 
-		foreach ($keys as $value) {
-			if (! array_key_exists($value, $input)) {
+		foreach ($keys as $value)
+{
+			if (! array_key_exists($value, $input))
+{
 				return false;
 			}
 		}
@@ -289,8 +296,10 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	{
 		$keys = is_array($key) ? $key : func_get_args();
 
-		foreach ($keys as $value) {
-			if ($this->isEmptyString($value)) {
+		foreach ($keys as $value)
+{
+			if ($this->isEmptyString($value))
+{
 				return false;
 			}
 		}
@@ -351,7 +360,8 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 
 		$input = $this->all();
 
-		foreach ($keys as $key) {
+		foreach ($keys as $key)
+{
 			Arr::set($results, $key, data_get($input, $key));
 		}
 
@@ -436,15 +446,17 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	}
 
 	/**
-	 * Convert the given array of Symfony UploadedFiles to custom framework UploadedFiles.
+	 * Convert the given array of Symfony UploadedFiles to custom Framework UploadedFiles.
 	 *
 	 * @param  array  $files
 	 * @return array
 	 */
 	protected function convertUploadedFiles(array $files)
 	{
-		return array_map(function ($file) {
-			if (is_null($file) || (is_array($file) && empty(array_filter($file)))) {
+		return array_map(function ($file)
+{
+			if (is_null($file) || (is_array($file) && empty(array_filter($file))))
+{
 				return $file;
 			}
 
@@ -474,12 +486,15 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	public function hasFile($key)
 	{
-		if (! is_array($files = $this->file($key))) {
+		if (! is_array($files = $this->file($key)))
+{
 			$files = [$files];
 		}
 
-		foreach ($files as $file) {
-			if ($this->isValidFile($file)) {
+		foreach ($files as $file)
+{
+			if ($this->isValidFile($file))
+{
 				return true;
 			}
 		}
@@ -605,7 +620,8 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	protected function retrieveItem($source, $key, $default)
 	{
-		if (is_null($key)) {
+		if (is_null($key))
+{
 			return $this->$source->all();
 		}
 
@@ -643,11 +659,13 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	public function json($key = null, $default = null)
 	{
-		if (! isset($this->json)) {
+		if (! isset($this->json))
+{
 			$this->json = new ParameterBag((array) json_decode($this->getContent(), true));
 		}
 
-		if (is_null($key)) {
+		if (is_null($key))
+{
 			return $this->json;
 		}
 
@@ -661,7 +679,8 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	protected function getInputSource()
 	{
-		if ($this->isJson()) {
+		if ($this->isJson())
+{
 			return $this->json();
 		}
 
@@ -677,7 +696,8 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	public static function matchesType($actual, $type)
 	{
-		if ($actual === $type) {
+		if ($actual === $type)
+{
 			return true;
 		}
 
@@ -718,19 +738,24 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	{
 		$accepts = $this->getAcceptableContentTypes();
 
-		if (count($accepts) === 0) {
+		if (count($accepts) === 0)
+{
 			return true;
 		}
 
 		$types = (array) $contentTypes;
 
-		foreach ($accepts as $accept) {
-			if ($accept === '*/*' || $accept === '*') {
+		foreach ($accepts as $accept)
+{
+			if ($accept === '*/*' || $accept === '*')
+{
 				return true;
 			}
 
-			foreach ($types as $type) {
-				if ($this->matchesType($accept, $type) || $accept === strtok($type, '/').'/*') {
+			foreach ($types as $type)
+{
+				if ($this->matchesType($accept, $type) || $accept === strtok($type, '/').'/*')
+{
 					return true;
 				}
 			}
@@ -751,19 +776,24 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 
 		$contentTypes = (array) $contentTypes;
 
-		foreach ($accepts as $accept) {
-			if (in_array($accept, ['*/*', '*'])) {
+		foreach ($accepts as $accept)
+{
+			if (in_array($accept, ['*/*', '*']))
+{
 				return $contentTypes[0];
 			}
 
-			foreach ($contentTypes as $contentType) {
+			foreach ($contentTypes as $contentType)
+{
 				$type = $contentType;
 
-				if (! is_null($mimeType = $this->getMimeType($contentType))) {
+				if (! is_null($mimeType = $this->getMimeType($contentType)))
+{
 					$type = $mimeType;
 				}
 
-				if ($this->matchesType($type, $accept) || $accept === strtok($type, '/').'/*') {
+				if ($this->matchesType($type, $accept) || $accept === strtok($type, '/').'/*')
+{
 					return $contentType;
 				}
 			}
@@ -798,8 +828,10 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	public function format($default = 'html')
 	{
-		foreach ($this->getAcceptableContentTypes() as $type) {
-			if ($format = $this->getFormat($type)) {
+		foreach ($this->getAcceptableContentTypes() as $type)
+{
+			if ($format = $this->getFormat($type))
+{
 				return $format;
 			}
 		}
@@ -816,20 +848,22 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	{
 		$header = $this->header('Authorization', '');
 
-		if (Str::startsWith($header, 'Bearer ')) {
+		if (Str::startsWith($header, 'Bearer '))
+{
 			return Str::substr($header, 7);
 		}
 	}
 
 	/**
-	 * Create an Foundation request from a Symfony instance.
+	 * Create an Illuminate request from a Symfony instance.
 	 *
 	 * @param  \Symfony\Component\HttpFoundation\Request  $request
 	 * @return \Foundation\Http\Request
 	 */
 	public static function createFromBase(SymfonyRequest $request)
 	{
-		if ($request instanceof static) {
+		if ($request instanceof static)
+{
 			return $request;
 		}
 
@@ -866,7 +900,8 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	public function session()
 	{
-		if (! $this->hasSession()) {
+		if (! $this->hasSession())
+{
 			throw new RuntimeException('Session store not set on request.');
 		}
 
@@ -895,9 +930,12 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	{
 		$route = call_user_func($this->getRouteResolver());
 
-		if (is_null($route) || is_null($param)) {
+		if (is_null($route) || is_null($param))
+{
 			return $route;
-		} else {
+		}
+else
+{
 			return $route->parameter($param);
 		}
 	}
@@ -911,7 +949,8 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	public function fingerprint()
 	{
-		if (! $this->route()) {
+		if (! $this->route())
+{
 			throw new RuntimeException('Unable to generate fingerprint. Route unavailable.');
 		}
 
@@ -930,7 +969,8 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	public function getUserResolver()
 	{
-		return $this->userResolver ?: function () {
+		return $this->userResolver ?: function ()
+{
 			//
 		};
 	}
@@ -955,7 +995,8 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	 */
 	public function getRouteResolver()
 	{
-		return $this->routeResolver ?: function () {
+		return $this->routeResolver ?: function ()
+{
 			//
 		};
 	}
@@ -1049,9 +1090,12 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 	{
 		$all = $this->all();
 
-		if (array_key_exists($key, $all)) {
+		if (array_key_exists($key, $all))
+{
 			return $all[$key];
-		} else {
+		}
+else
+{
 			return $this->route($key);
 		}
 	}

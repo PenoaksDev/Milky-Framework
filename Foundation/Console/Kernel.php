@@ -7,7 +7,7 @@ use Throwable;
 use Foundation\Contracts\Events\Dispatcher;
 use Foundation\Console\Scheduling\Schedule;
 use Foundation\Console\Application as Artisan;
-use Foundation\Contracts\Foundation\Application;
+use Foundation\Framework;
 use Foundation\Contracts\Console\Kernel as KernelContract;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
@@ -16,9 +16,9 @@ class Kernel implements KernelContract
 	/**
 	 * The application implementation.
 	 *
-	 * @var \Foundation\Contracts\Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The event dispatcher implementation.
@@ -60,20 +60,22 @@ class Kernel implements KernelContract
 	/**
 	 * Create a new console kernel instance.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @param  \Foundation\Contracts\Events\Dispatcher  $events
 	 * @return void
 	 */
-	public function __construct(Application $app, Dispatcher $events)
+	public function __construct(Framework $fw, Dispatcher $events)
 	{
-		if (! defined('ARTISAN_BINARY')) {
+		if (! defined('ARTISAN_BINARY'))
+{
 			define('ARTISAN_BINARY', 'artisan');
 		}
 
-		$this->app = $app;
+		$this->fw = $fw;
 		$this->events = $events;
 
-		$this->app->booted(function () {
+		$this->fw->booted(function ()
+{
 			$this->defineConsoleSchedule();
 		});
 	}
@@ -85,7 +87,7 @@ class Kernel implements KernelContract
 	 */
 	protected function defineConsoleSchedule()
 	{
-		$this->app->instance(
+		$this->fw->bindings->instance(
 			'Foundation\Console\Scheduling\Schedule', $schedule = new Schedule
 		);
 
@@ -101,17 +103,20 @@ class Kernel implements KernelContract
 	 */
 	public function handle($input, $output = null)
 	{
-		try {
+		try
+{
 			$this->bootstrap();
 
 			return $this->getArtisan()->run($input, $output);
-		} catch (Exception $e) {
+		} catch (Exception $e)
+{
 			$this->reportException($e);
 
 			$this->renderException($output, $e);
 
 			return 1;
-		} catch (Throwable $e) {
+		} catch (Throwable $e)
+{
 			$e = new FatalThrowableError($e);
 
 			$this->reportException($e);
@@ -131,7 +136,7 @@ class Kernel implements KernelContract
 	 */
 	public function terminate($input, $status)
 	{
-		$this->app->terminate();
+		$this->fw->terminate();
 	}
 
 	/**
@@ -179,7 +184,7 @@ class Kernel implements KernelContract
 	 */
 	public function queue($command, array $parameters = [])
 	{
-		$this->app['Foundation\Contracts\Queue\Queue']->push(
+		$this->fw->bindings['Foundation\Contracts\Queue\Queue']->push(
 			'Foundation\Console\QueuedJob', func_get_args()
 		);
 	}
@@ -215,14 +220,15 @@ class Kernel implements KernelContract
 	 */
 	public function bootstrap()
 	{
-		if (! $this->app->hasBeenBootstrapped()) {
-			$this->app->bootstrapWith($this->bootstrappers());
+		if (! $this->fw->hasBeenBootstrapped())
+		{
+			$this->fw->bootstrapWith($this->bootstrappers());
 		}
 
 		// If we are calling an arbitrary command from within the application, we'll load
 		// all of the available deferred providers which will make all of the commands
 		// available to an application. Otherwise the command will not be available.
-		$this->app->loadDeferredProviders();
+		$this->fw->loadDeferredProviders();
 	}
 
 	/**
@@ -232,8 +238,9 @@ class Kernel implements KernelContract
 	 */
 	protected function getArtisan()
 	{
-		if (is_null($this->artisan)) {
-			return $this->artisan = (new Artisan($this->app, $this->events, $this->app->version()))
+		if (is_null($this->artisan))
+{
+			return $this->artisan = (new Artisan($this->fw, $this->events, $this->fw->version()))
 								->resolveCommands($this->commands);
 		}
 
@@ -258,7 +265,7 @@ class Kernel implements KernelContract
 	 */
 	protected function reportException(Exception $e)
 	{
-		$this->app['Foundation\Contracts\Debug\ExceptionHandler']->report($e);
+		$this->fw->bindings['Foundation\Contracts\Debug\ExceptionHandler']->report($e);
 	}
 
 	/**
@@ -270,6 +277,6 @@ class Kernel implements KernelContract
 	 */
 	protected function renderException($output, Exception $e)
 	{
-		$this->app['Foundation\Contracts\Debug\ExceptionHandler']->renderForConsole($output, $e);
+		$this->fw->bindings['Foundation\Contracts\Debug\ExceptionHandler']->renderForConsole($output, $e);
 	}
 }

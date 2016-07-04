@@ -57,13 +57,15 @@ class BroadcastEvent
 	 */
 	protected function getPayloadFromEvent($event)
 	{
-		if (method_exists($event, 'broadcastWith')) {
+		if (method_exists($event, 'broadcastWith'))
+{
 			return $event->broadcastWith();
 		}
 
 		$payload = [];
 
-		foreach ((new ReflectionClass($event))->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+		foreach ((new ReflectionClass($event))->getProperties(ReflectionProperty::IS_PUBLIC) as $property)
+{
 			$payload[$property->getName()] = $this->formatProperty($property->getValue($event));
 		}
 
@@ -78,7 +80,8 @@ class BroadcastEvent
 	 */
 	protected function formatProperty($value)
 	{
-		if ($value instanceof Arrayable) {
+		if ($value instanceof Arrayable)
+{
 			return $value->toArray();
 		}
 

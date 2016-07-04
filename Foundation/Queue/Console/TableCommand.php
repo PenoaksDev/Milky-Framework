@@ -57,7 +57,7 @@ class TableCommand extends Command
 	 */
 	public function fire()
 	{
-		$table = $this->laravel['config']['queue.connections.database.table'];
+		$table = $this->framework['config']['queue.connections.database.table'];
 
 		$tableClassName = Str::studly($table);
 
@@ -84,8 +84,8 @@ class TableCommand extends Command
 	{
 		$name = 'create_'.$table.'_table';
 
-		$path = $this->laravel->databasePath().'/migrations';
+		$path = $this->framework->databasePath().'/migrations';
 
-		return $this->laravel['migration.creator']->create($name, $path);
+		return $this->framework['migration.creator']->create($name, $path);
 	}
 }

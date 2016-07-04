@@ -55,9 +55,11 @@ class FilesystemAdapter implements FilesystemContract, CloudFilesystemContract
 	 */
 	public function get($path)
 	{
-		try {
+		try
+{
 			return $this->driver->read($path);
-		} catch (FileNotFoundException $e) {
+		} catch (FileNotFoundException $e)
+{
 			throw new ContractFileNotFoundException($path, $e->getCode(), $e);
 		}
 	}
@@ -72,15 +74,21 @@ class FilesystemAdapter implements FilesystemContract, CloudFilesystemContract
 	 */
 	public function put($path, $contents, $visibility = null)
 	{
-		if ($visibility = $this->parseVisibility($visibility)) {
+		if ($visibility = $this->parseVisibility($visibility))
+{
 			$config = ['visibility' => $visibility];
-		} else {
+		}
+else
+{
 			$config = [];
 		}
 
-		if (is_resource($contents)) {
+		if (is_resource($contents))
+{
 			return $this->driver->putStream($path, $contents, $config);
-		} else {
+		}
+else
+{
 			return $this->driver->put($path, $contents, $config);
 		}
 	}
@@ -93,7 +101,8 @@ class FilesystemAdapter implements FilesystemContract, CloudFilesystemContract
 	 */
 	public function getVisibility($path)
 	{
-		if ($this->driver->getVisibility($path) == AdapterInterface::VISIBILITY_PUBLIC) {
+		if ($this->driver->getVisibility($path) == AdapterInterface::VISIBILITY_PUBLIC)
+{
 			return FilesystemContract::VISIBILITY_PUBLIC;
 		}
 
@@ -121,7 +130,8 @@ class FilesystemAdapter implements FilesystemContract, CloudFilesystemContract
 	 */
 	public function prepend($path, $data, $separator = PHP_EOL)
 	{
-		if ($this->exists($path)) {
+		if ($this->exists($path))
+{
 			return $this->put($path, $data.$separator.$this->get($path));
 		}
 
@@ -137,7 +147,8 @@ class FilesystemAdapter implements FilesystemContract, CloudFilesystemContract
 	 */
 	public function append($path, $data, $separator = PHP_EOL)
 	{
-		if ($this->exists($path)) {
+		if ($this->exists($path))
+{
 			return $this->put($path, $this->get($path).$separator.$data);
 		}
 
@@ -154,10 +165,13 @@ class FilesystemAdapter implements FilesystemContract, CloudFilesystemContract
 	{
 		$paths = is_array($paths) ? $paths : func_get_args();
 
-		foreach ($paths as $path) {
-			try {
+		foreach ($paths as $path)
+{
+			try
+{
 				$this->driver->delete($path);
-			} catch (FileNotFoundException $e) {
+			} catch (FileNotFoundException $e)
+{
 				//
 			}
 		}
@@ -232,13 +246,18 @@ class FilesystemAdapter implements FilesystemContract, CloudFilesystemContract
 	{
 		$adapter = $this->driver->getAdapter();
 
-		if ($adapter instanceof AwsS3Adapter) {
+		if ($adapter instanceof AwsS3Adapter)
+{
 			$path = $adapter->getPathPrefix().$path;
 
 			return $adapter->getClient()->getObjectUrl($adapter->getBucket(), $path);
-		} elseif ($adapter instanceof LocalAdapter) {
+		}
+elseif ($adapter instanceof LocalAdapter)
+{
 			return '/storage/'.$path;
-		} else {
+		}
+else
+{
 			throw new RuntimeException('This driver does not support retrieving URLs.');
 		}
 	}
@@ -351,11 +370,13 @@ class FilesystemAdapter implements FilesystemContract, CloudFilesystemContract
 	 */
 	protected function parseVisibility($visibility)
 	{
-		if (is_null($visibility)) {
+		if (is_null($visibility))
+{
 			return;
 		}
 
-		switch ($visibility) {
+		switch ($visibility)
+{
 			case FilesystemContract::VISIBILITY_PUBLIC:
 				return AdapterInterface::VISIBILITY_PUBLIC;
 			case FilesystemContract::VISIBILITY_PRIVATE:

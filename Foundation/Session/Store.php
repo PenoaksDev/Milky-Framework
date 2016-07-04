@@ -91,7 +91,8 @@ class Store implements SessionInterface
 	{
 		$this->loadSession();
 
-		if (! $this->has('_token')) {
+		if (! $this->has('_token'))
+{
 			$this->regenerateToken();
 		}
 
@@ -107,7 +108,8 @@ class Store implements SessionInterface
 	{
 		$this->attributes = array_merge($this->attributes, $this->readFromHandler());
 
-		foreach (array_merge($this->bags, [$this->metaBag]) as $bag) {
+		foreach (array_merge($this->bags, [$this->metaBag]) as $bag)
+{
 			$this->initializeLocalBag($bag);
 
 			$bag->initialize($this->bagData[$bag->getStorageKey()]);
@@ -123,10 +125,12 @@ class Store implements SessionInterface
 	{
 		$data = $this->handler->read($this->getId());
 
-		if ($data) {
+		if ($data)
+{
 			$data = @unserialize($this->prepareForUnserialize($data));
 
-			if ($data !== false && $data !== null && is_array($data)) {
+			if ($data !== false && $data !== null && is_array($data))
+{
 				return $data;
 			}
 		}
@@ -169,7 +173,8 @@ class Store implements SessionInterface
 	 */
 	public function setId($id)
 	{
-		if (! $this->isValidId($id)) {
+		if (! $this->isValidId($id))
+{
 			$id = $this->generateSessionId();
 		}
 
@@ -228,7 +233,8 @@ class Store implements SessionInterface
 	 */
 	public function migrate($destroy = false, $lifetime = null)
 	{
-		if ($destroy) {
+		if ($destroy)
+{
 			$this->handler->destroy($this->getId());
 		}
 
@@ -282,10 +288,12 @@ class Store implements SessionInterface
 	 */
 	protected function addBagDataToSession()
 	{
-		foreach (array_merge($this->bags, [$this->metaBag]) as $bag) {
+		foreach (array_merge($this->bags, [$this->metaBag]) as $bag)
+{
 			$key = $bag->getStorageKey();
 
-			if (isset($this->bagData[$key])) {
+			if (isset($this->bagData[$key]))
+{
 				$this->put($key, $this->bagData[$key]);
 			}
 		}
@@ -312,8 +320,10 @@ class Store implements SessionInterface
 	{
 		$keys = is_array($name) ? $name : func_get_args();
 
-		foreach ($keys as $value) {
-			if (is_null($this->get($value))) {
+		foreach ($keys as $value)
+{
+			if (is_null($this->get($value)))
+{
 				return false;
 			}
 		}
@@ -388,11 +398,13 @@ class Store implements SessionInterface
 	 */
 	public function put($key, $value = null)
 	{
-		if (! is_array($key)) {
+		if (! is_array($key))
+{
 			$key = [$key => $value];
 		}
 
-		foreach ($key as $arrayKey => $arrayValue) {
+		foreach ($key as $arrayKey => $arrayValue)
+{
 			$this->set($arrayKey, $arrayValue);
 		}
 	}
@@ -548,7 +560,8 @@ class Store implements SessionInterface
 	{
 		$this->attributes = [];
 
-		foreach ($this->bags as $bag) {
+		foreach ($this->bags as $bag)
+{
 			$bag->clear();
 		}
 	}
@@ -584,7 +597,8 @@ class Store implements SessionInterface
 	 */
 	public function getBag($name)
 	{
-		return Arr::get($this->bags, $name, function () {
+		return Arr::get($this->bags, $name, function ()
+{
 			throw new InvalidArgumentException('Bag not registered.');
 		});
 	}
@@ -667,7 +681,8 @@ class Store implements SessionInterface
 	 */
 	public function setExists($value)
 	{
-		if ($this->handler instanceof ExistenceAwareInterface) {
+		if ($this->handler instanceof ExistenceAwareInterface)
+{
 			$this->handler->setExists($value);
 		}
 	}
@@ -700,7 +715,8 @@ class Store implements SessionInterface
 	 */
 	public function setRequestOnHandler(Request $request)
 	{
-		if ($this->handlerNeedsRequest()) {
+		if ($this->handlerNeedsRequest())
+{
 			$this->handler->setRequest($request);
 		}
 	}

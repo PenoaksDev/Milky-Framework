@@ -15,7 +15,7 @@ class Schema extends Facade
 	 */
 	public static function connection($name)
 	{
-		return static::$app['db']->connection($name)->getSchemaBuilder();
+		return static::$fw->bindings['db']->connection($name)->getSchemaBuilder();
 	}
 
 	/**
@@ -25,6 +25,6 @@ class Schema extends Facade
 	 */
 	protected static function getFacadeAccessor()
 	{
-		return static::$app['db']->connection()->getSchemaBuilder();
+		return static::$fw->bindings['db']->connection()->getSchemaBuilder();
 	}
 }

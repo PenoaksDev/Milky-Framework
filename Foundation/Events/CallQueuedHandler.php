@@ -3,26 +3,26 @@
 namespace Foundation\Events;
 
 use Foundation\Contracts\Queue\Job;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 
 class CallQueuedHandler
 {
 	/**
-	 * The container instance.
+	 * The bindings instance.
 	 *
-	 * @var \Foundation\Contracts\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * Create a new job instance.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function __construct(Container $container)
+	public function __construct(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 
 	/**
@@ -35,14 +35,15 @@ class CallQueuedHandler
 	public function call(Job $job, array $data)
 	{
 		$handler = $this->setJobInstanceIfNecessary(
-			$job, $this->container->make($data['class'])
+			$job, $this->bindings->make($data['class'])
 		);
 
 		call_user_func_array(
 			[$handler, $data['method']], unserialize($data['data'])
 		);
 
-		if (! $job->isDeletedOrReleased()) {
+		if (! $job->isDeletedOrReleased())
+{
 			$job->delete();
 		}
 	}
@@ -56,7 +57,8 @@ class CallQueuedHandler
 	 */
 	protected function setJobInstanceIfNecessary(Job $job, $instance)
 	{
-		if (in_array('Foundation\Queue\InteractsWithQueue', class_uses_recursive(get_class($instance)))) {
+		if (in_array('Foundation\Queue\InteractsWithQueue', class_uses_recursive(get_class($instance))))
+{
 			$instance->setJob($job);
 		}
 
@@ -71,9 +73,10 @@ class CallQueuedHandler
 	 */
 	public function failed(array $data)
 	{
-		$handler = $this->container->make($data['class']);
+		$handler = $this->bindings->make($data['class']);
 
-		if (method_exists($handler, 'failed')) {
+		if (method_exists($handler, 'failed'))
+{
 			call_user_func_array([$handler, 'failed'], unserialize($data['data']));
 		}
 	}

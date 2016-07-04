@@ -37,7 +37,8 @@ class Str
 	 */
 	public static function ascii($value)
 	{
-		foreach (static::charsArray() as $key => $val) {
+		foreach (static::charsArray() as $key => $val)
+{
 			$value = str_replace($val, $key, $value);
 		}
 
@@ -52,7 +53,8 @@ class Str
 	 */
 	public static function camel($value)
 	{
-		if (isset(static::$camelCache[$value])) {
+		if (isset(static::$camelCache[$value]))
+{
 			return static::$camelCache[$value];
 		}
 
@@ -68,8 +70,10 @@ class Str
 	 */
 	public static function contains($haystack, $needles)
 	{
-		foreach ((array) $needles as $needle) {
-			if ($needle != '' && mb_strpos($haystack, $needle) !== false) {
+		foreach ((array) $needles as $needle)
+{
+			if ($needle != '' && mb_strpos($haystack, $needle) !== false)
+{
 				return true;
 			}
 		}
@@ -86,8 +90,10 @@ class Str
 	 */
 	public static function endsWith($haystack, $needles)
 	{
-		foreach ((array) $needles as $needle) {
-			if ((string) $needle === static::substr($haystack, -static::length($needle))) {
+		foreach ((array) $needles as $needle)
+{
+			if ((string) $needle === static::substr($haystack, -static::length($needle)))
+{
 				return true;
 			}
 		}
@@ -118,7 +124,8 @@ class Str
 	 */
 	public static function is($pattern, $value)
 	{
-		if ($pattern == $value) {
+		if ($pattern == $value)
+{
 			return true;
 		}
 
@@ -153,7 +160,8 @@ class Str
 	 */
 	public static function limit($value, $limit = 100, $end = '...')
 	{
-		if (mb_strwidth($value, 'UTF-8') <= $limit) {
+		if (mb_strwidth($value, 'UTF-8') <= $limit)
+{
 			return $value;
 		}
 
@@ -183,7 +191,8 @@ class Str
 	{
 		preg_match('/^\s*+(?:\S++\s*+){1,'.$words.'}/u', $value, $matches);
 
-		if (! isset($matches[0]) || static::length($value) === static::length($matches[0])) {
+		if (! isset($matches[0]) || static::length($value) === static::length($matches[0]))
+{
 			return $value;
 		}
 
@@ -224,7 +233,8 @@ class Str
 	{
 		$string = '';
 
-		while (($len = static::length($string)) < $length) {
+		while (($len = static::length($string)) < $length)
+{
 			$size = $length - $len;
 
 			$bytes = random_bytes($size);
@@ -293,7 +303,8 @@ class Str
 	{
 		$position = strpos($subject, $search);
 
-		if ($position !== false) {
+		if ($position !== false)
+{
 			return substr_replace($subject, $replace, $position, strlen($search));
 		}
 
@@ -312,7 +323,8 @@ class Str
 	{
 		$position = strrpos($subject, $search);
 
-		if ($position !== false) {
+		if ($position !== false)
+{
 			return substr_replace($subject, $replace, $position, strlen($search));
 		}
 
@@ -388,11 +400,13 @@ class Str
 	{
 		$key = $value;
 
-		if (isset(static::$snakeCache[$key][$delimiter])) {
+		if (isset(static::$snakeCache[$key][$delimiter]))
+{
 			return static::$snakeCache[$key][$delimiter];
 		}
 
-		if (! ctype_lower($value)) {
+		if (! ctype_lower($value))
+{
 			$value = preg_replace('/\s+/u', '', $value);
 
 			$value = static::lower(preg_replace('/(.)(?=[A-Z])/u', '$1'.$delimiter, $value));
@@ -410,8 +424,10 @@ class Str
 	 */
 	public static function startsWith($haystack, $needles)
 	{
-		foreach ((array) $needles as $needle) {
-			if ($needle != '' && mb_strpos($haystack, $needle) === 0) {
+		foreach ((array) $needles as $needle)
+{
+			if ($needle != '' && mb_strpos($haystack, $needle) === 0)
+{
 				return true;
 			}
 		}
@@ -429,7 +445,8 @@ class Str
 	{
 		$key = $value;
 
-		if (isset(static::$studlyCache[$key])) {
+		if (isset(static::$studlyCache[$key]))
+{
 			return static::$studlyCache[$key];
 		}
 
@@ -475,7 +492,8 @@ class Str
 	{
 		static $charsArray;
 
-		if (isset($charsArray)) {
+		if (isset($charsArray))
+{
 			return $charsArray;
 		}
 

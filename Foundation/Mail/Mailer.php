@@ -11,7 +11,7 @@ use SuperClosure\Serializer;
 use InvalidArgumentException;
 use Foundation\Contracts\View\Factory;
 use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\Queue\Queue as QueueContract;
 use Foundation\Contracts\Mail\Mailer as MailerContract;
 use Foundation\Contracts\Mail\MailQueue as MailQueueContract;
@@ -54,11 +54,11 @@ class Mailer implements MailerContract, MailQueueContract
 	protected $to;
 
 	/**
-	 * The IoC container instance.
+	 * The IoC bindings instance.
 	 *
-	 * @var \Foundation\Contracts\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * The queue implementation.
@@ -162,7 +162,8 @@ class Mailer implements MailerContract, MailQueueContract
 
 		$this->callMessageBuilder($callback, $message);
 
-		if (isset($this->to['address'])) {
+		if (isset($this->to['address']))
+{
 			$message->to($this->to['address'], $this->to['name'], true);
 		}
 
@@ -257,7 +258,8 @@ class Mailer implements MailerContract, MailQueueContract
 	 */
 	protected function buildQueueCallable($callback)
 	{
-		if (! $callback instanceof Closure) {
+		if (! $callback instanceof Closure)
+{
 			return $callback;
 		}
 
@@ -286,7 +288,8 @@ class Mailer implements MailerContract, MailQueueContract
 	 */
 	protected function getQueuedCallable(array $data)
 	{
-		if (Str::contains($data['callback'], 'SerializableClosure')) {
+		if (Str::contains($data['callback'], 'SerializableClosure'))
+{
 			return (new Serializer)->unserialize($data['callback']);
 		}
 
@@ -317,17 +320,20 @@ class Mailer implements MailerContract, MailQueueContract
 	 */
 	protected function addContent($message, $view, $plain, $raw, $data)
 	{
-		if (isset($view)) {
+		if (isset($view))
+{
 			$message->setBody($this->getView($view, $data), 'text/html');
 		}
 
-		if (isset($plain)) {
+		if (isset($plain))
+{
 			$method = isset($view) ? 'addPart' : 'setBody';
 
 			$message->$method($this->getView($plain, $data), 'text/plain');
 		}
 
-		if (isset($raw)) {
+		if (isset($raw))
+{
 			$method = (isset($view) || isset($plain)) ? 'addPart' : 'setBody';
 
 			$message->$method($raw, 'text/plain');
@@ -344,21 +350,24 @@ class Mailer implements MailerContract, MailQueueContract
 	 */
 	protected function parseView($view)
 	{
-		if (is_string($view)) {
+		if (is_string($view))
+{
 			return [$view, null, null];
 		}
 
 		// If the given view is an array with numeric keys, we will just assume that
 		// both a "pretty" and "plain" view were provided, so we will return this
 		// array as is, since must should contain both views with numeric keys.
-		if (is_array($view) && isset($view[0])) {
+		if (is_array($view) && isset($view[0]))
+{
 			return [$view[0], $view[1], null];
 		}
 
 		// If the view is an array, but doesn't contain numeric keys, we will assume
 		// the the views are being explicitly specified and will extract them via
 		// named keys instead, allowing the developers to use one or the other.
-		if (is_array($view)) {
+		if (is_array($view))
+{
 			return [
 				Arr::get($view, 'html'),
 				Arr::get($view, 'text'),
@@ -377,13 +386,16 @@ class Mailer implements MailerContract, MailQueueContract
 	 */
 	protected function sendSwiftMessage($message)
 	{
-		if ($this->events) {
+		if ($this->events)
+{
 			$this->events->fire(new Events\MessageSending($message));
 		}
 
-		try {
+		try
+{
 			return $this->swift->send($message, $this->failedRecipients);
-		} finally {
+		} finally
+{
 			$this->swift->getTransport()->stop();
 		}
 	}
@@ -399,12 +411,14 @@ class Mailer implements MailerContract, MailQueueContract
 	 */
 	protected function callMessageBuilder($callback, $message)
 	{
-		if ($callback instanceof Closure) {
+		if ($callback instanceof Closure)
+{
 			return call_user_func($callback, $message);
 		}
 
-		if (is_string($callback)) {
-			return $this->container->make($callback)->mail($message);
+		if (is_string($callback))
+{
+			return $this->bindings->make($callback)->mail($message);
 		}
 
 		throw new InvalidArgumentException('Callback is not valid.');
@@ -422,7 +436,8 @@ class Mailer implements MailerContract, MailQueueContract
 		// If a global from address has been specified we will set it on every message
 		// instances so the developer does not have to repeat themselves every time
 		// they create a new message. We will just go ahead and push the address.
-		if (! empty($this->from['address'])) {
+		if (! empty($this->from['address']))
+{
 			$message->from($this->from['address'], $this->from['name']);
 		}
 
@@ -496,13 +511,13 @@ class Mailer implements MailerContract, MailQueueContract
 	}
 
 	/**
-	 * Set the IoC container instance.
+	 * Set the IoC bindings instance.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function setContainer(Container $container)
+	public function setBindings(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 }

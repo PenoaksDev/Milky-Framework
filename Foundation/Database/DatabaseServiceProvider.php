@@ -19,9 +19,9 @@ class DatabaseServiceProvider extends ServiceProvider
 	 */
 	public function boot()
 	{
-		Model::setConnectionResolver($this->app['db']);
+		Model::setConnectionResolver($this->fw->bindings['db']);
 
-		Model::setEventDispatcher($this->app['events']);
+		Model::setEventDispatcher($this->fw->bindings['events']);
 	}
 
 	/**
@@ -40,35 +40,40 @@ class DatabaseServiceProvider extends ServiceProvider
 		// The connection factory is used to create the actual connection instances on
 		// the database. We will inject the factory into the manager so that it may
 		// make the connections while they are actually needed and not of before.
-		$this->app->singleton('db.factory', function ($app) {
-			return new ConnectionFactory($app);
+		$this->fw->bindings->singleton('db.factory', function ($fw)
+{
+			return new ConnectionFactory($fw);
 		});
 
 		// The database manager is used to resolve various connections, since multiple
 		// connections might be managed. It also implements the connection resolver
 		// interface which may be used by other components requiring connections.
-		$this->app->singleton('db', function ($app) {
-			return new DatabaseManager($app, $app['db.factory']);
+		$this->fw->bindings->singleton('db', function ($fw)
+{
+			return new DatabaseManager($fw, $fw->bindings['db.factory']);
 		});
 
-		$this->app->bind('db.connection', function ($app) {
-			return $app['db']->connection();
+		$this->fw->bindings->bind('db.connection', function ($fw)
+{
+			return $fw->bindings['db']->connection();
 		});
 	}
 
 	/**
-	 * Register the Eloquent factory instance in the container.
+	 * Register the Eloquent factory instance in the bindings.
 	 *
 	 * @return void
 	 */
 	protected function registerEloquentFactory()
 	{
-		$this->app->singleton(FakerGenerator::class, function () {
+		$this->fw->bindings->singleton(FakerGenerator::class, function ()
+{
 			return FakerFactory::create();
 		});
 
-		$this->app->singleton(EloquentFactory::class, function ($app) {
-			$faker = $app->make(FakerGenerator::class);
+		$this->fw->bindings->singleton(EloquentFactory::class, function ($fw)
+{
+			$faker = $fw->make(FakerGenerator::class);
 
 			return EloquentFactory::construct($faker, database_path('factories'));
 		});
@@ -81,7 +86,8 @@ class DatabaseServiceProvider extends ServiceProvider
 	 */
 	protected function registerQueueableEntityResolver()
 	{
-		$this->app->singleton('Foundation\Contracts\Queue\EntityResolver', function () {
+		$this->fw->bindings->singleton('Foundation\Contracts\Queue\EntityResolver', function ()
+{
 			return new QueueEntityResolver;
 		});
 	}

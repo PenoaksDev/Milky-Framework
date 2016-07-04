@@ -19,7 +19,7 @@ trait AuthorizesRequests
 	{
 		list($ability, $arguments) = $this->parseAbilityAndArguments($ability, $arguments);
 
-		return app(Gate::class)->authorize($ability, $arguments);
+		return fw(Gate::class)->authorize($ability, $arguments);
 	}
 
 	/**
@@ -36,7 +36,7 @@ trait AuthorizesRequests
 	{
 		list($ability, $arguments) = $this->parseAbilityAndArguments($ability, $arguments);
 
-		return app(Gate::class)->forUser($user)->authorize($ability, $arguments);
+		return fw(Gate::class)->forUser($user)->authorize($ability, $arguments);
 	}
 
 	/**
@@ -48,7 +48,8 @@ trait AuthorizesRequests
 	 */
 	protected function parseAbilityAndArguments($ability, $arguments)
 	{
-		if (is_string($ability)) {
+		if (is_string($ability))
+{
 			return [$ability, $arguments];
 		}
 

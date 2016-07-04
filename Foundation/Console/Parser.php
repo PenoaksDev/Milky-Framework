@@ -19,15 +19,19 @@ class Parser
 	 */
 	public static function parse($expression)
 	{
-		if (trim($expression) === '') {
+		if (trim($expression) === '')
+{
 			throw new InvalidArgumentException('Console command definition is empty.');
 		}
 
 		preg_match('/[^\s]+/', $expression, $matches);
 
-		if (isset($matches[0])) {
+		if (isset($matches[0]))
+{
 			$name = $matches[0];
-		} else {
+		}
+else
+{
 			throw new InvalidArgumentException('Unable to determine command name from signature.');
 		}
 
@@ -35,7 +39,8 @@ class Parser
 
 		$tokens = isset($matches[1]) ? $matches[1] : [];
 
-		if (count($tokens)) {
+		if (count($tokens))
+{
 			return array_merge([$name], static::parameters($tokens));
 		}
 
@@ -54,10 +59,14 @@ class Parser
 
 		$options = [];
 
-		foreach ($tokens as $token) {
-			if (! Str::startsWith($token, '--')) {
+		foreach ($tokens as $token)
+{
+			if (! Str::startsWith($token, '--'))
+{
 				$arguments[] = static::parseArgument($token);
-			} else {
+			}
+else
+{
 				$options[] = static::parseOption(ltrim($token, '-'));
 			}
 		}
@@ -75,7 +84,8 @@ class Parser
 	{
 		$description = null;
 
-		if (Str::contains($token, ' : ')) {
+		if (Str::contains($token, ' : '))
+{
 			list($token, $description) = explode(' : ', $token, 2);
 
 			$token = trim($token);
@@ -83,7 +93,8 @@ class Parser
 			$description = trim($description);
 		}
 
-		switch (true) {
+		switch (true)
+{
 			case Str::endsWith($token, '?*'):
 				return new InputArgument(trim($token, '?*'), InputArgument::IS_ARRAY, $description);
 			case Str::endsWith($token, '*'):
@@ -107,7 +118,8 @@ class Parser
 	{
 		$description = null;
 
-		if (Str::contains($token, ' : ')) {
+		if (Str::contains($token, ' : '))
+{
 			list($token, $description) = explode(' : ', $token);
 			$token = trim($token);
 			$description = trim($description);
@@ -117,12 +129,14 @@ class Parser
 
 		$matches = preg_split('/\s*\|\s*/', $token, 2);
 
-		if (isset($matches[1])) {
+		if (isset($matches[1]))
+{
 			$shortcut = $matches[0];
 			$token = $matches[1];
 		}
 
-		switch (true) {
+		switch (true)
+{
 			case Str::endsWith($token, '='):
 				return new InputOption(trim($token, '='), $shortcut, InputOption::VALUE_OPTIONAL, $description);
 			case Str::endsWith($token, '=*'):

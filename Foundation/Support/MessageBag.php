@@ -33,7 +33,8 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 	 */
 	public function __construct(array $messages = [])
 	{
-		foreach ($messages as $key => $value) {
+		foreach ($messages as $key => $value)
+{
 			$this->messages[$key] = (array) $value;
 		}
 	}
@@ -57,7 +58,8 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 	 */
 	public function add($key, $message)
 	{
-		if ($this->isUnique($key, $message)) {
+		if ($this->isUnique($key, $message))
+{
 			$this->messages[$key][] = $message;
 		}
 
@@ -72,7 +74,8 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 	 */
 	public function merge($messages)
 	{
-		if ($messages instanceof MessageProvider) {
+		if ($messages instanceof MessageProvider)
+{
 			$messages = $messages->getMessageBag()->getMessages();
 		}
 
@@ -129,10 +132,11 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 	 */
 	public function get($key, $format = null)
 	{
-		// If the message exists in the container, we will transform it and return
+		// If the message exists in the bindings, we will transform it and return
 		// the message. Otherwise, we'll return an empty array since the entire
 		// methods is to return back an array of messages in the first place.
-		if (array_key_exists($key, $this->messages)) {
+		if (array_key_exists($key, $this->messages))
+{
 			return $this->transform($this->messages[$key], $this->checkFormat($format), $key);
 		}
 
@@ -151,7 +155,8 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 
 		$all = [];
 
-		foreach ($this->messages as $key => $messages) {
+		foreach ($this->messages as $key => $messages)
+{
 			$all = array_merge($all, $this->transform($messages, $format, $key));
 		}
 
@@ -186,7 +191,8 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 		// the messages to be easily formatted to each developer's desires.
 		$replace = [':message', ':key'];
 
-		foreach ($messages as &$message) {
+		foreach ($messages as &$message)
+{
 			$message = str_replace($replace, [$message, $messageKey], $format);
 		}
 
@@ -205,7 +211,7 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 	}
 
 	/**
-	 * Get the raw messages in the container.
+	 * Get the raw messages in the bindings.
 	 *
 	 * @return array
 	 */
@@ -215,7 +221,7 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 	}
 
 	/**
-	 * Get the raw messages in the container.
+	 * Get the raw messages in the bindings.
 	 *
 	 * @return array
 	 */
@@ -278,7 +284,7 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 	}
 
 	/**
-	 * Get the number of messages in the container.
+	 * Get the number of messages in the bindings.
 	 *
 	 * @return int
 	 */

@@ -27,14 +27,14 @@ class Factory implements ArrayAccess
 	}
 
 	/**
-	 * The model definitions in the container.
+	 * The model definitions in the bindings.
 	 *
 	 * @var array
 	 */
 	protected $definitions = [];
 
 	/**
-	 * Create a new factory container.
+	 * Create a new factory bindings.
 	 *
 	 * @param  \Faker\Generator  $faker
 	 * @param  string|null  $pathToFactories
@@ -108,8 +108,10 @@ class Factory implements ArrayAccess
 	{
 		$factory = $this;
 
-		if (is_dir($path)) {
-			foreach (Finder::create()->files()->in($path) as $file) {
+		if (is_dir($path))
+{
+			foreach (Finder::create()->files()->in($path) as $file)
+{
 				require $file->getRealPath();
 			}
 		}

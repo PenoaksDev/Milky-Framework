@@ -32,7 +32,8 @@ class Paginator extends AbstractPaginator implements Arrayable, ArrayAccess, Cou
 	 */
 	public function __construct($items, $perPage, $currentPage = null, array $options = [])
 	{
-		foreach ($options as $key => $value) {
+		foreach ($options as $key => $value)
+{
 			$this->{$key} = $value;
 		}
 
@@ -76,7 +77,8 @@ class Paginator extends AbstractPaginator implements Arrayable, ArrayAccess, Cou
 	 */
 	public function nextPageUrl()
 	{
-		if ($this->hasMorePages()) {
+		if ($this->hasMorePages())
+{
 			return $this->url($this->currentPage() + 1);
 		}
 	}
@@ -110,7 +112,8 @@ class Paginator extends AbstractPaginator implements Arrayable, ArrayAccess, Cou
 	 */
 	public function render(Presenter $presenter = null)
 	{
-		if (is_null($presenter) && static::$presenterResolver) {
+		if (is_null($presenter) && static::$presenterResolver)
+{
 			$presenter = call_user_func(static::$presenterResolver, $this);
 		}
 

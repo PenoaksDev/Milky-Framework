@@ -79,7 +79,7 @@ trait InteractsWithPages
 
 		$this->clearInputs()->followRedirects()->assertPageLoaded($uri);
 
-		$this->currentUri = $this->app->make('request')->fullUrl();
+		$this->currentUri = $this->fw->make('request')->fullUrl();
 
 		$this->crawler = new Crawler($this->response->getContent(), $this->currentUri);
 
@@ -134,7 +134,8 @@ trait InteractsWithPages
 	 */
 	protected function followRedirects()
 	{
-		while ($this->response->isRedirect()) {
+		while ($this->response->isRedirect())
+{
 			$this->makeRequest('GET', $this->response->getTargetUrl());
 		}
 
@@ -185,9 +186,11 @@ trait InteractsWithPages
 	{
 		$status = $this->response->getStatusCode();
 
-		try {
+		try
+{
 			$this->assertEquals(200, $status);
-		} catch (PHPUnitException $e) {
+		} catch (PHPUnitException $e)
+{
 			$message = $message ?: "A request to [{$uri}] failed. Received status code [{$status}].";
 
 			$responseException = isset($this->response->exception)
@@ -222,7 +225,8 @@ trait InteractsWithPages
 	 */
 	protected function crawler()
 	{
-		if (! empty($this->subCrawlers)) {
+		if (! empty($this->subCrawlers))
+{
 			return end($this->subCrawlers);
 		}
 
@@ -239,7 +243,8 @@ trait InteractsWithPages
 	 */
 	protected function assertInPage(PageConstraint $constraint, $reverse = false, $message = '')
 	{
-		if ($reverse) {
+		if ($reverse)
+{
 			$constraint = new ReversePageConstraint($constraint);
 		}
 
@@ -457,10 +462,12 @@ trait InteractsWithPages
 	{
 		$link = $this->crawler()->selectLink($name);
 
-		if (! count($link)) {
+		if (! count($link))
+{
 			$link = $this->filterByNameOrId($name, 'a');
 
-			if (! count($link)) {
+			if (! count($link))
+{
 				throw new InvalidArgumentException(
 					"Could not find a link with a body, name, or ID attribute of [{$name}]."
 				);
@@ -567,7 +574,8 @@ trait InteractsWithPages
 	 */
 	protected function fillForm($buttonText, $inputs = [])
 	{
-		if (! is_string($buttonText)) {
+		if (! is_string($buttonText))
+{
 			$inputs = $buttonText;
 
 			$buttonText = null;
@@ -586,13 +594,16 @@ trait InteractsWithPages
 	 */
 	protected function getForm($buttonText = null)
 	{
-		try {
-			if ($buttonText) {
+		try
+{
+			if ($buttonText)
+{
 				return $this->crawler()->selectButton($buttonText)->form();
 			}
 
 			return $this->crawler()->filter('form')->form();
-		} catch (InvalidArgumentException $e) {
+		} catch (InvalidArgumentException $e)
+{
 			throw new InvalidArgumentException(
 				"Could not find a form that has submit button [{$buttonText}]."
 			);
@@ -629,7 +640,8 @@ trait InteractsWithPages
 	{
 		$crawler = $this->filterByNameOrId($filter);
 
-		if (! count($crawler)) {
+		if (! count($crawler))
+{
 			throw new InvalidArgumentException(
 				"Nothing matched the filter [{$filter}] CSS query provided for [{$this->currentUri}]."
 			);
@@ -651,7 +663,8 @@ trait InteractsWithPages
 
 		$elements = is_array($elements) ? $elements : [$elements];
 
-		array_walk($elements, function (&$element) use ($name, $id) {
+		array_walk($elements, function (&$element) use ($name, $id)
+{
 			$element = "{$element}#{$id}, {$element}[name='{$name}']";
 		});
 
@@ -671,7 +684,8 @@ trait InteractsWithPages
 
 		$names = array_keys($files);
 
-		$files = array_map(function (array $file, $name) use ($uploads) {
+		$files = array_map(function (array $file, $name) use ($uploads)
+{
 			return isset($uploads[$name])
 						? $this->getUploadedFileForTesting($file, $uploads, $name)
 						: $file;

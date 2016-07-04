@@ -44,7 +44,8 @@ class MemcachedStore extends TaggableStore implements Store
 	{
 		$value = $this->memcached->get($this->prefix.$key);
 
-		if ($this->memcached->getResultCode() == 0) {
+		if ($this->memcached->getResultCode() == 0)
+{
 			return $value;
 		}
 	}
@@ -59,13 +60,15 @@ class MemcachedStore extends TaggableStore implements Store
 	 */
 	public function many(array $keys)
 	{
-		$prefixedKeys = array_map(function ($key) {
+		$prefixedKeys = array_map(function ($key)
+{
 			return $this->prefix.$key;
 		}, $keys);
 
 		$values = $this->memcached->getMulti($prefixedKeys, null, Memcached::GET_PRESERVE_ORDER);
 
-		if ($this->memcached->getResultCode() != 0) {
+		if ($this->memcached->getResultCode() != 0)
+{
 			return array_fill_keys($keys, null);
 		}
 
@@ -96,7 +99,8 @@ class MemcachedStore extends TaggableStore implements Store
 	{
 		$prefixedValues = [];
 
-		foreach ($values as $key => $value) {
+		foreach ($values as $key => $value)
+{
 			$prefixedValues[$this->prefix.$key] = $value;
 		}
 

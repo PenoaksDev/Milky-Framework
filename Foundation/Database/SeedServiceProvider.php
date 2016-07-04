@@ -21,7 +21,8 @@ class SeedServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('seeder', function () {
+		$this->fw->bindings->singleton('seeder', function ()
+{
 			return new Seeder;
 		});
 
@@ -37,8 +38,9 @@ class SeedServiceProvider extends ServiceProvider
 	 */
 	protected function registerSeedCommand()
 	{
-		$this->app->singleton('command.seed', function ($app) {
-			return new SeedCommand($app['db']);
+		$this->fw->bindings->singleton('command.seed', function ($fw)
+{
+			return new SeedCommand($fw->bindings['db']);
 		});
 	}
 

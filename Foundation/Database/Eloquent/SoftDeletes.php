@@ -44,7 +44,8 @@ trait SoftDeletes
 	 */
 	protected function performDeleteOnModel()
 	{
-		if ($this->forceDeleting) {
+		if ($this->forceDeleting)
+{
 			return $this->newQueryWithoutScopes()->where($this->getKeyName(), $this->getKey())->forceDelete();
 		}
 
@@ -75,7 +76,8 @@ trait SoftDeletes
 		// If the restoring event does not return false, we will proceed with this
 		// restore operation. Otherwise, we bail out so the developer will stop
 		// the restore totally. We will clear the deleted timestamp and save.
-		if ($this->fireModelEvent('restoring') === false) {
+		if ($this->fireModelEvent('restoring') === false)
+{
 			return false;
 		}
 

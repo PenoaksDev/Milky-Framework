@@ -18,7 +18,8 @@ class CheckResponseForModifications
 	{
 		$response = $next($request);
 
-		if ($response instanceof Response) {
+		if ($response instanceof Response)
+{
 			$response->isNotModified($request);
 		}
 

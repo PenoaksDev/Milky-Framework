@@ -50,7 +50,8 @@ class MakeAuthCommand extends Command
 
 		$this->exportViews();
 
-		if (! $this->option('views')) {
+		if (! $this->option('views'))
+{
 			$this->info('Installed HomeController.');
 
 			file_put_contents(
@@ -77,15 +78,18 @@ class MakeAuthCommand extends Command
 	 */
 	protected function createDirectories()
 	{
-		if (! is_dir(base_path('resources/views/layouts'))) {
+		if (! is_dir(base_path('resources/views/layouts')))
+{
 			mkdir(base_path('resources/views/layouts'), 0755, true);
 		}
 
-		if (! is_dir(base_path('resources/views/auth/passwords'))) {
+		if (! is_dir(base_path('resources/views/auth/passwords')))
+{
 			mkdir(base_path('resources/views/auth/passwords'), 0755, true);
 		}
 
-		if (! is_dir(base_path('resources/views/auth/emails'))) {
+		if (! is_dir(base_path('resources/views/auth/emails')))
+{
 			mkdir(base_path('resources/views/auth/emails'), 0755, true);
 		}
 	}
@@ -97,7 +101,8 @@ class MakeAuthCommand extends Command
 	 */
 	protected function exportViews()
 	{
-		foreach ($this->views as $key => $value) {
+		foreach ($this->views as $key => $value)
+{
 			$path = base_path('resources/views/'.$value);
 
 			$this->line('<info>Created View:</info> '.$path);

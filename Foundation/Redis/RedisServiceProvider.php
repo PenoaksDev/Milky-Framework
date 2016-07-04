@@ -20,8 +20,9 @@ class RedisServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('redis', function ($app) {
-			return new Database($app['config']['database.redis']);
+		$this->fw->bindings->singleton('redis', function ($fw)
+{
+			return new Database($fw->bindings['config']['database.redis']);
 		});
 	}
 

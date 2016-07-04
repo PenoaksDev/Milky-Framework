@@ -1,6 +1,6 @@
 <?php
 
-namespace Foundation\Contracts\Container;
+namespace Foundation\Lang;
 
 use Exception;
 

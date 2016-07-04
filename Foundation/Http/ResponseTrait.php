@@ -49,7 +49,8 @@ trait ResponseTrait
 	 */
 	public function withHeaders(array $headers)
 	{
-		foreach ($headers as $key => $value) {
+		foreach ($headers as $key => $value)
+{
 			$this->headers->set($key, $value);
 		}
 
@@ -75,7 +76,8 @@ trait ResponseTrait
 	 */
 	public function withCookie($cookie)
 	{
-		if (is_string($cookie) && function_exists('cookie')) {
+		if (is_string($cookie) && function_exists('cookie'))
+{
 			$cookie = call_user_func_array('cookie', func_get_args());
 		}
 

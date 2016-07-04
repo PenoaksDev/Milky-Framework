@@ -21,15 +21,18 @@ class CacheServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('cache', function ($app) {
-			return new CacheManager($app);
+		$this->fw->bindings->singleton('cache', function ($fw)
+{
+			return new CacheManager($fw);
 		});
 
-		$this->app->singleton('cache.store', function ($app) {
-			return $app['cache']->driver();
+		$this->fw->bindings->singleton('cache.store', function ($fw)
+{
+			return $fw->bindings['cache']->driver();
 		});
 
-		$this->app->singleton('memcached.connector', function () {
+		$this->fw->bindings->singleton('memcached.connector', function ()
+{
 			return new MemcachedConnector;
 		});
 
@@ -43,8 +46,9 @@ class CacheServiceProvider extends ServiceProvider
 	 */
 	public function registerCommands()
 	{
-		$this->app->singleton('command.cache.clear', function ($app) {
-			return new ClearCommand($app['cache']);
+		$this->fw->bindings->singleton('command.cache.clear', function ($fw)
+{
+			return new ClearCommand($fw->bindings['cache']);
 		});
 
 		$this->commands('command.cache.clear');

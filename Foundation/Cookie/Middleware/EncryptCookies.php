@@ -67,14 +67,18 @@ class EncryptCookies
 	 */
 	protected function decrypt(Request $request)
 	{
-		foreach ($request->cookies as $key => $c) {
-			if ($this->isDisabled($key)) {
+		foreach ($request->cookies as $key => $c)
+{
+			if ($this->isDisabled($key))
+{
 				continue;
 			}
 
-			try {
+			try
+{
 				$request->cookies->set($key, $this->decryptCookie($c));
-			} catch (DecryptException $e) {
+			} catch (DecryptException $e)
+{
 				$request->cookies->set($key, null);
 			}
 		}
@@ -105,8 +109,10 @@ class EncryptCookies
 	{
 		$decrypted = [];
 
-		foreach ($cookie as $key => $value) {
-			if (is_string($value)) {
+		foreach ($cookie as $key => $value)
+{
+			if (is_string($value))
+{
 				$decrypted[$key] = $this->encrypter->decrypt($value);
 			}
 		}
@@ -122,8 +128,10 @@ class EncryptCookies
 	 */
 	protected function encrypt(Response $response)
 	{
-		foreach ($response->headers->getCookies() as $cookie) {
-			if ($this->isDisabled($cookie->getName())) {
+		foreach ($response->headers->getCookies() as $cookie)
+{
+			if ($this->isDisabled($cookie->getName()))
+{
 				continue;
 			}
 

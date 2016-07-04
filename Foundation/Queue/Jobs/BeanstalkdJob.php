@@ -3,7 +3,7 @@
 namespace Foundation\Queue\Jobs;
 
 use Pheanstalk\Pheanstalk;
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Pheanstalk\Job as PheanstalkJob;
 use Foundation\Contracts\Queue\Job as JobContract;
 
@@ -26,20 +26,20 @@ class BeanstalkdJob extends Job implements JobContract
 	/**
 	 * Create a new job instance.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @param  \Pheanstalk\Pheanstalk  $pheanstalk
 	 * @param  \Pheanstalk\Job  $job
 	 * @param  string  $queue
 	 * @return void
 	 */
-	public function __construct(Container $container,
+	public function __construct(Bindings $bindings,
 								Pheanstalk $pheanstalk,
 								PheanstalkJob $job,
 								$queue)
 	{
 		$this->job = $job;
 		$this->queue = $queue;
-		$this->container = $container;
+		$this->bindings = $bindings;
 		$this->pheanstalk = $pheanstalk;
 	}
 
@@ -125,13 +125,13 @@ class BeanstalkdJob extends Job implements JobContract
 	}
 
 	/**
-	 * Get the IoC container instance.
+	 * Get the IoC bindings instance.
 	 *
-	 * @return \Foundation\Container\Container
+	 * @return \Foundation\Framework
 	 */
-	public function getContainer()
+	public function getBindings()
 	{
-		return $this->container;
+		return $this->bindings;
 	}
 
 	/**

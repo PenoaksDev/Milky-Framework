@@ -30,12 +30,14 @@ class PasswordResetServiceProvider extends ServiceProvider
 	 */
 	protected function registerPasswordBroker()
 	{
-		$this->app->singleton('auth.password', function ($app) {
-			return new PasswordBrokerManager($app);
+		$this->fw->bindings->singleton('auth.password', function ($fw)
+{
+			return new PasswordBrokerManager($fw);
 		});
 
-		$this->app->bind('auth.password.broker', function ($app) {
-			return $app->make('auth.password')->broker();
+		$this->fw->bindings->bind('auth.password.broker', function ($fw)
+{
+			return $fw->make('auth.password')->broker();
 		});
 	}
 

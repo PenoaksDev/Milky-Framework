@@ -56,7 +56,8 @@ class TokenGuard implements Guard
 		// If we've already retrieved the user for the current request we can just
 		// return it back immediately. We do not want to fetch the user data on
 		// every call to this method because that would be tremendously slow.
-		if (! is_null($this->user)) {
+		if (! is_null($this->user))
+{
 			return $this->user;
 		}
 
@@ -64,7 +65,8 @@ class TokenGuard implements Guard
 
 		$token = $this->getTokenForRequest();
 
-		if (! empty($token)) {
+		if (! empty($token))
+{
 			$user = $this->provider->retrieveByCredentials(
 				[$this->storageKey => $token]
 			);
@@ -82,11 +84,13 @@ class TokenGuard implements Guard
 	{
 		$token = $this->request->input($this->inputKey);
 
-		if (empty($token)) {
+		if (empty($token))
+{
 			$token = $this->request->bearerToken();
 		}
 
-		if (empty($token)) {
+		if (empty($token))
+{
 			$token = $this->request->getPassword();
 		}
 
@@ -103,7 +107,8 @@ class TokenGuard implements Guard
 	{
 		$credentials = [$this->storageKey => $credentials[$this->inputKey]];
 
-		if ($this->provider->retrieveByCredentials($credentials)) {
+		if ($this->provider->retrieveByCredentials($credentials))
+{
 			return true;
 		}
 

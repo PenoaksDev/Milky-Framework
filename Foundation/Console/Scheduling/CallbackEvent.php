@@ -4,7 +4,7 @@ namespace Foundation\Console\Scheduling;
 
 use LogicException;
 use InvalidArgumentException;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 
 class CallbackEvent extends Event
 {
@@ -36,7 +36,8 @@ class CallbackEvent extends Event
 		$this->callback = $callback;
 		$this->parameters = $parameters;
 
-		if (! is_string($this->callback) && ! is_callable($this->callback)) {
+		if (! is_string($this->callback) && ! is_callable($this->callback))
+{
 			throw new InvalidArgumentException(
 				'Invalid scheduled callback event. Must be string or callable.'
 			);
@@ -46,24 +47,27 @@ class CallbackEvent extends Event
 	/**
 	 * Run the given event.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return mixed
 	 *
 	 * @throws \Exception
 	 */
-	public function run(Container $container)
+	public function run(Bindings $bindings)
 	{
-		if ($this->description) {
+		if ($this->description)
+{
 			touch($this->mutexPath());
 		}
 
-		try {
-			$response = $container->call($this->callback, $this->parameters);
-		} finally {
+		try
+{
+			$response = $bindings->call($this->callback, $this->parameters);
+		} finally
+{
 			$this->removeMutex();
 		}
 
-		parent::callAfterCallbacks($container);
+		parent::callAfterCallbacks($bindings);
 
 		return $response;
 	}
@@ -75,7 +79,8 @@ class CallbackEvent extends Event
 	 */
 	protected function removeMutex()
 	{
-		if ($this->description) {
+		if ($this->description)
+{
 			@unlink($this->mutexPath());
 		}
 	}
@@ -89,13 +94,15 @@ class CallbackEvent extends Event
 	 */
 	public function withoutOverlapping()
 	{
-		if (! isset($this->description)) {
+		if (! isset($this->description))
+{
 			throw new LogicException(
 				"A scheduled event name is required to prevent overlapping. Use the 'name' method before 'withoutOverlapping'."
 			);
 		}
 
-		return $this->skip(function () {
+		return $this->skip(function ()
+{
 			return file_exists($this->mutexPath());
 		});
 	}
@@ -117,7 +124,8 @@ class CallbackEvent extends Event
 	 */
 	public function getSummaryForDisplay()
 	{
-		if (is_string($this->description)) {
+		if (is_string($this->description))
+{
 			return $this->description;
 		}
 

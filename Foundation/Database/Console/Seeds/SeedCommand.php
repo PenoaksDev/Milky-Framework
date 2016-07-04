@@ -53,27 +53,29 @@ class SeedCommand extends Command
 	 */
 	public function fire()
 	{
-		if (! $this->confirmToProceed()) {
+		if (! $this->confirmToProceed())
+{
 			return;
 		}
 
 		$this->resolver->setDefaultConnection($this->getDatabase());
 
-		Model::unguarded(function () {
+		Model::unguarded(function ()
+{
 			$this->getSeeder()->run();
 		});
 	}
 
 	/**
-	 * Get a seeder instance from the container.
+	 * Get a seeder instance from the bindings.
 	 *
 	 * @return \Foundation\Database\Seeder
 	 */
 	protected function getSeeder()
 	{
-		$class = $this->laravel->make($this->input->getOption('class'));
+		$class = $this->framework->make($this->input->getOption('class'));
 
-		return $class->setContainer($this->laravel)->setCommand($this);
+		return $class->setBindings($this->framework)->setCommand($this);
 	}
 
 	/**
@@ -85,7 +87,7 @@ class SeedCommand extends Command
 	{
 		$database = $this->input->getOption('database');
 
-		return $database ?: $this->laravel['config']['database.default'];
+		return $database ?: $this->framework['config']['database.default'];
 	}
 
 	/**

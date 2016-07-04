@@ -25,12 +25,16 @@ class RouteServiceProvider extends ServiceProvider
 	{
 		$this->setRootControllerNamespace();
 
-		if ($this->app->routesAreCached()) {
+		if ($this->fw->routesAreCached())
+{
 			$this->loadCachedRoutes();
-		} else {
+		}
+else
+{
 			$this->loadRoutes();
 
-			$this->app->booted(function () use ($router) {
+			$this->fw->booted(function () use ($router)
+{
 				$router->getRoutes()->refreshNameLookups();
 			});
 		}
@@ -43,11 +47,12 @@ class RouteServiceProvider extends ServiceProvider
 	 */
 	protected function setRootControllerNamespace()
 	{
-		if (is_null($this->namespace)) {
+		if (is_null($this->namespace))
+{
 			return;
 		}
 
-		$this->app[UrlGenerator::class]->setRootControllerNamespace($this->namespace);
+		$this->fw->bindings[UrlGenerator::class]->setRootControllerNamespace($this->namespace);
 	}
 
 	/**
@@ -57,8 +62,9 @@ class RouteServiceProvider extends ServiceProvider
 	 */
 	protected function loadCachedRoutes()
 	{
-		$this->app->booted(function () {
-			require $this->app->getCachedRoutesPath();
+		$this->fw->booted(function ()
+{
+			require $this->fw->getCachedRoutesPath();
 		});
 	}
 
@@ -69,7 +75,7 @@ class RouteServiceProvider extends ServiceProvider
 	 */
 	protected function loadRoutes()
 	{
-		$this->app->call([$this, 'map']);
+		$this->fw->call([$this, 'map']);
 	}
 
 	/**
@@ -80,13 +86,15 @@ class RouteServiceProvider extends ServiceProvider
 	 */
 	protected function loadRoutesFrom($path)
 	{
-		$router = $this->app->make(Router::class);
+		$router = $this->fw->make(Router::class);
 
-		if (is_null($this->namespace)) {
+		if (is_null($this->namespace))
+{
 			return require $path;
 		}
 
-		$router->group(['namespace' => $this->namespace], function (Router $router) use ($path) {
+		$router->group(['namespace' => $this->namespace], function (Router $router) use ($path)
+{
 			require $path;
 		});
 	}
@@ -110,6 +118,6 @@ class RouteServiceProvider extends ServiceProvider
 	 */
 	public function __call($method, $parameters)
 	{
-		return call_user_func_array([$this->app->make(Router::class), $method], $parameters);
+		return call_user_func_array([$this->fw->make(Router::class), $method], $parameters);
 	}
 }

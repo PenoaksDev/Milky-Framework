@@ -2,10 +2,10 @@
 
 namespace Foundation\Testing\Concerns;
 
-trait InteractsWithContainer
+trait InteractsWithBindings
 {
 	/**
-	 * Register an instance of an object in the container.
+	 * Register an instance of an object in the bindings.
 	 *
 	 * @param  string  $abstract
 	 * @param  object  $instance
@@ -13,7 +13,7 @@ trait InteractsWithContainer
 	 */
 	protected function instance($abstract, $instance)
 	{
-		$this->app->instance($abstract, $instance);
+		$this->fw->bindings->instance($abstract, $instance);
 
 		return $instance;
 	}

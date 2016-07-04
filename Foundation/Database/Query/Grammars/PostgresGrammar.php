@@ -28,7 +28,8 @@ class PostgresGrammar extends Grammar
 	 */
 	protected function compileLock(Builder $query, $value)
 	{
-		if (is_string($value)) {
+		if (is_string($value))
+{
 			return $value;
 		}
 
@@ -136,7 +137,8 @@ class PostgresGrammar extends Grammar
 		// When gathering the columns for an update statement, we'll wrap each of the
 		// columns and convert it to a parameter value. Then we will concatenate a
 		// list of the columns that can be added into this update query clauses.
-		foreach ($values as $key => $value) {
+		foreach ($values as $key => $value)
+{
 			$columns[] = $this->wrap($key).' = '.$this->parameter($value);
 		}
 
@@ -151,7 +153,8 @@ class PostgresGrammar extends Grammar
 	 */
 	protected function compileUpdateFrom(Builder $query)
 	{
-		if (! isset($query->joins)) {
+		if (! isset($query->joins))
+{
 			return '';
 		}
 
@@ -160,11 +163,13 @@ class PostgresGrammar extends Grammar
 		// When using Postgres, updates with joins list the joined tables in the from
 		// clause, which is different than other systems like MySQL. Here, we will
 		// compile out the tables that are joined and add them to a from clause.
-		foreach ($query->joins as $join) {
+		foreach ($query->joins as $join)
+{
 			$froms[] = $this->wrapTable($join->table);
 		}
 
-		if (count($froms) > 0) {
+		if (count($froms) > 0)
+{
 			return ' from '.implode(', ', $froms);
 		}
 	}
@@ -179,7 +184,8 @@ class PostgresGrammar extends Grammar
 	{
 		$baseWhere = $this->compileWheres($query);
 
-		if (! isset($query->joins)) {
+		if (! isset($query->joins))
+{
 			return $baseWhere;
 		}
 
@@ -188,7 +194,8 @@ class PostgresGrammar extends Grammar
 		// strip the leading boolean we will do so when using as the only where.
 		$joinWhere = $this->compileUpdateJoinWheres($query);
 
-		if (trim($baseWhere) == '') {
+		if (trim($baseWhere) == '')
+{
 			return 'where '.$this->removeLeadingBoolean($joinWhere);
 		}
 
@@ -208,8 +215,10 @@ class PostgresGrammar extends Grammar
 		// Here we will just loop through all of the join constraints and compile them
 		// all out then implode them. This should give us "where" like syntax after
 		// everything has been built and then we will join it to the real wheres.
-		foreach ($query->joins as $join) {
-			foreach ($join->clauses as $clause) {
+		foreach ($query->joins as $join)
+{
+			foreach ($join->clauses as $clause)
+{
 				$joinWheres[] = $this->compileJoinConstraint($clause);
 			}
 		}
@@ -227,7 +236,8 @@ class PostgresGrammar extends Grammar
 	 */
 	public function compileInsertGetId(Builder $query, $values, $sequence)
 	{
-		if (is_null($sequence)) {
+		if (is_null($sequence))
+{
 			$sequence = 'id';
 		}
 
@@ -253,11 +263,13 @@ class PostgresGrammar extends Grammar
 	 */
 	protected function wrapValue($value)
 	{
-		if ($value === '*') {
+		if ($value === '*')
+{
 			return $value;
 		}
 
-		if (Str::contains($value, '->')) {
+		if (Str::contains($value, '->'))
+{
 			return $this->wrapJsonSelector($value);
 		}
 
@@ -280,7 +292,8 @@ class PostgresGrammar extends Grammar
 
 		$attribute = array_pop($wrappedPath);
 
-		if (! empty($wrappedPath)) {
+		if (! empty($wrappedPath))
+{
 			return $field.'->'.implode('->', $wrappedPath).'->>'.$attribute;
 		}
 
@@ -295,7 +308,8 @@ class PostgresGrammar extends Grammar
 	 */
 	protected function wrapJsonPathAttributes($path)
 	{
-		return array_map(function ($attribute) {
+		return array_map(function ($attribute)
+{
 			return "'$attribute'";
 		}, $path);
 	}

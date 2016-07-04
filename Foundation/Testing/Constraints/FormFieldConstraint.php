@@ -54,7 +54,8 @@ abstract class FormFieldConstraint extends PageConstraint
 	{
 		$field = $crawler->filter(implode(', ', $this->getElements()));
 
-		if ($field->count() > 0) {
+		if ($field->count() > 0)
+{
 			return $field;
 		}
 
@@ -75,7 +76,8 @@ abstract class FormFieldConstraint extends PageConstraint
 
 		$id = str_replace(['[', ']'], ['\\[', '\\]'], $name);
 
-		return collect(explode(',', $this->validElements()))->map(function ($element) use ($name, $id) {
+		return collect(explode(',', $this->validElements()))->map(function ($element) use ($name, $id)
+{
 			return "{$element}#{$id}, {$element}[name='{$name}']";
 		})->all();
 	}

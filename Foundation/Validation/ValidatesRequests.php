@@ -26,13 +26,15 @@ trait ValidatesRequests
 	 */
 	public function validateWith($validator, Request $request = null)
 	{
-		$request = $request ?: app('request');
+		$request = $request ?: fw('request');
 
-		if (is_array($validator)) {
+		if (is_array($validator))
+{
 			$validator = $this->getValidationFactory()->make($request->all(), $validator);
 		}
 
-		if ($validator->fails()) {
+		if ($validator->fails())
+{
 			$this->throwValidationException($request, $validator);
 		}
 	}
@@ -50,7 +52,8 @@ trait ValidatesRequests
 	{
 		$validator = $this->getValidationFactory()->make($request->all(), $rules, $messages, $customAttributes);
 
-		if ($validator->fails()) {
+		if ($validator->fails())
+{
 			$this->throwValidationException($request, $validator);
 		}
 	}
@@ -69,7 +72,8 @@ trait ValidatesRequests
 	 */
 	public function validateWithBag($errorBag, Request $request, array $rules, array $messages = [], array $customAttributes = [])
 	{
-		$this->withErrorBag($errorBag, function () use ($request, $rules, $messages, $customAttributes) {
+		$this->withErrorBag($errorBag, function () use ($request, $rules, $messages, $customAttributes)
+{
 			$this->validate($request, $rules, $messages, $customAttributes);
 		});
 	}
@@ -99,7 +103,8 @@ trait ValidatesRequests
 	 */
 	protected function buildFailedValidationResponse(Request $request, array $errors)
 	{
-		if (($request->ajax() && ! $request->pjax()) || $request->wantsJson()) {
+		if (($request->ajax() && ! $request->pjax()) || $request->wantsJson())
+{
 			return new JsonResponse($errors, 422);
 		}
 
@@ -126,7 +131,7 @@ trait ValidatesRequests
 	 */
 	protected function getRedirectUrl()
 	{
-		return app(UrlGenerator::class)->previous();
+		return fw(UrlGenerator::class)->previous();
 	}
 
 	/**
@@ -136,7 +141,7 @@ trait ValidatesRequests
 	 */
 	protected function getValidationFactory()
 	{
-		return app(Factory::class);
+		return fw(Factory::class);
 	}
 
 	/**

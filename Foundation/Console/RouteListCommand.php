@@ -68,7 +68,8 @@ class RouteListCommand extends Command
 	 */
 	public function fire()
 	{
-		if (count($this->routes) == 0) {
+		if (count($this->routes) == 0)
+{
 			return $this->error("Your application doesn't have any routes.");
 		}
 
@@ -84,17 +85,21 @@ class RouteListCommand extends Command
 	{
 		$results = [];
 
-		foreach ($this->routes as $route) {
+		foreach ($this->routes as $route)
+{
 			$results[] = $this->getRouteInformation($route);
 		}
 
-		if ($sort = $this->option('sort')) {
-			$results = Arr::sort($results, function ($value) use ($sort) {
+		if ($sort = $this->option('sort'))
+{
+			$results = Arr::sort($results, function ($value) use ($sort)
+{
 				return $value[$sort];
 			});
 		}
 
-		if ($this->option('reverse')) {
+		if ($this->option('reverse'))
+{
 			$results = array_reverse($results);
 		}
 
@@ -142,7 +147,8 @@ class RouteListCommand extends Command
 
 		$actionName = $route->getActionName();
 
-		if (! empty($actionName) && $actionName !== 'Closure') {
+		if (! empty($actionName) && $actionName !== 'Closure')
+{
 			$middlewares = array_merge($middlewares, $this->getControllerMiddleware($actionName));
 		}
 
@@ -157,12 +163,12 @@ class RouteListCommand extends Command
 	 */
 	protected function getControllerMiddleware($actionName)
 	{
-		Controller::setRouter($this->laravel['router']);
+		Controller::setRouter($this->framework['router']);
 
 		$segments = explode('@', $actionName);
 
 		return $this->getControllerMiddlewareFromInstance(
-			$this->laravel->make($segments[0]), $segments[1]
+			$this->framework->make($segments[0]), $segments[1]
 		);
 	}
 
@@ -179,8 +185,10 @@ class RouteListCommand extends Command
 
 		$results = [];
 
-		foreach ($controller->getMiddleware() as $name => $options) {
-			if (! $this->methodExcludedByOptions($method, $options)) {
+		foreach ($controller->getMiddleware() as $name => $options)
+{
+			if (! $this->methodExcludedByOptions($method, $options))
+{
 				$results[] = Arr::get($middleware, $name, $name);
 			}
 		}
@@ -211,7 +219,8 @@ class RouteListCommand extends Command
 	{
 		if (($this->option('name') && ! Str::contains($route['name'], $this->option('name'))) ||
 			 $this->option('path') && ! Str::contains($route['uri'], $this->option('path')) ||
-			 $this->option('method') && ! Str::contains($route['method'], $this->option('method'))) {
+			 $this->option('method') && ! Str::contains($route['method'], $this->option('method')))
+{
 			return;
 		}
 

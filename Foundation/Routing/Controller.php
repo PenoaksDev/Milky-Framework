@@ -30,7 +30,8 @@ abstract class Controller
 	 */
 	public function middleware($middleware, array $options = [])
 	{
-		foreach ((array) $middleware as $middlewareName) {
+		foreach ((array) $middleware as $middlewareName)
+{
 			$this->middleware[$middlewareName] = &$options;
 		}
 

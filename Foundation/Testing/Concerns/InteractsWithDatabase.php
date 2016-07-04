@@ -14,7 +14,7 @@ trait InteractsWithDatabase
 	 */
 	protected function seeInDatabase($table, array $data, $connection = null)
 	{
-		$database = $this->app->make('db');
+		$database = $this->fw->make('db');
 
 		$connection = $connection ?: $database->getDefaultConnection();
 
@@ -63,7 +63,7 @@ trait InteractsWithDatabase
 	 */
 	protected function notSeeInDatabase($table, array $data, $connection = null)
 	{
-		$database = $this->app->make('db');
+		$database = $this->fw->make('db');
 
 		$connection = $connection ?: $database->getDefaultConnection();
 

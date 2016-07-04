@@ -44,23 +44,27 @@ class HasLink extends PageConstraint
 	{
 		$links = $this->crawler($crawler)->selectLink($this->text);
 
-		if ($links->count() == 0) {
+		if ($links->count() == 0)
+{
 			return false;
 		}
 
 		// If the URL is null we assume the developer only wants to find a link
 		// with the given text regardless of the URL. So if we find the link
 		// we will return true. Otherwise, we will look for the given URL.
-		if ($this->url == null) {
+		if ($this->url == null)
+{
 			return true;
 		}
 
 		$absoluteUrl = $this->absoluteUrl();
 
-		foreach ($links as $link) {
+		foreach ($links as $link)
+{
 			$linkHref = $link->getAttribute('href');
 
-			if ($linkHref == $this->url || $linkHref == $absoluteUrl) {
+			if ($linkHref == $this->url || $linkHref == $absoluteUrl)
+{
 				return true;
 			}
 		}
@@ -75,7 +79,8 @@ class HasLink extends PageConstraint
 	 */
 	protected function absoluteUrl()
 	{
-		if (! Str::startsWith($this->url, ['http', 'https'])) {
+		if (! Str::startsWith($this->url, ['http', 'https']))
+{
 			return URL::to($this->url);
 		}
 
@@ -91,7 +96,8 @@ class HasLink extends PageConstraint
 	{
 		$description = "a link with the text [{$this->text}]";
 
-		if ($this->url) {
+		if ($this->url)
+{
 			$description .= " and the URL [{$this->url}]";
 		}
 

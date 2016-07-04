@@ -13,9 +13,12 @@ trait WithoutMiddleware
 	 */
 	public function disableMiddlewareForAllTests()
 	{
-		if (method_exists($this, 'withoutMiddleware')) {
+		if (method_exists($this, 'withoutMiddleware'))
+{
 			$this->withoutMiddleware();
-		} else {
+		}
+else
+{
 			throw new Exception('Unable to disable middleware. CrawlerTrait not used.');
 		}
 	}

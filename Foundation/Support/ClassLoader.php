@@ -28,8 +28,10 @@ class ClassLoader
 	{
 		$class = static::normalizeClass($class);
 
-		foreach (static::$directories as $directory) {
-			if (file_exists($path = $directory.DIRECTORY_SEPARATOR.$class)) {
+		foreach (static::$directories as $directory)
+{
+			if (file_exists($path = $directory.DIRECTORY_SEPARATOR.$class))
+{
 				require_once $path;
 
 				return true;
@@ -47,7 +49,8 @@ class ClassLoader
 	 */
 	public static function normalizeClass($class)
 	{
-		if ($class[0] == '\\') {
+		if ($class[0] == '\\')
+{
 			$class = substr($class, 1);
 		}
 
@@ -61,7 +64,8 @@ class ClassLoader
 	 */
 	public static function register()
 	{
-		if (! static::$registered) {
+		if (! static::$registered)
+{
 			static::$registered = spl_autoload_register([static::class, 'load']);
 		}
 	}
@@ -85,9 +89,12 @@ class ClassLoader
 	 */
 	public static function removeDirectories($directories = null)
 	{
-		if (is_null($directories)) {
+		if (is_null($directories))
+{
 			static::$directories = [];
-		} else {
+		}
+else
+{
 			static::$directories = array_diff(static::$directories, (array) $directories);
 		}
 	}

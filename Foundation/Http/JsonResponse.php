@@ -44,17 +44,25 @@ class JsonResponse extends BaseJsonResponse
 	 */
 	public function setData($data = [])
 	{
-		if ($data instanceof Arrayable) {
+		if ($data instanceof Arrayable)
+{
 			$this->data = json_encode($data->toArray(), $this->encodingOptions);
-		} elseif ($data instanceof Jsonable) {
+		}
+elseif ($data instanceof Jsonable)
+{
 			$this->data = $data->toJson($this->encodingOptions);
-		} elseif ($data instanceof JsonSerializable) {
+		}
+elseif ($data instanceof JsonSerializable)
+{
 			$this->data = json_encode($data->jsonSerialize(), $this->encodingOptions);
-		} else {
+		}
+else
+{
 			$this->data = json_encode($data, $this->encodingOptions);
 		}
 
-		if (JSON_ERROR_NONE !== json_last_error()) {
+		if (JSON_ERROR_NONE !== json_last_error())
+{
 			throw new InvalidArgumentException(json_last_error_msg());
 		}
 

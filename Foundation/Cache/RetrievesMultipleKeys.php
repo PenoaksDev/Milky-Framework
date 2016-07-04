@@ -16,7 +16,8 @@ trait RetrievesMultipleKeys
 	{
 		$return = [];
 
-		foreach ($keys as $key) {
+		foreach ($keys as $key)
+{
 			$return[$key] = $this->get($key);
 		}
 
@@ -32,7 +33,8 @@ trait RetrievesMultipleKeys
 	 */
 	public function putMany(array $values, $minutes)
 	{
-		foreach ($values as $key => $value) {
+		foreach ($values as $key => $value)
+{
 			$this->put($key, $value, $minutes);
 		}
 	}

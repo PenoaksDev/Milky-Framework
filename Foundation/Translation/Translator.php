@@ -102,14 +102,16 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface
 		// the translator was instantiated. Then, we can load the lines and return.
 		$locales = $fallback ? $this->parseLocale($locale) : [$locale ?: $this->locale];
 
-		foreach ($locales as $locale) {
+		foreach ($locales as $locale)
+{
 			$this->load($namespace, $group, $locale);
 
 			$line = $this->getLine(
 				$namespace, $group, $locale, $item, $replace
 			);
 
-			if (! is_null($line)) {
+			if (! is_null($line))
+{
 				break;
 			}
 		}
@@ -117,7 +119,8 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface
 		// If the line doesn't exist, we will return back the key which was requested as
 		// that will be quick to spot in the UI if language keys are wrong or missing
 		// from the application's language files. Otherwise we can return the line.
-		if (! isset($line)) {
+		if (! isset($line))
+{
 			return $key;
 		}
 
@@ -138,9 +141,12 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface
 	{
 		$line = Arr::get($this->loaded[$namespace][$group][$locale], $item);
 
-		if (is_string($line)) {
+		if (is_string($line))
+{
 			return $this->makeReplacements($line, $replace);
-		} elseif (is_array($line) && count($line) > 0) {
+		}
+elseif (is_array($line) && count($line) > 0)
+{
 			return $line;
 		}
 	}
@@ -156,7 +162,8 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface
 	{
 		$replace = $this->sortReplacements($replace);
 
-		foreach ($replace as $key => $value) {
+		foreach ($replace as $key => $value)
+{
 			$line = str_replace(
 				[':'.Str::upper($key), ':'.Str::ucfirst($key), ':'.$key],
 				[Str::upper($value), Str::ucfirst($value), $value],
@@ -175,7 +182,8 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface
 	 */
 	protected function sortReplacements(array $replace)
 	{
-		return (new Collection($replace))->sortBy(function ($value, $key) {
+		return (new Collection($replace))->sortBy(function ($value, $key)
+{
 			return mb_strlen($key) * -1;
 		});
 	}
@@ -193,7 +201,8 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface
 	{
 		$line = $this->get($key, $replace, $locale = $locale ?: $this->locale ?: $this->fallback);
 
-		if (is_array($number) || $number instanceof \Countable) {
+		if (is_array($number) || $number instanceof \Countable)
+{
 			$number = count($number);
 		}
 
@@ -241,7 +250,8 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface
 	 */
 	public function load($namespace, $group, $locale)
 	{
-		if ($this->isLoaded($namespace, $group, $locale)) {
+		if ($this->isLoaded($namespace, $group, $locale))
+{
 			return;
 		}
 
@@ -288,7 +298,8 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface
 	{
 		$segments = parent::parseKey($key);
 
-		if (is_null($segments[0])) {
+		if (is_null($segments[0]))
+{
 			$segments[0] = '*';
 		}
 
@@ -313,7 +324,8 @@ class Translator extends NamespacedItemResolver implements TranslatorInterface
 	 */
 	public function getSelector()
 	{
-		if (! isset($this->selector)) {
+		if (! isset($this->selector))
+{
 			$this->selector = new MessageSelector;
 		}
 

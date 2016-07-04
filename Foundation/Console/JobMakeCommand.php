@@ -35,9 +35,12 @@ class JobMakeCommand extends GeneratorCommand
 	 */
 	protected function getStub()
 	{
-		if ($this->option('sync')) {
+		if ($this->option('sync'))
+{
 			return __DIR__.'/stubs/job.stub';
-		} else {
+		}
+else
+{
 			return __DIR__.'/stubs/job-queued.stub';
 		}
 	}

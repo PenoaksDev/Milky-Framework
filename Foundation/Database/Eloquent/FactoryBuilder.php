@@ -9,7 +9,7 @@ use InvalidArgumentException;
 class FactoryBuilder
 {
 	/**
-	 * The model definitions in the container.
+	 * The model definitions in the bindings.
 	 *
 	 * @var array
 	 */
@@ -83,10 +83,14 @@ class FactoryBuilder
 	{
 		$results = $this->make($attributes);
 
-		if ($this->amount === 1) {
+		if ($this->amount === 1)
+{
 			$results->save();
-		} else {
-			foreach ($results as $result) {
+		}
+else
+{
+			foreach ($results as $result)
+{
 				$result->save();
 			}
 		}
@@ -102,12 +106,16 @@ class FactoryBuilder
 	 */
 	public function make(array $attributes = [])
 	{
-		if ($this->amount === 1) {
+		if ($this->amount === 1)
+{
 			return $this->makeInstance($attributes);
-		} else {
+		}
+else
+{
 			$results = [];
 
-			for ($i = 0; $i < $this->amount; $i++) {
+			for ($i = 0; $i < $this->amount; $i++)
+{
 				$results[] = $this->makeInstance($attributes);
 			}
 
@@ -125,8 +133,10 @@ class FactoryBuilder
 	 */
 	protected function makeInstance(array $attributes = [])
 	{
-		return Model::unguarded(function () use ($attributes) {
-			if (! isset($this->definitions[$this->class][$this->name])) {
+		return Model::unguarded(function () use ($attributes)
+{
+			if (! isset($this->definitions[$this->class][$this->name]))
+{
 				throw new InvalidArgumentException("Unable to locate factory with name [{$this->name}] [{$this->class}].");
 			}
 
@@ -151,7 +161,8 @@ class FactoryBuilder
 	 */
 	protected function callClosureAttributes(array $attributes)
 	{
-		foreach ($attributes as &$attribute) {
+		foreach ($attributes as &$attribute)
+{
 			$attribute = $attribute instanceof Closure
 							? $attribute($attributes) : $attribute;
 		}

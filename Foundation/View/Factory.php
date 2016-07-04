@@ -9,7 +9,7 @@ use InvalidArgumentException;
 use Foundation\Contracts\Support\Arrayable;
 use Foundation\View\Engines\EngineResolver;
 use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\View\Factory as FactoryContract;
 
 class Factory implements FactoryContract
@@ -36,11 +36,11 @@ class Factory implements FactoryContract
 	protected $events;
 
 	/**
-	 * The IoC container instance.
+	 * The IoC bindings instance.
 	 *
-	 * @var \Foundation\Contracts\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * Data that should be available to all templates.
@@ -156,7 +156,8 @@ class Factory implements FactoryContract
 	 */
 	public function make($view, $data = [], $mergeData = [])
 	{
-		if (isset($this->aliases[$view])) {
+		if (isset($this->aliases[$view]))
+{
 			$view = $this->aliases[$view];
 		}
 
@@ -181,7 +182,8 @@ class Factory implements FactoryContract
 	{
 		$delimiter = ViewFinderInterface::HINT_PATH_DELIMITER;
 
-		if (strpos($name, $delimiter) === false) {
+		if (strpos($name, $delimiter) === false)
+{
 			return str_replace('/', '.', $name);
 		}
 
@@ -245,9 +247,11 @@ class Factory implements FactoryContract
 	 */
 	public function exists($view)
 	{
-		try {
+		try
+{
 			$this->finder->find($view);
-		} catch (InvalidArgumentException $e) {
+		} catch (InvalidArgumentException $e)
+{
 			return false;
 		}
 
@@ -270,8 +274,10 @@ class Factory implements FactoryContract
 		// If is actually data in the array, we will loop through the data and append
 		// an instance of the partial view to the final result HTML passing in the
 		// iterated value of this data array, allowing the views to access them.
-		if (count($data) > 0) {
-			foreach ($data as $key => $value) {
+		if (count($data) > 0)
+{
+			foreach ($data as $key => $value)
+{
 				$data = ['key' => $key, $iterator => $value];
 
 				$result .= $this->make($view, $data)->render();
@@ -281,10 +287,14 @@ class Factory implements FactoryContract
 		// If there is no data in the array, we will render the contents of the empty
 		// view. Alternatively, the "empty view" could be a raw string that begins
 		// with "raw|" for convenience and to let this know that it is a string.
-		else {
-			if (Str::startsWith($empty, 'raw|')) {
+		else
+{
+			if (Str::startsWith($empty, 'raw|'))
+{
 				$result = substr($empty, 4);
-			} else {
+			}
+else
+{
 				$result = $this->make($empty)->render();
 			}
 		}
@@ -302,7 +312,8 @@ class Factory implements FactoryContract
 	 */
 	public function getEngineFromPath($path)
 	{
-		if (! $extension = $this->getExtension($path)) {
+		if (! $extension = $this->getExtension($path))
+{
 			throw new InvalidArgumentException("Unrecognized extension in file: $path");
 		}
 
@@ -321,7 +332,8 @@ class Factory implements FactoryContract
 	{
 		$extensions = array_keys($this->extensions);
 
-		return Arr::first($extensions, function ($key, $value) use ($path) {
+		return Arr::first($extensions, function ($key, $value) use ($path)
+{
 			return Str::endsWith($path, '.'.$value);
 		});
 	}
@@ -335,11 +347,13 @@ class Factory implements FactoryContract
 	 */
 	public function share($key, $value = null)
 	{
-		if (! is_array($key)) {
+		if (! is_array($key))
+{
 			return $this->shared[$key] = $value;
 		}
 
-		foreach ($key as $innerKey => $innerValue) {
+		foreach ($key as $innerKey => $innerValue)
+{
 			$this->share($innerKey, $innerValue);
 		}
 	}
@@ -355,7 +369,8 @@ class Factory implements FactoryContract
 	{
 		$creators = [];
 
-		foreach ((array) $views as $view) {
+		foreach ((array) $views as $view)
+{
 			$creators[] = $this->addViewEvent($view, $callback, 'creating: ');
 		}
 
@@ -372,7 +387,8 @@ class Factory implements FactoryContract
 	{
 		$registered = [];
 
-		foreach ($composers as $callback => $views) {
+		foreach ($composers as $callback => $views)
+{
 			$registered = array_merge($registered, $this->composer($views, $callback));
 		}
 
@@ -391,7 +407,8 @@ class Factory implements FactoryContract
 	{
 		$composers = [];
 
-		foreach ((array) $views as $view) {
+		foreach ((array) $views as $view)
+{
 			$composers[] = $this->addViewEvent($view, $callback, 'composing: ', $priority);
 		}
 
@@ -411,11 +428,14 @@ class Factory implements FactoryContract
 	{
 		$view = $this->normalizeName($view);
 
-		if ($callback instanceof Closure) {
+		if ($callback instanceof Closure)
+{
 			$this->addEventListener($prefix.$view, $callback, $priority);
 
 			return $callback;
-		} elseif (is_string($callback)) {
+		}
+elseif (is_string($callback))
+{
 			return $this->addClassEvent($view, $callback, $prefix, $priority);
 		}
 	}
@@ -434,7 +454,7 @@ class Factory implements FactoryContract
 		$name = $prefix.$view;
 
 		// When registering a class based view "composer", we will simply resolve the
-		// classes from the application IoC container then call the compose method
+		// classes from the application IoC bindings then call the compose method
 		// on the instance. This allows for convenient, testable view composers.
 		$callback = $this->buildClassEventCallback($class, $prefix);
 
@@ -453,15 +473,18 @@ class Factory implements FactoryContract
 	 */
 	protected function addEventListener($name, $callback, $priority = null)
 	{
-		if (is_null($priority)) {
+		if (is_null($priority))
+{
 			$this->events->listen($name, $callback);
-		} else {
+		}
+else
+{
 			$this->events->listen($name, $callback, $priority);
 		}
 	}
 
 	/**
-	 * Build a class based container callback Closure.
+	 * Build a class based bindings callback Closure.
 	 *
 	 * @param  string  $class
 	 * @param  string  $prefix
@@ -472,10 +495,11 @@ class Factory implements FactoryContract
 		list($class, $method) = $this->parseClassEvent($class, $prefix);
 
 		// Once we have the class and method name, we can build the Closure to resolve
-		// the instance out of the IoC container and call the method on it with the
+		// the instance out of the IoC bindings and call the method on it with the
 		// given arguments that are passed to the Closure as the composer's data.
-		return function () use ($class, $method) {
-			$callable = [$this->container->make($class), $method];
+		return function () use ($class, $method)
+{
+			$callable = [$this->bindings->make($class), $method];
 
 			return call_user_func_array($callable, func_get_args());
 		};
@@ -490,7 +514,8 @@ class Factory implements FactoryContract
 	 */
 	protected function parseClassEvent($class, $prefix)
 	{
-		if (Str::contains($class, '@')) {
+		if (Str::contains($class, '@'))
+{
 			return explode('@', $class);
 		}
 
@@ -530,11 +555,15 @@ class Factory implements FactoryContract
 	 */
 	public function startSection($section, $content = '')
 	{
-		if ($content === '') {
-			if (ob_start()) {
+		if ($content === '')
+{
+			if (ob_start())
+{
 				$this->sectionStack[] = $section;
 			}
-		} else {
+		}
+else
+{
 			$this->extendSection($section, $content);
 		}
 	}
@@ -558,7 +587,8 @@ class Factory implements FactoryContract
 	 */
 	public function yieldSection()
 	{
-		if (empty($this->sectionStack)) {
+		if (empty($this->sectionStack))
+{
 			return '';
 		}
 
@@ -574,15 +604,19 @@ class Factory implements FactoryContract
 	 */
 	public function stopSection($overwrite = false)
 	{
-		if (empty($this->sectionStack)) {
+		if (empty($this->sectionStack))
+{
 			throw new InvalidArgumentException('Cannot end a section without first starting one.');
 		}
 
 		$last = array_pop($this->sectionStack);
 
-		if ($overwrite) {
+		if ($overwrite)
+{
 			$this->sections[$last] = ob_get_clean();
-		} else {
+		}
+else
+{
 			$this->extendSection($last, ob_get_clean());
 		}
 
@@ -597,15 +631,19 @@ class Factory implements FactoryContract
 	 */
 	public function appendSection()
 	{
-		if (empty($this->sectionStack)) {
+		if (empty($this->sectionStack))
+{
 			throw new InvalidArgumentException('Cannot end a section without first starting one.');
 		}
 
 		$last = array_pop($this->sectionStack);
 
-		if (isset($this->sections[$last])) {
+		if (isset($this->sections[$last]))
+{
 			$this->sections[$last] .= ob_get_clean();
-		} else {
+		}
+else
+{
 			$this->sections[$last] = ob_get_clean();
 		}
 
@@ -621,7 +659,8 @@ class Factory implements FactoryContract
 	 */
 	protected function extendSection($section, $content)
 	{
-		if (isset($this->sections[$section])) {
+		if (isset($this->sections[$section]))
+{
 			$content = str_replace('@parent', $content, $this->sections[$section]);
 		}
 
@@ -639,7 +678,8 @@ class Factory implements FactoryContract
 	{
 		$sectionContent = $default;
 
-		if (isset($this->sections[$section])) {
+		if (isset($this->sections[$section]))
+{
 			$sectionContent = $this->sections[$section];
 		}
 
@@ -659,11 +699,15 @@ class Factory implements FactoryContract
 	 */
 	public function startPush($section, $content = '')
 	{
-		if ($content === '') {
-			if (ob_start()) {
+		if ($content === '')
+{
+			if (ob_start())
+{
 				$this->pushStack[] = $section;
 			}
-		} else {
+		}
+else
+{
 			$this->extendPush($section, $content);
 		}
 	}
@@ -676,7 +720,8 @@ class Factory implements FactoryContract
 	 */
 	public function stopPush()
 	{
-		if (empty($this->pushStack)) {
+		if (empty($this->pushStack))
+{
 			throw new InvalidArgumentException('Cannot end a section without first starting one.');
 		}
 
@@ -696,12 +741,16 @@ class Factory implements FactoryContract
 	 */
 	protected function extendPush($section, $content)
 	{
-		if (! isset($this->pushes[$section])) {
+		if (! isset($this->pushes[$section]))
+{
 			$this->pushes[$section] = [];
 		}
-		if (! isset($this->pushes[$section][$this->renderCount])) {
+		if (! isset($this->pushes[$section][$this->renderCount]))
+{
 			$this->pushes[$section][$this->renderCount] = $content;
-		} else {
+		}
+else
+{
 			$this->pushes[$section][$this->renderCount] .= $content;
 		}
 	}
@@ -715,7 +764,8 @@ class Factory implements FactoryContract
 	 */
 	public function yieldPushContent($section, $default = '')
 	{
-		if (! isset($this->pushes[$section])) {
+		if (! isset($this->pushes[$section]))
+{
 			return $default;
 		}
 
@@ -745,7 +795,8 @@ class Factory implements FactoryContract
 	 */
 	public function flushSectionsIfDoneRendering()
 	{
-		if ($this->doneRendering()) {
+		if ($this->doneRendering())
+{
 			$this->flushSections();
 		}
 	}
@@ -827,7 +878,8 @@ class Factory implements FactoryContract
 	{
 		$this->finder->addExtension($extension);
 
-		if (isset($resolver)) {
+		if (isset($resolver))
+{
 			$this->engines->register($engine, $resolver);
 		}
 
@@ -899,24 +951,24 @@ class Factory implements FactoryContract
 	}
 
 	/**
-	 * Get the IoC container instance.
+	 * Get the IoC bindings instance.
 	 *
-	 * @return \Foundation\Contracts\Container\Container
+	 * @return \Foundation\Framework
 	 */
-	public function getContainer()
+	public function getBindings()
 	{
-		return $this->container;
+		return $this->bindings;
 	}
 
 	/**
-	 * Set the IoC container instance.
+	 * Set the IoC bindings instance.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function setContainer(Container $container)
+	public function setBindings(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 
 	/**

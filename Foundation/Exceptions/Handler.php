@@ -37,10 +37,10 @@ class Handler implements ExceptionHandlerContract
 	/**
 	 * Create a new exception handler instance.
 	 *
-	 * @param  \Psr\Log\LoggerInterface  $log
+	 * @param  \Psr\Log\LoggerInterface $log
 	 * @return void
 	 */
-	public function __construct(LoggerInterface $log)
+	public function __construct( LoggerInterface $log )
 	{
 		$this->log = $log;
 	}
@@ -48,39 +48,42 @@ class Handler implements ExceptionHandlerContract
 	/**
 	 * Report or log an exception.
 	 *
-	 * @param  \Exception  $e
+	 * @param  \Exception $e
 	 * @return void
 	 */
-	public function report(Exception $e)
+	public function report( Exception $e )
 	{
-		if ($this->shouldReport($e)) {
-			$this->log->error($e);
+		if ( $this->shouldReport( $e ) )
+		{
+			$this->log->error( $e );
 		}
 	}
 
 	/**
 	 * Determine if the exception should be reported.
 	 *
-	 * @param  \Exception  $e
+	 * @param  \Exception $e
 	 * @return bool
 	 */
-	public function shouldReport(Exception $e)
+	public function shouldReport( Exception $e )
 	{
-		return ! $this->shouldntReport($e);
+		return !$this->shouldntReport( $e );
 	}
 
 	/**
 	 * Determine if the exception is in the "do not report" list.
 	 *
-	 * @param  \Exception  $e
+	 * @param  \Exception $e
 	 * @return bool
 	 */
-	protected function shouldntReport(Exception $e)
+	protected function shouldntReport( Exception $e )
 	{
-		$dontReport = array_merge($this->dontReport, [HttpResponseException::class]);
+		$dontReport = array_merge( $this->dontReport, [HttpResponseException::class] );
 
-		foreach ($dontReport as $type) {
-			if ($e instanceof $type) {
+		foreach ( $dontReport as $type )
+		{
+			if ( $e instanceof $type )
+			{
 				return true;
 			}
 		}
@@ -91,115 +94,133 @@ class Handler implements ExceptionHandlerContract
 	/**
 	 * Render an exception into a response.
 	 *
-	 * @param  \Foundation\Http\Request  $request
-	 * @param  \Exception  $e
+	 * @param  \Foundation\Http\Request $request
+	 * @param  \Exception $e
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
-	public function render($request, Exception $e)
+	public function render( $request, Exception $e )
 	{
-		if ($e instanceof HttpResponseException) {
+		if ( $e instanceof HttpResponseException )
+		{
 			return $e->getResponse();
-		} elseif ($e instanceof ModelNotFoundException) {
-			$e = new NotFoundHttpException($e->getMessage(), $e);
-		} elseif ($e instanceof AuthenticationException) {
-			return $this->unauthenticated($request, $e);
-		} elseif ($e instanceof AuthorizationException) {
-			$e = new HttpException(403, $e->getMessage());
-		} elseif ($e instanceof ValidationException && $e->getResponse()) {
+		}
+		elseif ( $e instanceof ModelNotFoundException )
+		{
+			$e = new NotFoundHttpException( $e->getMessage(), $e );
+		}
+		elseif ( $e instanceof AuthenticationException )
+		{
+			return $this->unauthenticated( $request, $e );
+		}
+		elseif ( $e instanceof AuthorizationException )
+		{
+			$e = new HttpException( 403, $e->getMessage() );
+		}
+		elseif ( $e instanceof ValidationException && $e->getResponse() )
+		{
 			return $e->getResponse();
 		}
 
-		if ($this->isHttpException($e)) {
-			return $this->toFoundationResponse($this->renderHttpException($e), $e);
-		} else {
-			return $this->toFoundationResponse($this->convertExceptionToResponse($e), $e);
+		if ( $this->isHttpException( $e ) )
+		{
+			return $this->toHttpResponse( $this->renderHttpException( $e ), $e );
+		}
+		else
+		{
+			return $this->toHttpResponse( $this->convertExceptionToResponse( $e ), $e );
 		}
 	}
 
 	/**
 	 * Map exception into an illuminate response.
 	 *
-	 * @param  \Symfony\Component\HttpFoundation\Response  $response
-	 * @param  \Exception  $e
+	 * @param  \Symfony\Component\HttpFoundation\Response $response
+	 * @param  \Exception $e
 	 * @return \Foundation\Http\Response
 	 */
-	protected function toFoundationResponse($response, Exception $e)
+	protected function toHttpResponse( $response, Exception $e )
 	{
-		$response = new Response($response->getContent(), $response->getStatusCode(), $response->headers->all());
+		$response = new Response( $response->getContent(), $response->getStatusCode(), $response->headers->all() );
 
-		return $response->withException($e);
+		return $response->withException( $e );
 	}
 
 	/**
 	 * Render an exception to the console.
 	 *
-	 * @param  \Symfony\Component\Console\Output\OutputInterface  $output
-	 * @param  \Exception  $e
+	 * @param  \Symfony\Component\Console\Output\OutputInterface $output
+	 * @param  \Exception $e
 	 * @return void
 	 */
-	public function renderForConsole($output, Exception $e)
+	public function renderForConsole( $output, Exception $e )
 	{
-		(new ConsoleApplication)->renderException($e, $output);
+		( new ConsoleApplication )->renderException( $e, $output );
 	}
 
 	/**
 	 * Render the given HttpException.
 	 *
-	 * @param  \Symfony\Component\HttpKernel\Exception\HttpException  $e
+	 * @param  \Symfony\Component\HttpKernel\Exception\HttpException $e
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
-	protected function renderHttpException(HttpException $e)
+	protected function renderHttpException( HttpException $e )
 	{
 		$status = $e->getStatusCode();
 
-		if (view()->exists("errors.{$status}")) {
-			return response()->view("errors.{$status}", ['exception' => $e], $status, $e->getHeaders());
-		} else {
-			return $this->convertExceptionToResponse($e);
+		if ( view()->exists( "errors.{$status}" ) )
+		{
+			return response()->view( "errors.{$status}", ['exception' => $e], $status, $e->getHeaders() );
+		}
+		else
+		{
+			return $this->convertExceptionToResponse( $e );
 		}
 	}
 
 	/**
 	 * Create a Symfony response for the given exception.
 	 *
-	 * @param  \Exception  $e
+	 * @param  \Exception $e
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
-	protected function convertExceptionToResponse(Exception $e)
+	protected function convertExceptionToResponse( Exception $e )
 	{
-		$e = FlattenException::create($e);
+		$e = FlattenException::create( $e );
 
-		$handler = new SymfonyExceptionHandler(config('app.debug'));
+		$handler = new SymfonyExceptionHandler( config( 'app.debug' ) );
 
-		$decorated = $this->decorate($handler->getContent($e), $handler->getStylesheet($e));
+		$decorated = $this->decorate( $handler->getContent( $e ), $handler->getStylesheet( $e ) );
 
-		return SymfonyResponse::create($decorated, $e->getStatusCode(), $e->getHeaders());
+		return SymfonyResponse::create( $decorated, $e->getStatusCode(), $e->getHeaders() );
 	}
 
 	/**
 	 * Convert an authentication exception into an unauthenticated response.
 	 *
-	 * @param  \Foundation\Http\Request  $request
-	 * @param  \Foundation\Auth\AuthenticationException  $e
+	 * @param  \Foundation\Http\Request $request
+	 * @param  \Foundation\Auth\AuthenticationException $e
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
-	protected function unauthenticated($request, AuthenticationException $e)
+	protected function unauthenticated( $request, AuthenticationException $e )
 	{
-		if ($request->ajax() || $request->wantsJson()) {
-			return response('Unauthorized.', 401);
-		} else {
-			return redirect()->guest('login');
+		if ( $request->ajax() || $request->wantsJson() )
+		{
+			return response( 'Unauthorized.', 401 );
+		}
+		else
+		{
+			return redirect()->guest( 'login' );
 		}
 	}
 
 	/**
 	 * Get the html response content.
 	 *
-	 * @param  string  $content
-	 * @param  string  $css
+	 * @param  string $content
+	 * @param  string $css
 	 * @return string
 	 */
-	protected function decorate($content, $css)
+	protected function decorate( $content, $css )
 	{
 		return <<<EOF
 <!DOCTYPE html>
@@ -207,7 +228,6 @@ class Handler implements ExceptionHandlerContract
 	<head>
 		<meta name="robots" content="noindex,nofollow" />
 		<style>
-			/* Copyright (c) 2010, Yahoo! Inc. All rights reserved. Code licensed under the BSD License: http://developer.yahoo.com/yui/license.html */
 			html{color:#000;background:#FFF;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}
 			html { background: #eee; padding: 10px }
 			img { border: 0; }
@@ -225,10 +245,10 @@ EOF;
 	/**
 	 * Determine if the given exception is an HTTP exception.
 	 *
-	 * @param  \Exception  $e
+	 * @param  \Exception $e
 	 * @return bool
 	 */
-	protected function isHttpException(Exception $e)
+	protected function isHttpException( Exception $e )
 	{
 		return $e instanceof HttpException;
 	}

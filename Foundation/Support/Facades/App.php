@@ -3,7 +3,7 @@
 namespace Foundation\Support\Facades;
 
 /**
- * @see \Foundation\Application
+ * @see \Foundation\Framework
  */
 class App extends Facade
 {
@@ -14,6 +14,6 @@ class App extends Facade
 	 */
 	protected static function getFacadeAccessor()
 	{
-		return 'app';
+		return 'fw';
 	}
 }

@@ -29,7 +29,8 @@ class KeyGenerateCommand extends Command
 	{
 		$key = $this->generateRandomKey();
 
-		if ($this->option('show')) {
+		if ($this->option('show'))
+{
 			return $this->line('<comment>'.$key.'</comment>');
 		}
 
@@ -38,7 +39,7 @@ class KeyGenerateCommand extends Command
 		// secure random byte generator and is later base64 encoded for storage.
 		$this->setKeyInEnvironmentFile($key);
 
-		$this->laravel['config']['app.key'] = $key;
+		$this->framework['config']['app.key'] = $key;
 
 		$this->info("Application key [$key] set successfully.");
 	}
@@ -51,10 +52,10 @@ class KeyGenerateCommand extends Command
 	 */
 	protected function setKeyInEnvironmentFile($key)
 	{
-		file_put_contents($this->laravel->environmentFilePath(), str_replace(
-			'APP_KEY='.$this->laravel['config']['app.key'],
+		file_put_contents($this->framework->environmentFilePath(), str_replace(
+			'APP_KEY='.$this->framework['config']['app.key'],
 			'APP_KEY='.$key,
-			file_get_contents($this->laravel->environmentFilePath())
+			file_get_contents($this->framework->environmentFilePath())
 		));
 	}
 
@@ -66,7 +67,7 @@ class KeyGenerateCommand extends Command
 	protected function generateRandomKey()
 	{
 		return 'base64:'.base64_encode(random_bytes(
-			$this->laravel['config']['app.cipher'] == 'AES-128-CBC' ? 16 : 32
+			$this->framework['config']['app.cipher'] == 'AES-128-CBC' ? 16 : 32
 		));
 	}
 }

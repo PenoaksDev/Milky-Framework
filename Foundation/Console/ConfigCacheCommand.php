@@ -53,7 +53,7 @@ class ConfigCacheCommand extends Command
 		$config = $this->getFreshConfiguration();
 
 		$this->files->put(
-			$this->laravel->getCachedConfigPath(), '<?php return '.var_export($config, true).';'.PHP_EOL
+			$this->framework->getCachedConfigPath(), '<?php return '.var_export($config, true).';'.PHP_EOL
 		);
 
 		$this->info('Configuration cached successfully!');
@@ -66,10 +66,10 @@ class ConfigCacheCommand extends Command
 	 */
 	protected function getFreshConfiguration()
 	{
-		$app = require $this->laravel->bootstrapPath().'/app.php';
+		$fw = require $this->framework->bootstrapPath().'/app.php';
 
-		$app->make('Foundation\Contracts\Console\Kernel')->bootstrap();
+		$fw->make('Foundation\Contracts\Console\Kernel')->bootstrap();
 
-		return $app['config']->all();
+		return $fw->bindings['config']->all();
 	}
 }

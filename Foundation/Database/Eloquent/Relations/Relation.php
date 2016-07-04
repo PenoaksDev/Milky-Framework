@@ -180,9 +180,11 @@ abstract class Relation
 		// When resetting the relation where clause, we want to shift the first element
 		// off of the bindings, leaving only the constraints that the developers put
 		// as "extra" on the relationships, and not original relation constraints.
-		try {
+		try
+{
 			$results = call_user_func($callback);
-		} finally {
+		} finally
+{
 			static::$constraints = $previous;
 		}
 
@@ -198,7 +200,8 @@ abstract class Relation
 	 */
 	protected function getKeys(array $models, $key = null)
 	{
-		return array_unique(array_values(array_map(function ($value) use ($key) {
+		return array_unique(array_values(array_map(function ($value) use ($key)
+{
 			return $key ? $value->getAttribute($key) : $value->getKey();
 		}, $models)));
 	}
@@ -305,7 +308,8 @@ abstract class Relation
 	{
 		$map = static::buildMorphMapFromModels($map);
 
-		if (is_array($map)) {
+		if (is_array($map))
+{
 			static::$morphMap = $merge ? array_merge(static::$morphMap, $map) : $map;
 		}
 
@@ -320,11 +324,13 @@ abstract class Relation
 	 */
 	protected static function buildMorphMapFromModels(array $models = null)
 	{
-		if (is_null($models) || Arr::isAssoc($models)) {
+		if (is_null($models) || Arr::isAssoc($models))
+{
 			return $models;
 		}
 
-		$tables = array_map(function ($model) {
+		$tables = array_map(function ($model)
+{
 			return (new $model)->getTable();
 		}, $models);
 
@@ -342,7 +348,8 @@ abstract class Relation
 	{
 		$result = call_user_func_array([$this->query, $method], $parameters);
 
-		if ($result === $this->query) {
+		if ($result === $this->query)
+{
 			return $this;
 		}
 

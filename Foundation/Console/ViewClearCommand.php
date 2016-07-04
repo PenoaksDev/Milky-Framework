@@ -48,9 +48,10 @@ class ViewClearCommand extends Command
 	 */
 	public function fire()
 	{
-		$views = $this->files->glob($this->laravel['config']['view.compiled'].'/*');
+		$views = $this->files->glob($this->framework['config']['view.compiled'].'/*');
 
-		foreach ($views as $view) {
+		foreach ($views as $view)
+{
 			$this->files->delete($view);
 		}
 

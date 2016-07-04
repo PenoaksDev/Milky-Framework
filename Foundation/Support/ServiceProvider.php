@@ -1,5 +1,4 @@
 <?php
-
 namespace Foundation\Support;
 
 use BadMethodCallException;
@@ -10,9 +9,9 @@ abstract class ServiceProvider
 	/**
 	 * The application instance.
 	 *
-	 * @var \Foundation\Contracts\Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -38,12 +37,12 @@ abstract class ServiceProvider
 	/**
 	 * Create a new service provider instance.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function __construct($app)
+	public function __construct($fw)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 	}
 
 	/**
@@ -62,9 +61,9 @@ abstract class ServiceProvider
 	 */
 	protected function mergeConfigFrom($path, $key)
 	{
-		$config = $this->app['config']->get($key, []);
+		$config = $this->fw->bindings['config']->get($key, []);
 
-		$this->app['config']->set($key, array_merge(require $path, $config));
+		$this->fw->bindings['config']->set($key, array_merge(require $path, $config));
 	}
 
 	/**
@@ -76,11 +75,12 @@ abstract class ServiceProvider
 	 */
 	protected function loadViewsFrom($path, $namespace)
 	{
-		if (is_dir($appPath = $this->app->basePath().'/resources/views/vendor/'.$namespace)) {
-			$this->app['view']->addNamespace($namespace, $appPath);
+		if (is_dir($fwPath = $this->fw->basePath().'/resources/views/vendor/'.$namespace))
+{
+			$this->fw->bindings['view']->addNamespace($namespace, $fwPath);
 		}
 
-		$this->app['view']->addNamespace($namespace, $path);
+		$this->fw->bindings['view']->addNamespace($namespace, $path);
 	}
 
 	/**
@@ -92,7 +92,7 @@ abstract class ServiceProvider
 	 */
 	protected function loadTranslationsFrom($path, $namespace)
 	{
-		$this->app['translator']->addNamespace($namespace, $path);
+		$this->fw->bindings['translator']->addNamespace($namespace, $path);
 	}
 
 	/**
@@ -106,14 +106,17 @@ abstract class ServiceProvider
 	{
 		$class = static::class;
 
-		if (! array_key_exists($class, static::$publishes)) {
+		if (! array_key_exists($class, static::$publishes))
+{
 			static::$publishes[$class] = [];
 		}
 
 		static::$publishes[$class] = array_merge(static::$publishes[$class], $paths);
 
-		if ($group) {
-			if (! array_key_exists($group, static::$publishGroups)) {
+		if ($group)
+{
+			if (! array_key_exists($group, static::$publishGroups))
+{
 				static::$publishGroups[$group] = [];
 			}
 
@@ -130,29 +133,35 @@ abstract class ServiceProvider
 	 */
 	public static function pathsToPublish($provider = null, $group = null)
 	{
-		if ($provider && $group) {
-			if (empty(static::$publishes[$provider]) || empty(static::$publishGroups[$group])) {
+		if ($provider && $group)
+{
+			if (empty(static::$publishes[$provider]) || empty(static::$publishGroups[$group]))
+{
 				return [];
 			}
 
 			return array_intersect_key(static::$publishes[$provider], static::$publishGroups[$group]);
 		}
 
-		if ($group && array_key_exists($group, static::$publishGroups)) {
+		if ($group && array_key_exists($group, static::$publishGroups))
+{
 			return static::$publishGroups[$group];
 		}
 
-		if ($provider && array_key_exists($provider, static::$publishes)) {
+		if ($provider && array_key_exists($provider, static::$publishes))
+{
 			return static::$publishes[$provider];
 		}
 
-		if ($group || $provider) {
+		if ($group || $provider)
+{
 			return [];
 		}
 
 		$paths = [];
 
-		foreach (static::$publishes as $class => $publish) {
+		foreach (static::$publishes as $class => $publish)
+{
 			$paths = array_merge($paths, $publish);
 		}
 
@@ -172,9 +181,10 @@ abstract class ServiceProvider
 		// To register the commands with Artisan, we will grab each of the arguments
 		// passed into the method and listen for Artisan "start" event which will
 		// give us the Artisan console instance which we will give commands to.
-		$events = $this->app['events'];
+		$events = $this->fw->bindings['events'];
 
-		$events->listen(ArtisanStarting::class, function ($event) use ($commands) {
+		$events->listen(ArtisanStarting::class, function ($event) use ($commands)
+{
 			$event->artisan->resolveCommands($commands);
 		});
 	}
@@ -230,7 +240,8 @@ abstract class ServiceProvider
 	 */
 	public function __call($method, $parameters)
 	{
-		if ($method == 'boot') {
+		if ($method == 'boot')
+{
 			return;
 		}
 

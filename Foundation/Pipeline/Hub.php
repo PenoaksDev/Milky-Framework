@@ -3,17 +3,17 @@
 namespace Foundation\Pipeline;
 
 use Closure;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\Pipeline\Hub as HubContract;
 
 class Hub implements HubContract
 {
 	/**
-	 * The container implementation.
+	 * The bindings implementation.
 	 *
-	 * @var \Foundation\Contracts\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * All of the available pipelines.
@@ -25,12 +25,12 @@ class Hub implements HubContract
 	/**
 	 * Create a new Hub instance.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function __construct(Container $container)
+	public function __construct(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 
 	/**
@@ -68,7 +68,7 @@ class Hub implements HubContract
 		$pipeline = $pipeline ?: 'default';
 
 		return call_user_func(
-			$this->pipelines[$pipeline], new Pipeline($this->container), $object
+			$this->pipelines[$pipeline], new Pipeline($this->bindings), $object
 		);
 	}
 }

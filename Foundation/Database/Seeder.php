@@ -3,16 +3,16 @@
 namespace Foundation\Database;
 
 use Foundation\Console\Command;
-use Foundation\Container\Container;
+use Foundation\Framework;
 
 abstract class Seeder
 {
 	/**
-	 * The container instance.
+	 * The bindings instance.
 	 *
-	 * @var \Foundation\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * The console command instance.
@@ -38,7 +38,8 @@ abstract class Seeder
 	{
 		$this->resolve($class)->run();
 
-		if (isset($this->command)) {
+		if (isset($this->command))
+{
 			$this->command->getOutput()->writeln("<info>Seeded:</info> $class");
 		}
 	}
@@ -51,15 +52,19 @@ abstract class Seeder
 	 */
 	protected function resolve($class)
 	{
-		if (isset($this->container)) {
-			$instance = $this->container->make($class);
+		if (isset($this->bindings))
+{
+			$instance = $this->bindings->make($class);
 
-			$instance->setContainer($this->container);
-		} else {
+			$instance->setBindings($this->bindings);
+		}
+else
+{
 			$instance = new $class;
 		}
 
-		if (isset($this->command)) {
+		if (isset($this->command))
+{
 			$instance->setCommand($this->command);
 		}
 
@@ -67,14 +72,14 @@ abstract class Seeder
 	}
 
 	/**
-	 * Set the IoC container instance.
+	 * Set the IoC bindings instance.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return $this
 	 */
-	public function setContainer(Container $container)
+	public function setBindings(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 
 		return $this;
 	}

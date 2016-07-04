@@ -86,7 +86,8 @@ class EloquentUserProvider implements UserProvider
 	 */
 	public function retrieveByCredentials(array $credentials)
 	{
-		if (empty($credentials)) {
+		if (empty($credentials))
+{
 			return;
 		}
 
@@ -95,8 +96,10 @@ class EloquentUserProvider implements UserProvider
 		// Eloquent User "model" that will be utilized by the Guard instances.
 		$query = $this->createModel()->newQuery();
 
-		foreach ($credentials as $key => $value) {
-			if (! Str::contains($key, 'password')) {
+		foreach ($credentials as $key => $value)
+{
+			if (! Str::contains($key, 'password'))
+{
 				$query->where($key, $value);
 			}
 		}

@@ -25,7 +25,8 @@ class HasOne extends HasOneOrMany
 	 */
 	public function initRelation(array $models, $relation)
 	{
-		foreach ($models as $model) {
+		foreach ($models as $model)
+{
 			$model->setRelation($relation, null);
 		}
 

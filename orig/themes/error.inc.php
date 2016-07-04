@@ -1,4 +1,4 @@
-<div class="container" style="margin: 10px;">
+<div class="bindings" style="margin: 10px;">
 <!-- PAGE DATA -->
 </div>
 

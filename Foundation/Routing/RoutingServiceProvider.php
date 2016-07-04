@@ -35,9 +35,10 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerRouter()
 	{
-		$this->app['router'] = $this->app->share(function ($app) {
-			return new Router($app['events'], $app);
-		});
+		$this->fw->bindings['router'] = $this->fw->bindings->share( function ( $fw )
+		{
+			return new Router( $fw->bindings['events'], $fw );
+		} );
 	}
 
 	/**
@@ -47,33 +48,32 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerUrlGenerator()
 	{
-		$this->app['url'] = $this->app->share(function ($app) {
-			$routes = $app['router']->getRoutes();
+		$this->fw->bindings['url'] = $this->fw->bindings->share( function ( $fw )
+		{
+			$routes = $fw->bindings['router']->getRoutes();
 
 			// The URL generator needs the route collection that exists on the router.
 			// Keep in mind this is an object, so we're passing by references here
 			// and all the registered routes will be available to the generator.
-			$app->instance('routes', $routes);
+			$fw->bindings->instance( 'routes', $routes );
 
-			$url = new UrlGenerator(
-				$routes, $app->rebinding(
-					'request', $this->requestRebinder()
-				)
-			);
+			$url = new UrlGenerator( $routes, $fw->rebinding( 'request', $this->requestRebinder() ) );
 
-			$url->setSessionResolver(function () {
-				return $this->app['session'];
-			});
+			$url->setSessionResolver( function ()
+			{
+				return $this->fw->bindings['session'];
+			} );
 
 			// If the route collection is "rebound", for example, when the routes stay
 			// cached for the application, we will need to rebind the routes on the
 			// URL generator instance so it has the latest version of the routes.
-			$app->rebinding('routes', function ($app, $routes) {
-				$app['url']->setRoutes($routes);
-			});
+			$fw->rebinding( 'routes', function ( $fw, $routes )
+			{
+				$fw->bindings['url']->setRoutes( $routes );
+			} );
 
 			return $url;
-		});
+		} );
 	}
 
 	/**
@@ -83,8 +83,9 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function requestRebinder()
 	{
-		return function ($app, $request) {
-			$app['url']->setRequest($request);
+		return function ( $fw, $request )
+		{
+			$fw->bindings['url']->setRequest( $request );
 		};
 	}
 
@@ -95,18 +96,20 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerRedirector()
 	{
-		$this->app['redirect'] = $this->app->share(function ($app) {
-			$redirector = new Redirector($app['url']);
+		$this->fw->bindings['redirect'] = $this->fw->bindings->share( function ( $fw )
+		{
+			$redirector = new Redirector( $fw->bindings['url'] );
 
 			// If the session is set on the application instance, we'll inject it into
 			// the redirector instance. This allows the redirect responses to allow
 			// for the quite convenient "with" methods that flash to the session.
-			if (isset($app['session.store'])) {
-				$redirector->setSession($app['session.store']);
+			if ( isset( $fw->bindings['session.store'] ) )
+			{
+				$redirector->setSession( $fw->bindings['session.store'] );
 			}
 
 			return $redirector;
-		});
+		} );
 	}
 
 	/**
@@ -116,9 +119,10 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerPsrRequest()
 	{
-		$this->app->bind('Psr\Http\Message\ServerRequestInterface', function ($app) {
-			return (new DiactorosFactory)->createRequest($app->make('request'));
-		});
+		$this->fw->bindings->bind( 'Psr\Http\Message\ServerRequestInterface', function ( $fw )
+		{
+			return ( new DiactorosFactory )->createRequest( $fw->make( 'request' ) );
+		} );
 	}
 
 	/**
@@ -128,9 +132,10 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerPsrResponse()
 	{
-		$this->app->bind('Psr\Http\Message\ResponseInterface', function ($app) {
+		$this->fw->bindings->bind( 'Psr\Http\Message\ResponseInterface', function ( $fw )
+		{
 			return new PsrResponse();
-		});
+		} );
 	}
 
 	/**
@@ -140,8 +145,9 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerResponseFactory()
 	{
-		$this->app->singleton('Foundation\Contracts\Routing\ResponseFactory', function ($app) {
-			return new ResponseFactory($app['Foundation\Contracts\View\Factory'], $app['redirect']);
-		});
+		$this->fw->bindings->singleton( 'Foundation\Contracts\Routing\ResponseFactory', function ( $fw )
+		{
+			return new ResponseFactory( $fw->bindings['Foundation\Contracts\View\Factory'], $fw->bindings['redirect'] );
+		} );
 	}
 }

@@ -4,7 +4,7 @@ namespace Foundation\Validation;
 
 use Closure;
 use Foundation\Support\Str;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 use Symfony\Component\Translation\TranslatorInterface;
 use Foundation\Contracts\Validation\Factory as FactoryContract;
 
@@ -25,11 +25,11 @@ class Factory implements FactoryContract
 	protected $verifier;
 
 	/**
-	 * The IoC container instance.
+	 * The IoC bindings instance.
 	 *
-	 * @var \Foundation\Contracts\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * All of the custom validator extensions.
@@ -70,12 +70,12 @@ class Factory implements FactoryContract
 	 * Create a new Validator factory instance.
 	 *
 	 * @param  \Symfony\Component\Translation\TranslatorInterface  $translator
-	 * @param  \Foundation\Contracts\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function __construct(TranslatorInterface $translator, Container $container = null)
+	public function __construct(TranslatorInterface $translator, Bindings $bindings = null)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 		$this->translator = $translator;
 	}
 
@@ -95,15 +95,17 @@ class Factory implements FactoryContract
 		// it may be written besides database. We'll inject it into the validator.
 		$validator = $this->resolve($data, $rules, $messages, $customAttributes);
 
-		if (! is_null($this->verifier)) {
+		if (! is_null($this->verifier))
+{
 			$validator->setPresenceVerifier($this->verifier);
 		}
 
-		// Next we'll set the IoC container instance of the validator, which is used to
+		// Next we'll set the IoC bindings instance of the validator, which is used to
 		// resolve out class based validator extensions. If it is not set then these
 		// types of extensions will not be possible on these validation instances.
-		if (! is_null($this->container)) {
-			$validator->setContainer($this->container);
+		if (! is_null($this->bindings))
+{
+			$validator->setBindings($this->bindings);
 		}
 
 		$this->addExtensions($validator);
@@ -144,7 +146,8 @@ class Factory implements FactoryContract
 	 */
 	protected function resolve(array $data, array $rules, array $messages, array $customAttributes)
 	{
-		if (is_null($this->resolver)) {
+		if (is_null($this->resolver))
+{
 			return new Validator($this->translator, $data, $rules, $messages, $customAttributes);
 		}
 
@@ -163,7 +166,8 @@ class Factory implements FactoryContract
 	{
 		$this->extensions[$rule] = $extension;
 
-		if ($message) {
+		if ($message)
+{
 			$this->fallbackMessages[Str::snake($rule)] = $message;
 		}
 	}
@@ -180,7 +184,8 @@ class Factory implements FactoryContract
 	{
 		$this->implicitExtensions[$rule] = $extension;
 
-		if ($message) {
+		if ($message)
+{
 			$this->fallbackMessages[Str::snake($rule)] = $message;
 		}
 	}

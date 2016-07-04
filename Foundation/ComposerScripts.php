@@ -33,19 +33,21 @@ class ComposerScripts
 	}
 
 	/**
-	 * Clear the cached framework bootstrapping files.
+	 * Clear the cached Framework bootstrapping files.
 	 *
 	 * @return void
 	 */
 	protected static function clearCompiled()
 	{
-		$laravel = new Application(getcwd());
+		$framework = new Application(getcwd());
 
-		if (file_exists($compiledPath = $laravel->getCachedCompilePath())) {
+		if (file_exists($compiledPath = $framework->getCachedCompilePath()))
+{
 			@unlink($compiledPath);
 		}
 
-		if (file_exists($servicesPath = $laravel->getCachedServicesPath())) {
+		if (file_exists($servicesPath = $framework->getCachedServicesPath()))
+{
 			@unlink($servicesPath);
 		}
 	}

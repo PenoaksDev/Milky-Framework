@@ -37,14 +37,16 @@ class FoundationServiceProvider extends ServiceProvider
 	 */
 	protected function configureFormRequests()
 	{
-		$this->app->afterResolving(function (ValidatesWhenResolved $resolved) {
+		$this->fw->afterResolving(function (ValidatesWhenResolved $resolved)
+{
 			$resolved->validate();
 		});
 
-		$this->app->resolving(function (FormRequest $request, $app) {
-			$this->initializeRequest($request, $app['request']);
+		$this->fw->resolving(function (FormRequest $request, $fw)
+{
+			$this->initializeRequest($request, $fw->bindings['request']);
 
-			$request->setContainer($app)->setRedirector($app->make(Redirector::class));
+			$request->setBindings($fw)->setRedirector($fw->make(Redirector::class));
 		});
 	}
 
@@ -66,7 +68,8 @@ class FoundationServiceProvider extends ServiceProvider
 			$current->cookies->all(), $files, $current->server->all(), $current->getContent()
 		);
 
-		if ($session = $current->getSession()) {
+		if ($session = $current->getSession())
+{
 			$form->setSession($session);
 		}
 

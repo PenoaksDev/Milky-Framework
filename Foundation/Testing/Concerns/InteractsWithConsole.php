@@ -22,6 +22,6 @@ trait InteractsWithConsole
 	 */
 	public function artisan($command, $parameters = [])
 	{
-		return $this->code = $this->app[Kernel::class]->call($command, $parameters);
+		return $this->code = $this->fw->bindings[Kernel::class]->call($command, $parameters);
 	}
 }

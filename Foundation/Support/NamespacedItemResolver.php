@@ -22,18 +22,22 @@ class NamespacedItemResolver
 		// If we've already parsed the given key, we'll return the cached version we
 		// already have, as this will save us some processing. We cache off every
 		// key we parse so we can quickly return it on all subsequent requests.
-		if (isset($this->parsed[$key])) {
+		if (isset($this->parsed[$key]))
+{
 			return $this->parsed[$key];
 		}
 
 		// If the key does not contain a double colon, it means the key is not in a
 		// namespace, and is just a regular configuration item. Namespaces are a
 		// tool for organizing configuration items for things such as modules.
-		if (strpos($key, '::') === false) {
+		if (strpos($key, '::') === false)
+{
 			$segments = explode('.', $key);
 
 			$parsed = $this->parseBasicSegments($segments);
-		} else {
+		}
+else
+{
 			$parsed = $this->parseNamespacedSegments($key);
 		}
 
@@ -56,14 +60,16 @@ class NamespacedItemResolver
 		// just pulling an entire group out of the array and not a single item.
 		$group = $segments[0];
 
-		if (count($segments) == 1) {
+		if (count($segments) == 1)
+{
 			return [null, $group, null];
 		}
 
 		// If there is more than one segment in this group, it means we are pulling
 		// a specific item out of a groups and will need to return the item name
 		// as well as the group so we know which item to pull from the arrays.
-		else {
+		else
+{
 			$item = implode('.', array_slice($segments, 1));
 
 			return [null, $group, $item];

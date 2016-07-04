@@ -111,7 +111,8 @@ class DatabaseQueue extends Queue implements QueueContract
 
 		$availableAt = $this->getAvailableAt(0);
 
-		$records = array_map(function ($job) use ($queue, $data, $availableAt) {
+		$records = array_map(function ($job) use ($queue, $data, $availableAt)
+{
 			return $this->buildDatabaseRecord(
 				$queue, $this->createPayload($job, $data), $availableAt
 			);
@@ -161,19 +162,21 @@ class DatabaseQueue extends Queue implements QueueContract
 	{
 		$queue = $this->getQueue($queue);
 
-		if (! is_null($this->expire)) {
+		if (! is_null($this->expire))
+{
 			$this->releaseJobsThatHaveBeenReservedTooLong($queue);
 		}
 
 		$this->database->beginTransaction();
 
-		if ($job = $this->getNextAvailableJob($queue)) {
+		if ($job = $this->getNextAvailableJob($queue))
+{
 			$this->markJobAsReserved($job->id);
 
 			$this->database->commit();
 
 			return new DatabaseJob(
-				$this->container, $this, $job, $queue
+				$this->bindings, $this, $job, $queue
 			);
 		}
 
@@ -188,7 +191,8 @@ class DatabaseQueue extends Queue implements QueueContract
 	 */
 	protected function releaseJobsThatHaveBeenReservedTooLong($queue)
 	{
-		if (random_int(1, 10) < 10) {
+		if (random_int(1, 10) < 10)
+{
 			return;
 		}
 
@@ -255,7 +259,8 @@ class DatabaseQueue extends Queue implements QueueContract
 	{
 		$this->database->beginTransaction();
 
-		if ($this->database->table($this->table)->lockForUpdate()->find($id)) {
+		if ($this->database->table($this->table)->lockForUpdate()->find($id))
+{
 			$this->database->table($this->table)->where('id', $id)->delete();
 		}
 

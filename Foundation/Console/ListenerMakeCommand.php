@@ -36,7 +36,8 @@ class ListenerMakeCommand extends GeneratorCommand
 	 */
 	public function fire()
 	{
-		if (! $this->option('event')) {
+		if (! $this->option('event'))
+{
 			return $this->error('Missing required option: --event');
 		}
 
@@ -55,8 +56,9 @@ class ListenerMakeCommand extends GeneratorCommand
 
 		$event = $this->option('event');
 
-		if (! Str::startsWith($event, $this->laravel->getNamespace()) && ! Str::startsWith($event, 'Foundation')) {
-			$event = $this->laravel->getNamespace().'Events\\'.$event;
+		if (! Str::startsWith($event, $this->framework->getNamespace()) && ! Str::startsWith($event, 'Illuminate'))
+{
+			$event = $this->framework->getNamespace().'Events\\'.$event;
 		}
 
 		$stub = str_replace(
@@ -77,9 +79,12 @@ class ListenerMakeCommand extends GeneratorCommand
 	 */
 	protected function getStub()
 	{
-		if ($this->option('queued')) {
+		if ($this->option('queued'))
+{
 			return __DIR__.'/stubs/listener-queued.stub';
-		} else {
+		}
+else
+{
 			return __DIR__.'/stubs/listener.stub';
 		}
 	}

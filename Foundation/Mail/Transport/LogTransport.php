@@ -46,7 +46,8 @@ class LogTransport extends Transport
 	{
 		$string = (string) $entity->getHeaders().PHP_EOL.$entity->getBody();
 
-		foreach ($entity->getChildren() as $children) {
+		foreach ($entity->getChildren() as $children)
+{
 			$string .= PHP_EOL.PHP_EOL.$this->getMimeEntityString($children);
 		}
 

@@ -102,7 +102,8 @@ abstract class AbstractPaginator implements Htmlable
 	{
 		$urls = [];
 
-		for ($page = $start; $page <= $end; $page++) {
+		for ($page = $start; $page <= $end; $page++)
+{
 			$urls[$page] = $this->url($page);
 		}
 
@@ -117,7 +118,8 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	public function url($page)
 	{
-		if ($page <= 0) {
+		if ($page <= 0)
+{
 			$page = 1;
 		}
 
@@ -126,7 +128,8 @@ abstract class AbstractPaginator implements Htmlable
 		// to the URL. This allows for extra information like sortings storage.
 		$parameters = [$this->pageName => $page];
 
-		if (count($this->query) > 0) {
+		if (count($this->query) > 0)
+{
 			$parameters = array_merge($this->query, $parameters);
 		}
 
@@ -143,7 +146,8 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	public function previousPageUrl()
 	{
-		if ($this->currentPage() > 1) {
+		if ($this->currentPage() > 1)
+{
 			return $this->url($this->currentPage() - 1);
 		}
 	}
@@ -156,7 +160,8 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	public function fragment($fragment = null)
 	{
-		if (is_null($fragment)) {
+		if (is_null($fragment))
+{
 			return $this->fragment;
 		}
 
@@ -174,8 +179,9 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	public function appends($key, $value = null)
 	{
-		if (is_array($key)) {
-			return $this->appendArray($key);
+		if (is_array($key))
+{
+			return $this->fwendArray($key);
 		}
 
 		return $this->addQuery($key, $value);
@@ -189,7 +195,8 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	protected function appendArray(array $keys)
 	{
-		foreach ($keys as $key => $value) {
+		foreach ($keys as $key => $value)
+{
 			$this->addQuery($key, $value);
 		}
 
@@ -205,7 +212,8 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	public function addQuery($key, $value)
 	{
-		if ($key !== $this->pageName) {
+		if ($key !== $this->pageName)
+{
 			$this->query[$key] = $value;
 		}
 
@@ -239,7 +247,8 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	public function firstItem()
 	{
-		if (count($this->items) === 0) {
+		if (count($this->items) === 0)
+{
 			return;
 		}
 
@@ -253,7 +262,8 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	public function lastItem()
 	{
-		if (count($this->items) === 0) {
+		if (count($this->items) === 0)
+{
 			return;
 		}
 
@@ -298,7 +308,8 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	public static function resolveCurrentPath($default = '/')
 	{
-		if (isset(static::$currentPathResolver)) {
+		if (isset(static::$currentPathResolver))
+{
 			return call_user_func(static::$currentPathResolver);
 		}
 
@@ -325,7 +336,8 @@ abstract class AbstractPaginator implements Htmlable
 	 */
 	public static function resolveCurrentPage($pageName = 'page', $default = 1)
 	{
-		if (isset(static::$currentPageResolver)) {
+		if (isset(static::$currentPageResolver))
+{
 			return call_user_func(static::$currentPageResolver, $pageName);
 		}
 

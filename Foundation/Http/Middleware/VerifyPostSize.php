@@ -18,7 +18,8 @@ class VerifyPostSize
 	 */
 	public function handle($request, Closure $next)
 	{
-		if ($request->server('CONTENT_LENGTH') > $this->getPostMaxSize()) {
+		if ($request->server('CONTENT_LENGTH') > $this->getPostMaxSize())
+{
 			throw new PostTooLargeException;
 		}
 
@@ -32,13 +33,15 @@ class VerifyPostSize
 	 */
 	protected function getPostMaxSize()
 	{
-		if (is_numeric($postMaxSize = ini_get('post_max_size'))) {
+		if (is_numeric($postMaxSize = ini_get('post_max_size')))
+{
 			return (int) $postMaxSize;
 		}
 
 		$metric = strtoupper(substr($postMaxSize, -1));
 
-		switch ($metric) {
+		switch ($metric)
+{
 			case 'K':
 				return (int) $postMaxSize * 1024;
 			case 'M':

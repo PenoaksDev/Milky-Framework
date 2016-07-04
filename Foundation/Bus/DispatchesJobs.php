@@ -14,7 +14,7 @@ trait DispatchesJobs
 	 */
 	protected function dispatch($job)
 	{
-		return app(Dispatcher::class)->dispatch($job);
+		return fw(Dispatcher::class)->dispatch($job);
 	}
 
 	/**
@@ -25,6 +25,6 @@ trait DispatchesJobs
 	 */
 	public function dispatchNow($job)
 	{
-		return app(Dispatcher::class)->dispatchNow($job);
+		return fw(Dispatcher::class)->dispatchNow($job);
 	}
 }

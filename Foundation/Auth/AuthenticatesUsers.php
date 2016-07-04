@@ -30,7 +30,8 @@ trait AuthenticatesUsers
 		$view = property_exists($this, 'loginView')
 					? $this->loginView : 'auth.authenticate';
 
-		if (view()->exists($view)) {
+		if (view()->exists($view))
+{
 			return view($view);
 		}
 
@@ -63,7 +64,8 @@ trait AuthenticatesUsers
 		// the IP address of the client making these requests into this application.
 		$throttles = $this->isUsingThrottlesLoginsTrait();
 
-		if ($throttles && $lockedOut = $this->hasTooManyLoginAttempts($request)) {
+		if ($throttles && $lockedOut = $this->hasTooManyLoginAttempts($request))
+{
 			$this->fireLockoutEvent($request);
 
 			return $this->sendLockoutResponse($request);
@@ -71,14 +73,16 @@ trait AuthenticatesUsers
 
 		$credentials = $this->getCredentials($request);
 
-		if (Auth::guard($this->getGuard())->attempt($credentials, $request->has('remember'))) {
+		if (Auth::guard($this->getGuard())->attempt($credentials, $request->has('remember')))
+{
 			return $this->handleUserWasAuthenticated($request, $throttles);
 		}
 
 		// If the login attempt was unsuccessful we will increment the number of attempts
 		// to login and redirect the user back to the login form. Of course, when this
 		// user surpasses their maximum number of attempts they will get locked out.
-		if ($throttles && ! $lockedOut) {
+		if ($throttles && ! $lockedOut)
+{
 			$this->incrementLoginAttempts($request);
 		}
 
@@ -107,11 +111,13 @@ trait AuthenticatesUsers
 	 */
 	protected function handleUserWasAuthenticated(Request $request, $throttles)
 	{
-		if ($throttles) {
+		if ($throttles)
+{
 			$this->clearLoginAttempts($request);
 		}
 
-		if (method_exists($this, 'authenticated')) {
+		if (method_exists($this, 'authenticated'))
+{
 			return $this->authenticated($request, Auth::guard($this->getGuard())->user());
 		}
 

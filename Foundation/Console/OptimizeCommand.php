@@ -53,16 +53,22 @@ class OptimizeCommand extends Command
 	{
 		$this->info('Generating optimized class loader');
 
-		if ($this->option('psr')) {
+		if ($this->option('psr'))
+{
 			$this->composer->dumpAutoloads();
-		} else {
+		}
+else
+{
 			$this->composer->dumpOptimized();
 		}
 
-		if ($this->option('force') || ! $this->laravel['config']['app.debug']) {
+		if ($this->option('force') || ! $this->framework['config']['app.debug'])
+{
 			$this->info('Compiling common classes');
 			$this->compileClasses();
-		} else {
+		}
+else
+{
 			$this->call('clear-compiled');
 		}
 	}
@@ -76,12 +82,15 @@ class OptimizeCommand extends Command
 	{
 		$preloader = (new Factory)->create(['skip' => true]);
 
-		$handle = $preloader->prepareOutput($this->laravel->getCachedCompilePath());
+		$handle = $preloader->prepareOutput($this->framework->getCachedCompilePath());
 
-		foreach ($this->getClassFiles() as $file) {
-			try {
+		foreach ($this->getClassFiles() as $file)
+{
+			try
+{
 				fwrite($handle, $preloader->getCode($file, false)."\n");
-			} catch (VisitorExceptionInterface $e) {
+			} catch (VisitorExceptionInterface $e)
+{
 				//
 			}
 		}
@@ -96,13 +105,14 @@ class OptimizeCommand extends Command
 	 */
 	protected function getClassFiles()
 	{
-		$app = $this->laravel;
+		$fw = $this->framework;
 
 		$core = require __DIR__.'/Optimize/config.php';
 
-		$files = array_merge($core, $app['config']->get('compile.files', []));
+		$files = array_merge($core, $fw->bindings['config']->get('compile.files', []));
 
-		foreach ($app['config']->get('compile.providers', []) as $provider) {
+		foreach ($fw->bindings['config']->get('compile.providers', []) as $provider)
+{
 			$files = array_merge($files, forward_static_call([$provider, 'compiles']));
 		}
 

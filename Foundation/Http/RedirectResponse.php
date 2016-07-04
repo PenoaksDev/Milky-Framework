@@ -40,7 +40,8 @@ class RedirectResponse extends BaseRedirectResponse
 	{
 		$key = is_array($key) ? $key : [$key => $value];
 
-		foreach ($key as $k => $v) {
+		foreach ($key as $k => $v)
+{
 			$this->session->flash($k, $v);
 		}
 
@@ -55,7 +56,8 @@ class RedirectResponse extends BaseRedirectResponse
 	 */
 	public function withCookies(array $cookies)
 	{
-		foreach ($cookies as $cookie) {
+		foreach ($cookies as $cookie)
+{
 			$this->headers->setCookie($cookie);
 		}
 
@@ -72,8 +74,10 @@ class RedirectResponse extends BaseRedirectResponse
 	{
 		$input = $input ?: $this->request->input();
 
-		$this->session->flashInput($data = array_filter($input, $callback = function (&$value) use (&$callback) {
-			if (is_array($value)) {
+		$this->session->flashInput($data = array_filter($input, $callback = function (&$value) use (&$callback)
+{
+			if (is_array($value))
+{
 				$value = array_filter($value, $callback);
 			}
 
@@ -106,7 +110,7 @@ class RedirectResponse extends BaseRedirectResponse
 	}
 
 	/**
-	 * Flash a container of errors to the session.
+	 * Flash a bindings of errors to the session.
 	 *
 	 * @param  \Foundation\Contracts\Support\MessageProvider|array|string  $provider
 	 * @param  string  $key
@@ -131,7 +135,8 @@ class RedirectResponse extends BaseRedirectResponse
 	 */
 	protected function parseErrors($provider)
 	{
-		if ($provider instanceof MessageProvider) {
+		if ($provider instanceof MessageProvider)
+{
 			return $provider->getMessageBag();
 		}
 
@@ -191,7 +196,8 @@ class RedirectResponse extends BaseRedirectResponse
 	 */
 	public function __call($method, $parameters)
 	{
-		if (Str::startsWith($method, 'with')) {
+		if (Str::startsWith($method, 'with'))
+{
 			return $this->with(Str::snake(substr($method, 4)), $parameters[0]);
 		}
 

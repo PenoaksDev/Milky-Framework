@@ -19,13 +19,15 @@ trait SerializesModels
 	{
 		$properties = (new ReflectionClass($this))->getProperties();
 
-		foreach ($properties as $property) {
+		foreach ($properties as $property)
+{
 			$property->setValue($this, $this->getSerializedPropertyValue(
 				$this->getPropertyValue($property)
 			));
 		}
 
-		return array_map(function ($p) {
+		return array_map(function ($p)
+{
 			return $p->getName();
 		}, $properties);
 	}
@@ -37,7 +39,8 @@ trait SerializesModels
 	 */
 	public function __wakeup()
 	{
-		foreach ((new ReflectionClass($this))->getProperties() as $property) {
+		foreach ((new ReflectionClass($this))->getProperties() as $property)
+{
 			$property->setValue($this, $this->getRestoredPropertyValue(
 				$this->getPropertyValue($property)
 			));
@@ -52,7 +55,8 @@ trait SerializesModels
 	 */
 	protected function getSerializedPropertyValue($value)
 	{
-		if ($value instanceof QueueableEntity) {
+		if ($value instanceof QueueableEntity)
+{
 			return new ModelIdentifier(get_class($value), $value->getQueueableId());
 		}
 
@@ -67,7 +71,8 @@ trait SerializesModels
 	 */
 	protected function getRestoredPropertyValue($value)
 	{
-		if (! $value instanceof ModelIdentifier) {
+		if (! $value instanceof ModelIdentifier)
+{
 			return $value;
 		}
 
@@ -84,7 +89,8 @@ trait SerializesModels
 	 */
 	protected function restoreCollection($value)
 	{
-		if (! $value->class || count($value->id) === 0) {
+		if (! $value->class || count($value->id) === 0)
+{
 			return new EloquentCollection;
 		}
 

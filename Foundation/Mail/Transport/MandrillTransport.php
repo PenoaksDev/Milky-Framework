@@ -48,9 +48,12 @@ class MandrillTransport extends Transport
 			'async' => false,
 		];
 
-		if (version_compare(ClientInterface::VERSION, '6') === 1) {
+		if (version_compare(ClientInterface::VERSION, '6') === 1)
+{
 			$options = ['form_params' => $data];
-		} else {
+		}
+else
+{
 			$options = ['body' => $data];
 		}
 
@@ -69,15 +72,18 @@ class MandrillTransport extends Transport
 	{
 		$to = [];
 
-		if ($message->getTo()) {
+		if ($message->getTo())
+{
 			$to = array_merge($to, array_keys($message->getTo()));
 		}
 
-		if ($message->getCc()) {
+		if ($message->getCc())
+{
 			$to = array_merge($to, array_keys($message->getCc()));
 		}
 
-		if ($message->getBcc()) {
+		if ($message->getBcc())
+{
 			$to = array_merge($to, array_keys($message->getBcc()));
 		}
 

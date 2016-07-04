@@ -10,9 +10,9 @@ abstract class Manager
 	/**
 	 * The application instance.
 	 *
-	 * @var \Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The registered custom driver creators.
@@ -31,12 +31,12 @@ abstract class Manager
 	/**
 	 * Create a new manager instance.
 	 *
-	 * @param  \Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function __construct($app)
+	public function __construct($fw)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 	}
 
 	/**
@@ -59,7 +59,8 @@ abstract class Manager
 		// If the given driver has not been created before, we will create the instances
 		// here and cache it so we can return it next time very quickly. If there is
 		// already a driver created by this name, we'll just return that instance.
-		if (! isset($this->drivers[$driver])) {
+		if (! isset($this->drivers[$driver]))
+{
 			$this->drivers[$driver] = $this->createDriver($driver);
 		}
 
@@ -81,9 +82,12 @@ abstract class Manager
 		// We'll check to see if a creator method exists for the given driver. If not we
 		// will check for a custom driver creator, which allows developers to create
 		// drivers using their own customized driver creator Closure to create it.
-		if (isset($this->customCreators[$driver])) {
+		if (isset($this->customCreators[$driver]))
+{
 			return $this->callCustomCreator($driver);
-		} elseif (method_exists($this, $method)) {
+		}
+elseif (method_exists($this, $method))
+{
 			return $this->$method();
 		}
 
@@ -98,7 +102,7 @@ abstract class Manager
 	 */
 	protected function callCustomCreator($driver)
 	{
-		return $this->customCreators[$driver]($this->app);
+		return $this->customCreators[$driver]($this->fw);
 	}
 
 	/**

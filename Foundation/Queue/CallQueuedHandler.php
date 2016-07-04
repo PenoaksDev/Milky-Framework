@@ -40,7 +40,8 @@ class CallQueuedHandler
 
 		$this->dispatcher->dispatchNow($command);
 
-		if (! $job->isDeletedOrReleased()) {
+		if (! $job->isDeletedOrReleased())
+{
 			$job->delete();
 		}
 	}
@@ -54,7 +55,8 @@ class CallQueuedHandler
 	 */
 	protected function setJobInstanceIfNecessary(Job $job, $instance)
 	{
-		if (in_array('Foundation\Queue\InteractsWithQueue', class_uses_recursive(get_class($instance)))) {
+		if (in_array('Foundation\Queue\InteractsWithQueue', class_uses_recursive(get_class($instance))))
+{
 			$instance->setJob($job);
 		}
 
@@ -71,7 +73,8 @@ class CallQueuedHandler
 	{
 		$command = unserialize($data['command']);
 
-		if (method_exists($command, 'failed')) {
+		if (method_exists($command, 'failed'))
+{
 			$command->failed();
 		}
 	}

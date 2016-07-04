@@ -32,7 +32,8 @@ abstract class Grammar
 	 */
 	public function wrapTable($table)
 	{
-		if ($this->isExpression($table)) {
+		if ($this->isExpression($table))
+{
 			return $this->getValue($table);
 		}
 
@@ -48,17 +49,20 @@ abstract class Grammar
 	 */
 	public function wrap($value, $prefixAlias = false)
 	{
-		if ($this->isExpression($value)) {
+		if ($this->isExpression($value))
+{
 			return $this->getValue($value);
 		}
 
 		// If the value being wrapped has a column alias we will need to separate out
 		// the pieces so we can wrap each of the segments of the expression on it
 		// own, and then joins them both back together with the "as" connector.
-		if (strpos(strtolower($value), ' as ') !== false) {
+		if (strpos(strtolower($value), ' as ') !== false)
+{
 			$segments = explode(' ', $value);
 
-			if ($prefixAlias) {
+			if ($prefixAlias)
+{
 				$segments[2] = $this->tablePrefix.$segments[2];
 			}
 
@@ -72,10 +76,14 @@ abstract class Grammar
 		// If the value is not an aliased table expression, we'll just wrap it like
 		// normal, so if there is more than one segment, we will wrap the first
 		// segments as if it was a table and the rest as just regular values.
-		foreach ($segments as $key => $segment) {
-			if ($key == 0 && count($segments) > 1) {
+		foreach ($segments as $key => $segment)
+{
+			if ($key == 0 && count($segments) > 1)
+{
 				$wrapped[] = $this->wrapTable($segment);
-			} else {
+			}
+else
+{
 				$wrapped[] = $this->wrapValue($segment);
 			}
 		}
@@ -91,7 +99,8 @@ abstract class Grammar
 	 */
 	protected function wrapValue($value)
 	{
-		if ($value === '*') {
+		if ($value === '*')
+{
 			return $value;
 		}
 

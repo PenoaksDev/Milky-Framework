@@ -35,7 +35,8 @@ class SimpleBootstrapFourPresenter extends BootstrapFourPresenter
 	 */
 	public function render()
 	{
-		if ($this->hasPages()) {
+		if ($this->hasPages())
+{
 			return new HtmlString(sprintf(
 				'<ul class="pager">%s %s</ul>',
 				$this->getPreviousButton(),

@@ -67,7 +67,7 @@ class AppNameCommand extends Command
 	 */
 	public function fire()
 	{
-		$this->currentRoot = trim($this->laravel->getNamespace(), '\\');
+		$this->currentRoot = trim($this->framework->getNamespace(), '\\');
 
 		$this->setBootstrapNamespaces();
 
@@ -87,18 +87,19 @@ class AppNameCommand extends Command
 	}
 
 	/**
-	 * Set the namespace on the files in the app directory.
+	 * Set the namespace on the files in the fw directory.
 	 *
 	 * @return void
 	 */
 	protected function setAppDirectoryNamespace()
 	{
 		$files = Finder::create()
-							->in($this->laravel['path'])
+							->in($this->framework['path'])
 							->contains($this->currentRoot)
 							->name('*.php');
 
-		foreach ($files as $file) {
+		foreach ($files as $file)
+{
 			$this->replaceNamespace($file->getRealPath());
 		}
 	}
@@ -189,7 +190,7 @@ class AppNameCommand extends Command
 			$this->argument('name').'\\Http\\Controllers\\',
 		];
 
-		$this->replaceIn($this->getConfigPath('app'), $search, $replace);
+		$this->replaceIn($this->getConfigPath('fw'), $search, $replace);
 	}
 
 	/**
@@ -224,7 +225,7 @@ class AppNameCommand extends Command
 	protected function setDatabaseFactoryNamespaces()
 	{
 		$this->replaceIn(
-			$this->laravel->databasePath().'/factories/ModelFactory.php', $this->currentRoot, $this->argument('name')
+			$this->framework->databasePath().'/factories/ModelFactory.php', $this->currentRoot, $this->argument('name')
 		);
 	}
 
@@ -248,7 +249,7 @@ class AppNameCommand extends Command
 	 */
 	protected function getBootstrapPath()
 	{
-		return $this->laravel->bootstrapPath().'/app.php';
+		return $this->framework->bootstrapPath().'/app.php';
 	}
 
 	/**
@@ -258,7 +259,7 @@ class AppNameCommand extends Command
 	 */
 	protected function getComposerPath()
 	{
-		return $this->laravel->basePath().'/composer.json';
+		return $this->framework->basePath().'/composer.json';
 	}
 
 	/**
@@ -269,7 +270,7 @@ class AppNameCommand extends Command
 	 */
 	protected function getConfigPath($name)
 	{
-		return $this->laravel['path.config'].'/'.$name.'.php';
+		return $this->framework['path.config'].'/'.$name.'.php';
 	}
 
 	/**

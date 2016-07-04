@@ -15,7 +15,7 @@ class Cookie extends Facade
 	 */
 	public static function has($key)
 	{
-		return ! is_null(static::$app['request']->cookie($key, null));
+		return ! is_null(static::$fw->bindings['request']->cookie($key, null));
 	}
 
 	/**
@@ -27,7 +27,7 @@ class Cookie extends Facade
 	 */
 	public static function get($key = null, $default = null)
 	{
-		return static::$app['request']->cookie($key, $default);
+		return static::$fw->bindings['request']->cookie($key, $default);
 	}
 
 	/**

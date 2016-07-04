@@ -30,7 +30,8 @@ trait InteractsWithQueue
 	 */
 	public function delete()
 	{
-		if ($this->job) {
+		if ($this->job)
+{
 			return $this->job->delete();
 		}
 	}
@@ -42,7 +43,8 @@ trait InteractsWithQueue
 	 */
 	public function failed()
 	{
-		if ($this->job) {
+		if ($this->job)
+{
 			return $this->job->failed();
 		}
 	}
@@ -55,7 +57,8 @@ trait InteractsWithQueue
 	 */
 	public function release($delay = 0)
 	{
-		if ($this->job) {
+		if ($this->job)
+{
 			return $this->job->release($delay);
 		}
 	}

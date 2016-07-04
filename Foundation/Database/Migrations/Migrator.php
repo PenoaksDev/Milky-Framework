@@ -98,7 +98,8 @@ class Migrator
 		// First we will just make sure that there are any migrations to run. If there
 		// aren't, we will just make a note of it to the developer so they're aware
 		// that all of the migrations have been run against this database system.
-		if (count($migrations) == 0) {
+		if (count($migrations) == 0)
+{
 			$this->note('<info>Nothing to migrate.</info>');
 
 			return;
@@ -113,13 +114,15 @@ class Migrator
 		// Once we have the array of migrations, we will spin through them and run the
 		// migrations "up" so the changes are made to the databases. We'll then log
 		// that the migration was run so we don't repeat it next time we execute.
-		foreach ($migrations as $file) {
+		foreach ($migrations as $file)
+{
 			$this->runUp($file, $batch, $pretend);
 
 			// If we are stepping through the migrations, then we will increment the
 			// batch value for each individual migration that is run. That way we
 			// can run "artisan migrate:rollback" and undo them one at a time.
-			if ($step) {
+			if ($step)
+{
 				$batch++;
 			}
 		}
@@ -140,7 +143,8 @@ class Migrator
 		// command such as "up" or "down", or we can just simulate the action.
 		$migration = $this->resolve($file);
 
-		if ($pretend) {
+		if ($pretend)
+{
 			return $this->pretendToRun($migration, 'up');
 		}
 
@@ -171,13 +175,17 @@ class Migrator
 
 		$count = count($migrations);
 
-		if ($count === 0) {
+		if ($count === 0)
+{
 			$this->note('<info>Nothing to rollback.</info>');
-		} else {
+		}
+else
+{
 			// We need to reverse these migrations so that they are "downed" in reverse
 			// to what they run on "up". It lets us backtrack through the migrations
 			// and properly reverse the entire database schema operation that ran.
-			foreach ($migrations as $migration) {
+			foreach ($migrations as $migration)
+{
 				$this->runDown((object) $migration, $pretend);
 			}
 		}
@@ -199,10 +207,14 @@ class Migrator
 
 		$count = count($migrations);
 
-		if ($count === 0) {
+		if ($count === 0)
+{
 			$this->note('<info>Nothing to rollback.</info>');
-		} else {
-			foreach ($migrations as $migration) {
+		}
+else
+{
+			foreach ($migrations as $migration)
+{
 				$this->runDown((object) ['migration' => $migration], $pretend);
 			}
 		}
@@ -226,7 +238,8 @@ class Migrator
 		// pretend execution of the migration or we can run the real migration.
 		$instance = $this->resolve($file);
 
-		if ($pretend) {
+		if ($pretend)
+{
 			return $this->pretendToRun($instance, 'down');
 		}
 
@@ -253,11 +266,13 @@ class Migrator
 		// Once we have the array of files in the directory we will just remove the
 		// extension and take the basename of the file which is all we need when
 		// finding the migrations that haven't been run against the databases.
-		if ($files === false) {
+		if ($files === false)
+{
 			return [];
 		}
 
-		$files = array_map(function ($file) {
+		$files = array_map(function ($file)
+{
 			return str_replace('.php', '', basename($file));
 		}, $files);
 
@@ -278,7 +293,8 @@ class Migrator
 	 */
 	public function requireFiles($path, array $files)
 	{
-		foreach ($files as $file) {
+		foreach ($files as $file)
+{
 			$this->files->requireOnce($path.'/'.$file.'.php');
 		}
 	}
@@ -292,7 +308,8 @@ class Migrator
 	 */
 	protected function pretendToRun($migration, $method)
 	{
-		foreach ($this->getQueries($migration, $method) as $query) {
+		foreach ($this->getQueries($migration, $method) as $query)
+{
 			$name = get_class($migration);
 
 			$this->note("<info>{$name}:</info> {$query['query']}");
@@ -315,7 +332,8 @@ class Migrator
 		// that would get fired against the database system for this migration.
 		$db = $this->resolveConnection($connection);
 
-		return $db->pretend(function () use ($migration, $method) {
+		return $db->pretend(function () use ($migration, $method)
+{
 			$migration->$method();
 		});
 	}
@@ -375,7 +393,8 @@ class Migrator
 	 */
 	public function setConnection($name)
 	{
-		if (! is_null($name)) {
+		if (! is_null($name))
+{
 			$this->resolver->setDefaultConnection($name);
 		}
 

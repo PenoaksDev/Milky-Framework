@@ -41,11 +41,13 @@ trait ResetsPasswords
 	 */
 	public function showLinkRequestForm()
 	{
-		if (property_exists($this, 'linkRequestView')) {
+		if (property_exists($this, 'linkRequestView'))
+{
 			return view($this->linkRequestView);
 		}
 
-		if (view()->exists('auth.passwords.email')) {
+		if (view()->exists('auth.passwords.email'))
+{
 			return view('auth.passwords.email');
 		}
 
@@ -80,7 +82,8 @@ trait ResetsPasswords
 			$this->resetEmailBuilder()
 		);
 
-		switch ($response) {
+		switch ($response)
+{
 			case Password::RESET_LINK_SENT:
 				return $this->getSendResetLinkEmailSuccessResponse($response);
 			case Password::INVALID_USER:
@@ -118,7 +121,8 @@ trait ResetsPasswords
 	 */
 	protected function resetEmailBuilder()
 	{
-		return function (Message $message) {
+		return function (Message $message)
+{
 			$message->subject($this->getEmailSubject());
 		};
 	}
@@ -180,17 +184,20 @@ trait ResetsPasswords
 	 */
 	public function showResetForm(Request $request, $token = null)
 	{
-		if (is_null($token)) {
+		if (is_null($token))
+{
 			return $this->getEmail();
 		}
 
 		$email = $request->input('email');
 
-		if (property_exists($this, 'resetView')) {
+		if (property_exists($this, 'resetView'))
+{
 			return view($this->resetView)->with(compact('token', 'email'));
 		}
 
-		if (view()->exists('auth.passwords.reset')) {
+		if (view()->exists('auth.passwords.reset'))
+{
 			return view('auth.passwords.reset')->with(compact('token', 'email'));
 		}
 
@@ -227,11 +234,13 @@ trait ResetsPasswords
 
 		$broker = $this->getBroker();
 
-		$response = Password::broker($broker)->reset($credentials, function ($user, $password) {
+		$response = Password::broker($broker)->reset($credentials, function ($user, $password)
+{
 			$this->resetPassword($user, $password);
 		});
 
-		switch ($response) {
+		switch ($response)
+{
 			case Password::PASSWORD_RESET:
 				return $this->getResetSuccessResponse($response);
 			default:

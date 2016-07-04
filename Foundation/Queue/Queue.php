@@ -6,18 +6,18 @@ use Closure;
 use DateTime;
 use Foundation\Support\Arr;
 use SuperClosure\Serializer;
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\Queue\QueueableEntity;
 use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
 
 abstract class Queue
 {
 	/**
-	 * The IoC container instance.
+	 * The IoC bindings instance.
 	 *
-	 * @var \Foundation\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * Push a new job onto the queue.
@@ -56,7 +56,8 @@ abstract class Queue
 	 */
 	public function bulk($jobs, $data = '', $queue = null)
 	{
-		foreach ((array) $jobs as $job) {
+		foreach ((array) $jobs as $job)
+{
 			$this->push($job, $data, $queue);
 		}
 	}
@@ -71,9 +72,12 @@ abstract class Queue
 	 */
 	protected function createPayload($job, $data = '', $queue = null)
 	{
-		if ($job instanceof Closure) {
+		if ($job instanceof Closure)
+{
 			return json_encode($this->createClosurePayload($job, $data));
-		} elseif (is_object($job)) {
+		}
+elseif (is_object($job))
+{
 			return json_encode([
 				'job' => 'Foundation\Queue\CallQueuedHandler@call',
 				'data' => ['commandName' => get_class($job), 'command' => serialize(clone $job)],
@@ -103,13 +107,17 @@ abstract class Queue
 	 */
 	protected function prepareQueueableEntities($data)
 	{
-		if ($data instanceof QueueableEntity) {
+		if ($data instanceof QueueableEntity)
+{
 			return $this->prepareQueueableEntity($data);
 		}
 
-		if (is_array($data)) {
-			$data = array_map(function ($d) {
-				if (is_array($d)) {
+		if (is_array($data))
+{
+			$data = array_map(function ($d)
+{
+				if (is_array($d))
+{
 					return $this->prepareQueueableEntities($d);
 				}
 
@@ -128,7 +136,8 @@ abstract class Queue
 	 */
 	protected function prepareQueueableEntity($value)
 	{
-		if ($value instanceof QueueableEntity) {
+		if ($value instanceof QueueableEntity)
+{
 			return '::entity::|'.get_class($value).'|'.$value->getQueueableId();
 		}
 
@@ -146,7 +155,7 @@ abstract class Queue
 	{
 		$closure = $this->crypt->encrypt((new Serializer)->serialize($job));
 
-		return ['job' => 'FoundationQueueClosure', 'data' => compact('closure')];
+		return ['job' => 'IlluminateQueueClosure', 'data' => compact('closure')];
 	}
 
 	/**
@@ -172,7 +181,8 @@ abstract class Queue
 	 */
 	protected function getSeconds($delay)
 	{
-		if ($delay instanceof DateTime) {
+		if ($delay instanceof DateTime)
+{
 			return max(0, $delay->getTimestamp() - $this->getTime());
 		}
 
@@ -190,14 +200,14 @@ abstract class Queue
 	}
 
 	/**
-	 * Set the IoC container instance.
+	 * Set the IoC bindings instance.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function setContainer(Container $container)
+	public function setBindings(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 
 	/**

@@ -245,7 +245,8 @@ class Connection implements ConnectionInterface
 	 */
 	public function getSchemaBuilder()
 	{
-		if (is_null($this->schemaGrammar)) {
+		if (is_null($this->schemaGrammar))
+{
 			$this->useDefaultSchemaGrammar();
 		}
 
@@ -322,8 +323,10 @@ class Connection implements ConnectionInterface
 	 */
 	public function select($query, $bindings = [], $useReadPdo = true)
 	{
-		return $this->run($query, $bindings, function ($me, $query, $bindings) use ($useReadPdo) {
-			if ($me->pretending()) {
+		return $this->run($query, $bindings, function ($me, $query, $bindings) use ($useReadPdo)
+{
+			if ($me->pretending())
+{
 				return [];
 			}
 
@@ -352,16 +355,21 @@ class Connection implements ConnectionInterface
 	 */
 	public function cursor($query, $bindings = [], $useReadPdo = true)
 	{
-		$statement = $this->run($query, $bindings, function ($me, $query, $bindings) use ($useReadPdo) {
-			if ($me->pretending()) {
+		$statement = $this->run($query, $bindings, function ($me, $query, $bindings) use ($useReadPdo)
+{
+			if ($me->pretending())
+{
 				return [];
 			}
 
 			$statement = $this->getPdoForSelect($useReadPdo)->prepare($query);
 
-			if ($me->getFetchMode() === PDO::FETCH_CLASS) {
+			if ($me->getFetchMode() === PDO::FETCH_CLASS)
+{
 				$statement->setFetchMode($me->getFetchMode(), 'StdClass');
-			} else {
+			}
+else
+{
 				$statement->setFetchMode($me->getFetchMode());
 			}
 
@@ -370,7 +378,8 @@ class Connection implements ConnectionInterface
 			return $statement;
 		});
 
-		while ($record = $statement->fetch()) {
+		while ($record = $statement->fetch())
+{
 			yield $record;
 		}
 	}
@@ -431,8 +440,10 @@ class Connection implements ConnectionInterface
 	 */
 	public function statement($query, $bindings = [])
 	{
-		return $this->run($query, $bindings, function ($me, $query, $bindings) {
-			if ($me->pretending()) {
+		return $this->run($query, $bindings, function ($me, $query, $bindings)
+{
+			if ($me->pretending())
+{
 				return true;
 			}
 
@@ -451,8 +462,10 @@ class Connection implements ConnectionInterface
 	 */
 	public function affectingStatement($query, $bindings = [])
 	{
-		return $this->run($query, $bindings, function ($me, $query, $bindings) {
-			if ($me->pretending()) {
+		return $this->run($query, $bindings, function ($me, $query, $bindings)
+{
+			if ($me->pretending())
+{
 				return 0;
 			}
 
@@ -475,8 +488,10 @@ class Connection implements ConnectionInterface
 	 */
 	public function unprepared($query)
 	{
-		return $this->run($query, [], function ($me, $query) {
-			if ($me->pretending()) {
+		return $this->run($query, [], function ($me, $query)
+{
+			if ($me->pretending())
+{
 				return true;
 			}
 
@@ -494,13 +509,17 @@ class Connection implements ConnectionInterface
 	{
 		$grammar = $this->getQueryGrammar();
 
-		foreach ($bindings as $key => $value) {
+		foreach ($bindings as $key => $value)
+{
 			// We need to transform all instances of DateTimeInterface into the actual
 			// date string. Each query grammar maintains its own date string format
 			// so we'll just ask the grammar for the format to get from the date.
-			if ($value instanceof DateTimeInterface) {
+			if ($value instanceof DateTimeInterface)
+{
 				$bindings[$key] = $value->format($grammar->getDateFormat());
-			} elseif ($value === false) {
+			}
+elseif ($value === false)
+{
 				$bindings[$key] = 0;
 			}
 		}
@@ -523,7 +542,8 @@ class Connection implements ConnectionInterface
 		// We'll simply execute the given callback within a try / catch block
 		// and if we catch any exception we can rollback the transaction
 		// so that none of the changes are persisted to the database.
-		try {
+		try
+{
 			$result = $callback($this);
 
 			$this->commit();
@@ -532,11 +552,13 @@ class Connection implements ConnectionInterface
 		// If we catch an exception, we will roll back so nothing gets messed
 		// up in the database. Then we'll re-throw the exception so it can
 		// be handled how the developer sees fit for their applications.
-		catch (Exception $e) {
+		catch (Exception $e)
+{
 			$this->rollBack();
 
 			throw $e;
-		} catch (Throwable $e) {
+		} catch (Throwable $e)
+{
 			$this->rollBack();
 
 			throw $e;
@@ -555,15 +577,20 @@ class Connection implements ConnectionInterface
 	{
 		++$this->transactions;
 
-		if ($this->transactions == 1) {
-			try {
+		if ($this->transactions == 1)
+{
+			try
+{
 				$this->getPdo()->beginTransaction();
-			} catch (Exception $e) {
+			} catch (Exception $e)
+{
 				--$this->transactions;
 
 				throw $e;
 			}
-		} elseif ($this->transactions > 1 && $this->queryGrammar->supportsSavepoints()) {
+		}
+elseif ($this->transactions > 1 && $this->queryGrammar->supportsSavepoints())
+{
 			$this->getPdo()->exec(
 				$this->queryGrammar->compileSavepoint('trans'.$this->transactions)
 			);
@@ -579,7 +606,8 @@ class Connection implements ConnectionInterface
 	 */
 	public function commit()
 	{
-		if ($this->transactions == 1) {
+		if ($this->transactions == 1)
+{
 			$this->getPdo()->commit();
 		}
 
@@ -595,9 +623,12 @@ class Connection implements ConnectionInterface
 	 */
 	public function rollBack()
 	{
-		if ($this->transactions == 1) {
+		if ($this->transactions == 1)
+{
 			$this->getPdo()->rollBack();
-		} elseif ($this->transactions > 1 && $this->queryGrammar->supportsSavepoints()) {
+		}
+elseif ($this->transactions > 1 && $this->queryGrammar->supportsSavepoints())
+{
 			$this->getPdo()->exec(
 				$this->queryGrammar->compileSavepointRollBack('trans'.$this->transactions)
 			);
@@ -665,10 +696,13 @@ class Connection implements ConnectionInterface
 		// Here we will run this query. If an exception occurs we'll determine if it was
 		// caused by a connection that has been lost. If that is the cause, we'll try
 		// to re-establish connection and re-run the query with a fresh connection.
-		try {
+		try
+{
 			$result = $this->runQueryCallback($query, $bindings, $callback);
-		} catch (QueryException $e) {
-			if ($this->transactions >= 1) {
+		} catch (QueryException $e)
+{
+			if ($this->transactions >= 1)
+{
 				throw $e;
 			}
 
@@ -702,14 +736,16 @@ class Connection implements ConnectionInterface
 		// To execute the statement, we'll simply call the callback, which will actually
 		// run the SQL against the PDO connection. Then we can calculate the time it
 		// took to execute and log the query SQL, bindings and time in our memory.
-		try {
+		try
+{
 			$result = $callback($this, $query, $bindings);
 		}
 
 		// If an exception occurs when attempting to run a query, we'll format the error
 		// message to include the bindings with SQL, which will make this exception a
 		// lot more helpful to the developer instead of just the database's errors.
-		catch (Exception $e) {
+		catch (Exception $e)
+{
 			throw new QueryException(
 				$query, $this->prepareBindings($bindings), $e
 			);
@@ -731,7 +767,8 @@ class Connection implements ConnectionInterface
 	 */
 	protected function tryAgainIfCausedByLostConnection(QueryException $e, $query, $bindings, Closure $callback)
 	{
-		if ($this->causedByLostConnection($e->getPrevious())) {
+		if ($this->causedByLostConnection($e->getPrevious()))
+{
 			$this->reconnect();
 
 			return $this->runQueryCallback($query, $bindings, $callback);
@@ -759,7 +796,8 @@ class Connection implements ConnectionInterface
 	 */
 	public function reconnect()
 	{
-		if (is_callable($this->reconnector)) {
+		if (is_callable($this->reconnector))
+{
 			return call_user_func($this->reconnector, $this);
 		}
 
@@ -773,7 +811,8 @@ class Connection implements ConnectionInterface
 	 */
 	protected function reconnectIfMissingConnection()
 	{
-		if (is_null($this->getPdo()) || is_null($this->getReadPdo())) {
+		if (is_null($this->getPdo()) || is_null($this->getReadPdo()))
+{
 			$this->reconnect();
 		}
 	}
@@ -788,13 +827,15 @@ class Connection implements ConnectionInterface
 	 */
 	public function logQuery($query, $bindings, $time = null)
 	{
-		if (isset($this->events)) {
+		if (isset($this->events))
+{
 			$this->events->fire(new Events\QueryExecuted(
 				$query, $bindings, $time, $this
 			));
 		}
 
-		if ($this->loggingQueries) {
+		if ($this->loggingQueries)
+{
 			$this->queryLog[] = compact('query', 'bindings', 'time');
 		}
 	}
@@ -807,7 +848,8 @@ class Connection implements ConnectionInterface
 	 */
 	public function listen(Closure $callback)
 	{
-		if (isset($this->events)) {
+		if (isset($this->events))
+{
 			$this->events->listen(Events\QueryExecuted::class, $callback);
 		}
 	}
@@ -820,11 +862,13 @@ class Connection implements ConnectionInterface
 	 */
 	protected function fireConnectionEvent($event)
 	{
-		if (! isset($this->events)) {
+		if (! isset($this->events))
+{
 			return;
 		}
 
-		switch ($event) {
+		switch ($event)
+{
 			case 'beganTransaction':
 				return $this->events->fire(new Events\TransactionBeginning($this));
 			case 'committed':
@@ -886,7 +930,8 @@ class Connection implements ConnectionInterface
 	 */
 	public function getDoctrineConnection()
 	{
-		if (is_null($this->doctrineConnection)) {
+		if (is_null($this->doctrineConnection))
+{
 			$driver = $this->getDoctrineDriver();
 
 			$data = ['pdo' => $this->getPdo(), 'dbname' => $this->getConfig('database')];
@@ -904,7 +949,8 @@ class Connection implements ConnectionInterface
 	 */
 	public function getPdo()
 	{
-		if ($this->pdo instanceof Closure) {
+		if ($this->pdo instanceof Closure)
+{
 			return $this->pdo = call_user_func($this->pdo);
 		}
 
@@ -918,7 +964,8 @@ class Connection implements ConnectionInterface
 	 */
 	public function getReadPdo()
 	{
-		if ($this->transactions >= 1) {
+		if ($this->transactions >= 1)
+{
 			return $this->getPdo();
 		}
 
@@ -935,7 +982,8 @@ class Connection implements ConnectionInterface
 	 */
 	public function setPdo($pdo)
 	{
-		if ($this->transactions >= 1) {
+		if ($this->transactions >= 1)
+{
 			throw new RuntimeException("Can't swap PDO instance while within transaction.");
 		}
 

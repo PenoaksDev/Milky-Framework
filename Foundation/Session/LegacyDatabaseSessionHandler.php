@@ -77,15 +77,18 @@ class LegacyDatabaseSessionHandler implements SessionHandlerInterface, Existence
 	{
 		$session = (object) $this->getQuery()->find($sessionId);
 
-		if (isset($session->last_activity)) {
-			if ($session->last_activity < Carbon::now()->subMinutes($this->minutes)->getTimestamp()) {
+		if (isset($session->last_activity))
+{
+			if ($session->last_activity < Carbon::now()->subMinutes($this->minutes)->getTimestamp())
+{
 				$this->exists = true;
 
 				return;
 			}
 		}
 
-		if (isset($session->payload)) {
+		if (isset($session->payload))
+{
 			$this->exists = true;
 
 			return base64_decode($session->payload);
@@ -97,11 +100,14 @@ class LegacyDatabaseSessionHandler implements SessionHandlerInterface, Existence
 	 */
 	public function write($sessionId, $data)
 	{
-		if ($this->exists) {
+		if ($this->exists)
+{
 			$this->getQuery()->where('id', $sessionId)->update([
 				'payload' => base64_encode($data), 'last_activity' => time(),
 			]);
-		} else {
+		}
+else
+{
 			$this->getQuery()->insert([
 				'id' => $sessionId, 'payload' => base64_encode($data), 'last_activity' => time(),
 			]);

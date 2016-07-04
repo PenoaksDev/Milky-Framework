@@ -33,25 +33,31 @@ class ServeCommand extends Command
 	 */
 	public function fire()
 	{
-		chdir($this->laravel->publicPath());
+		chdir($this->framework->publicPath());
 
 		$host = $this->input->getOption('host');
 
 		$port = $this->input->getOption('port');
 
-		$base = ProcessUtils::escapeArgument($this->laravel->basePath());
+		$base = ProcessUtils::escapeArgument($this->framework->basePath());
 
 		$binary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
 
-		$this->info("framework development server started on http://{$host}:{$port}/");
+		$this->info("Framework development server started on http://{$host}:{$port}/");
 
-		if (defined('HHVM_VERSION')) {
-			if (version_compare(HHVM_VERSION, '3.8.0') >= 0) {
+		if (defined('HHVM_VERSION'))
+{
+			if (version_compare(HHVM_VERSION, '3.8.0') >= 0)
+{
 				passthru("{$binary} -m server -v Server.Type=proxygen -v Server.SourceRoot={$base}/ -v Server.IP={$host} -v Server.Port={$port} -v Server.DefaultDocument=server.php -v Server.ErrorDocument404=server.php");
-			} else {
+			}
+else
+{
 				throw new Exception("HHVM's built-in server requires HHVM >= 3.8.0.");
 			}
-		} else {
+		}
+else
+{
 			passthru("{$binary} -S {$host}:{$port} {$base}/server.php");
 		}
 	}

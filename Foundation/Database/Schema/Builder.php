@@ -80,8 +80,10 @@ class Builder
 	{
 		$tableColumns = array_map('strtolower', $this->getColumnListing($table));
 
-		foreach ($columns as $column) {
-			if (! in_array(strtolower($column), $tableColumns)) {
+		foreach ($columns as $column)
+{
+			if (! in_array(strtolower($column), $tableColumns))
+{
 				return false;
 			}
 		}
@@ -238,7 +240,8 @@ class Builder
 	 */
 	protected function createBlueprint($table, Closure $callback = null)
 	{
-		if (isset($this->resolver)) {
+		if (isset($this->resolver))
+{
 			return call_user_func($this->resolver, $table, $callback);
 		}
 

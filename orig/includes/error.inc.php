@@ -51,7 +51,7 @@ pre span.error-ln {
 	font-weight: bold;
 }
 
-.container {
+.bindings {
 	margin: 1em 4em;
 }
 

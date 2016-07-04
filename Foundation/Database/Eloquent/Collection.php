@@ -18,11 +18,13 @@ class Collection extends BaseCollection implements QueueableCollection
 	 */
 	public function find($key, $default = null)
 	{
-		if ($key instanceof Model) {
+		if ($key instanceof Model)
+{
 			$key = $key->getKey();
 		}
 
-		return Arr::first($this->items, function ($itemKey, $model) use ($key) {
+		return Arr::first($this->items, function ($itemKey, $model) use ($key)
+{
 			return $model->getKey() == $key;
 		}, $default);
 	}
@@ -35,8 +37,10 @@ class Collection extends BaseCollection implements QueueableCollection
 	 */
 	public function load($relations)
 	{
-		if (count($this->items) > 0) {
-			if (is_string($relations)) {
+		if (count($this->items) > 0)
+{
+			if (is_string($relations))
+{
 				$relations = func_get_args();
 			}
 
@@ -70,17 +74,20 @@ class Collection extends BaseCollection implements QueueableCollection
 	 */
 	public function contains($key, $value = null)
 	{
-		if (func_num_args() == 2) {
+		if (func_num_args() == 2)
+{
 			return parent::contains($key, $value);
 		}
 
-		if ($this->useAsCallable($key)) {
+		if ($this->useAsCallable($key))
+{
 			return parent::contains($key);
 		}
 
 		$key = $key instanceof Model ? $key->getKey() : $key;
 
-		return parent::contains(function ($k, $m) use ($key) {
+		return parent::contains(function ($k, $m) use ($key)
+{
 			return $m->getKey() == $key;
 		});
 	}
@@ -92,7 +99,8 @@ class Collection extends BaseCollection implements QueueableCollection
 	 */
 	public function modelKeys()
 	{
-		return array_map(function ($m) {
+		return array_map(function ($m)
+{
 			return $m->getKey();
 		}, $this->items);
 	}
@@ -107,7 +115,8 @@ class Collection extends BaseCollection implements QueueableCollection
 	{
 		$dictionary = $this->getDictionary();
 
-		foreach ($items as $item) {
+		foreach ($items as $item)
+{
 			$dictionary[$item->getKey()] = $item;
 		}
 
@@ -126,8 +135,10 @@ class Collection extends BaseCollection implements QueueableCollection
 
 		$dictionary = $this->getDictionary($items);
 
-		foreach ($this->items as $item) {
-			if (! isset($dictionary[$item->getKey()])) {
+		foreach ($this->items as $item)
+{
+			if (! isset($dictionary[$item->getKey()]))
+{
 				$diff->add($item);
 			}
 		}
@@ -147,8 +158,10 @@ class Collection extends BaseCollection implements QueueableCollection
 
 		$dictionary = $this->getDictionary($items);
 
-		foreach ($this->items as $item) {
-			if (isset($dictionary[$item->getKey()])) {
+		foreach ($this->items as $item)
+{
+			if (isset($dictionary[$item->getKey()]))
+{
 				$intersect->add($item);
 			}
 		}
@@ -164,7 +177,8 @@ class Collection extends BaseCollection implements QueueableCollection
 	 */
 	public function unique($key = null)
 	{
-		if (! is_null($key)) {
+		if (! is_null($key))
+{
 			return parent::unique($key);
 		}
 
@@ -205,7 +219,8 @@ class Collection extends BaseCollection implements QueueableCollection
 	 */
 	public function makeHidden($attributes)
 	{
-		return $this->each(function ($model) use ($attributes) {
+		return $this->each(function ($model) use ($attributes)
+{
 			$model->addHidden($attributes);
 		});
 	}
@@ -218,7 +233,8 @@ class Collection extends BaseCollection implements QueueableCollection
 	 */
 	public function makeVisible($attributes)
 	{
-		return $this->each(function ($model) use ($attributes) {
+		return $this->each(function ($model) use ($attributes)
+{
 			$model->makeVisible($attributes);
 		});
 	}
@@ -248,7 +264,8 @@ class Collection extends BaseCollection implements QueueableCollection
 
 		$dictionary = [];
 
-		foreach ($items as $value) {
+		foreach ($items as $value)
+{
 			$dictionary[$value->getKey()] = $value;
 		}
 
@@ -330,14 +347,17 @@ class Collection extends BaseCollection implements QueueableCollection
 	 */
 	public function getQueueableClass()
 	{
-		if ($this->count() === 0) {
+		if ($this->count() === 0)
+{
 			return;
 		}
 
 		$class = get_class($this->first());
 
-		$this->each(function ($model) use ($class) {
-			if (get_class($model) !== $class) {
+		$this->each(function ($model) use ($class)
+{
+			if (get_class($model) !== $class)
+{
 				throw new LogicException('Queueing collections with multiple model types is not supported.');
 			}
 		});

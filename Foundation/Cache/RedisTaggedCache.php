@@ -95,7 +95,8 @@ class RedisTaggedCache extends TaggedCache
 	{
 		$fullKey = $this->getPrefix().sha1($namespace).':'.$key;
 
-		foreach (explode('|', $namespace) as $segment) {
+		foreach (explode('|', $namespace) as $segment)
+{
 			$this->store->connection()->sadd($this->referenceKey($segment, $reference), $fullKey);
 		}
 	}
@@ -128,7 +129,8 @@ class RedisTaggedCache extends TaggedCache
 	 */
 	protected function deleteKeysByReference($reference)
 	{
-		foreach (explode('|', $this->tags->getNamespace()) as $segment) {
+		foreach (explode('|', $this->tags->getNamespace()) as $segment)
+{
 			$this->deleteValues($segment = $this->referenceKey($segment, $reference));
 
 			$this->store->connection()->del($segment);
@@ -145,7 +147,8 @@ class RedisTaggedCache extends TaggedCache
 	{
 		$values = array_unique($this->store->connection()->smembers($referenceKey));
 
-		if (count($values) > 0) {
+		if (count($values) > 0)
+{
 			call_user_func_array([$this->store->connection(), 'del'], $values);
 		}
 	}

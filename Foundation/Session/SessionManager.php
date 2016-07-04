@@ -35,9 +35,9 @@ class SessionManager extends Manager
 	 */
 	protected function createCookieDriver()
 	{
-		$lifetime = $this->app['config']['session.lifetime'];
+		$lifetime = $this->fw->bindings['config']['session.lifetime'];
 
-		return $this->buildSession(new CookieSessionHandler($this->app['cookie'], $lifetime));
+		return $this->buildSession(new CookieSessionHandler($this->fw->bindings['cookie'], $lifetime));
 	}
 
 	/**
@@ -57,11 +57,11 @@ class SessionManager extends Manager
 	 */
 	protected function createNativeDriver()
 	{
-		$path = $this->app['config']['session.files'];
+		$path = $this->fw->bindings['config']['session.files'];
 
-		$lifetime = $this->app['config']['session.lifetime'];
+		$lifetime = $this->fw->bindings['config']['session.lifetime'];
 
-		return $this->buildSession(new FileSessionHandler($this->app['files'], $path, $lifetime));
+		return $this->buildSession(new FileSessionHandler($this->fw->bindings['files'], $path, $lifetime));
 	}
 
 	/**
@@ -73,11 +73,11 @@ class SessionManager extends Manager
 	{
 		$connection = $this->getDatabaseConnection();
 
-		$table = $this->app['config']['session.table'];
+		$table = $this->fw->bindings['config']['session.table'];
 
-		$lifetime = $this->app['config']['session.lifetime'];
+		$lifetime = $this->fw->bindings['config']['session.lifetime'];
 
-		return $this->buildSession(new DatabaseSessionHandler($connection, $table, $lifetime, $this->app));
+		return $this->buildSession(new DatabaseSessionHandler($connection, $table, $lifetime, $this->fw));
 	}
 
 	/**
@@ -91,9 +91,9 @@ class SessionManager extends Manager
 	{
 		$connection = $this->getDatabaseConnection();
 
-		$table = $this->app['config']['session.table'];
+		$table = $this->fw->bindings['config']['session.table'];
 
-		$lifetime = $this->app['config']['session.lifetime'];
+		$lifetime = $this->fw->bindings['config']['session.lifetime'];
 
 		return $this->buildSession(new LegacyDatabaseSessionHandler($connection, $table, $lifetime));
 	}
@@ -105,9 +105,9 @@ class SessionManager extends Manager
 	 */
 	protected function getDatabaseConnection()
 	{
-		$connection = $this->app['config']['session.connection'];
+		$connection = $this->fw->bindings['config']['session.connection'];
 
-		return $this->app['db']->connection($connection);
+		return $this->fw->bindings['db']->connection($connection);
 	}
 
 	/**
@@ -149,7 +149,7 @@ class SessionManager extends Manager
 	{
 		$handler = $this->createCacheHandler('redis');
 
-		$handler->getCache()->getStore()->setConnection($this->app['config']['session.connection']);
+		$handler->getCache()->getStore()->setConnection($this->fw->bindings['config']['session.connection']);
 
 		return $this->buildSession($handler);
 	}
@@ -173,9 +173,9 @@ class SessionManager extends Manager
 	 */
 	protected function createCacheHandler($driver)
 	{
-		$minutes = $this->app['config']['session.lifetime'];
+		$minutes = $this->fw->bindings['config']['session.lifetime'];
 
-		return new CacheBasedSessionHandler(clone $this->app['cache']->driver($driver), $minutes);
+		return new CacheBasedSessionHandler(clone $this->fw->bindings['cache']->driver($driver), $minutes);
 	}
 
 	/**
@@ -186,12 +186,15 @@ class SessionManager extends Manager
 	 */
 	protected function buildSession($handler)
 	{
-		if ($this->app['config']['session.encrypt']) {
+		if ($this->fw->bindings['config']['session.encrypt'])
+{
 			return new EncryptedStore(
-				$this->app['config']['session.cookie'], $handler, $this->app['encrypter']
+				$this->fw->bindings['config']['session.cookie'], $handler, $this->fw->bindings['encrypter']
 			);
-		} else {
-			return new Store($this->app['config']['session.cookie'], $handler);
+		}
+else
+{
+			return new Store($this->fw->bindings['config']['session.cookie'], $handler);
 		}
 	}
 
@@ -202,7 +205,7 @@ class SessionManager extends Manager
 	 */
 	public function getSessionConfig()
 	{
-		return $this->app['config']['session'];
+		return $this->fw->bindings['config']['session'];
 	}
 
 	/**
@@ -212,7 +215,7 @@ class SessionManager extends Manager
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['session.driver'];
+		return $this->fw->bindings['config']['session.driver'];
 	}
 
 	/**
@@ -223,6 +226,6 @@ class SessionManager extends Manager
 	 */
 	public function setDefaultDriver($name)
 	{
-		$this->app['config']['session.driver'] = $name;
+		$this->fw->bindings['config']['session.driver'] = $name;
 	}
 }

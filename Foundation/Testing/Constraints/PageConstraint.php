@@ -77,13 +77,17 @@ abstract class PageConstraint extends PHPUnit_Framework_Constraint
 			$html, $this->getFailureDescription()
 		);
 
-		if (! empty($description)) {
+		if (! empty($description))
+{
 			$failureDescription .= ": $description";
 		}
 
-		if (trim($html) != '') {
+		if (trim($html) != '')
+{
 			$failureDescription .= '. Please check the content above.';
-		} else {
+		}
+else
+{
 			$failureDescription .= '. The response is empty.';
 		}
 

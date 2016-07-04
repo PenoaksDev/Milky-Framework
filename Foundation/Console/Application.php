@@ -3,7 +3,7 @@
 namespace Foundation\Console;
 
 use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Contracts\Container\Container;
+use Foundation\Framework;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -14,11 +14,11 @@ use Foundation\Contracts\Console\Application as ApplicationContract;
 class Application extends SymfonyApplication implements ApplicationContract
 {
 	/**
-	 * The framework application instance.
+	 * The Framework application instance.
 	 *
-	 * @var \Foundation\Contracts\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $laravel;
+	protected $framework;
 
 	/**
 	 * The output from the previous command.
@@ -30,16 +30,16 @@ class Application extends SymfonyApplication implements ApplicationContract
 	/**
 	 * Create a new Artisan console application.
 	 *
-	 * @param  \Foundation\Contracts\Container\Container  $laravel
+	 * @param  \Foundation\Framework  $framework
 	 * @param  \Foundation\Contracts\Events\Dispatcher  $events
 	 * @param  string  $version
 	 * @return void
 	 */
-	public function __construct(Container $laravel, Dispatcher $events, $version)
+	public function __construct(Bindings $framework, Dispatcher $events, $version)
 	{
-		parent::__construct('framework Framework', $version);
+		parent::__construct('Framework Framework', $version);
 
-		$this->laravel = $laravel;
+		$this->framework = $framework;
 		$this->setAutoExit(false);
 		$this->setCatchExceptions(false);
 
@@ -86,8 +86,9 @@ class Application extends SymfonyApplication implements ApplicationContract
 	 */
 	public function add(SymfonyCommand $command)
 	{
-		if ($command instanceof Command) {
-			$command->setframework($this->laravel);
+		if ($command instanceof Command)
+{
+			$command->setFramework($this->framework);
 		}
 
 		return $this->addToParent($command);
@@ -112,7 +113,7 @@ class Application extends SymfonyApplication implements ApplicationContract
 	 */
 	public function resolve($command)
 	{
-		return $this->add($this->laravel->make($command));
+		return $this->add($this->framework->make($command));
 	}
 
 	/**
@@ -125,7 +126,8 @@ class Application extends SymfonyApplication implements ApplicationContract
 	{
 		$commands = is_array($commands) ? $commands : func_get_args();
 
-		foreach ($commands as $command) {
+		foreach ($commands as $command)
+{
 			$this->resolve($command);
 		}
 
@@ -161,12 +163,12 @@ class Application extends SymfonyApplication implements ApplicationContract
 	}
 
 	/**
-	 * Get the framework application instance.
+	 * Get the Framework application instance.
 	 *
-	 * @return \Foundation\Contracts\Foundation\Application
+	 * @return \Foundation\Framework
 	 */
-	public function getframework()
+	public function getFramework()
 	{
-		return $this->laravel;
+		return $this->framework;
 	}
 }

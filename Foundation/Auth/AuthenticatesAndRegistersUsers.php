@@ -4,7 +4,8 @@ namespace Foundation\Auth;
 
 trait AuthenticatesAndRegistersUsers
 {
-	use AuthenticatesUsers, RegistersUsers {
+	use AuthenticatesUsers, RegistersUsers
+{
 		AuthenticatesUsers::redirectPath insteadof RegistersUsers;
 		AuthenticatesUsers::getGuard insteadof RegistersUsers;
 	}

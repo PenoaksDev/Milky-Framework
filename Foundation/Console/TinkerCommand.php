@@ -63,8 +63,10 @@ class TinkerCommand extends Command
 	{
 		$commands = [];
 
-		foreach ($this->getApplication()->all() as $name => $command) {
-			if (in_array($name, $this->commandWhitelist)) {
+		foreach ($this->getApplication()->all() as $name => $command)
+{
+			if (in_array($name, $this->commandWhitelist))
+{
 				$commands[] = $command;
 			}
 		}
@@ -73,16 +75,16 @@ class TinkerCommand extends Command
 	}
 
 	/**
-	 * Get an array of framework tailored casters.
+	 * Get an array of Framework tailored casters.
 	 *
 	 * @return array
 	 */
 	protected function getCasters()
 	{
 		return [
-			'Foundation\Application' => 'Foundation\Console\FoundationCaster::castApplication',
-			'Foundation\Support\Collection' => 'Foundation\Console\FoundationCaster::castCollection',
-			'Foundation\Database\Eloquent\Model' => 'Foundation\Console\FoundationCaster::castModel',
+			'Foundation\Framework' => 'Foundation\Console\IlluminateCaster::castApplication',
+			'Foundation\Support\Collection' => 'Foundation\Console\IlluminateCaster::castCollection',
+			'Foundation\Database\Eloquent\Model' => 'Foundation\Console\IlluminateCaster::castModel',
 		];
 	}
 

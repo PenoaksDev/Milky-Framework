@@ -20,15 +20,17 @@ class BroadcastServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('Foundation\Broadcasting\BroadcastManager', function ($app) {
-			return new BroadcastManager($app);
+		$this->fw->bindings->singleton('Foundation\Broadcasting\BroadcastManager', function ($fw)
+{
+			return new BroadcastManager($fw);
 		});
 
-		$this->app->singleton('Foundation\Contracts\Broadcasting\Broadcaster', function ($app) {
-			return $app->make('Foundation\Broadcasting\BroadcastManager')->connection();
+		$this->fw->bindings->singleton('Foundation\Contracts\Broadcasting\Broadcaster', function ($fw)
+{
+			return $fw->make('Foundation\Broadcasting\BroadcastManager')->connection();
 		});
 
-		$this->app->alias(
+		$this->fw->bindings->alias(
 			'Foundation\Broadcasting\BroadcastManager', 'Foundation\Contracts\Broadcasting\Factory'
 		);
 	}

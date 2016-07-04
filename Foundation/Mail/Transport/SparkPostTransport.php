@@ -72,19 +72,23 @@ class SparkPostTransport extends Transport
 	{
 		$to = [];
 
-		if ($message->getTo()) {
+		if ($message->getTo())
+{
 			$to = array_merge($to, array_keys($message->getTo()));
 		}
 
-		if ($message->getCc()) {
+		if ($message->getCc())
+{
 			$to = array_merge($to, array_keys($message->getCc()));
 		}
 
-		if ($message->getBcc()) {
+		if ($message->getBcc())
+{
 			$to = array_merge($to, array_keys($message->getBcc()));
 		}
 
-		$recipients = array_map(function ($address) {
+		$recipients = array_map(function ($address)
+{
 			return compact('address');
 		}, $to);
 

@@ -20,7 +20,8 @@ class HashServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('hash', function () {
+		$this->fw->bindings->singleton('hash', function ()
+{
 			return new BcryptHasher;
 		});
 	}

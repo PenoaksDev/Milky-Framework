@@ -66,8 +66,10 @@ class FileSessionHandler implements SessionHandlerInterface
 	 */
 	public function read($sessionId)
 	{
-		if ($this->files->exists($path = $this->path.'/'.$sessionId)) {
-			if (filemtime($path) >= Carbon::now()->subMinutes($this->minutes)->getTimestamp()) {
+		if ($this->files->exists($path = $this->path.'/'.$sessionId))
+{
+			if (filemtime($path) >= Carbon::now()->subMinutes($this->minutes)->getTimestamp())
+{
 				return $this->files->get($path);
 			}
 		}
@@ -102,7 +104,8 @@ class FileSessionHandler implements SessionHandlerInterface
 					->ignoreDotFiles(true)
 					->date('<= now - '.$lifetime.' seconds');
 
-		foreach ($files as $file) {
+		foreach ($files as $file)
+{
 			$this->files->delete($file->getRealPath());
 		}
 	}

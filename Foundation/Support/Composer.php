@@ -68,13 +68,15 @@ class Composer
 	 */
 	protected function findComposer()
 	{
-		if (! $this->files->exists($this->workingPath.'/composer.phar')) {
+		if (! $this->files->exists($this->workingPath.'/composer.phar'))
+{
 			return 'composer';
 		}
 
 		$binary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
 
-		if (defined('HHVM_VERSION')) {
+		if (defined('HHVM_VERSION'))
+{
 			$binary .= ' --php';
 		}
 

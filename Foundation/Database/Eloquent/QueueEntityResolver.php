@@ -20,7 +20,8 @@ class QueueEntityResolver implements EntityResolverContract
 	{
 		$instance = (new $type)->find($id);
 
-		if ($instance) {
+		if ($instance)
+{
 			return $instance;
 		}
 

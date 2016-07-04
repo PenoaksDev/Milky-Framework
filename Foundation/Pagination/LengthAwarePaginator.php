@@ -40,7 +40,8 @@ class LengthAwarePaginator extends AbstractPaginator implements Arrayable, Array
 	 */
 	public function __construct($items, $total, $perPage, $currentPage = null, array $options = [])
 	{
-		foreach ($options as $key => $value) {
+		foreach ($options as $key => $value)
+{
 			$this->{$key} = $value;
 		}
 
@@ -73,7 +74,8 @@ class LengthAwarePaginator extends AbstractPaginator implements Arrayable, Array
 	 */
 	public function nextPageUrl()
 	{
-		if ($this->lastPage() > $this->currentPage()) {
+		if ($this->lastPage() > $this->currentPage())
+{
 			return $this->url($this->currentPage() + 1);
 		}
 	}
@@ -127,7 +129,8 @@ class LengthAwarePaginator extends AbstractPaginator implements Arrayable, Array
 	 */
 	public function render(Presenter $presenter = null)
 	{
-		if (is_null($presenter) && static::$presenterResolver) {
+		if (is_null($presenter) && static::$presenterResolver)
+{
 			$presenter = call_user_func(static::$presenterResolver, $this);
 		}
 

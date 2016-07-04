@@ -20,17 +20,19 @@ class BusServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('Foundation\Bus\Dispatcher', function ($app) {
-			return new Dispatcher($app, function ($connection = null) use ($app) {
-				return $app['Foundation\Contracts\Queue\Factory']->connection($connection);
+		$this->fw->bindings->singleton('Foundation\Bus\Dispatcher', function ($fw)
+{
+			return new Dispatcher($fw, function ($connection = null) use ($fw)
+{
+				return $fw->bindings['Foundation\Contracts\Queue\Factory']->connection($connection);
 			});
 		});
 
-		$this->app->alias(
+		$this->fw->bindings->alias(
 			'Foundation\Bus\Dispatcher', 'Foundation\Contracts\Bus\Dispatcher'
 		);
 
-		$this->app->alias(
+		$this->fw->bindings->alias(
 			'Foundation\Bus\Dispatcher', 'Foundation\Contracts\Bus\QueueingDispatcher'
 		);
 	}

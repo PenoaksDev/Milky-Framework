@@ -13,9 +13,9 @@ class CacheManager implements FactoryContract
 	/**
 	 * The application instance.
 	 *
-	 * @var \Foundation\Application
+	 * @var \Foundation\Framework
 	 */
-	protected $app;
+	protected $fw;
 
 	/**
 	 * The array of resolved cache stores.
@@ -34,12 +34,12 @@ class CacheManager implements FactoryContract
 	/**
 	 * Create a new Cache manager instance.
 	 *
-	 * @param  \Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return void
 	 */
-	public function __construct($app)
+	public function __construct($fw)
 	{
-		$this->app = $app;
+		$this->fw = $fw;
 	}
 
 	/**
@@ -89,18 +89,25 @@ class CacheManager implements FactoryContract
 	{
 		$config = $this->getConfig($name);
 
-		if (is_null($config)) {
+		if (is_null($config))
+{
 			throw new InvalidArgumentException("Cache store [{$name}] is not defined.");
 		}
 
-		if (isset($this->customCreators[$config['driver']])) {
+		if (isset($this->customCreators[$config['driver']]))
+{
 			return $this->callCustomCreator($config);
-		} else {
+		}
+else
+{
 			$driverMethod = 'create'.ucfirst($config['driver']).'Driver';
 
-			if (method_exists($this, $driverMethod)) {
+			if (method_exists($this, $driverMethod))
+{
 				return $this->{$driverMethod}($config);
-			} else {
+			}
+else
+{
 				throw new InvalidArgumentException("Driver [{$config['driver']}] is not supported.");
 			}
 		}
@@ -114,7 +121,7 @@ class CacheManager implements FactoryContract
 	 */
 	protected function callCustomCreator(array $config)
 	{
-		return $this->customCreators[$config['driver']]($this->app, $config);
+		return $this->customCreators[$config['driver']]($this->fw, $config);
 	}
 
 	/**
@@ -148,7 +155,7 @@ class CacheManager implements FactoryContract
 	 */
 	protected function createFileDriver(array $config)
 	{
-		return $this->repository(new FileStore($this->app['files'], $config['path']));
+		return $this->repository(new FileStore($this->fw->bindings['files'], $config['path']));
 	}
 
 	/**
@@ -161,7 +168,7 @@ class CacheManager implements FactoryContract
 	{
 		$prefix = $this->getPrefix($config);
 
-		$memcached = $this->app['memcached.connector']->connect($config['servers']);
+		$memcached = $this->fw->bindings['memcached.connector']->connect($config['servers']);
 
 		return $this->repository(new MemcachedStore($memcached, $prefix));
 	}
@@ -184,7 +191,7 @@ class CacheManager implements FactoryContract
 	 */
 	protected function createRedisDriver(array $config)
 	{
-		$redis = $this->app['redis'];
+		$redis = $this->fw->bindings['redis'];
 
 		$connection = Arr::get($config, 'connection', 'default');
 
@@ -199,11 +206,11 @@ class CacheManager implements FactoryContract
 	 */
 	protected function createDatabaseDriver(array $config)
 	{
-		$connection = $this->app['db']->connection(Arr::get($config, 'connection'));
+		$connection = $this->fw->bindings['db']->connection(Arr::get($config, 'connection'));
 
 		return $this->repository(
 			new DatabaseStore(
-				$connection, $this->app['encrypter'], $config['table'], $this->getPrefix($config)
+				$connection, $this->fw->bindings['encrypter'], $config['table'], $this->getPrefix($config)
 			)
 		);
 	}
@@ -218,9 +225,10 @@ class CacheManager implements FactoryContract
 	{
 		$repository = new Repository($store);
 
-		if ($this->app->bound('Foundation\Contracts\Events\Dispatcher')) {
+		if ($this->fw->bound('Foundation\Contracts\Events\Dispatcher'))
+{
 			$repository->setEventDispatcher(
-				$this->app['Foundation\Contracts\Events\Dispatcher']
+				$this->fw->bindings['Foundation\Contracts\Events\Dispatcher']
 			);
 		}
 
@@ -235,7 +243,7 @@ class CacheManager implements FactoryContract
 	 */
 	protected function getPrefix(array $config)
 	{
-		return Arr::get($config, 'prefix') ?: $this->app['config']['cache.prefix'];
+		return Arr::get($config, 'prefix') ?: $this->fw->bindings['config']['cache.prefix'];
 	}
 
 	/**
@@ -246,7 +254,7 @@ class CacheManager implements FactoryContract
 	 */
 	protected function getConfig($name)
 	{
-		return $this->app['config']["cache.stores.{$name}"];
+		return $this->fw->bindings['config']["cache.stores.{$name}"];
 	}
 
 	/**
@@ -256,7 +264,7 @@ class CacheManager implements FactoryContract
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['cache.default'];
+		return $this->fw->bindings['config']['cache.default'];
 	}
 
 	/**
@@ -267,7 +275,7 @@ class CacheManager implements FactoryContract
 	 */
 	public function setDefaultDriver($name)
 	{
-		$this->app['config']['cache.default'] = $name;
+		$this->fw->bindings['config']['cache.default'] = $name;
 	}
 
 	/**

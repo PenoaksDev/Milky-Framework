@@ -45,7 +45,8 @@ class ApcStore extends TaggableStore implements Store
 	{
 		$value = $this->apc->get($this->prefix.$key);
 
-		if ($value !== false) {
+		if ($value !== false)
+{
 			return $value;
 		}
 	}

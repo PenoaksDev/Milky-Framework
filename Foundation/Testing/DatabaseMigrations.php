@@ -13,7 +13,8 @@ trait DatabaseMigrations
 	{
 		$this->artisan('migrate');
 
-		$this->beforeApplicationDestroyed(function () {
+		$this->beforeApplicationDestroyed(function ()
+{
 			$this->artisan('migrate:rollback');
 		});
 	}

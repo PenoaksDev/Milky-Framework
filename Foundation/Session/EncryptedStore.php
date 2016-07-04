@@ -39,9 +39,11 @@ class EncryptedStore extends Store
 	 */
 	protected function prepareForUnserialize($data)
 	{
-		try {
+		try
+{
 			return $this->encrypter->decrypt($data);
-		} catch (DecryptException $e) {
+		} catch (DecryptException $e)
+{
 			return json_encode([]);
 		}
 	}

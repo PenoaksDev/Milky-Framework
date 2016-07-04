@@ -26,7 +26,8 @@ class ConnectionResolver implements ConnectionResolverInterface
 	 */
 	public function __construct(array $connections = [])
 	{
-		foreach ($connections as $name => $connection) {
+		foreach ($connections as $name => $connection)
+{
 			$this->addConnection($name, $connection);
 		}
 	}
@@ -39,7 +40,8 @@ class ConnectionResolver implements ConnectionResolverInterface
 	 */
 	public function connection($name = null)
 	{
-		if (is_null($name)) {
+		if (is_null($name))
+{
 			$name = $this->getDefaultConnection();
 		}
 

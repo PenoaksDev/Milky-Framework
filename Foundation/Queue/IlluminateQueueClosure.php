@@ -2,7 +2,7 @@
 
 use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
 
-class FoundationQueueClosure
+class IlluminateQueueClosure
 {
 	/**
 	 * The encrypter instance.

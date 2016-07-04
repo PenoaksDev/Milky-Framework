@@ -39,13 +39,17 @@ class Schedule
 	{
 		$binary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
 
-		if (defined('HHVM_VERSION')) {
+		if (defined('HHVM_VERSION'))
+{
 			$binary .= ' --php';
 		}
 
-		if (defined('ARTISAN_BINARY')) {
+		if (defined('ARTISAN_BINARY'))
+{
 			$artisan = ProcessUtils::escapeArgument(ARTISAN_BINARY);
-		} else {
+		}
+else
+{
 			$artisan = 'artisan';
 		}
 
@@ -61,7 +65,8 @@ class Schedule
 	 */
 	public function exec($command, array $parameters = [])
 	{
-		if (count($parameters)) {
+		if (count($parameters))
+{
 			$command .= ' '.$this->compileParameters($parameters);
 		}
 
@@ -78,7 +83,8 @@ class Schedule
 	 */
 	protected function compileParameters(array $parameters)
 	{
-		return collect($parameters)->map(function ($value, $key) {
+		return collect($parameters)->map(function ($value, $key)
+{
 			return is_numeric($key) ? $value : $key.'='.(is_numeric($value) ? $value : ProcessUtils::escapeArgument($value));
 		})->implode(' ');
 	}
@@ -96,13 +102,14 @@ class Schedule
 	/**
 	 * Get all of the events on the schedule that are due.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return array
 	 */
-	public function dueEvents($app)
+	public function dueEvents($fw)
 	{
-		return array_filter($this->events, function ($event) use ($app) {
-			return $event->isDue($app);
+		return array_filter($this->events, function ($event) use ($fw)
+{
+			return $event->isDue($fw);
 		});
 	}
 }

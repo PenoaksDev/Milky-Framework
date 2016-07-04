@@ -54,7 +54,8 @@ class WorkCommand extends Command
 	 */
 	public function fire()
 	{
-		if ($this->downForMaintenance() && ! $this->option('daemon')) {
+		if ($this->downForMaintenance() && ! $this->option('daemon'))
+{
 			return $this->worker->sleep($this->option('sleep'));
 		}
 
@@ -86,11 +87,13 @@ class WorkCommand extends Command
 	 */
 	protected function listenForEvents()
 	{
-		$this->laravel['events']->listen(JobProcessed::class, function ($event) {
+		$this->framework['events']->listen(JobProcessed::class, function ($event)
+{
 			$this->writeOutput($event->job, false);
 		});
 
-		$this->laravel['events']->listen(JobFailed::class, function ($event) {
+		$this->framework['events']->listen(JobFailed::class, function ($event)
+{
 			$this->writeOutput($event->job, true);
 		});
 	}
@@ -108,11 +111,12 @@ class WorkCommand extends Command
 	protected function runWorker($connection, $queue, $delay, $memory, $daemon = false)
 	{
 		$this->worker->setDaemonExceptionHandler(
-			$this->laravel['Foundation\Contracts\Debug\ExceptionHandler']
+			$this->framework['Foundation\Contracts\Debug\ExceptionHandler']
 		);
 
-		if ($daemon) {
-			$this->worker->setCache($this->laravel['cache']->driver());
+		if ($daemon)
+{
+			$this->worker->setCache($this->framework['cache']->driver());
 
 			return $this->worker->daemon(
 				$connection, $queue, $delay, $memory,
@@ -135,9 +139,12 @@ class WorkCommand extends Command
 	 */
 	protected function writeOutput(Job $job, $failed)
 	{
-		if ($failed) {
+		if ($failed)
+{
 			$this->output->writeln('<error>['.Carbon::now()->format('Y-m-d H:i:s').'] Failed:</error> '.$job->resolveName());
-		} else {
+		}
+else
+{
 			$this->output->writeln('<info>['.Carbon::now()->format('Y-m-d H:i:s').'] Processed:</info> '.$job->resolveName());
 		}
 	}
@@ -149,11 +156,12 @@ class WorkCommand extends Command
 	 */
 	protected function downForMaintenance()
 	{
-		if ($this->option('force')) {
+		if ($this->option('force'))
+{
 			return false;
 		}
 
-		return $this->laravel->isDownForMaintenance();
+		return $this->framework->isDownForMaintenance();
 	}
 
 	/**

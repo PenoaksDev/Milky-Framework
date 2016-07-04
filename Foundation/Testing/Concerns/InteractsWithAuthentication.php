@@ -38,7 +38,7 @@ trait InteractsWithAuthentication
 	 */
 	protected function isAuthenticated($guard = null)
 	{
-		return $this->app->make('auth')->guard($guard)->check();
+		return $this->fw->make('auth')->guard($guard)->check();
 	}
 
 	/**
@@ -50,7 +50,7 @@ trait InteractsWithAuthentication
 	 */
 	public function seeIsAuthenticatedAs($user, $guard = null)
 	{
-		$expected = $this->app->make('auth')->guard($guard)->user();
+		$expected = $this->fw->make('auth')->guard($guard)->user();
 
 		$this->assertInstanceOf(
 			get_class($expected), $user,
@@ -106,7 +106,7 @@ trait InteractsWithAuthentication
 	 */
 	protected function hasCredentials(array $credentials, $guard = null)
 	{
-		$provider = $this->app->make('auth')->guard($guard)->getProvider();
+		$provider = $this->fw->make('auth')->guard($guard)->getProvider();
 
 		$user = $provider->retrieveByCredentials($credentials);
 

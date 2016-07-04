@@ -103,8 +103,10 @@ class DatabaseUserProvider implements UserProvider
 		// generic "user" object that will be utilized by the Guard instances.
 		$query = $this->conn->table($this->table);
 
-		foreach ($credentials as $key => $value) {
-			if (! Str::contains($key, 'password')) {
+		foreach ($credentials as $key => $value)
+{
+			if (! Str::contains($key, 'password'))
+{
 				$query->where($key, $value);
 			}
 		}
@@ -125,7 +127,8 @@ class DatabaseUserProvider implements UserProvider
 	 */
 	protected function getGenericUser($user)
 	{
-		if ($user !== null) {
+		if ($user !== null)
+{
 			return new GenericUser((array) $user);
 		}
 	}

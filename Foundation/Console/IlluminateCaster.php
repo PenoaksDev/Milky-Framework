@@ -4,18 +4,18 @@ namespace Foundation\Console;
 
 use Exception;
 use Foundation\Support\Collection;
-use Foundation\Application;
+use Foundation\Framework;
 use Foundation\Database\Eloquent\Model;
 use Symfony\Component\VarDumper\Caster\Caster;
 
-class FoundationCaster
+class IlluminateCaster
 {
 	/**
-	 * Foundation application methods to include in the presenter.
+	 * Illuminate application methods to include in the presenter.
 	 *
 	 * @var array
 	 */
-	private static $appProperties = [
+	private static $fwProperties = [
 		'configurationIsCached',
 		'environment',
 		'environmentFile',
@@ -36,21 +36,25 @@ class FoundationCaster
 	/**
 	 * Get an array representing the properties of an application.
 	 *
-	 * @param  \Foundation\Application  $app
+	 * @param  \Foundation\Framework  $fw
 	 * @return array
 	 */
-	public static function castApplication(Application $app)
+	public static function castApplication(Framework $fw)
 	{
 		$results = [];
 
-		foreach (self::$appProperties as $property) {
-			try {
-				$val = $app->$property();
+		foreach (self::$fwProperties as $property)
+{
+			try
+{
+				$val = $fw->$property();
 
-				if (! is_null($val)) {
+				if (! is_null($val))
+{
 					$results[Caster::PREFIX_VIRTUAL.$property] = $val;
 				}
-			} catch (Exception $e) {
+			} catch (Exception $e)
+{
 				//
 			}
 		}
@@ -89,7 +93,8 @@ class FoundationCaster
 
 		$results = [];
 
-		foreach (array_intersect_key($attributes, $visible) as $key => $value) {
+		foreach (array_intersect_key($attributes, $visible) as $key => $value)
+{
 			$results[(isset($visible[$key]) ? Caster::PREFIX_VIRTUAL : Caster::PREFIX_PROTECTED).$key] = $value;
 		}
 

@@ -2,7 +2,7 @@
 
 namespace Foundation\Queue\Jobs;
 
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Foundation\Contracts\Queue\Job as JobContract;
 
 class SyncJob extends Job implements JobContract
@@ -24,14 +24,14 @@ class SyncJob extends Job implements JobContract
 	/**
 	 * Create a new job instance.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @param  string  $payload
 	 * @return void
 	 */
-	public function __construct(Container $container, $payload)
+	public function __construct(Bindings $bindings, $payload)
 	{
 		$this->payload = $payload;
-		$this->container = $container;
+		$this->bindings = $bindings;
 	}
 
 	/**

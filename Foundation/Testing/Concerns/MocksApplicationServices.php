@@ -37,10 +37,12 @@ trait MocksApplicationServices
 
 		$this->withoutEvents();
 
-		$this->beforeApplicationDestroyed(function () use ($events) {
+		$this->beforeApplicationDestroyed(function () use ($events)
+{
 			$fired = $this->getFiredEvents($events);
 
-			if ($eventsNotFired = array_diff($events, $fired)) {
+			if ($eventsNotFired = array_diff($events, $fired))
+{
 				throw new Exception(
 					'These expected events were not fired: ['.implode(', ', $eventsNotFired).']'
 				);
@@ -64,8 +66,10 @@ trait MocksApplicationServices
 
 		$this->withoutEvents();
 
-		$this->beforeApplicationDestroyed(function () use ($events) {
-			if ($fired = $this->getFiredEvents($events)) {
+		$this->beforeApplicationDestroyed(function () use ($events)
+{
+			if ($fired = $this->getFiredEvents($events))
+{
 				throw new Exception(
 					'These unexpected events were fired: ['.implode(', ', $fired).']'
 				);
@@ -84,11 +88,12 @@ trait MocksApplicationServices
 	{
 		$mock = Mockery::mock('Foundation\Contracts\Events\Dispatcher');
 
-		$mock->shouldReceive('fire')->andReturnUsing(function ($called) {
+		$mock->shouldReceive('fire')->andReturnUsing(function ($called)
+{
 			$this->firedEvents[] = $called;
 		});
 
-		$this->app->instance('events', $mock);
+		$this->fw->bindings->instance('events', $mock);
 
 		return $this;
 	}
@@ -103,8 +108,10 @@ trait MocksApplicationServices
 	{
 		$observers = is_array($observers) ? $observers : [$observers];
 
-		array_map(function ($observer) {
-			$this->app->bind($observer, function () use ($observer) {
+		array_map(function ($observer)
+{
+			$this->fw->bindings->bind($observer, function () use ($observer)
+{
 				return $this->getMockBuilder($observer)->disableOriginalConstructor()->getMock();
 			});
 		}, $observers);
@@ -137,10 +144,12 @@ trait MocksApplicationServices
 
 		$this->withoutJobs();
 
-		$this->beforeApplicationDestroyed(function () use ($jobs) {
+		$this->beforeApplicationDestroyed(function () use ($jobs)
+{
 			$dispatched = $this->getDispatchedJobs($jobs);
 
-			if ($jobsNotDispatched = array_diff($jobs, $dispatched)) {
+			if ($jobsNotDispatched = array_diff($jobs, $dispatched))
+{
 				throw new Exception(
 					'These expected jobs were not dispatched: ['.implode(', ', $jobsNotDispatched).']'
 				);
@@ -164,8 +173,10 @@ trait MocksApplicationServices
 
 		$this->withoutJobs();
 
-		$this->beforeApplicationDestroyed(function () use ($jobs) {
-			if ($dispatched = $this->getDispatchedJobs($jobs)) {
+		$this->beforeApplicationDestroyed(function () use ($jobs)
+{
+			if ($dispatched = $this->getDispatchedJobs($jobs))
+{
 				throw new Exception(
 					'These unexpected jobs were dispatched: ['.implode(', ', $dispatched).']'
 				);
@@ -184,11 +195,12 @@ trait MocksApplicationServices
 	{
 		$mock = Mockery::mock('Foundation\Contracts\Bus\Dispatcher');
 
-		$mock->shouldReceive('dispatch')->andReturnUsing(function ($dispatched) {
+		$mock->shouldReceive('dispatch')->andReturnUsing(function ($dispatched)
+{
 			$this->dispatchedJobs[] = $dispatched;
 		});
 
-		$this->app->instance(
+		$this->fw->bindings->instance(
 			'Foundation\Contracts\Bus\Dispatcher', $mock
 		);
 
@@ -215,7 +227,8 @@ trait MocksApplicationServices
 	 */
 	protected function getDispatched(array $classes, array $dispatched)
 	{
-		return array_filter($classes, function ($class) use ($dispatched) {
+		return array_filter($classes, function ($class) use ($dispatched)
+{
 			return $this->wasDispatched($class, $dispatched);
 		});
 	}
@@ -229,9 +242,11 @@ trait MocksApplicationServices
 	 */
 	protected function wasDispatched($needle, array $haystack)
 	{
-		foreach ($haystack as $dispatched) {
+		foreach ($haystack as $dispatched)
+{
 			if ((is_string($dispatched) && ($dispatched === $needle || is_subclass_of($dispatched, $needle))) ||
-				$dispatched instanceof $needle) {
+				$dispatched instanceof $needle)
+{
 				return true;
 			}
 		}

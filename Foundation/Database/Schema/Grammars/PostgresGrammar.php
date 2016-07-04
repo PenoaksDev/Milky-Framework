@@ -422,7 +422,8 @@ class PostgresGrammar extends Grammar
 	 */
 	protected function typeEnum(Fluent $column)
 	{
-		$allowed = array_map(function ($a) {
+		$allowed = array_map(function ($a)
+{
 			return "'".$a."'";
 		}, $column->allowed);
 
@@ -514,7 +515,8 @@ class PostgresGrammar extends Grammar
 	 */
 	protected function typeTimestamp(Fluent $column)
 	{
-		if ($column->useCurrent) {
+		if ($column->useCurrent)
+{
 			return 'timestamp(0) without time zone default CURRENT_TIMESTAMP(0)';
 		}
 
@@ -529,7 +531,8 @@ class PostgresGrammar extends Grammar
 	 */
 	protected function typeTimestampTz(Fluent $column)
 	{
-		if ($column->useCurrent) {
+		if ($column->useCurrent)
+{
 			return 'timestamp(0) with time zone default CURRENT_TIMESTAMP(0)';
 		}
 
@@ -601,7 +604,8 @@ class PostgresGrammar extends Grammar
 	 */
 	protected function modifyDefault(Blueprint $blueprint, Fluent $column)
 	{
-		if (! is_null($column->default)) {
+		if (! is_null($column->default))
+{
 			return ' default '.$this->getDefaultValue($column->default);
 		}
 	}
@@ -615,7 +619,8 @@ class PostgresGrammar extends Grammar
 	 */
 	protected function modifyIncrement(Blueprint $blueprint, Fluent $column)
 	{
-		if (in_array($column->type, $this->serials) && $column->autoIncrement) {
+		if (in_array($column->type, $this->serials) && $column->autoIncrement)
+{
 			return ' primary key';
 		}
 	}

@@ -43,7 +43,8 @@ class RedisBroadcaster implements Broadcaster
 
 		$payload = json_encode(['event' => $event, 'data' => $payload]);
 
-		foreach ($channels as $channel) {
+		foreach ($channels as $channel)
+{
 			$connection->publish($channel, $payload);
 		}
 	}

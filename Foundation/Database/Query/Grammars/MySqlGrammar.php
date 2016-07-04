@@ -37,7 +37,8 @@ class MySqlGrammar extends Grammar
 	{
 		$sql = parent::compileSelect($query);
 
-		if ($query->unions) {
+		if ($query->unions)
+{
 			$sql = '('.$sql.') '.$this->compileUnions($query);
 		}
 
@@ -77,7 +78,8 @@ class MySqlGrammar extends Grammar
 	 */
 	protected function compileLock(Builder $query, $value)
 	{
-		if (is_string($value)) {
+		if (is_string($value))
+{
 			return $value;
 		}
 
@@ -100,12 +102,16 @@ class MySqlGrammar extends Grammar
 		// Each one of the columns in the update statements needs to be wrapped in the
 		// keyword identifiers, also a place-holder needs to be created for each of
 		// the values in the list of bindings so we can make the sets statements.
-		foreach ($values as $key => $value) {
-			if ($this->isJsonSelector($key)) {
+		foreach ($values as $key => $value)
+{
+			if ($this->isJsonSelector($key))
+{
 				$columns[] = $this->compileJsonUpdateColumn(
 					$key, new JsonExpression($value)
 				);
-			} else {
+			}
+else
+{
 				$columns[] = $this->wrap($key).' = '.$this->parameter($value);
 			}
 		}
@@ -115,9 +121,12 @@ class MySqlGrammar extends Grammar
 		// If the query has any "join" clauses, we will setup the joins on the builder
 		// and compile them so we can attach them to this update, as update queries
 		// can get join statements to attach to other tables when they're needed.
-		if (isset($query->joins)) {
+		if (isset($query->joins))
+{
 			$joins = ' '.$this->compileJoins($query, $query->joins);
-		} else {
+		}
+else
+{
 			$joins = '';
 		}
 
@@ -128,11 +137,13 @@ class MySqlGrammar extends Grammar
 
 		$sql = rtrim("update {$table}{$joins} set $columns $where");
 
-		if (isset($query->orders)) {
+		if (isset($query->orders))
+{
 			$sql .= ' '.$this->compileOrders($query, $query->orders);
 		}
 
-		if (isset($query->limit)) {
+		if (isset($query->limit))
+{
 			$sql .= ' '.$this->compileLimit($query, $query->limit);
 		}
 
@@ -168,8 +179,10 @@ class MySqlGrammar extends Grammar
 	{
 		$index = 0;
 
-		foreach ($values as $column => $value) {
-			if ($this->isJsonSelector($column) && is_bool($value)) {
+		foreach ($values as $column => $value)
+{
+			if ($this->isJsonSelector($column) && is_bool($value))
+{
 				unset($bindings[$index]);
 			}
 
@@ -191,19 +204,24 @@ class MySqlGrammar extends Grammar
 
 		$where = is_array($query->wheres) ? $this->compileWheres($query) : '';
 
-		if (isset($query->joins)) {
+		if (isset($query->joins))
+{
 			$joins = ' '.$this->compileJoins($query, $query->joins);
 
 			$sql = trim("delete $table from {$table}{$joins} $where");
-		} else {
+		}
+else
+{
 			$sql = trim("delete from $table $where");
 		}
 
-		if (isset($query->orders)) {
+		if (isset($query->orders))
+{
 			$sql .= ' '.$this->compileOrders($query, $query->orders);
 		}
 
-		if (isset($query->limit)) {
+		if (isset($query->limit))
+{
 			$sql .= ' '.$this->compileLimit($query, $query->limit);
 		}
 
@@ -218,11 +236,13 @@ class MySqlGrammar extends Grammar
 	 */
 	protected function wrapValue($value)
 	{
-		if ($value === '*') {
+		if ($value === '*')
+{
 			return $value;
 		}
 
-		if ($this->isJsonSelector($value)) {
+		if ($this->isJsonSelector($value))
+{
 			return $this->wrapJsonSelector($value);
 		}
 

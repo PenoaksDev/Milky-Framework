@@ -19,9 +19,12 @@ trait ValidatesWhenResolvedTrait
 	{
 		$instance = $this->getValidatorInstance();
 
-		if (! $this->passesAuthorization()) {
+		if (! $this->passesAuthorization())
+{
 			$this->failedAuthorization();
-		} elseif (! $instance->passes()) {
+		}
+elseif (! $instance->passes())
+{
 			$this->failedValidation($instance);
 		}
 	}
@@ -56,7 +59,8 @@ trait ValidatesWhenResolvedTrait
 	 */
 	protected function passesAuthorization()
 	{
-		if (method_exists($this, 'authorize')) {
+		if (method_exists($this, 'authorize'))
+{
 			return $this->authorize();
 		}
 

@@ -51,11 +51,11 @@ class ClearCommand extends Command
 	{
 		$storeName = $this->argument('store');
 
-		$this->laravel['events']->fire('cache:clearing', [$storeName]);
+		$this->framework['events']->fire('cache:clearing', [$storeName]);
 
 		$this->cache->store($storeName)->flush();
 
-		$this->laravel['events']->fire('cache:cleared', [$storeName]);
+		$this->framework['events']->fire('cache:cleared', [$storeName]);
 
 		$this->info('Application cache cleared!');
 	}

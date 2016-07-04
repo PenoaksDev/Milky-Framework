@@ -28,18 +28,21 @@ class EventGenerateCommand extends Command
 	 */
 	public function fire()
 	{
-		$provider = $this->laravel->getProvider(
+		$provider = $this->framework->getProvider(
 			'Foundation\Support\Providers\EventServiceProvider'
 		);
 
-		foreach ($provider->listens() as $event => $listeners) {
-			if (! Str::contains($event, '\\')) {
+		foreach ($provider->listens() as $event => $listeners)
+{
+			if (! Str::contains($event, '\\'))
+{
 				continue;
 			}
 
 			$this->callSilent('make:event', ['name' => $event]);
 
-			foreach ($listeners as $listener) {
+			foreach ($listeners as $listener)
+{
 				$listener = preg_replace('/@.+$/', '', $listener);
 
 				$this->callSilent('make:listener', ['name' => $listener, '--event' => $event]);

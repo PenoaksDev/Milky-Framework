@@ -24,19 +24,22 @@ class SyncQueue extends Queue implements QueueContract
 	{
 		$queueJob = $this->resolveJob($this->createPayload($job, $data, $queue));
 
-		try {
+		try
+{
 			$this->raiseBeforeJobEvent($queueJob);
 
 			$queueJob->fire();
 
 			$this->raiseAfterJobEvent($queueJob);
-		} catch (Exception $e) {
+		} catch (Exception $e)
+{
 			$this->raiseExceptionOccurredJobEvent($queueJob, $e);
 
 			$this->handleFailedJob($queueJob);
 
 			throw $e;
-		} catch (Throwable $e) {
+		} catch (Throwable $e)
+{
 			$this->raiseExceptionOccurredJobEvent($queueJob, $e);
 
 			$this->handleFailedJob($queueJob);
@@ -93,7 +96,7 @@ class SyncQueue extends Queue implements QueueContract
 	 */
 	protected function resolveJob($payload)
 	{
-		return new SyncJob($this->container, $payload);
+		return new SyncJob($this->bindings, $payload);
 	}
 
 	/**
@@ -106,8 +109,9 @@ class SyncQueue extends Queue implements QueueContract
 	{
 		$data = json_decode($job->getRawBody(), true);
 
-		if ($this->container->bound('events')) {
-			$this->container['events']->fire(new Events\JobProcessing('sync', $job, $data));
+		if ($this->bindings->bound('events'))
+{
+			$this->bindings['events']->fire(new Events\JobProcessing('sync', $job, $data));
 		}
 	}
 
@@ -121,8 +125,9 @@ class SyncQueue extends Queue implements QueueContract
 	{
 		$data = json_decode($job->getRawBody(), true);
 
-		if ($this->container->bound('events')) {
-			$this->container['events']->fire(new Events\JobProcessed('sync', $job, $data));
+		if ($this->bindings->bound('events'))
+{
+			$this->bindings['events']->fire(new Events\JobProcessed('sync', $job, $data));
 		}
 	}
 
@@ -137,8 +142,9 @@ class SyncQueue extends Queue implements QueueContract
 	{
 		$data = json_decode($job->getRawBody(), true);
 
-		if ($this->container->bound('events')) {
-			$this->container['events']->fire(new Events\JobExceptionOccurred('sync', $job, $data, $exception));
+		if ($this->bindings->bound('events'))
+{
+			$this->bindings['events']->fire(new Events\JobExceptionOccurred('sync', $job, $data, $exception));
 		}
 	}
 
@@ -165,8 +171,9 @@ class SyncQueue extends Queue implements QueueContract
 	{
 		$data = json_decode($job->getRawBody(), true);
 
-		if ($this->container->bound('events')) {
-			$this->container['events']->fire(new Events\JobFailed('sync', $job, $data));
+		if ($this->bindings->bound('events'))
+{
+			$this->bindings['events']->fire(new Events\JobFailed('sync', $job, $data));
 		}
 	}
 }

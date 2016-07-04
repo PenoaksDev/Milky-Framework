@@ -4,24 +4,28 @@ namespace Foundation\Bootstrap;
 
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
-use Foundation\Contracts\Foundation\Application;
+use Foundation\Framework;
 
 class DetectEnvironment
 {
 	/**
 	 * Bootstrap the given application.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework $fw
 	 * @return void
 	 */
-	public function bootstrap(Application $app)
+	public function bootstrap( Framework $fw )
 	{
-		if (! $app->configurationIsCached()) {
-			$this->checkForSpecificEnvironmentFile($app);
+		if ( !$fw->configurationIsCached() )
+		{
+			$this->checkForSpecificEnvironmentFile( $fw );
 
-			try {
-				(new Dotenv($app->environmentPath(), $app->environmentFile()))->load();
-			} catch (InvalidPathException $e) {
+			try
+			{
+				( new Dotenv( $fw->environmentPath(), $fw->environmentFile() ) )->load();
+			}
+			catch ( InvalidPathException $e )
+			{
 				//
 			}
 		}
@@ -30,19 +34,17 @@ class DetectEnvironment
 	/**
 	 * Detect if a custom environment file matching the APP_ENV exists.
 	 *
-	 * @param  \Foundation\Contracts\Foundation\Application  $app
+	 * @param  \Foundation\Framework $fw
 	 * @return void
 	 */
-	protected function checkForSpecificEnvironmentFile($app)
+	protected function checkForSpecificEnvironmentFile( $fw )
 	{
-		if (! env('APP_ENV')) {
+		if ( !env( 'APP_ENV' ) )
 			return;
-		}
 
-		$file = $app->environmentFile().'.'.env('APP_ENV');
+		$file = $fw->environmentFile() . '.' . env( 'APP_ENV' );
 
-		if (file_exists($app->environmentPath().'/'.$file)) {
-			$app->loadEnvironmentFrom($file);
-		}
+		if ( file_exists( $fw->environmentPath() . '/' . $file ) )
+			$fw->loadEnvironmentFrom( $file );
 	}
 }

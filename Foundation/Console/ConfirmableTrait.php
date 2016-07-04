@@ -19,8 +19,10 @@ trait ConfirmableTrait
 
 		$shouldConfirm = $callback instanceof Closure ? call_user_func($callback) : $callback;
 
-		if ($shouldConfirm) {
-			if ($this->option('force')) {
+		if ($shouldConfirm)
+{
+			if ($this->option('force'))
+{
 				return true;
 			}
 
@@ -31,7 +33,8 @@ trait ConfirmableTrait
 
 			$confirmed = $this->confirm('Do you really wish to run this command?');
 
-			if (! $confirmed) {
+			if (! $confirmed)
+{
 				$this->comment('Command Cancelled!');
 
 				return false;
@@ -48,8 +51,9 @@ trait ConfirmableTrait
 	 */
 	protected function getDefaultConfirmCallback()
 	{
-		return function () {
-			return $this->getframework()->environment() == 'production';
+		return function ()
+{
+			return $this->getFramework()->environment() == 'production';
 		};
 	}
 }

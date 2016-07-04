@@ -27,7 +27,8 @@ class SqlServerGrammar extends Grammar
 	{
 		$original = $query->columns;
 
-		if (is_null($query->columns)) {
+		if (is_null($query->columns))
+{
 			$query->columns = ['*'];
 		}
 
@@ -36,7 +37,8 @@ class SqlServerGrammar extends Grammar
 		// If an offset is present on the query, we will need to wrap the query in
 		// a big "ANSI" offset syntax block. This is very nasty compared to the
 		// other database systems but is necessary for implementing features.
-		if ($query->offset > 0) {
+		if ($query->offset > 0)
+{
 			return $this->compileAnsiOffset($query, $components);
 		}
 
@@ -56,7 +58,8 @@ class SqlServerGrammar extends Grammar
 	 */
 	protected function compileColumns(Builder $query, $columns)
 	{
-		if (! is_null($query->aggregate)) {
+		if (! is_null($query->aggregate))
+{
 			return;
 		}
 
@@ -65,7 +68,8 @@ class SqlServerGrammar extends Grammar
 		// If there is a limit on the query, but not an offset, we will add the top
 		// clause to the query, which serves as a "limit" type clause within the
 		// SQL Server system similar to the limit keywords available in MySQL.
-		if ($query->limit > 0 && $query->offset <= 0) {
+		if ($query->limit > 0 && $query->offset <= 0)
+{
 			$select .= 'top '.$query->limit.' ';
 		}
 
@@ -83,11 +87,13 @@ class SqlServerGrammar extends Grammar
 	{
 		$from = parent::compileFrom($query, $table);
 
-		if (is_string($query->lock)) {
+		if (is_string($query->lock))
+{
 			return $from.' '.$query->lock;
 		}
 
-		if (! is_null($query->lock)) {
+		if (! is_null($query->lock))
+{
 			return $from.' with(rowlock,'.($query->lock ? 'updlock,' : '').'holdlock)';
 		}
 
@@ -106,7 +112,8 @@ class SqlServerGrammar extends Grammar
 		// An ORDER BY clause is required to make this offset query work, so if one does
 		// not exist we'll just create a dummy clause to trick the database and so it
 		// does not complain about the queries for not having an "order by" clause.
-		if (! isset($components['orders'])) {
+		if (! isset($components['orders']))
+{
 			$components['orders'] = 'order by (select 0)';
 		}
 
@@ -153,7 +160,8 @@ class SqlServerGrammar extends Grammar
 	{
 		$start = $query->offset + 1;
 
-		if ($query->limit > 0) {
+		if ($query->limit > 0)
+{
 			$finish = $query->offset + $query->limit;
 
 			return "between {$start} and {$finish}";
@@ -277,7 +285,8 @@ class SqlServerGrammar extends Grammar
 	 */
 	protected function wrapValue($value)
 	{
-		if ($value === '*') {
+		if ($value === '*')
+{
 			return $value;
 		}
 
@@ -295,7 +304,8 @@ class SqlServerGrammar extends Grammar
 	{
 		$table = $alias = $this->wrapTable($query->from);
 
-		if (strpos(strtolower($table), '] as [') !== false) {
+		if (strpos(strtolower($table), '] as [') !== false)
+{
 			$segments = explode('] as [', $table);
 
 			$alias = '['.$segments[1];
@@ -306,7 +316,8 @@ class SqlServerGrammar extends Grammar
 		// the values in the list of bindings so we can make the sets statements.
 		$columns = [];
 
-		foreach ($values as $key => $value) {
+		foreach ($values as $key => $value)
+{
 			$columns[] = $this->wrap($key).' = '.$this->parameter($value);
 		}
 
@@ -315,9 +326,12 @@ class SqlServerGrammar extends Grammar
 		// If the query has any "join" clauses, we will setup the joins on the builder
 		// and compile them so we can attach them to this update, as update queries
 		// can get join statements to attach to other tables when they're needed.
-		if (isset($query->joins)) {
+		if (isset($query->joins))
+{
 			$joins = ' '.$this->compileJoins($query, $query->joins);
-		} else {
+		}
+else
+{
 			$joins = '';
 		}
 
@@ -326,7 +340,8 @@ class SqlServerGrammar extends Grammar
 		// intended records are updated by the SQL statements we generate to run.
 		$where = $this->compileWheres($query);
 
-		if (! empty($joins)) {
+		if (! empty($joins))
+{
 			return trim("update {$alias} set {$columns} from {$table}{$joins} {$where}");
 		}
 
@@ -352,7 +367,8 @@ class SqlServerGrammar extends Grammar
 	 */
 	protected function wrapTableValuedFunction($table)
 	{
-		if (preg_match('/^(.+?)(\(.*?\))]$/', $table, $matches) === 1) {
+		if (preg_match('/^(.+?)(\(.*?\))]$/', $table, $matches) === 1)
+{
 			$table = $matches[1].']'.$matches[2];
 		}
 

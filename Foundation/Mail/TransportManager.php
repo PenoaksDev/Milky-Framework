@@ -24,7 +24,7 @@ class TransportManager extends Manager
 	 */
 	protected function createSmtpDriver()
 	{
-		$config = $this->app['config']['mail'];
+		$config = $this->fw->bindings['config']['mail'];
 
 		// The Swift SMTP transport instance will allow us to use any SMTP backend
 		// for delivering mail such as Sendgrid, Amazon SES, or a custom server
@@ -33,20 +33,23 @@ class TransportManager extends Manager
 			$config['host'], $config['port']
 		);
 
-		if (isset($config['encryption'])) {
+		if (isset($config['encryption']))
+{
 			$transport->setEncryption($config['encryption']);
 		}
 
 		// Once we have the transport we will check for the presence of a username
 		// and password. If we have it we will set the credentials on the Swift
 		// transporter instance so that we'll properly authenticate delivery.
-		if (isset($config['username'])) {
+		if (isset($config['username']))
+{
 			$transport->setUsername($config['username']);
 
 			$transport->setPassword($config['password']);
 		}
 
-		if (isset($config['stream'])) {
+		if (isset($config['stream']))
+{
 			$transport->setStreamOptions($config['stream']);
 		}
 
@@ -60,7 +63,7 @@ class TransportManager extends Manager
 	 */
 	protected function createSendmailDriver()
 	{
-		$command = $this->app['config']['mail']['sendmail'];
+		$command = $this->fw->bindings['config']['mail']['sendmail'];
 
 		return SendmailTransport::newInstance($command);
 	}
@@ -72,13 +75,14 @@ class TransportManager extends Manager
 	 */
 	protected function createSesDriver()
 	{
-		$config = $this->app['config']->get('services.ses', []);
+		$config = $this->fw->bindings['config']->get('services.ses', []);
 
 		$config += [
 			'version' => 'latest', 'service' => 'email',
 		];
 
-		if ($config['key'] && $config['secret']) {
+		if ($config['key'] && $config['secret'])
+{
 			$config['credentials'] = Arr::only($config, ['key', 'secret']);
 		}
 
@@ -102,7 +106,7 @@ class TransportManager extends Manager
 	 */
 	protected function createMailgunDriver()
 	{
-		$config = $this->app['config']->get('services.mailgun', []);
+		$config = $this->fw->bindings['config']->get('services.mailgun', []);
 
 		return new MailgunTransport(
 			$this->getHttpClient($config),
@@ -117,7 +121,7 @@ class TransportManager extends Manager
 	 */
 	protected function createMandrillDriver()
 	{
-		$config = $this->app['config']->get('services.mandrill', []);
+		$config = $this->fw->bindings['config']->get('services.mandrill', []);
 
 		return new MandrillTransport(
 			$this->getHttpClient($config), $config['secret']
@@ -131,7 +135,7 @@ class TransportManager extends Manager
 	 */
 	protected function createSparkPostDriver()
 	{
-		$config = $this->app['config']->get('services.sparkpost', []);
+		$config = $this->fw->bindings['config']->get('services.sparkpost', []);
 
 		return new SparkPostTransport(
 			$this->getHttpClient($config), $config['secret']
@@ -145,7 +149,7 @@ class TransportManager extends Manager
 	 */
 	protected function createLogDriver()
 	{
-		return new LogTransport($this->app->make('Psr\Log\LoggerInterface'));
+		return new LogTransport($this->fw->make('Psr\Log\LoggerInterface'));
 	}
 
 	/**
@@ -168,7 +172,7 @@ class TransportManager extends Manager
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['mail.driver'];
+		return $this->fw->bindings['config']['mail.driver'];
 	}
 
 	/**
@@ -179,6 +183,6 @@ class TransportManager extends Manager
 	 */
 	public function setDefaultDriver($name)
 	{
-		$this->app['config']['mail.driver'] = $name;
+		$this->fw->bindings['config']['mail.driver'] = $name;
 	}
 }

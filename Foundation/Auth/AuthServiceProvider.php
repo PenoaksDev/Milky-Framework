@@ -32,17 +32,19 @@ class AuthServiceProvider extends ServiceProvider
 	 */
 	protected function registerAuthenticator()
 	{
-		$this->app->singleton('auth', function ($app) {
+		$this->fw->bindings->singleton('auth', function ($fw)
+{
 			// Once the authentication service has actually been requested by the developer
 			// we will set a variable in the application indicating such. This helps us
 			// know that we need to set any queued cookies in the after event later.
-			$app['auth.loaded'] = true;
+			$fw->bindings['auth.loaded'] = true;
 
-			return new AuthManager($app);
+			return new AuthManager($fw);
 		});
 
-		$this->app->singleton('auth.driver', function ($app) {
-			return $app['auth']->guard();
+		$this->fw->bindings->singleton('auth.driver', function ($fw)
+{
+			return $fw->bindings['auth']->guard();
 		});
 	}
 
@@ -53,9 +55,10 @@ class AuthServiceProvider extends ServiceProvider
 	 */
 	protected function registerUserResolver()
 	{
-		$this->app->bind(
-			AuthenticatableContract::class, function ($app) {
-				return call_user_func($app['auth']->userResolver());
+		$this->fw->bindings->bind(
+			AuthenticatableContract::class, function ($fw)
+{
+				return call_user_func($fw->bindings['auth']->userResolver());
 			}
 		);
 	}
@@ -67,9 +70,11 @@ class AuthServiceProvider extends ServiceProvider
 	 */
 	protected function registerAccessGate()
 	{
-		$this->app->singleton(GateContract::class, function ($app) {
-			return new Gate($app, function () use ($app) {
-				return call_user_func($app['auth']->userResolver());
+		$this->fw->bindings->singleton(GateContract::class, function ($fw)
+{
+			return new Gate($fw, function () use ($fw)
+{
+				return call_user_func($fw->bindings['auth']->userResolver());
 			});
 		});
 	}
@@ -81,9 +86,11 @@ class AuthServiceProvider extends ServiceProvider
 	 */
 	protected function registerRequestRebindHandler()
 	{
-		$this->app->rebinding('request', function ($app, $request) {
-			$request->setUserResolver(function ($guard = null) use ($app) {
-				return call_user_func($app['auth']->userResolver(), $guard);
+		$this->fw->rebinding('request', function ($fw, $request)
+{
+			$request->setUserResolver(function ($guard = null) use ($fw)
+{
+				return call_user_func($fw->bindings['auth']->userResolver(), $guard);
 			});
 		});
 	}

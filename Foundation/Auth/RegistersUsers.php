@@ -26,7 +26,8 @@ trait RegistersUsers
 	 */
 	public function showRegistrationForm()
 	{
-		if (property_exists($this, 'registerView')) {
+		if (property_exists($this, 'registerView'))
+{
 			return view($this->registerView);
 		}
 
@@ -54,7 +55,8 @@ trait RegistersUsers
 	{
 		$validator = $this->validator($request->all());
 
-		if ($validator->fails()) {
+		if ($validator->fails())
+{
 			$this->throwValidationException(
 				$request, $validator
 			);

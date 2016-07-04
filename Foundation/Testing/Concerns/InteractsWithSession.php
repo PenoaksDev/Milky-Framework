@@ -29,8 +29,9 @@ trait InteractsWithSession
 	{
 		$this->startSession();
 
-		foreach ($data as $key => $value) {
-			$this->app['session']->put($key, $value);
+		foreach ($data as $key => $value)
+{
+			$this->fw->bindings['session']->put($key, $value);
 		}
 	}
 
@@ -41,8 +42,9 @@ trait InteractsWithSession
 	 */
 	protected function startSession()
 	{
-		if (! $this->app['session']->isStarted()) {
-			$this->app['session']->start();
+		if (! $this->fw->bindings['session']->isStarted())
+{
+			$this->fw->bindings['session']->start();
 		}
 	}
 
@@ -55,7 +57,7 @@ trait InteractsWithSession
 	{
 		$this->startSession();
 
-		$this->app['session']->flush();
+		$this->fw->bindings['session']->flush();
 	}
 
 	/**
@@ -81,14 +83,18 @@ trait InteractsWithSession
 	 */
 	public function assertSessionHas($key, $value = null)
 	{
-		if (is_array($key)) {
+		if (is_array($key))
+{
 			return $this->assertSessionHasAll($key);
 		}
 
-		if (is_null($value)) {
-			PHPUnit::assertTrue($this->app['session.store']->has($key), "Session missing key: $key");
-		} else {
-			PHPUnit::assertEquals($value, $this->app['session.store']->get($key));
+		if (is_null($value))
+{
+			PHPUnit::assertTrue($this->fw->bindings['session.store']->has($key), "Session missing key: $key");
+		}
+else
+{
+			PHPUnit::assertEquals($value, $this->fw->bindings['session.store']->get($key));
 		}
 	}
 
@@ -100,10 +106,14 @@ trait InteractsWithSession
 	 */
 	public function assertSessionHasAll(array $bindings)
 	{
-		foreach ($bindings as $key => $value) {
-			if (is_int($key)) {
+		foreach ($bindings as $key => $value)
+{
+			if (is_int($key))
+{
 				$this->assertSessionHas($value);
-			} else {
+			}
+else
+{
 				$this->assertSessionHas($key, $value);
 			}
 		}
@@ -117,12 +127,16 @@ trait InteractsWithSession
 	 */
 	public function assertSessionMissing($key)
 	{
-		if (is_array($key)) {
-			foreach ($key as $k) {
+		if (is_array($key))
+{
+			foreach ($key as $k)
+{
 				$this->assertSessionMissing($k);
 			}
-		} else {
-			PHPUnit::assertFalse($this->app['session.store']->has($key), "Session has unexpected key: $key");
+		}
+else
+{
+			PHPUnit::assertFalse($this->fw->bindings['session.store']->has($key), "Session has unexpected key: $key");
 		}
 	}
 
@@ -139,12 +153,16 @@ trait InteractsWithSession
 
 		$bindings = (array) $bindings;
 
-		$errors = $this->app['session.store']->get('errors');
+		$errors = $this->fw->bindings['session.store']->get('errors');
 
-		foreach ($bindings as $key => $value) {
-			if (is_int($key)) {
+		foreach ($bindings as $key => $value)
+{
+			if (is_int($key))
+{
 				PHPUnit::assertTrue($errors->has($value), "Session missing error: $value");
-			} else {
+			}
+else
+{
 				PHPUnit::assertContains($value, $errors->get($key, $format));
 			}
 		}

@@ -85,7 +85,7 @@ interface MessageBag
 	public function isEmpty();
 
 	/**
-	 * Get the number of messages in the container.
+	 * Get the number of messages in the bindings.
 	 *
 	 * @return int
 	 */

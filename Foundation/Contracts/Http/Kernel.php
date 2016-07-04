@@ -5,13 +5,6 @@ namespace Foundation\Contracts\Http;
 interface Kernel
 {
 	/**
-	 * Bootstrap the application for HTTP requests.
-	 *
-	 * @return void
-	 */
-	public function bootstrap();
-
-	/**
 	 * Handle an incoming HTTP request.
 	 *
 	 * @param  \Symfony\Component\HttpFoundation\Request  $request
@@ -31,7 +24,7 @@ interface Kernel
 	/**
 	 * Get the framework application instance.
 	 *
-	 * @return \Foundation\Contracts\Foundation\Application
+	 * @return \Foundation\Framework
 	 */
 	public function getApplication();
 }

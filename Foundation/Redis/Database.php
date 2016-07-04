@@ -28,9 +28,12 @@ class Database implements DatabaseContract
 
 		$options = (array) Arr::pull($servers, 'options');
 
-		if ($cluster) {
+		if ($cluster)
+{
 			$this->clients = $this->createAggregateClient($servers, $options);
-		} else {
+		}
+else
+{
 			$this->clients = $this->createSingleClients($servers, $options);
 		}
 	}
@@ -58,7 +61,8 @@ class Database implements DatabaseContract
 	{
 		$clients = [];
 
-		foreach ($servers as $key => $server) {
+		foreach ($servers as $key => $server)
+{
 			$clients[$key] = new Client($server, $options);
 		}
 
@@ -103,8 +107,10 @@ class Database implements DatabaseContract
 
 		call_user_func_array([$loop, $method], (array) $channels);
 
-		foreach ($loop as $message) {
-			if ($message->kind === 'message' || $message->kind === 'pmessage') {
+		foreach ($loop as $message)
+{
+			if ($message->kind === 'message' || $message->kind === 'pmessage')
+{
 				call_user_func($callback, $message->payload, $message->channel);
 			}
 		}

@@ -10,27 +10,28 @@ use Foundation\Contracts\Support\Arrayable;
 class Fluent implements ArrayAccess, Arrayable, Jsonable, JsonSerializable
 {
 	/**
-	 * All of the attributes set on the container.
+	 * All of the attributes set on the bindings.
 	 *
 	 * @var array
 	 */
 	protected $attributes = [];
 
 	/**
-	 * Create a new fluent container instance.
+	 * Create a new fluent bindings instance.
 	 *
 	 * @param  array|object	$attributes
 	 * @return void
 	 */
 	public function __construct($attributes = [])
 	{
-		foreach ($attributes as $key => $value) {
+		foreach ($attributes as $key => $value)
+{
 			$this->attributes[$key] = $value;
 		}
 	}
 
 	/**
-	 * Get an attribute from the container.
+	 * Get an attribute from the bindings.
 	 *
 	 * @param  string  $key
 	 * @param  mixed   $default
@@ -38,7 +39,8 @@ class Fluent implements ArrayAccess, Arrayable, Jsonable, JsonSerializable
 	 */
 	public function get($key, $default = null)
 	{
-		if (array_key_exists($key, $this->attributes)) {
+		if (array_key_exists($key, $this->attributes))
+{
 			return $this->attributes[$key];
 		}
 
@@ -46,7 +48,7 @@ class Fluent implements ArrayAccess, Arrayable, Jsonable, JsonSerializable
 	}
 
 	/**
-	 * Get the attributes from the container.
+	 * Get the attributes from the bindings.
 	 *
 	 * @return array
 	 */
@@ -132,7 +134,7 @@ class Fluent implements ArrayAccess, Arrayable, Jsonable, JsonSerializable
 	}
 
 	/**
-	 * Handle dynamic calls to the container to set attributes.
+	 * Handle dynamic calls to the bindings to set attributes.
 	 *
 	 * @param  string  $method
 	 * @param  array   $parameters

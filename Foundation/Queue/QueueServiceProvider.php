@@ -2,7 +2,7 @@
 
 namespace Foundation\Queue;
 
-use FoundationQueueClosure;
+use IlluminateQueueClosure;
 use Foundation\Support\ServiceProvider;
 use Foundation\Queue\Console\WorkCommand;
 use Foundation\Queue\Console\ListenCommand;
@@ -50,19 +50,21 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerManager()
 	{
-		$this->app->singleton('queue', function ($app) {
+		$this->fw->bindings->singleton('queue', function ($fw)
+{
 			// Once we have an instance of the queue manager, we will register the various
 			// resolvers for the queue connectors. These connectors are responsible for
 			// creating the classes that accept queue configs and instantiate queues.
-			$manager = new QueueManager($app);
+			$manager = new QueueManager($fw);
 
 			$this->registerConnectors($manager);
 
 			return $manager;
 		});
 
-		$this->app->singleton('queue.connection', function ($app) {
-			return $app['queue']->connection();
+		$this->fw->bindings->singleton('queue.connection', function ($fw)
+{
+			return $fw->bindings['queue']->connection();
 		});
 	}
 
@@ -77,8 +79,9 @@ class QueueServiceProvider extends ServiceProvider
 
 		$this->registerRestartCommand();
 
-		$this->app->singleton('queue.worker', function ($app) {
-			return new Worker($app['queue'], $app['queue.failer'], $app['events']);
+		$this->fw->bindings->singleton('queue.worker', function ($fw)
+{
+			return new Worker($fw->bindings['queue'], $fw->bindings['queue.failer'], $fw->bindings['events']);
 		});
 	}
 
@@ -89,8 +92,9 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerWorkCommand()
 	{
-		$this->app->singleton('command.queue.work', function ($app) {
-			return new WorkCommand($app['queue.worker']);
+		$this->fw->bindings->singleton('command.queue.work', function ($fw)
+{
+			return new WorkCommand($fw->bindings['queue.worker']);
 		});
 
 		$this->commands('command.queue.work');
@@ -105,8 +109,9 @@ class QueueServiceProvider extends ServiceProvider
 	{
 		$this->registerListenCommand();
 
-		$this->app->singleton('queue.listener', function ($app) {
-			return new Listener($app->basePath());
+		$this->fw->bindings->singleton('queue.listener', function ($fw)
+{
+			return new Listener($fw->basePath());
 		});
 	}
 
@@ -117,8 +122,9 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerListenCommand()
 	{
-		$this->app->singleton('command.queue.listen', function ($app) {
-			return new ListenCommand($app['queue.listener']);
+		$this->fw->bindings->singleton('command.queue.listen', function ($fw)
+{
+			return new ListenCommand($fw->bindings['queue.listener']);
 		});
 
 		$this->commands('command.queue.listen');
@@ -131,7 +137,8 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	public function registerRestartCommand()
 	{
-		$this->app->singleton('command.queue.restart', function () {
+		$this->fw->bindings->singleton('command.queue.restart', function ()
+{
 			return new RestartCommand;
 		});
 
@@ -146,7 +153,8 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	public function registerConnectors($manager)
 	{
-		foreach (['Null', 'Sync', 'Database', 'Beanstalkd', 'Redis', 'Sqs'] as $connector) {
+		foreach (['Null', 'Sync', 'Database', 'Beanstalkd', 'Redis', 'Sqs'] as $connector)
+{
 			$this->{"register{$connector}Connector"}($manager);
 		}
 	}
@@ -159,7 +167,8 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerNullConnector($manager)
 	{
-		$manager->addConnector('null', function () {
+		$manager->addConnector('null', function ()
+{
 			return new NullConnector;
 		});
 	}
@@ -172,7 +181,8 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerSyncConnector($manager)
 	{
-		$manager->addConnector('sync', function () {
+		$manager->addConnector('sync', function ()
+{
 			return new SyncConnector;
 		});
 	}
@@ -185,7 +195,8 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerBeanstalkdConnector($manager)
 	{
-		$manager->addConnector('beanstalkd', function () {
+		$manager->addConnector('beanstalkd', function ()
+{
 			return new BeanstalkdConnector;
 		});
 	}
@@ -198,8 +209,9 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerDatabaseConnector($manager)
 	{
-		$manager->addConnector('database', function () {
-			return new DatabaseConnector($this->app['db']);
+		$manager->addConnector('database', function ()
+{
+			return new DatabaseConnector($this->fw->bindings['db']);
 		});
 	}
 
@@ -211,10 +223,11 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerRedisConnector($manager)
 	{
-		$app = $this->app;
+		$fw = $this->fw;
 
-		$manager->addConnector('redis', function () use ($app) {
-			return new RedisConnector($app['redis']);
+		$manager->addConnector('redis', function () use ($fw)
+{
+			return new RedisConnector($fw->bindings['redis']);
 		});
 	}
 
@@ -226,7 +239,8 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerSqsConnector($manager)
 	{
-		$manager->addConnector('sqs', function () {
+		$manager->addConnector('sqs', function ()
+{
 			return new SqsConnector;
 		});
 	}
@@ -238,26 +252,31 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerFailedJobServices()
 	{
-		$this->app->singleton('queue.failer', function ($app) {
-			$config = $app['config']['queue.failed'];
+		$this->fw->bindings->singleton('queue.failer', function ($fw)
+{
+			$config = $fw->bindings['config']['queue.failed'];
 
-			if (isset($config['table'])) {
-				return new DatabaseFailedJobProvider($app['db'], $config['database'], $config['table']);
-			} else {
+			if (isset($config['table']))
+{
+				return new DatabaseFailedJobProvider($fw->bindings['db'], $config['database'], $config['table']);
+			}
+else
+{
 				return new NullFailedJobProvider;
 			}
 		});
 	}
 
 	/**
-	 * Register the Foundation queued closure job.
+	 * Register the Illuminate queued closure job.
 	 *
 	 * @return void
 	 */
 	protected function registerQueueClosure()
 	{
-		$this->app->singleton('FoundationQueueClosure', function ($app) {
-			return new FoundationQueueClosure($app['encrypter']);
+		$this->fw->bindings->singleton('IlluminateQueueClosure', function ($fw)
+{
+			return new IlluminateQueueClosure($fw->bindings['encrypter']);
 		});
 	}
 

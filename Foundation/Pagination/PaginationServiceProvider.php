@@ -13,14 +13,17 @@ class PaginationServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		Paginator::currentPathResolver(function () {
-			return $this->app['request']->url();
+		Paginator::currentPathResolver(function ()
+{
+			return $this->fw->bindings['request']->url();
 		});
 
-		Paginator::currentPageResolver(function ($pageName = 'page') {
-			$page = $this->app['request']->input($pageName);
+		Paginator::currentPageResolver(function ($pageName = 'page')
+{
+			$page = $this->fw->bindings['request']->input($pageName);
 
-			if (filter_var($page, FILTER_VALIDATE_INT) !== false && (int) $page >= 1) {
+			if (filter_var($page, FILTER_VALIDATE_INT) !== false && (int) $page >= 1)
+{
 				return $page;
 			}
 

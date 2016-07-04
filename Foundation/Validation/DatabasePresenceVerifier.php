@@ -47,11 +47,13 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface
 	{
 		$query = $this->table($collection)->where($column, '=', $value);
 
-		if (! is_null($excludeId) && $excludeId != 'NULL') {
+		if (! is_null($excludeId) && $excludeId != 'NULL')
+{
 			$query->where($idColumn ?: 'id', '<>', $excludeId);
 		}
 
-		foreach ($extra as $key => $extraValue) {
+		foreach ($extra as $key => $extraValue)
+{
 			$this->addWhere($query, $key, $extraValue);
 		}
 
@@ -71,7 +73,8 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface
 	{
 		$query = $this->table($collection)->whereIn($column, $values);
 
-		foreach ($extra as $key => $extraValue) {
+		foreach ($extra as $key => $extraValue)
+{
 			$this->addWhere($query, $key, $extraValue);
 		}
 
@@ -88,13 +91,20 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface
 	 */
 	protected function addWhere($query, $key, $extraValue)
 	{
-		if ($extraValue === 'NULL') {
+		if ($extraValue === 'NULL')
+{
 			$query->whereNull($key);
-		} elseif ($extraValue === 'NOT_NULL') {
+		}
+elseif ($extraValue === 'NOT_NULL')
+{
 			$query->whereNotNull($key);
-		} elseif (Str::startsWith($extraValue, '!')) {
+		}
+elseif (Str::startsWith($extraValue, '!'))
+{
 			$query->where($key, '!=', mb_substr($extraValue, 1));
-		} else {
+		}
+else
+{
 			$query->where($key, $extraValue);
 		}
 	}

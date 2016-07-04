@@ -3,7 +3,7 @@
 namespace Foundation\Queue\Capsule;
 
 use Foundation\Queue\QueueManager;
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Foundation\Queue\QueueServiceProvider;
 use Foundation\Support\Traits\CapsuleManagerTrait;
 
@@ -21,15 +21,15 @@ class Manager
 	/**
 	 * Create a new queue capsule manager.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return void
 	 */
-	public function __construct(Container $container = null)
+	public function __construct(Bindings $bindings = null)
 	{
-		$this->setupContainer($container ?: new Container);
+		$this->setupBindings($bindings ?: new Bindings);
 
-		// Once we have the container setup, we will setup the default configuration
-		// options in the container "config" bindings. This just makes this queue
+		// Once we have the bindings setup, we will setup the default configuration
+		// options in the bindings "config" bindings. This just makes this queue
 		// manager behave correctly since all the correct binding are in place.
 		$this->setupDefaultConfiguration();
 
@@ -45,7 +45,7 @@ class Manager
 	 */
 	protected function setupDefaultConfiguration()
 	{
-		$this->container['config']['queue.default'] = 'default';
+		$this->bindings['config']['queue.default'] = 'default';
 	}
 
 	/**
@@ -55,7 +55,7 @@ class Manager
 	 */
 	protected function setupManager()
 	{
-		$this->manager = new QueueManager($this->container);
+		$this->manager = new QueueManager($this->bindings);
 	}
 
 	/**
@@ -65,7 +65,7 @@ class Manager
 	 */
 	protected function registerConnectors()
 	{
-		$provider = new QueueServiceProvider($this->container);
+		$provider = new QueueServiceProvider($this->bindings);
 
 		$provider->registerConnectors($this->manager);
 	}
@@ -144,7 +144,7 @@ class Manager
 	 */
 	public function addConnection(array $config, $name = 'default')
 	{
-		$this->container['config']["queue.connections.{$name}"] = $config;
+		$this->bindings['config']["queue.connections.{$name}"] = $config;
 	}
 
 	/**

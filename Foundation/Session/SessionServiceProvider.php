@@ -17,7 +17,7 @@ class SessionServiceProvider extends ServiceProvider
 
 		$this->registerSessionDriver();
 
-		$this->app->singleton('Foundation\Session\Middleware\StartSession');
+		$this->fw->bindings->singleton('Foundation\Session\Middleware\StartSession');
 	}
 
 	/**
@@ -27,8 +27,9 @@ class SessionServiceProvider extends ServiceProvider
 	 */
 	protected function registerSessionManager()
 	{
-		$this->app->singleton('session', function ($app) {
-			return new SessionManager($app);
+		$this->fw->bindings->singleton('session', function ($fw)
+{
+			return new SessionManager($fw);
 		});
 	}
 
@@ -39,11 +40,12 @@ class SessionServiceProvider extends ServiceProvider
 	 */
 	protected function registerSessionDriver()
 	{
-		$this->app->singleton('session.store', function ($app) {
+		$this->fw->bindings->singleton('session.store', function ($fw)
+{
 			// First, we will create the session manager which is responsible for the
 			// creation of the various session drivers when they are needed by the
 			// application instance, and will resolve them on a lazy load basis.
-			$manager = $app['session'];
+			$manager = $fw->bindings['session'];
 
 			return $manager->driver();
 		});

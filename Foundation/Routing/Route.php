@@ -3,6 +3,7 @@
 namespace Foundation\Routing;
 
 use Closure;
+use Foundation\Bindings\Bindings;
 use LogicException;
 use ReflectionMethod;
 use ReflectionFunction;
@@ -10,7 +11,7 @@ use Foundation\Support\Arr;
 use Foundation\Support\Str;
 use Foundation\Http\Request;
 use UnexpectedValueException;
-use Foundation\Container\Container;
+use Foundation\Framework;
 use Foundation\Routing\Matching\UriValidator;
 use Foundation\Routing\Matching\HostValidator;
 use Foundation\Routing\Matching\MethodValidator;
@@ -86,11 +87,11 @@ class Route
 	protected $router;
 
 	/**
-	 * The container instance used by the route.
+	 * The bindings instance used by the route.
 	 *
-	 * @var \Foundation\Container\Container
+	 * @var \Foundation\Framework
 	 */
-	protected $container;
+	protected $bindings;
 
 	/**
 	 * The validators used by the routes.
@@ -113,11 +114,13 @@ class Route
 		$this->methods = (array) $methods;
 		$this->action = $this->parseAction($action);
 
-		if (in_array('GET', $this->methods) && ! in_array('HEAD', $this->methods)) {
+		if (in_array('GET', $this->methods) && ! in_array('HEAD', $this->methods))
+{
 			$this->methods[] = 'HEAD';
 		}
 
-		if (isset($this->action['prefix'])) {
+		if (isset($this->action['prefix']))
+{
 			$this->prefix($this->action['prefix']);
 		}
 	}
@@ -130,15 +133,18 @@ class Route
 	 */
 	public function run(Request $request)
 	{
-		$this->container = $this->container ?: new Container;
+		$this->bindings = $this->bindings ?: new Bindings;
 
-		try {
-			if (! is_string($this->action['uses'])) {
+		try
+{
+			if (! is_string($this->action['uses']))
+{
 				return $this->runCallable($request);
 			}
 
 			return $this->runController($request);
-		} catch (HttpResponseException $e) {
+		} catch (HttpResponseException $e)
+{
 			return $e->getResponse();
 		}
 	}
@@ -170,7 +176,7 @@ class Route
 	{
 		list($class, $method) = explode('@', $this->action['uses']);
 
-		return (new ControllerDispatcher($this->router, $this->container))
+		return (new ControllerDispatcher($this->router, $this->bindings))
 					->dispatch($this, $request, $class, $method);
 	}
 
@@ -185,12 +191,15 @@ class Route
 	{
 		$this->compileRoute();
 
-		foreach ($this->getValidators() as $validator) {
-			if (! $includingMethod && $validator instanceof MethodValidator) {
+		foreach ($this->getValidators() as $validator)
+{
+			if (! $includingMethod && $validator instanceof MethodValidator)
+{
 				continue;
 			}
 
-			if (! $validator->matches($this, $request)) {
+			if (! $validator->matches($this, $request))
+{
 				return false;
 			}
 		}
@@ -234,11 +243,13 @@ class Route
 	 */
 	public function middleware($middleware = null)
 	{
-		if (is_null($middleware)) {
+		if (is_null($middleware))
+{
 			return (array) Arr::get($this->action, 'middleware', []);
 		}
 
-		if (is_string($middleware)) {
+		if (is_string($middleware))
+{
 			$middleware = [$middleware];
 		}
 
@@ -258,9 +269,9 @@ class Route
 	{
 		list($class, $method) = explode('@', $this->action['uses']);
 
-		$controller = $this->container->make($class);
+		$controller = $this->bindings->make($class);
 
-		return (new ControllerDispatcher($this->router, $this->container))
+		return (new ControllerDispatcher($this->router, $this->bindings))
 			->getMiddleware($controller, $method);
 	}
 
@@ -274,15 +285,19 @@ class Route
 	{
 		$action = $this->getAction();
 
-		if (is_string($action['uses'])) {
+		if (is_string($action['uses']))
+{
 			list($class, $method) = explode('@', $action['uses']);
 
 			$parameters = (new ReflectionMethod($class, $method))->getParameters();
-		} else {
+		}
+else
+{
 			$parameters = (new ReflectionFunction($action['uses']))->getParameters();
 		}
 
-		return is_null($subClass) ? $parameters : array_filter($parameters, function ($p) use ($subClass) {
+		return is_null($subClass) ? $parameters : array_filter($parameters, function ($p) use ($subClass)
+{
 			return $p->getClass() && $p->getClass()->isSubclassOf($subClass);
 		});
 	}
@@ -305,7 +320,8 @@ class Route
 	 */
 	public function hasParameter($name)
 	{
-		if (! $this->hasParameters()) {
+		if (! $this->hasParameters())
+{
 			return false;
 		}
 
@@ -372,8 +388,10 @@ class Route
 	 */
 	public function parameters()
 	{
-		if (isset($this->parameters)) {
-			return array_map(function ($value) {
+		if (isset($this->parameters))
+{
+			return array_map(function ($value)
+{
 				return is_string($value) ? rawurldecode($value) : $value;
 			}, $this->parameters);
 		}
@@ -388,7 +406,8 @@ class Route
 	 */
 	public function parametersWithoutNulls()
 	{
-		return array_filter($this->parameters(), function ($p) {
+		return array_filter($this->parameters(), function ($p)
+{
 			return ! is_null($p);
 		});
 	}
@@ -400,7 +419,8 @@ class Route
 	 */
 	public function parameterNames()
 	{
-		if (isset($this->parameterNames)) {
+		if (isset($this->parameterNames))
+{
 			return $this->parameterNames;
 		}
 
@@ -416,7 +436,8 @@ class Route
 	{
 		preg_match_all('/\{(.*?)\}/', $this->domain().$this->uri, $matches);
 
-		return array_map(function ($m) {
+		return array_map(function ($m)
+{
 			return trim($m, '?');
 		}, $matches[1]);
 	}
@@ -454,7 +475,8 @@ class Route
 		// If the route has a regular expression for the host part of the URI, we will
 		// compile that and get the parameter matches for this domain. We will then
 		// merge them into this parameters array so that this array is completed.
-		if (! is_null($this->compiled->getHostRegex())) {
+		if (! is_null($this->compiled->getHostRegex()))
+{
 			$params = $this->bindHostParameters(
 				$request, $params
 			);
@@ -498,13 +520,15 @@ class Route
 	 */
 	protected function matchToKeys(array $matches)
 	{
-		if (empty($parameterNames = $this->parameterNames())) {
+		if (empty($parameterNames = $this->parameterNames()))
+{
 			return [];
 		}
 
 		$parameters = array_intersect_key($matches, array_flip($parameterNames));
 
-		return array_filter($parameters, function ($value) {
+		return array_filter($parameters, function ($value)
+{
 			return is_string($value) && strlen($value) > 0;
 		});
 	}
@@ -517,12 +541,15 @@ class Route
 	 */
 	protected function replaceDefaults(array $parameters)
 	{
-		foreach ($parameters as $key => $value) {
+		foreach ($parameters as $key => $value)
+{
 			$parameters[$key] = isset($value) ? $value : Arr::get($this->defaults, $key);
 		}
 
-		foreach ($this->defaults as $key => $value) {
-			if (! isset($parameters[$key])) {
+		foreach ($this->defaults as $key => $value)
+{
+			if (! isset($parameters[$key]))
+{
 				$parameters[$key] = $value;
 			}
 		}
@@ -543,8 +570,10 @@ class Route
 		// If no action is passed in right away, we assume the user will make use of
 		// fluent routing. In that case, we set a default closure, to be executed
 		// if the user never explicitly sets an action to handle the given uri.
-		if (is_null($action)) {
-			return ['uses' => function () {
+		if (is_null($action))
+{
+			return ['uses' => function ()
+{
 				throw new LogicException("Route for [{$this->uri}] has no action.");
 			}];
 		}
@@ -552,18 +581,21 @@ class Route
 		// If the action is already a Closure instance, we will just set that instance
 		// as the "uses" property, because there is nothing else we need to do when
 		// it is available. Otherwise we will need to find it in the action list.
-		if (is_callable($action)) {
+		if (is_callable($action))
+{
 			return ['uses' => $action];
 		}
 
 		// If no "uses" property has been set, we will dig through the array to find a
 		// Closure instance within this list. We will set the first Closure we come
 		// across into the "uses" property that will get fired off by this route.
-		elseif (! isset($action['uses'])) {
+		elseif (! isset($action['uses']))
+{
 			$action['uses'] = $this->findCallable($action);
 		}
 
-		if (is_string($action['uses']) && ! Str::contains($action['uses'], '@')) {
+		if (is_string($action['uses']) && ! Str::contains($action['uses'], '@'))
+{
 			throw new UnexpectedValueException(sprintf(
 				'Invalid route action: [%s]', $action['uses']
 			));
@@ -580,7 +612,8 @@ class Route
 	 */
 	protected function findCallable(array $action)
 	{
-		return Arr::first($action, function ($key, $value) {
+		return Arr::first($action, function ($key, $value)
+{
 			return is_callable($value) && is_numeric($key);
 		});
 	}
@@ -592,7 +625,8 @@ class Route
 	 */
 	public static function getValidators()
 	{
-		if (isset(static::$validators)) {
+		if (isset(static::$validators))
+{
 			return static::$validators;
 		}
 
@@ -628,7 +662,8 @@ class Route
 	 */
 	public function where($name, $expression = null)
 	{
-		foreach ($this->parseWhere($name, $expression) as $name => $expression) {
+		foreach ($this->parseWhere($name, $expression) as $name => $expression)
+{
 			$this->wheres[$name] = $expression;
 		}
 
@@ -655,7 +690,8 @@ class Route
 	 */
 	protected function whereArray(array $wheres)
 	{
-		foreach ($wheres as $name => $expression) {
+		foreach ($wheres as $name => $expression)
+{
 			$this->where($name, $expression);
 		}
 
@@ -839,7 +875,8 @@ class Route
 	{
 		$groupStack = last($this->router->getGroupStack());
 
-		if (isset($groupStack['namespace']) && strpos($action, '\\') !== 0) {
+		if (isset($groupStack['namespace']) && strpos($action, '\\') !== 0)
+{
 			return $groupStack['namespace'].'\\'.$action;
 		}
 
@@ -903,14 +940,14 @@ class Route
 	}
 
 	/**
-	 * Set the container instance on the route.
+	 * Set the bindings instance on the route.
 	 *
-	 * @param  \Foundation\Container\Container  $container
+	 * @param  \Foundation\Framework  $bindings
 	 * @return $this
 	 */
-	public function setContainer(Container $container)
+	public function setBindings(Bindings $bindings)
 	{
-		$this->container = $container;
+		$this->bindings = $bindings;
 
 		return $this;
 	}
@@ -924,11 +961,12 @@ class Route
 	 */
 	public function prepareForSerialization()
 	{
-		if ($this->action['uses'] instanceof Closure) {
+		if ($this->action['uses'] instanceof Closure)
+{
 			throw new LogicException("Unable to prepare route [{$this->uri}] for serialization. Uses Closure.");
 		}
 
-		unset($this->router, $this->container, $this->compiled);
+		unset($this->router, $this->bindings, $this->compiled);
 	}
 
 	/**

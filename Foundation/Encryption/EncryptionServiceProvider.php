@@ -15,10 +15,12 @@ class EncryptionServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton('encrypter', function ($app) {
-			$config = $app->make('config')->get('app');
+		$this->fw->bindings->singleton('encrypter', function ()
+{
+			$config = ->make('config')->get('fw');
 
-			if (Str::startsWith($key = $config['key'], 'base64:')) {
+			if (Str::startsWith($key = $config['key'], 'base64:'))
+{
 				$key = base64_decode(substr($key, 7));
 			}
 
@@ -37,11 +39,16 @@ class EncryptionServiceProvider extends ServiceProvider
 	 */
 	protected function getEncrypterForKeyAndCipher($key, $cipher)
 	{
-		if (Encrypter::supported($key, $cipher)) {
+		if (Encrypter::supported($key, $cipher))
+{
 			return new Encrypter($key, $cipher);
-		} elseif (McryptEncrypter::supported($key, $cipher)) {
+		}
+elseif (McryptEncrypter::supported($key, $cipher))
+{
 			return new McryptEncrypter($key, $cipher);
-		} else {
+		}
+else
+{
 			throw new RuntimeException('No supported encrypter found. The cipher and / or key length are invalid.');
 		}
 	}
