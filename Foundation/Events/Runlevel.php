@@ -1,16 +1,28 @@
 <?php
 namespace Foundation\Events;
 
-class Runlevel
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
+
+use Foundation\Barebones\Event;
+
+class Runlevel implements Event
 {
-	CONST PREINIT = -1;
-	CONST INITIALIZING = 0;
-	CONST BOOTSTRAPPED = 1;
+	CONST LOADING = 0;
+	CONST INIT = 1;
+	CONST BOOT = 2;
+	CONST DONE = 2;
 
 	/**
 	 * @var int
 	 */
-	private $level = self::PREINIT;
+	private $level = self::LOADING;
 
 	/**
 	 * @param int $level

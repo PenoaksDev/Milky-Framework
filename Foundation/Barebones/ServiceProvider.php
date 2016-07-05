@@ -1,5 +1,5 @@
 <?php
-namespace Foundation\Support;
+namespace Foundation\Barebones;
 
 use BadMethodCallException;
 use Foundation\Console\Events\ArtisanStarting;
@@ -37,10 +37,10 @@ abstract class ServiceProvider
 	/**
 	 * Create a new service provider instance.
 	 *
-	 * @param  \Foundation\Framework  $fw
+	 * @param  \Foundation\Framework $fw
 	 * @return void
 	 */
-	public function __construct($fw)
+	public function __construct( $fw )
 	{
 		$this->fw = $fw;
 	}
@@ -55,114 +55,114 @@ abstract class ServiceProvider
 	/**
 	 * Merge the given configuration with the existing configuration.
 	 *
-	 * @param  string  $path
-	 * @param  string  $key
+	 * @param  string $path
+	 * @param  string $key
 	 * @return void
 	 */
-	protected function mergeConfigFrom($path, $key)
+	protected function mergeConfigFrom( $path, $key )
 	{
-		$config = $this->fw->bindings['config']->get($key, []);
+		$config = $this->fw->bindings['config']->get( $key, [] );
 
-		$this->fw->bindings['config']->set($key, array_merge(require $path, $config));
+		$this->fw->bindings['config']->set( $key, array_merge( require $path, $config ) );
 	}
 
 	/**
 	 * Register a view file namespace.
 	 *
-	 * @param  string  $path
-	 * @param  string  $namespace
+	 * @param  string $path
+	 * @param  string $namespace
 	 * @return void
 	 */
-	protected function loadViewsFrom($path, $namespace)
+	protected function loadViewsFrom( $path, $namespace )
 	{
-		if (is_dir($fwPath = $this->fw->basePath().'/resources/views/vendor/'.$namespace))
-{
-			$this->fw->bindings['view']->addNamespace($namespace, $fwPath);
+		if ( is_dir( $fwPath = $this->fw->basePath() . '/resources/views/vendor/' . $namespace ) )
+		{
+			$this->fw->bindings['view']->addNamespace( $namespace, $fwPath );
 		}
 
-		$this->fw->bindings['view']->addNamespace($namespace, $path);
+		$this->fw->bindings['view']->addNamespace( $namespace, $path );
 	}
 
 	/**
 	 * Register a translation file namespace.
 	 *
-	 * @param  string  $path
-	 * @param  string  $namespace
+	 * @param  string $path
+	 * @param  string $namespace
 	 * @return void
 	 */
-	protected function loadTranslationsFrom($path, $namespace)
+	protected function loadTranslationsFrom( $path, $namespace )
 	{
-		$this->fw->bindings['translator']->addNamespace($namespace, $path);
+		$this->fw->bindings['translator']->addNamespace( $namespace, $path );
 	}
 
 	/**
 	 * Register paths to be published by the publish command.
 	 *
-	 * @param  array  $paths
-	 * @param  string  $group
+	 * @param  array $paths
+	 * @param  string $group
 	 * @return void
 	 */
-	protected function publishes(array $paths, $group = null)
+	protected function publishes( array $paths, $group = null )
 	{
 		$class = static::class;
 
-		if (! array_key_exists($class, static::$publishes))
-{
+		if ( !array_key_exists( $class, static::$publishes ) )
+		{
 			static::$publishes[$class] = [];
 		}
 
-		static::$publishes[$class] = array_merge(static::$publishes[$class], $paths);
+		static::$publishes[$class] = array_merge( static::$publishes[$class], $paths );
 
-		if ($group)
-{
-			if (! array_key_exists($group, static::$publishGroups))
-{
+		if ( $group )
+		{
+			if ( !array_key_exists( $group, static::$publishGroups ) )
+			{
 				static::$publishGroups[$group] = [];
 			}
 
-			static::$publishGroups[$group] = array_merge(static::$publishGroups[$group], $paths);
+			static::$publishGroups[$group] = array_merge( static::$publishGroups[$group], $paths );
 		}
 	}
 
 	/**
 	 * Get the paths to publish.
 	 *
-	 * @param  string  $provider
-	 * @param  string  $group
+	 * @param  string $provider
+	 * @param  string $group
 	 * @return array
 	 */
-	public static function pathsToPublish($provider = null, $group = null)
+	public static function pathsToPublish( $provider = null, $group = null )
 	{
-		if ($provider && $group)
-{
-			if (empty(static::$publishes[$provider]) || empty(static::$publishGroups[$group]))
-{
+		if ( $provider && $group )
+		{
+			if ( empty( static::$publishes[$provider] ) || empty( static::$publishGroups[$group] ) )
+			{
 				return [];
 			}
 
-			return array_intersect_key(static::$publishes[$provider], static::$publishGroups[$group]);
+			return array_intersect_key( static::$publishes[$provider], static::$publishGroups[$group] );
 		}
 
-		if ($group && array_key_exists($group, static::$publishGroups))
-{
+		if ( $group && array_key_exists( $group, static::$publishGroups ) )
+		{
 			return static::$publishGroups[$group];
 		}
 
-		if ($provider && array_key_exists($provider, static::$publishes))
-{
+		if ( $provider && array_key_exists( $provider, static::$publishes ) )
+		{
 			return static::$publishes[$provider];
 		}
 
-		if ($group || $provider)
-{
+		if ( $group || $provider )
+		{
 			return [];
 		}
 
 		$paths = [];
 
-		foreach (static::$publishes as $class => $publish)
-{
-			$paths = array_merge($paths, $publish);
+		foreach ( static::$publishes as $class => $publish )
+		{
+			$paths = array_merge( $paths, $publish );
 		}
 
 		return $paths;
@@ -171,22 +171,22 @@ abstract class ServiceProvider
 	/**
 	 * Register the package's custom Artisan commands.
 	 *
-	 * @param  array|mixed  $commands
+	 * @param  array|mixed $commands
 	 * @return void
 	 */
-	public function commands($commands)
+	public function commands( $commands )
 	{
-		$commands = is_array($commands) ? $commands : func_get_args();
+		$commands = is_array( $commands ) ? $commands : func_get_args();
 
 		// To register the commands with Artisan, we will grab each of the arguments
 		// passed into the method and listen for Artisan "start" event which will
 		// give us the Artisan console instance which we will give commands to.
 		$events = $this->fw->bindings['events'];
 
-		$events->listen(ArtisanStarting::class, function ($event) use ($commands)
-{
-			$event->artisan->resolveCommands($commands);
-		});
+		$events->listen( ArtisanStarting::class, function ( $event ) use ( $commands )
+		{
+			$event->artisan->resolveCommands( $commands );
+		} );
 	}
 
 	/**
@@ -232,19 +232,17 @@ abstract class ServiceProvider
 	/**
 	 * Dynamically handle missing method calls.
 	 *
-	 * @param  string  $method
-	 * @param  array  $parameters
+	 * @param  string $method
+	 * @param  array $parameters
 	 * @return mixed
 	 *
 	 * @throws \BadMethodCallException
 	 */
-	public function __call($method, $parameters)
+	public function __call( $method, $parameters )
 	{
-		if ($method == 'boot')
-{
+		if ( $method == 'boot' )
 			return;
-		}
 
-		throw new BadMethodCallException("Call to undefined method [{$method}]");
+		throw new BadMethodCallException( "Call to undefined method [{$method}]" );
 	}
 }

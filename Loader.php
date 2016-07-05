@@ -1,19 +1,17 @@
 <?php
-
-use Foundation\Autoload\Func;
+use Foundation\Support\Facades\Log;
 
 define( 'FRAMEWORK_START', microtime( true ) );
 
+/* Force the display of errors */
 ini_set( 'display_errors', 'On' );
 
-function safeArray( array $arr, $key, $def = null )
+/**
+ * Super simple exception handler, should never be seen if framework is operating normally
+ */
+set_exception_handler( function ( Exception $e )
 {
-	return array_key_exists( $key, $arr ) ? $arr[$key] : $def;
-}
-
-set_exception_handler( function ( $e )
-{
-	echo "<b>Encountered an uncaught " . ( new ReflectionClass( $e ) )->getShortName() . ": " . $e->getMessage() . "</b><br />\n";
+	echo "<h1 style='margin-bottom: 0;'>Exception Uncaught</h1><br /><b>" . ( new ReflectionClass( $e ) )->getShortName() . ": " . $e->getMessage() . "</b><br />\n";
 	echo( "<pre>" . $e->getTraceAsString() . "</pre>" );
 	die();
 } );
@@ -68,9 +66,14 @@ EOF;
 	}
 } );
 
+/**
+ * @param $params
+ * @param $paths
+ * @return \Foundation\Framework
+ */
 function initFramework( $params, $paths )
 {
-	/* If $paths is not an array, make it one */
+	/* If $paths is not an array, make it one and assume the string is the base path */
 	if ( !is_array( $paths ) )
 	{
 		$paths = ['base' => $paths];
@@ -79,7 +82,14 @@ function initFramework( $params, $paths )
 	/* Make sure project base directory is set */
 	if ( !array_key_exists( 'base', $paths ) )
 	{
-		throw new RuntimeException( "You must specify the project base directory." );
+		if ( error_reporting() == E_STRICT )
+		{
+			throw new RuntimeException( "You must specify the project base directory." );
+		}
+		else
+		{
+			$paths['base'] = realpath( __DIR__ . '/..' );
+		}
 	}
 
 	/* Strip trailing slashes */
@@ -88,8 +98,8 @@ function initFramework( $params, $paths )
 		$paths[$key] = rtrim( $val, '\/' );
 	}
 
-	/* Set missing keys */
-	foreach ( ['src', 'config', 'vendor'] as $key )
+	/* Add additional missing paths */
+	foreach ( ['src', 'config', 'vendor', 'cache', 'vendor'] as $key )
 	{
 		if ( !array_key_exists( $key, $paths ) )
 		{
@@ -100,17 +110,17 @@ function initFramework( $params, $paths )
 	/* Register the Compose Auth Loader */
 	$loader = require $paths['vendor'] . '/autoload.php';
 
-	/* Since Composer already implements a decent autoloader, we'll just
-	 * utilize it by setting where it can find our classes */
+	/* Since Composer already implements a decent classloader, we'll just
+	 * utilize it by setting where it can find our framework classes */
 	$loader->set( 'Foundation', [__DIR__] );
 
 	/* Load all built-in functions */
 	require __DIR__ . '/Functions.php';
 
 	/* Initialize a new instance of the Framework Constructor */
-	$fw = new Foundation\Framework( $params, $paths, $loader );
+	$fw = new \Foundation\Framework( $loader, $params, $paths );
 
-	/* Return newly initialized framework */
+	/* Return newly started framework */
 
 	return $fw;
 }

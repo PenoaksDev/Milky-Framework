@@ -1,20 +1,19 @@
 <?php
-
 namespace Foundation\Routing;
 
 use Closure;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Foundation\Bindings\Bindings;
+use Foundation\Contracts\Routing\Registrar as RegistrarContract;
+use Foundation\Database\Eloquent\Model;
+use Foundation\Events\Dispatcher;
 use Foundation\Http\Request;
 use Foundation\Http\Response;
+use Foundation\Support\Arr;
 use Foundation\Support\Collection;
-use Foundation\Bindings\Bindings;
-use Foundation\Database\Eloquent\Model;
+use Foundation\Support\Str;
 use Foundation\Support\Traits\Macroable;
-use Foundation\Contracts\Events\Dispatcher;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
-use Foundation\Contracts\Routing\Registrar as RegistrarContract;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -25,7 +24,7 @@ class Router implements RegistrarContract
 	/**
 	 * The event dispatcher instance.
 	 *
-	 * @var \Foundation\Contracts\Events\Dispatcher
+	 * @var Dispatcher
 	 */
 	protected $events;
 
@@ -102,15 +101,15 @@ class Router implements RegistrarContract
 	/**
 	 * Create a new Router instance.
 	 *
-	 * @param  \Foundation\Contracts\Events\Dispatcher $events
-	 * @param  \Foundation\Framework $bindings
+	 * @param  Dispatcher $events
+	 * @param  Bindings $bindings
 	 * @return void
 	 */
 	public function __construct( Dispatcher $events, Bindings $bindings = null )
 	{
 		$this->events = $events;
 		$this->routes = new RouteCollection;
-		$this->bindings = $bindings ?: new Bindings;
+		$this->bindings = $bindings;
 
 		$this->bind( '_missing', function ( $v )
 		{

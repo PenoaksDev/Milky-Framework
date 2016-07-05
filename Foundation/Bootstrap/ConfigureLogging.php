@@ -2,11 +2,12 @@
 
 namespace Foundation\Bootstrap;
 
+use Foundation\Framework;
+use Foundation\Interfaces\Bootstrap;
 use Foundation\Log\Writer;
 use Monolog\Logger as Monolog;
-use Foundation\Framework;
 
-class ConfigureLogging
+class ConfigureLogging implements Bootstrap
 {
 	/**
 	 * Bootstrap the given application.

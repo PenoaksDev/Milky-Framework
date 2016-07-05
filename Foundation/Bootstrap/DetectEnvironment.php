@@ -5,8 +5,9 @@ namespace Foundation\Bootstrap;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Foundation\Framework;
+use Foundation\Interfaces\Bootstrap;
 
-class DetectEnvironment
+class DetectEnvironment implements Bootstrap
 {
 	/**
 	 * Bootstrap the given application.

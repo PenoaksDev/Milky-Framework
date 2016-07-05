@@ -1,11 +1,10 @@
 <?php
-
 namespace Foundation\Bootstrap;
 
-use Foundation\Http\Request;
 use Foundation\Framework;
+use Foundation\Http\Request;
 
-class SetRequestForConsole
+class SetRequestForConsole implements Bootstrap
 {
 	/**
 	 * Bootstrap the given application.

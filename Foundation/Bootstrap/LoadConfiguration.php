@@ -3,12 +3,13 @@
 namespace Foundation\Bootstrap;
 
 use Foundation\Config\Repository;
+use Foundation\Contracts\Config\Repository as RepositoryContract;
+use Foundation\Framework;
+use Foundation\Interfaces\Bootstrap;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use Foundation\Framework;
-use Foundation\Contracts\Config\Repository as RepositoryContract;
 
-class LoadConfiguration
+class LoadConfiguration implements Bootstrap
 {
 	/**
 	 * Bootstrap the given application.

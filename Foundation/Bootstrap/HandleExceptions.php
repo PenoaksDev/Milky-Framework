@@ -1,14 +1,15 @@
 <?php
 namespace Foundation\Bootstrap;
 
-use Exception;
 use ErrorException;
+use Exception;
 use Foundation\Framework;
+use Foundation\Interfaces\Bootstrap;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
-class HandleExceptions
+class HandleExceptions implements Bootstrap
 {
 	/**
 	 * The application instance.

@@ -1,10 +1,10 @@
 <?php
-
 namespace Foundation\Bootstrap;
 
 use Foundation\Framework;
+use Foundation\Interfaces\Bootstrap;
 
-class RegisterProviders
+class RegisterProviders implements Bootstrap
 {
 	/**
 	 * Bootstrap the given application.

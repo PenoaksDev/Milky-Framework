@@ -1,16 +1,24 @@
 <?php
 namespace Foundation\Events;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
+
 use Exception;
-use ReflectionClass;
-use Foundation\Support\Str;
-use Foundation\Framework;
+use Foundation\Contracts\Bindings\Bindings as BindingsContract;
 use Foundation\Contracts\Broadcasting\ShouldBroadcast;
 use Foundation\Contracts\Broadcasting\ShouldBroadcastNow;
-use Foundation\Contracts\Events\Dispatcher as DispatcherContract;
-use Foundation\Contracts\Bindings\Bindings as BindingsContract;
+use Foundation\Framework;
+use Foundation\Support\Str;
+use ReflectionClass;
 
-class Dispatcher implements DispatcherContract
+class Dispatcher
 {
 	/**
 	 * The IoC bindings instance.

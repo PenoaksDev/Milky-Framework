@@ -1,10 +1,10 @@
 <?php
-
 namespace Foundation\Routing;
 
-use Foundation\Support\ServiceProvider;
-use Zend\Diactoros\Response as PsrResponse;
+use Foundation\Framework;
+use Foundation\Barebones\ServiceProvider;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+use Zend\Diactoros\Response as PsrResponse;
 
 class RoutingServiceProvider extends ServiceProvider
 {

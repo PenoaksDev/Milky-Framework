@@ -2,7 +2,7 @@
 
 namespace Foundation\Providers;
 
-use Foundation\Support\ServiceProvider;
+use Foundation\Barebones\ServiceProvider;
 use Foundation\Queue\Console\TableCommand;
 use Foundation\Auth\Console\MakeAuthCommand;
 use Foundation\Console\UpCommand;

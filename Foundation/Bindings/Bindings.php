@@ -1,6 +1,15 @@
 <?php
 namespace Foundation\Bindings;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
+
 use Closure;
 use ArrayAccess;
 use ReflectionClass;
@@ -149,8 +158,10 @@ class Bindings implements ArrayAccess, BindingsContract
 	public function bound( $abstract )
 	{
 		if ( static::$framework->bound( $abstract ) )
+		{
 			return true;
-		
+		}
+
 		$abstract = $this->normalize( $abstract );
 
 		return isset( $this->bindings[$abstract] ) || isset( $this->instances[$abstract] ) || $this->isAlias( $abstract );
@@ -350,7 +361,7 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  string $abstract
 	 * @param  mixed $instance
-	 * @return void
+	 * @return $instance
 	 */
 	public function instance( $abstract, $instance )
 	{
@@ -379,6 +390,8 @@ class Bindings implements ArrayAccess, BindingsContract
 		{
 			$this->rebound( $abstract );
 		}
+
+		return $instance;
 	}
 
 	/**
@@ -667,7 +680,7 @@ class Bindings implements ArrayAccess, BindingsContract
 		try
 		{
 			$abstract = $this->getAlias( $this->normalize( $abstract ) );
-			
+
 			static::$framework->make( $abstract );
 
 			// If an instance of the type is currently being managed as a singleton we'll
@@ -1353,5 +1366,16 @@ class Bindings implements ArrayAccess, BindingsContract
 	public function __set( $key, $value )
 	{
 		$this[$key] = $value;
+	}
+
+	/**
+	 * Dynamically access bindings services.
+	 *
+	 * @param  string $key
+	 * @return mixed
+	 */
+	public function get( $key )
+	{
+		return $this[$key];
 	}
 }

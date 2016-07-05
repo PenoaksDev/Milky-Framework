@@ -47,14 +47,7 @@ class Kernel implements KernelContract
 	 * @var array
 	 */
 	protected $bootstrappers = [
-		'Foundation\Bootstrap\DetectEnvironment',
-		'Foundation\Bootstrap\LoadConfiguration',
-		'Foundation\Bootstrap\ConfigureLogging',
-		'Foundation\Bootstrap\HandleExceptions',
-		'Foundation\Bootstrap\RegisterFacades',
 		'Foundation\Bootstrap\SetRequestForConsole',
-		'Foundation\Bootstrap\RegisterProviders',
-		'Foundation\Bootstrap\BootProviders',
 	];
 
 	/**

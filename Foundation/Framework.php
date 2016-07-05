@@ -3,20 +3,29 @@ namespace Foundation;
 
 use Closure;
 use Composer\Autoload\ClassLoader;
-use Foundation\Autoload\Paths;
+use Foundation\Barebones\ServiceProvider;
 use Foundation\Bindings\Bindings;
+use Foundation\Bootstrap\BootProviders;
+use Foundation\Bootstrap\ConfigureLogging;
+use Foundation\Bootstrap\HandleExceptions;
+use Foundation\Bootstrap\LoadConfiguration;
+use Foundation\Bootstrap\RegisterFacades;
+use Foundation\Bootstrap\RegisterProviders;
 use Foundation\Config\Repository;
-use Foundation\Contracts\Console\Kernel as ConsoleKernel;
 use Foundation\Contracts\Debug\ExceptionHandler;
-use Foundation\Contracts\Http\Kernel as HttpKernel;
+use Foundation\Events\BootstrapPostEvent;
+use Foundation\Events\BootstrapPreEvent;
+use Foundation\Events\Dispatcher;
 use Foundation\Events\EventServiceProvider;
+use Foundation\Events\LocaleChangedEvent;
 use Foundation\Events\Runlevel;
+use Foundation\Events\ServiceProviderPostEvent;
+use Foundation\Events\ServiceProviderPreEvent;
 use Foundation\Filesystem\Filesystem;
-use Foundation\Http\Kernel;
+use Foundation\Framework\Env;
 use Foundation\Http\Request;
 use Foundation\Routing\RoutingServiceProvider;
 use Foundation\Support\Arr;
-use Foundation\Support\ServiceProvider;
 use Foundation\Support\Str;
 use RuntimeException;
 use Symfony\Component\Debug\Exception\FlattenException;
@@ -36,11 +45,13 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  * @Author: Penoaks Publishing Co.
  * @E-Mail: development@penoaks.com
  * @Website: http://penoaks.com
- * @License: MIT License
- * @Copyright (C) 2016 Penoaks Publishing Co. All Rights Reserved.
  *
- * Description:
- * This file is the primary constructor for Penoaks Framework.
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
  */
 class Framework implements HttpKernelInterface
 {
@@ -59,11 +70,18 @@ class Framework implements HttpKernelInterface
 	protected static $framework;
 
 	/**
-	 * Stores the autoloader for later use.
+	 * Stores the classloader for later use.
 	 *
 	 * @var ClassLoader
 	 */
 	protected $loader;
+
+	/**
+	 * Stores the environment class
+	 *
+	 * @var Env
+	 */
+	public $env;
 
 	/**
 	 * Stores the framework runlevel
@@ -82,7 +100,7 @@ class Framework implements HttpKernelInterface
 	/**
 	 * Stores the framework kernel.
 	 *
-	 * @var \Foundation\Http\Kernel
+	 * @var \Foundation\Kernel
 	 */
 	public $kernel;
 
@@ -176,41 +194,73 @@ class Framework implements HttpKernelInterface
 	/**
 	 * Create a new Foundation application instance.
 	 *
-	 * @param array $params
+	 * @param array $params Overrides both internal and project environment variables
 	 * @param array $paths
-	 * @param ClassLoader $loader ;
+	 * @param ClassLoader $loader The Composer AutoLoader used for auto loading classes
 	 */
-	public function __construct( array $params, array $paths, ClassLoader $loader )
+	public function __construct( ClassLoader $loader, array $params = [], array $paths = [] )
 	{
 		if ( !is_null( static::$framework ) )
 		{
-			throw new RuntimeException( "The Framework has already been initialed." );
+			throw new RuntimeException( "The Framework has already been started" );
 		}
 
-		Paths::set( $paths );
+		foreach ( ['base', 'src', 'config', 'cache', 'vendor'] as $key )
+		{
+			if ( !array_key_exists( $key, $paths ) )
+			{
+				throw new RuntimeException( "The " . $key . " path is not set. Paths base, src, config, and vendor are required." );
+			}
+		}
 
 		$this->bindings = new Bindings( $this );
 		$this->loader = $loader;
 
-		$loader->set( "", Paths::get( 'src' ) );
+		$bindings = &$this->bindings;
 
-		$this->register( new EventServiceProvider( $this ) );
-		$this->register( new RoutingServiceProvider( $this ) );
+		/* Store new instance of the ENV */
+		$env = new Env( $params );
+		$bindings->instance( Env::class, $env );
+		$this->env = &$env;
 
-		$this->bindings['router']->get('/', function(){
-			return "Hello World!";
-		});
+		/* Store default path values in ENV */
+		$env->set( ['path' => $paths] );
 
-		$aliases = ['fw' => ['Foundation\Framework'],
+		$loader->set( "", $env->get( 'path.src' ) );
+
+		$this->runlevel = new Runlevel();
+
+		/* Init the Events Dispatcher */
+		$events = ( new Dispatcher( $bindings ) )->setQueueResolver( function () use ( $bindings )
+		{
+			return $bindings->make( 'Foundation\Contracts\Queue\Factory' );
+		} );
+
+		/* Save Events Dispatcher */
+		$bindings->instance( 'events', $events );
+
+		/* Init Routing */
+		$this->provider( new RoutingServiceProvider( $this ) );
+
+		/* Fires the LOADING runlevel event */
+		$events->fire( $this->runlevel, [$this] );
+
+		/* Setup default index, normally overridden */
+		$bindings['router']->get( '/', view( 'Foundation\View\Default' ) );
+
+		$aliases = [
+			'fw' => ['Foundation\Framework'],
 			'auth' => ['Foundation\Auth\AuthManager', 'Foundation\Contracts\Auth\Factory'],
 			'auth.driver' => ['Foundation\Contracts\Auth\Guard'],
 			'blade.compiler' => ['Foundation\View\Compilers\BladeCompiler'],
 			'cache' => ['Foundation\Cache\CacheManager', 'Foundation\Contracts\Cache\Factory'],
 			'cache.store' => ['Foundation\Cache\Repository', 'Foundation\Contracts\Cache\Repository'],
 			'config' => ['Foundation\Config\Repository', 'Foundation\Contracts\Config\Repository'],
-			'cookie' => ['Foundation\Cookie\CookieJar',
+			'cookie' => [
+				'Foundation\Cookie\CookieJar',
 				'Foundation\Contracts\Cookie\Factory',
-				'Foundation\Contracts\Cookie\QueueingFactory'],
+				'Foundation\Contracts\Cookie\QueueingFactory'
+			],
 			'encrypter' => ['Foundation\Encryption\Encrypter', 'Foundation\Contracts\Encryption\Encrypter'],
 			'db' => ['Foundation\Database\DatabaseManager'],
 			'db.connection' => ['Foundation\Database\Connection', 'Foundation\Database\ConnectionInterface'],
@@ -222,16 +272,24 @@ class Framework implements HttpKernelInterface
 			'hash' => ['Foundation\Contracts\Hashing\Hasher'],
 			'translator' => ['Foundation\Translation\Translator', 'Symfony\Component\Translation\TranslatorInterface'],
 			'log' => ['Foundation\Log\Writer', 'Foundation\Contracts\Logging\Log', 'Psr\Log\LoggerInterface'],
-			'mailer' => ['Foundation\Mail\Mailer',
+			'mailer' => [
+				'Foundation\Mail\Mailer',
 				'Foundation\Contracts\Mail\Mailer',
-				'Foundation\Contracts\Mail\MailQueue'],
-			'auth.password' => ['Foundation\Auth\Passwords\PasswordBrokerManager',
-				'Foundation\Contracts\Auth\PasswordBrokerFactory'],
-			'auth.password.broker' => ['Foundation\Auth\Passwords\PasswordBroker',
-				'Foundation\Contracts\Auth\PasswordBroker'],
-			'queue' => ['Foundation\Queue\QueueManager',
+				'Foundation\Contracts\Mail\MailQueue'
+			],
+			'auth.password' => [
+				'Foundation\Auth\Passwords\PasswordBrokerManager',
+				'Foundation\Contracts\Auth\PasswordBrokerFactory'
+			],
+			'auth.password.broker' => [
+				'Foundation\Auth\Passwords\PasswordBroker',
+				'Foundation\Contracts\Auth\PasswordBroker'
+			],
+			'queue' => [
+				'Foundation\Queue\QueueManager',
 				'Foundation\Contracts\Queue\Factory',
-				'Foundation\Contracts\Queue\Monitor'],
+				'Foundation\Contracts\Queue\Monitor'
+			],
 			'queue.connection' => ['Foundation\Contracts\Queue\Queue'],
 			'queue.failer' => ['Foundation\Queue\Failed\FailedJobProviderInterface'],
 			'redirect' => ['Foundation\Routing\Redirector'],
@@ -239,31 +297,46 @@ class Framework implements HttpKernelInterface
 			'request' => ['Foundation\Http\Request', 'Symfony\Component\HttpFoundation\Request'],
 			'router' => ['Foundation\Routing\Router', 'Foundation\Contracts\Routing\Registrar'],
 			'session' => ['Foundation\Session\SessionManager'],
-			'session.store' => ['Foundation\Session\Store',
-				'Symfony\Component\HttpFoundation\Session\SessionInterface'],
+			'session.store' => [
+				'Foundation\Session\Store',
+				'Symfony\Component\HttpFoundation\Session\SessionInterface'
+			],
 			'url' => ['Foundation\Routing\UrlGenerator', 'Foundation\Contracts\Routing\UrlGenerator'],
 			'validator' => ['Foundation\Validation\Factory', 'Foundation\Contracts\Validation\Factory'],
-			'view' => ['Foundation\View\Factory', 'Foundation\Contracts\View\Factory'],];
+			'view' => ['Foundation\View\Factory', 'Foundation\Contracts\View\Factory'],
+		];
 
 		foreach ( $aliases as $key => $aliases2 )
 		{
 			foreach ( $aliases2 as $alias )
 			{
-				$this->bindings->alias( $key, $alias );
+				$bindings->alias( $key, $alias );
 			}
 		}
 
-		$this->bindings->singleton( HttpKernel::class, $params['httpKernel'] );
-		$this->bindings->singleton( ConsoleKernel::class, $params['consoleKernel'] );
-		$this->bindings->singleton( ExceptionHandler::class, $params['exceptionHandler'] );
-
+		/* Init the Framework Kernel */
+		$bindings->singleton( Kernel::class, $env['kernel'] );
 		$this->kernel = $this->bindings->make( Kernel::class );
 
-		$this->runlevel = new Runlevel();
+		/* Init exception handler */
+		$bindings->singleton( ExceptionHandler::class, $env['exceptionHandler'] );
 
-		$this->bindings['events']->fire( $this->runlevel->set( Runlevel::INITIALIZING ), [$this] );
+		/* Fire INIT Runlevel Event */
+		$bindings['events']->fire( $this->runlevel->set( Runlevel::INIT ) );
 
-		$this->bindings['events']->fire( $this->runlevel->set( Runlevel::BOOTSTRAPPED ), [$this] );
+		$this->bootstrap( new LoadConfiguration() );
+		$this->bootstrap( new ConfigureLogging() );
+		$this->bootstrap( new HandleExceptions() );
+		$this->bootstrap( new RegisterFacades() );
+
+		/* Fire BOOT Runlevel Event */
+		$bindings['events']->fire( $this->runlevel->set( Runlevel::BOOT ) );
+
+		$this->bootstrap( new RegisterProviders() );
+		$this->bootstrap( new BootProviders() );
+
+		/* Fire DONE Runlevel Event */
+		$bindings['events']->fire( $this->runlevel->set( Runlevel::DONE ) );
 	}
 
 	/**
@@ -295,244 +368,6 @@ class Framework implements HttpKernelInterface
 	public function version()
 	{
 		return static::VERSION;
-	}
-
-	/**
-	 * Run the given array of bootstrap classes.
-	 *
-	 * @param  array $bootstrappers
-	 * @return void
-	 */
-	public function bootstrap( array $bootstrappers )
-	{
-		if ( $this->runlevel->get() <> Runlevel::INITIALIZING )
-		{
-			throw new RuntimeException( "You can not bootstrap in any other runlevel besides INITIALIZING" );
-		}
-
-		foreach ( $bootstrappers as $bootstrapper )
-		{
-			$this->bindings['events']->fire( 'bootstrapping: ' . $bootstrapper, [$this] );
-			$this->bindings->make( $bootstrapper )->bootstrap( $this );
-			$this->bindings['events']->fire( 'bootstrapped: ' . $bootstrapper, [$this] );
-		}
-	}
-
-	/**
-	 * Register a callback to run after loading the environment.
-	 *
-	 * @param  \Closure $callback
-	 * @return void
-	 */
-	public function afterLoadingEnvironment( Closure $callback )
-	{
-		$this->afterBootstrapping( 'Foundation\Bootstrap\DetectEnvironment', $callback );
-	}
-
-	/**
-	 * Register a callback to run before a bootstrapper.
-	 *
-	 * @param  string $bootstrapper
-	 * @param  Closure $callback
-	 * @return void
-	 */
-	public function beforeBootstrapping( $bootstrapper, Closure $callback )
-	{
-		$this->bindings['events']->listen( 'bootstrapping: ' . $bootstrapper, $callback );
-	}
-
-	/**
-	 * Register a callback to run after a bootstrapper.
-	 *
-	 * @param  string $bootstrapper
-	 * @param  Closure $callback
-	 * @return void
-	 */
-	public function afterBootstrapping( $bootstrapper, Closure $callback )
-	{
-		$this->bindings['events']->listen( 'bootstrapped: ' . $bootstrapper, $callback );
-	}
-
-	/**
-	 * Bind all of the application paths in the bindings.
-	 *
-	 * @return void
-	 */
-	protected function bindPathsInBindings()
-	{
-		// TODO Replace the end-point of theses with the Paths class
-		$this->bindings->instance( 'path', $this->path() );
-		$this->bindings->instance( 'path.base', $this->basePath() );
-		$this->bindings->instance( 'path.lang', $this->langPath() );
-		$this->bindings->instance( 'path.config', $this->configPath() );
-		$this->bindings->instance( 'path.public', $this->publicPath() );
-		$this->bindings->instance( 'path.storage', $this->storagePath() );
-		$this->bindings->instance( 'path.database', $this->databasePath() );
-		$this->bindings->instance( 'path.bootstrap', $this->bootstrapPath() );
-	}
-
-	/**
-	 * Get the path to the application "app" directory.
-	 *
-	 * @return string
-	 */
-	public function path()
-	{
-		return Paths::get( 'src' );
-	}
-
-	/**
-	 * Get the base path of the framework installation.
-	 *
-	 * @return string
-	 */
-	public function basePath()
-	{
-		return Paths::get( 'base' );
-	}
-
-	/**
-	 * Get the path to the bootstrap directory.
-	 *
-	 * @return string
-	 */
-	public function bootstrapPath()
-	{
-		return Paths::get( 'bootstrap' );
-	}
-
-	/**
-	 * Get the path to the application configuration files.
-	 *
-	 * @return string
-	 */
-	public function configPath()
-	{
-		return Paths::get( 'config' );
-	}
-
-	/**
-	 * Get the path to the database directory.
-	 *
-	 * @return string
-	 */
-	public function databasePath()
-	{
-		return Paths::get( 'database' );
-	}
-
-	/**
-	 * Set the database directory.
-	 *
-	 * @param  string $path
-	 * @return $this
-	 */
-	public function useDatabasePath( $path )
-	{
-		Paths::set( ['database' => $path] );
-		$this->bindings->instance( 'path.database', $path );
-
-		return $this;
-	}
-
-	/**
-	 * Get the path to the language files.
-	 *
-	 * @return string
-	 */
-	public function langPath()
-	{
-		return Paths::get( 'lang' );
-	}
-
-	/**
-	 * Get the path to the public / web directory.
-	 *
-	 * @return string
-	 */
-	public function publicPath()
-	{
-		return Paths::get( 'public' );
-	}
-
-	/**
-	 * Get the path to the storage directory.
-	 *
-	 * @return string
-	 */
-	public function storagePath()
-	{
-		return Paths::get( 'storage' );
-	}
-
-	/**
-	 * Set the storage directory.
-	 *
-	 * @param  string $path
-	 * @return $this
-	 */
-	public function useStoragePath( $path )
-	{
-		Paths::set( ['storage' => $path] );
-		$this->bindings->instance( 'path.storage', $path );
-
-		return $this;
-	}
-
-	/**
-	 * Get the path to the environment file directory.
-	 *
-	 * @return string
-	 */
-	public function environmentPath()
-	{
-		return Paths::get( 'env' );
-	}
-
-	/**
-	 * Set the directory for the environment file.
-	 *
-	 * @param  string $path
-	 * @return $this
-	 */
-	public function useEnvironmentPath( $path )
-	{
-		Paths::set( ['env' => $path] );
-
-		return $this;
-	}
-
-	/**
-	 * Set the environment file to be loaded during bootstrapping.
-	 *
-	 * @param  string $file
-	 * @return $this
-	 */
-	public function loadEnvironmentFrom( $file )
-	{
-		$this->environmentFile = $file;
-
-		return $this;
-	}
-
-	/**
-	 * Get the environment file the application is using.
-	 *
-	 * @return string
-	 */
-	public function environmentFile()
-	{
-		return $this->environmentFile ?: '.env';
-	}
-
-	/**
-	 * Get the fully qualified path to the environment file.
-	 *
-	 * @return string
-	 */
-	public function environmentFilePath()
-	{
-		return $this->environmentPath() . '/' . $this->environmentFile();
 	}
 
 	/**
@@ -581,7 +416,7 @@ class Framework implements HttpKernelInterface
 	{
 		$args = isset( $_SERVER['argv'] ) ? $_SERVER['argv'] : null;
 
-		return $this->bindings['env'] = ( new EnvironmentDetector() )->detect( $callback, $args );
+		return $this->bindings['env'] = $this->env->detect( $callback, $args );
 	}
 
 	/**
@@ -611,62 +446,97 @@ class Framework implements HttpKernelInterface
 	 */
 	public function registerConfiguredProviders()
 	{
-		$manifestPath = $this->getCachedServicesPath();
+		( new ProviderRepository( $this, new Filesystem, $this->env->get('path.cache') . __ . 'cachedProviders.php' ) )->load( $this->config['app.providers'] );
+	}
 
-		( new ProviderRepository( $this, new Filesystem, $manifestPath ) )->load( $this->config['app.providers'] );
+	/**
+	 * Run the given array of bootstrap classes.
+	 *
+	 * @param \Foundation\Barebones\Bootstrap|array $bootstrappers
+	 * @return void
+	 */
+	public function bootstrap( $bootstrap )
+	{
+		if ( is_array( $bootstrap ) )
+		{
+			foreach ( $bootstrap as $b )
+				$this->bootstrap( $b );
+
+			return;
+		}
+
+		if ( $this->runlevel->get() <> Runlevel::BOOT )
+			throw new RuntimeException( "You can not bootstrap in any other runlevel besides INITIALIZING" );
+
+		$event = new BootstrapPreEvent( $bootstrap );
+		$this->bindings['events']->fire( $event, [$this] );
+		if ( !$event->isCancelled() )
+		{
+			$this->bindings->make( $bootstrap )->bootstrap( $this );
+			$this->bindings['events']->fire( new BootstrapPostEvent( $bootstrap ), [$this] );
+		}
 	}
 
 	/**
 	 * Register a service provider with the application.
 	 *
-	 * @param  \Foundation\Support\ServiceProvider|string $provider
+	 * @param  ServiceProvider|string|array $provider
 	 * @param  array $options
 	 * @param  bool $force
-	 * @return \Foundation\Support\ServiceProvider
+	 * @return ServiceProvider|array
 	 */
-	public function register( $provider, $options = [], $force = false )
+	public function provider( $provider, $options = [], $force = false )
 	{
+		if ( is_array( $provider ) )
+		{
+			$arr = [];
+			foreach ( $provider as $p )
+				$arr[] = $this->provider( $p );
+
+			return $arr;
+		}
+
 		if ( ( $registered = $this->getProvider( $provider ) ) && !$force )
-		{
 			return $registered;
-		}
 
-		// If the given "provider" is a string, we will resolve it, passing in the
-		// application instance automatically for the developer. This is simply
-		// a more convenient way of specifying your service provider classes.
-		if ( is_string( $provider ) )
-		{
-			$provider = $this->resolveProviderClass( $provider );
-		}
+		/**
+		 * Is the given "provider" is a string, we will resolve it.
+		 *
+		 * @var ServiceProvider $instance
+		 */
+		$instance = is_string( $provider ) ? $this->resolveProviderClass( $provider ) : $provider;
 
-		$provider->register();
+		$event = new ServiceProviderPreEvent( $instance );
+		$this->bindings['events']->fire( $event, [$this] );
+		if ( $event->isCancelled() )
+			return null;
+
+		$instance->register();
 
 		// Once we have registered the service we will iterate through the options
 		// and set each of them on the application so they will be available on
 		// the actual loading of the service objects and for developer usage.
 		foreach ( $options as $key => $value )
-		{
 			$this->bindings[$key] = $value;
-		}
 
-		$this->markAsRegistered( $provider );
+		$this->markAsRegistered( $instance );
 
 		// If the application has already booted, we will call this boot method on
 		// the provider class so it has an opportunity to do its boot logic and
 		// will be ready for any usage by the developer's application logic.
 		if ( $this->booted )
-		{
-			$this->bootProvider( $provider );
-		}
+			$this->bootProvider( $instance );
 
-		return $provider;
+		$this->bindings['events']->fire( new ServiceProviderPostEvent( $instance ) );
+
+		return $instance;
 	}
 
 	/**
 	 * Get the registered service provider instance if it exists.
 	 *
-	 * @param  \Foundation\Support\ServiceProvider|string $provider
-	 * @return \Foundation\Support\ServiceProvider|null
+	 * @param  ServiceProvider|string $provider
+	 * @return ServiceProvider|null
 	 */
 	public function getProvider( $provider )
 	{
@@ -682,7 +552,7 @@ class Framework implements HttpKernelInterface
 	 * Resolve a service provider instance from the class name.
 	 *
 	 * @param  string $provider
-	 * @return \Foundation\Support\ServiceProvider
+	 * @return ServiceProvider
 	 */
 	public function resolveProviderClass( $provider )
 	{
@@ -692,7 +562,7 @@ class Framework implements HttpKernelInterface
 	/**
 	 * Mark the given provider as registered.
 	 *
-	 * @param  \Foundation\Support\ServiceProvider $provider
+	 * @param  ServiceProvider $provider
 	 * @return void
 	 */
 	protected function markAsRegistered( $provider )
@@ -747,7 +617,7 @@ class Framework implements HttpKernelInterface
 				unset( $this->deferredServices[$service] );
 			}
 
-			$this->register( $instance = new $provider( $this ) );
+			$this->provider( $instance = new $provider( $this ) );
 
 			if ( !$this->booted )
 			{
@@ -838,7 +708,7 @@ class Framework implements HttpKernelInterface
 	/**
 	 * Boot the given service provider.
 	 *
-	 * @param  \Foundation\Support\ServiceProvider $provider
+	 * @param  ServiceProvider $provider
 	 * @return mixed
 	 */
 	protected function bootProvider( ServiceProvider $provider )
@@ -911,73 +781,13 @@ class Framework implements HttpKernelInterface
 	}
 
 	/**
-	 * Determine if the application configuration is cached.
-	 *
-	 * @return bool
-	 */
-	public function configurationIsCached()
-	{
-		return file_exists( $this->getCachedConfigPath() );
-	}
-
-	/**
-	 * Get the path to the configuration cache file.
-	 *
-	 * @return string
-	 */
-	public function getCachedConfigPath()
-	{
-		return $this->bootstrapPath() . '/cache/config.php';
-	}
-
-	/**
-	 * Determine if the application routes are cached.
-	 *
-	 * @return bool
-	 */
-	public function routesAreCached()
-	{
-		return $this->bindings['files']->exists( $this->getCachedRoutesPath() );
-	}
-
-	/**
-	 * Get the path to the routes cache file.
-	 *
-	 * @return string
-	 */
-	public function getCachedRoutesPath()
-	{
-		return $this->bootstrapPath() . '/cache/routes.php';
-	}
-
-	/**
-	 * Get the path to the cached "compiled.php" file.
-	 *
-	 * @return string
-	 */
-	public function getCachedCompilePath()
-	{
-		return $this->bootstrapPath() . '/cache/compiled.php';
-	}
-
-	/**
-	 * Get the path to the cached services.php file.
-	 *
-	 * @return string
-	 */
-	public function getCachedServicesPath()
-	{
-		return $this->bootstrapPath() . '/cache/services.php';
-	}
-
-	/**
 	 * Determine if the application is currently down for maintenance.
 	 *
 	 * @return bool
 	 */
 	public function isDownForMaintenance()
 	{
-		return file_exists( $this->storagePath() . '/framework/down' );
+		return $this->env->get( 'maintenance', false );
 	}
 
 	/**
@@ -1130,11 +940,13 @@ class Framework implements HttpKernelInterface
 	 */
 	public function setLocale( $locale )
 	{
-		$this->bindings['config']->set( 'app.locale', $locale );
+		$oldLocale = $this->config->get( 'app.locale', 'en' );
+
+		$this->config->set( 'app.locale', $locale );
 
 		$this->bindings['translator']->setLocale( $locale );
 
-		$this->bindings['events']->fire( 'locale.changed', [$locale] );
+		$this->bindings['events']->fire( new LocaleChangedEvent( $oldLocale, $locale ) );
 	}
 
 	/**

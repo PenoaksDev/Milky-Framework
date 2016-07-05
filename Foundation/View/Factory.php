@@ -3,14 +3,13 @@
 namespace Foundation\View;
 
 use Closure;
+use Foundation\Contracts\Events\Dispatcher;
+use Foundation\Contracts\Support\Arrayable;
+use Foundation\Contracts\View\Factory as FactoryContract;
 use Foundation\Support\Arr;
 use Foundation\Support\Str;
-use InvalidArgumentException;
-use Foundation\Contracts\Support\Arrayable;
 use Foundation\View\Engines\EngineResolver;
-use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Framework;
-use Foundation\Contracts\View\Factory as FactoryContract;
+use InvalidArgumentException;
 
 class Factory implements FactoryContract
 {

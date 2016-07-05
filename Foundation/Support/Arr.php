@@ -238,7 +238,6 @@ else
 	 *
 	 * @param  array  $array
 	 * @param  array|string  $keys
-	 * @return void
 	 */
 	public static function forget(&$array, $keys)
 	{
