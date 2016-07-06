@@ -1,11 +1,14 @@
 <?php
-
 namespace Foundation\Framework;
 
 use Closure;
+use Foundation\Support\Arr;
+use Foundation\Support\Str;
 
 class Env implements \ArrayAccess
 {
+	use \Foundation\Traits\StaticAccess;
+
 	/**
 	 * Holds environment variables
 	 *
@@ -25,34 +28,34 @@ class Env implements \ArrayAccess
 
 	public function set( $params, $value = null )
 	{
-		if ( is_array( $params ) )
-		{
-			$this->variables = array_merge_recursive( $this->variables, $params );
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
 		else
 		{
-			if ( is_null( $value ) )
-			{
-				unset( $this->variables[$params] );
-			}
+			if ( is_array( $params ) )
+				$this->variables = array_merge_recursive( $this->variables, $params );
 			else
-			{
-				$this->variables[$params] = $value;
-			}
+				if ( is_null( $value ) )
+					unset( $this->variables[$params] );
+				else
+					$this->variables[$params] = $value;
 		}
 	}
 
-	public function get( $key, $def = null )
+	/**
+	 * @param $key
+	 * @param null $def
+	 * @return array|mixed|null
+	 */
+	public static function get( $key, $def = null )
 	{
 		$keys = explode( '.', $key );
-		$value = $this->variables;
+		$value = static::i()->variables;
 
 		foreach ( $keys as $key )
 		{
 			if ( !is_array( $value ) || !array_key_exists( $key, $value ) )
-			{
 				return $def;
-			}
 			$value = $value[$key];
 		}
 
@@ -88,6 +91,9 @@ class Env implements \ArrayAccess
 	 */
 	public function detect( Closure $callback, $consoleArgs = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( $consoleArgs )
 		{
 			return $this->detectConsoleEnvironment( $callback, $consoleArgs );
@@ -104,6 +110,9 @@ class Env implements \ArrayAccess
 	 */
 	protected function detectWebEnvironment( Closure $callback )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return call_user_func( $callback );
 	}
 
@@ -116,6 +125,9 @@ class Env implements \ArrayAccess
 	 */
 	protected function detectConsoleEnvironment( Closure $callback, array $args )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		// First we will check if an environment argument was passed via console arguments
 		// and if it was that automatically overrides as the environment. Otherwise, we
 		// will check the environment as a "web" request like a typical HTTP request.
@@ -135,6 +147,9 @@ class Env implements \ArrayAccess
 	 */
 	protected function getEnvironmentArgument( array $args )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return Arr::first( $args, function ( $k, $v )
 		{
 			return Str::startsWith( $v, '--env' );

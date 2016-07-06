@@ -1,5 +1,15 @@
 <?php
-namespace Foundation;
+namespace Foundation\Barebones;
+
+use Exception;
+use Foundation\Events\Runlevel;
+use Foundation\Framework;
+use Foundation\Framework\Env;
+use Foundation\Routing\Pipeline;
+use Foundation\Routing\Router;
+use Foundation\Support\Facades\Facade;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
+use Throwable;
 
 /**
  * The MIT License (MIT)
@@ -9,16 +19,7 @@ namespace Foundation;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-
-use Exception;
-use Foundation\Events\Runlevel;
-use Foundation\Routing\Pipeline;
-use Foundation\Routing\Router;
-use Foundation\Support\Facades\Facade;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
-use Throwable;
-
-class Kernel
+abstract class Kernel
 {
 	/**
 	 * The application implementation.
@@ -65,7 +66,8 @@ class Kernel
 	public function __construct( Framework $fw, Env $env )
 	{
 		$this->fw = $fw;
-		$this->router = $router;
+		$router = Router::i();
+		$this->router = &$router;
 
 		foreach ( $this->middlewareGroups as $key => $middleware )
 		{
@@ -79,12 +81,6 @@ class Kernel
 
 		// Registers implemented event listeners with the events class, e.g., public function onSomethingEvent( ThrowableEvent $event );
 		$this->fw->bindings['events']->listenEvents( $this );
-
-		// Call the implemented boot method, that is boot the kernel.
-		if ( method_exists( $this, 'boot' ) )
-		{
-			$this->fw->bindings->call( $this, ['mode' => 'http'], 'boot' );
-		}
 	}
 
 	/**
@@ -92,9 +88,9 @@ class Kernel
 	 */
 	public function onRunlevelEvent( Runlevel $event )
 	{
-		switch ( Runlevel::$level )
+		switch ( $event->get() )
 		{
-			case Runlevel::INITIALIZING:
+			case Runlevel::BOOT:
 				$this->fw->bootstrap( [
 				] );
 				break;

@@ -17,7 +17,7 @@ class Runlevel implements Event
 	CONST LOADING = 0;
 	CONST INIT = 1;
 	CONST BOOT = 2;
-	CONST DONE = 2;
+	CONST DONE = 3;
 
 	/**
 	 * @var int
@@ -43,19 +43,27 @@ class Runlevel implements Event
 		return $this->level;
 	}
 
+	public function __toString()
+	{
+		return self::asString( $this->level );
+	}
+
 	/**
+	 * @param int $level
 	 * @return string
 	 */
-	public function asString()
+	public static function asString( $level )
 	{
-		switch( $this->level )
+		switch( $level )
 		{
-			case -1:
-				return "PREINIT";
 			case 0:
-				return "INITIALIZING";
+				return "LOADING";
 			case 1:
-				return "BOOTSTRAPPED";
+				return "INIT";
+			case 2:
+				return "BOOT";
+			case 3:
+				return "DONE";
 		}
 	}
 }

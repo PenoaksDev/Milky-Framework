@@ -10,25 +10,19 @@ namespace Foundation\Bindings;
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
 
-use Closure;
 use ArrayAccess;
-use ReflectionClass;
-use ReflectionMethod;
-use ReflectionFunction;
-use ReflectionParameter;
+use Closure;
+use Foundation\Contracts\Lang\BindingResolutionException;
 use Foundation\Framework;
 use InvalidArgumentException;
-use Foundation\Contracts\Lang\BindingResolutionException;
-use Foundation\Contracts\Bindings\Bindings as BindingsContract;
+use ReflectionClass;
+use ReflectionFunction;
+use ReflectionMethod;
+use ReflectionParameter;
 
-class Bindings implements ArrayAccess, BindingsContract
+class Bindings implements ArrayAccess
 {
-	/**
-	 * The globally available bindings.
-	 *
-	 * @var Bindings
-	 */
-	protected static $instance;
+	use \Foundation\Traits\StaticAccess;
 
 	/**
 	 * Stores an instance of the Framework.
@@ -36,6 +30,7 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * @var Framework
 	 */
 	protected static $framework;
+
 	/**
 	 * An array of the types that have been resolved.
 	 *
@@ -129,7 +124,7 @@ class Bindings implements ArrayAccess, BindingsContract
 
 	public function __construct( Framework $framework )
 	{
-		static::$instance = $this;
+		static::$selfInstance = $this;
 		static::$framework = $framework;
 
 		$this->instance( 'bindings', $this );
@@ -140,10 +135,13 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * Define a contextual binding.
 	 *
 	 * @param  string $concrete
-	 * @return \Illuminate\Contracts\Bindings\ContextualBindingBuilder
+	 * @return ContextualBindingBuilder
 	 */
 	public function when( $concrete )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$concrete = $this->normalize( $concrete );
 
 		return new ContextualBindingBuilder( $this, $concrete );
@@ -157,10 +155,11 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function bound( $abstract )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( static::$framework->bound( $abstract ) )
-		{
 			return true;
-		}
 
 		$abstract = $this->normalize( $abstract );
 
@@ -175,12 +174,13 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function resolved( $abstract )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$abstract = $this->normalize( $abstract );
 
 		if ( $this->isAlias( $abstract ) )
-		{
 			$abstract = $this->getAlias( $abstract );
-		}
 
 		return isset( $this->resolved[$abstract] ) || isset( $this->instances[$abstract] );
 	}
@@ -193,6 +193,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function isAlias( $name )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return isset( $this->aliases[$this->normalize( $name )] );
 	}
 
@@ -202,50 +205,54 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * @param  string|array $abstract
 	 * @param  \Closure|string|null $concrete
 	 * @param  bool $shared
-	 * @return void
 	 */
 	public function bind( $abstract, $concrete = null, $shared = false )
 	{
-		$abstract = $this->normalize( $abstract );
-
-		$concrete = $this->normalize( $concrete );
-
-		// If the given types are actually an array, we will assume an alias is being
-		// defined and will grab this "real" abstract class name and register this
-		// alias with the bindings so that it can be used as a shortcut for it.
-		if ( is_array( $abstract ) )
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
 		{
-			list( $abstract, $alias ) = $this->extractAlias( $abstract );
+			$abstract = $this->normalize( $abstract );
 
-			$this->alias( $abstract, $alias );
-		}
+			$concrete = $this->normalize( $concrete );
 
-		// If no concrete type was given, we will simply set the concrete type to the
-		// abstract type. This will allow concrete type to be registered as shared
-		// without being forced to state their classes in both of the parameter.
-		$this->dropStaleInstances( $abstract );
+			// If the given types are actually an array, we will assume an alias is being
+			// defined and will grab this "real" abstract class name and register this
+			// alias with the bindings so that it can be used as a shortcut for it.
+			if ( is_array( $abstract ) )
+			{
+				list( $abstract, $alias ) = $this->extractAlias( $abstract );
 
-		if ( is_null( $concrete ) )
-		{
-			$concrete = $abstract;
-		}
+				$this->alias( $abstract, $alias );
+			}
 
-		// If the factory is not a Closure, it means it is just a class name which is
-		// bound into this bindings to the abstract type and we will just wrap it
-		// up inside its own Closure to give us more convenience when extending.
-		if ( !$concrete instanceof Closure )
-		{
-			$concrete = $this->getClosure( $abstract, $concrete );
-		}
+			// If no concrete type was given, we will simply set the concrete type to the
+			// abstract type. This will allow concrete type to be registered as shared
+			// without being forced to state their classes in both of the parameter.
+			$this->dropStaleInstances( $abstract );
 
-		$this->bindings[$abstract] = compact( 'concrete', 'shared' );
+			if ( is_null( $concrete ) )
+			{
+				$concrete = $abstract;
+			}
 
-		// If the abstract type was already resolved in this bindings we'll fire the
-		// rebound listener so that any objects which have already gotten resolved
-		// can have their copy of the object updated via the listener callbacks.
-		if ( $this->resolved( $abstract ) )
-		{
-			$this->rebound( $abstract );
+			// If the factory is not a Closure, it means it is just a class name which is
+			// bound into this bindings to the abstract type and we will just wrap it
+			// up inside its own Closure to give us more convenience when extending.
+			if ( !$concrete instanceof Closure )
+			{
+				$concrete = $this->getClosure( $abstract, $concrete );
+			}
+
+			$this->bindings[$abstract] = compact( 'concrete', 'shared' );
+
+			// If the abstract type was already resolved in this bindings we'll fire the
+			// rebound listener so that any objects which have already gotten resolved
+			// can have their copy of the object updated via the listener callbacks.
+			if ( $this->resolved( $abstract ) )
+			{
+				$this->rebound( $abstract );
+			}
 		}
 	}
 
@@ -258,6 +265,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function getClosure( $abstract, $concrete )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return function ( $c, $parameters = [] ) use ( $abstract, $concrete )
 		{
 			$method = ( $abstract == $concrete ) ? 'build' : 'make';
@@ -272,11 +282,13 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * @param  string $concrete
 	 * @param  string $abstract
 	 * @param  \Closure|string $implementation
-	 * @return void
 	 */
 	public function addContextualBinding( $concrete, $abstract, $implementation )
 	{
-		$this->contextual[$this->normalize( $concrete )][$this->normalize( $abstract )] = $this->normalize( $implementation );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			$this->contextual[$this->normalize( $concrete )][$this->normalize( $abstract )] = $this->normalize( $implementation );
 	}
 
 	/**
@@ -285,11 +297,12 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * @param  string $abstract
 	 * @param  \Closure|string|null $concrete
 	 * @param  bool $shared
-	 * @return void
 	 */
 	public function bindIf( $abstract, $concrete = null, $shared = false )
 	{
-		if ( !$this->bound( $abstract ) )
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else if ( !$this->bound( $abstract ) )
 		{
 			$this->bind( $abstract, $concrete, $shared );
 		}
@@ -300,11 +313,13 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  string|array $abstract
 	 * @param  \Closure|string|null $concrete
-	 * @return void
 	 */
 	public function singleton( $abstract, $concrete = null )
 	{
-		$this->bind( $abstract, $concrete, true );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			$this->bind( $abstract, $concrete, true );
 	}
 
 	/**
@@ -315,20 +330,23 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function share( Closure $closure )
 	{
-		return function ( $bindings ) use ( $closure )
-		{
-			// We'll simply declare a static variable within the Closures and if it has
-			// not been set we will execute the given Closures to resolve this value
-			// and return it back to these consumers of the method as an instance.
-			static $object;
-
-			if ( is_null( $object ) )
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+		else
+			return function ( $bindings ) use ( $closure )
 			{
-				$object = $closure( $bindings );
-			}
+				// We'll simply declare a static variable within the Closures and if it has
+				// not been set we will execute the given Closures to resolve this value
+				// and return it back to these consumers of the method as an instance.
+				static $object;
 
-			return $object;
-		};
+				if ( is_null( $object ) )
+				{
+					$object = $closure( $bindings );
+				}
+
+				return $object;
+			};
 	}
 
 	/**
@@ -336,23 +354,27 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  string $abstract
 	 * @param  \Closure $closure
-	 * @return void
 	 *
 	 * @throws \InvalidArgumentException
 	 */
 	public function extend( $abstract, Closure $closure )
 	{
-		$abstract = $this->normalize( $abstract );
-
-		if ( isset( $this->instances[$abstract] ) )
-		{
-			$this->instances[$abstract] = $closure( $this->instances[$abstract], $this );
-
-			$this->rebound( $abstract );
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
 		else
 		{
-			$this->extenders[$abstract][] = $closure;
+			$abstract = $this->normalize( $abstract );
+
+			if ( isset( $this->instances[$abstract] ) )
+			{
+				$this->instances[$abstract] = $closure( $this->instances[$abstract], $this );
+
+				$this->rebound( $abstract );
+			}
+			else
+			{
+				$this->extenders[$abstract][] = $closure;
+			}
 		}
 	}
 
@@ -365,6 +387,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function instance( $abstract, $instance )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$abstract = $this->normalize( $abstract );
 
 		// First, we will extract the alias from the abstract if it is an array so we
@@ -399,22 +424,26 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  array|string $abstracts
 	 * @param  array|mixed ...$tags
-	 * @return void
 	 */
 	public function tag( $abstracts, $tags )
 	{
-		$tags = is_array( $tags ) ? $tags : array_slice( func_get_args(), 1 );
-
-		foreach ( $tags as $tag )
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
 		{
-			if ( !isset( $this->tags[$tag] ) )
-			{
-				$this->tags[$tag] = [];
-			}
+			$tags = is_array( $tags ) ? $tags : array_slice( func_get_args(), 1 );
 
-			foreach ( (array) $abstracts as $abstract )
+			foreach ( $tags as $tag )
 			{
-				$this->tags[$tag][] = $this->normalize( $abstract );
+				if ( !isset( $this->tags[$tag] ) )
+				{
+					$this->tags[$tag] = [];
+				}
+
+				foreach ( (array) $abstracts as $abstract )
+				{
+					$this->tags[$tag][] = $this->normalize( $abstract );
+				}
 			}
 		}
 	}
@@ -427,6 +456,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function tagged( $tag )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$results = [];
 
 		if ( isset( $this->tags[$tag] ) )
@@ -445,11 +477,13 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  string $abstract
 	 * @param  string $alias
-	 * @return void
 	 */
 	public function alias( $abstract, $alias )
 	{
-		$this->aliases[$alias] = $this->normalize( $abstract );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			$this->aliases[$alias] = $this->normalize( $abstract );
 	}
 
 	/**
@@ -460,6 +494,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function extractAlias( array $definition )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return [key( $definition ), current( $definition )];
 	}
 
@@ -472,6 +509,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function rebinding( $abstract, Closure $callback )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$this->reboundCallbacks[$this->normalize( $abstract )][] = $callback;
 
 		if ( $this->bound( $abstract ) )
@@ -490,6 +530,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function refresh( $abstract, $target, $method )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->rebinding( $this->normalize( $abstract ), function ( $fw, $instance ) use ( $target, $method )
 		{
 			$target->{$method}( $instance );
@@ -500,15 +543,19 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * Fire the "rebound" callbacks for the given abstract type.
 	 *
 	 * @param  string $abstract
-	 * @return void
 	 */
 	protected function rebound( $abstract )
 	{
-		$instance = $this->make( $abstract );
-
-		foreach ( $this->getReboundCallbacks( $abstract ) as $callback )
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
 		{
-			call_user_func( $callback, $this, $instance );
+			$instance = $this->make( $abstract );
+
+			foreach ( $this->getReboundCallbacks( $abstract ) as $callback )
+			{
+				call_user_func( $callback, $this, $instance );
+			}
 		}
 	}
 
@@ -520,6 +567,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function getReboundCallbacks( $abstract )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( isset( $this->reboundCallbacks[$abstract] ) )
 		{
 			return $this->reboundCallbacks[$abstract];
@@ -537,6 +587,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function wrap( Closure $callback, array $parameters = [] )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return function () use ( $callback, $parameters )
 		{
 			return $this->call( $callback, $parameters );
@@ -553,10 +606,11 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function call( $callback, array $parameters = [], $defaultMethod = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( $this->isCallableWithAtSign( $callback ) || $defaultMethod )
-		{
 			return $this->callClass( $callback, $parameters, $defaultMethod );
-		}
 
 		$dependencies = $this->getMethodDependencies( $callback, $parameters );
 
@@ -571,6 +625,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function isCallableWithAtSign( $callback )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return is_string( $callback ) && strpos( $callback, '@' ) !== false;
 	}
 
@@ -583,12 +640,13 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function getMethodDependencies( $callback, array $parameters = [] )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$dependencies = [];
 
 		foreach ( $this->getCallReflector( $callback )->getParameters() as $parameter )
-		{
 			$this->addDependencyForCallParameter( $parameter, $parameters, $dependencies );
-		}
 
 		return array_merge( $dependencies, $parameters );
 	}
@@ -601,15 +659,14 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function getCallReflector( $callback )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( is_string( $callback ) && strpos( $callback, '::' ) !== false )
-		{
 			$callback = explode( '::', $callback );
-		}
 
 		if ( is_array( $callback ) )
-		{
 			return new ReflectionMethod( $callback[0], $callback[1] );
-		}
 
 		return new ReflectionFunction( $callback );
 	}
@@ -624,20 +681,18 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function addDependencyForCallParameter( ReflectionParameter $parameter, array &$parameters, &$dependencies )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( array_key_exists( $parameter->name, $parameters ) )
 		{
 			$dependencies[] = $parameters[$parameter->name];
-
 			unset( $parameters[$parameter->name] );
 		}
 		elseif ( $parameter->getClass() )
-		{
 			$dependencies[] = $this->make( $parameter->getClass()->name );
-		}
 		elseif ( $parameter->isDefaultValueAvailable() )
-		{
 			$dependencies[] = $parameter->getDefaultValue();
-		}
 	}
 
 	/**
@@ -652,6 +707,12 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function callClass( $target, array $parameters = [], $defaultMethod = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
+		if ( !is_string( $target ) )
+			throw new \RuntimeException( "Target must be a string" );
+
 		$segments = explode( '@', $target );
 
 		// If the listener has an @ sign, we will assume it is being used to delimit
@@ -660,9 +721,7 @@ class Bindings implements ArrayAccess, BindingsContract
 		$method = count( $segments ) == 2 ? $segments[1] : $defaultMethod;
 
 		if ( is_null( $method ) )
-		{
 			throw new InvalidArgumentException( 'Method not provided.' );
-		}
 
 		return $this->call( [$this->make( $segments[0] ), $method], $parameters );
 	}
@@ -677,6 +736,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function make( $abstract, array $parameters = [] )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		try
 		{
 			$abstract = $this->getAlias( $this->normalize( $abstract ) );
@@ -741,18 +803,17 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function getConcrete( $abstract )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( !is_null( $concrete = $this->getContextualConcrete( $abstract ) ) )
-		{
 			return $concrete;
-		}
 
 		// If we don't have a registered resolver or concrete for the type, we'll just
 		// assume each type is a concrete name and will attempt to resolve it as is
 		// since the bindings should be able to resolve concretes automatically.
 		if ( !isset( $this->bindings[$abstract] ) )
-		{
 			return $abstract;
-		}
 
 		return $this->bindings[$abstract]['concrete'];
 	}
@@ -765,10 +826,11 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function getContextualConcrete( $abstract )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( isset( $this->contextual[end( $this->buildStack )][$abstract] ) )
-		{
 			return $this->contextual[end( $this->buildStack )][$abstract];
-		}
 	}
 
 	/**
@@ -779,6 +841,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function normalize( $service )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return is_string( $service ) ? ltrim( $service, '\\' ) : $service;
 	}
 
@@ -790,10 +855,11 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function getExtenders( $abstract )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( isset( $this->extenders[$abstract] ) )
-		{
 			return $this->extenders[$abstract];
-		}
 
 		return [];
 	}
@@ -805,10 +871,13 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * @param  array $parameters
 	 * @return mixed
 	 *
-	 * @throws \Illuminate\Contracts\Bindings\BindingResolutionException
+	 * @throws BindingResolutionException
 	 */
 	public function build( $concrete, array $parameters = [] )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		try
 		{
 			// If the concrete type is actually a Closure, we will just execute it and
@@ -849,7 +918,6 @@ class Bindings implements ArrayAccess, BindingsContract
 			if ( is_null( $constructor ) )
 			{
 				array_pop( $this->buildStack );
-
 				return new $concrete;
 			}
 
@@ -868,7 +936,7 @@ class Bindings implements ArrayAccess, BindingsContract
 		}
 		catch ( \ReflectionException $e )
 		{
-			throw new BindingResolutionException( "Failed to build [" . $concrete . "]: " . $e->getMessage() );
+			throw new BindingResolutionException( "Failed to build [" . $concrete . "]: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() );
 		}
 	}
 
@@ -881,6 +949,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function getDependencies( array $parameters, array $primitives = [], $classAndMethod = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$dependencies = [];
 
 		foreach ( $parameters as $parameter )
@@ -902,13 +973,18 @@ class Bindings implements ArrayAccess, BindingsContract
 				}
 				else
 				{
-					$dependencies[] = $this->resolveClass( $parameter );
+					$dependencies[] = $this->make( $parameter->getClass()->name );
 				}
 			}
 			catch ( BindingResolutionException $e )
 			{
 				if ( $parameter->isOptional() )
 				{
+					/*
+					 * If we can not resolve the class instance, we will check to see if the value
+					 * is optional, and if it is we will return the optional parameter value as
+					 * the value of the dependency, similarly to how we do this with scalars.
+					 */
 					$dependencies[] = $parameter->getDefaultValue();
 				}
 				else
@@ -936,6 +1012,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function resolveNonClass( ReflectionParameter $parameter )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( !is_null( $concrete = $this->getContextualConcrete( '$' . $parameter->name ) ) )
 		{
 			if ( $concrete instanceof Closure )
@@ -959,35 +1038,6 @@ class Bindings implements ArrayAccess, BindingsContract
 	}
 
 	/**
-	 * Resolve a class based dependency from the bindings.
-	 *
-	 * @param  \ReflectionParameter $parameter
-	 * @return mixed
-	 *
-	 * @throws \Illuminate\Contracts\Bindings\BindingResolutionException
-	 */
-	protected function resolveClass( ReflectionParameter $parameter )
-	{
-		try
-		{
-			return $this->make( $parameter->getClass()->name );
-		}
-
-			// If we can not resolve the class instance, we will check to see if the value
-			// is optional, and if it is we will return the optional parameter value as
-			// the value of the dependency, similarly to how we do this with scalars.
-		catch ( BindingResolutionException $e )
-		{
-			if ( $parameter->isOptional() )
-			{
-				return $parameter->getDefaultValue();
-			}
-
-			throw $e;
-		}
-	}
-
-	/**
 	 * If extra parameters are passed by numeric ID, rekey them by argument name.
 	 *
 	 * @param  array $dependencies
@@ -996,12 +1046,14 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function keyParametersByArgument( array $dependencies, array $parameters )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		foreach ( $parameters as $key => $value )
 		{
 			if ( is_numeric( $key ) )
 			{
 				unset( $parameters[$key] );
-
 				$parameters[$dependencies[$key]->name] = $value;
 			}
 		}
@@ -1014,17 +1066,17 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  string $abstract
 	 * @param  \Closure|null $callback
-	 * @return void
 	 */
 	public function resolving( $abstract, Closure $callback = null )
 	{
-		if ( $callback === null && $abstract instanceof Closure )
-		{
-			$this->resolvingCallback( $abstract );
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
 		else
 		{
-			$this->resolvingCallbacks[$this->normalize( $abstract )][] = $callback;
+			if ( $callback === null && $abstract instanceof Closure )
+				$this->resolvingCallback( $abstract );
+			else
+				$this->resolvingCallbacks[$this->normalize( $abstract )][] = $callback;
 		}
 	}
 
@@ -1033,17 +1085,17 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  string $abstract
 	 * @param  \Closure|null $callback
-	 * @return void
 	 */
 	public function afterResolving( $abstract, Closure $callback = null )
 	{
-		if ( $abstract instanceof Closure && $callback === null )
-		{
-			$this->afterResolvingCallback( $abstract );
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
 		else
 		{
-			$this->afterResolvingCallbacks[$this->normalize( $abstract )][] = $callback;
+			if ( $abstract instanceof Closure && $callback === null )
+				$this->afterResolvingCallback( $abstract );
+			else
+				$this->afterResolvingCallbacks[$this->normalize( $abstract )][] = $callback;
 		}
 	}
 
@@ -1051,19 +1103,19 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * Register a new resolving callback by type of its first argument.
 	 *
 	 * @param  \Closure $callback
-	 * @return void
 	 */
 	protected function resolvingCallback( Closure $callback )
 	{
-		$abstract = $this->getFunctionHint( $callback );
-
-		if ( $abstract )
-		{
-			$this->resolvingCallbacks[$abstract][] = $callback;
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
 		else
 		{
-			$this->globalResolvingCallbacks[] = $callback;
+			$abstract = $this->getFunctionHint( $callback );
+
+			if ( $abstract )
+				$this->resolvingCallbacks[$abstract][] = $callback;
+			else
+				$this->globalResolvingCallbacks[] = $callback;
 		}
 	}
 
@@ -1071,19 +1123,23 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * Register a new after resolving callback by type of its first argument.
 	 *
 	 * @param  \Closure $callback
-	 * @return void
 	 */
 	protected function afterResolvingCallback( Closure $callback )
 	{
-		$abstract = $this->getFunctionHint( $callback );
-
-		if ( $abstract )
-		{
-			$this->afterResolvingCallbacks[$abstract][] = $callback;
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
 		else
 		{
-			$this->globalAfterResolvingCallbacks[] = $callback;
+			$abstract = $this->getFunctionHint( $callback );
+
+			if ( $abstract )
+			{
+				$this->afterResolvingCallbacks[$abstract][] = $callback;
+			}
+			else
+			{
+				$this->globalAfterResolvingCallbacks[] = $callback;
+			}
 		}
 	}
 
@@ -1095,6 +1151,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function getFunctionHint( Closure $callback )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$function = new ReflectionFunction( $callback );
 
 		if ( $function->getNumberOfParameters() == 0 )
@@ -1117,17 +1176,18 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  string $abstract
 	 * @param  mixed $object
-	 * @return void
 	 */
 	protected function fireResolvingCallbacks( $abstract, $object )
 	{
-		$this->fireCallbackArray( $object, $this->globalResolvingCallbacks );
-
-		$this->fireCallbackArray( $object, $this->getCallbacksForType( $abstract, $object, $this->resolvingCallbacks ) );
-
-		$this->fireCallbackArray( $object, $this->globalAfterResolvingCallbacks );
-
-		$this->fireCallbackArray( $object, $this->getCallbacksForType( $abstract, $object, $this->afterResolvingCallbacks ) );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+		{
+			$this->fireCallbackArray( $object, $this->globalResolvingCallbacks );
+			$this->fireCallbackArray( $object, $this->getCallbacksForType( $abstract, $object, $this->resolvingCallbacks ) );
+			$this->fireCallbackArray( $object, $this->globalAfterResolvingCallbacks );
+			$this->fireCallbackArray( $object, $this->getCallbacksForType( $abstract, $object, $this->afterResolvingCallbacks ) );
+		}
 	}
 
 	/**
@@ -1141,6 +1201,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function getCallbacksForType( $abstract, $object, array $callbacksPerType )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$results = [];
 
 		foreach ( $callbacksPerType as $type => $callbacks )
@@ -1159,14 +1222,16 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  mixed $object
 	 * @param  array $callbacks
-	 * @return void
 	 */
 	protected function fireCallbackArray( $object, array $callbacks )
 	{
-		foreach ( $callbacks as $callback )
-		{
-			$callback( $object, $this );
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			foreach ( $callbacks as $callback )
+			{
+				$callback( $object, $this );
+			}
 	}
 
 	/**
@@ -1177,6 +1242,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function isShared( $abstract )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$abstract = $this->normalize( $abstract );
 
 		if ( isset( $this->instances[$abstract] ) )
@@ -1201,6 +1269,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	protected function isBuildable( $concrete, $abstract )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $concrete === $abstract || $concrete instanceof Closure;
 	}
 
@@ -1212,6 +1283,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function getAlias( $abstract )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( !isset( $this->aliases[$abstract] ) )
 		{
 			return $abstract;
@@ -1227,6 +1301,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function getBindings()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->bindings;
 	}
 
@@ -1234,57 +1311,55 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * Drop all of the stale instances and aliases.
 	 *
 	 * @param  string $abstract
-	 * @return void
 	 */
 	protected function dropStaleInstances( $abstract )
 	{
-		unset( $this->instances[$abstract], $this->aliases[$abstract] );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			unset( $this->instances[$abstract], $this->aliases[$abstract] );
 	}
 
 	/**
 	 * Remove a resolved instance from the instance cache.
 	 *
 	 * @param  string $abstract
-	 * @return void
 	 */
 	public function forgetInstance( $abstract )
 	{
-		unset( $this->instances[$this->normalize( $abstract )] );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			unset( $this->instances[$this->normalize( $abstract )] );
 	}
 
 	/**
 	 * Clear all of the instances from the bindings.
-	 *
-	 * @return void
 	 */
 	public function forgetInstances()
 	{
-		$this->instances = [];
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			$this->instances = [];
 	}
 
 	/**
 	 * Flush the bindings of all bindings and resolved instances.
-	 *
-	 * @return void
 	 */
 	public function flush()
 	{
-		static::$framework->flush();
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+		{
+			static::$framework->flush();
 
-		$this->aliases = [];
-		$this->resolved = [];
-		$this->bindings = [];
-		$this->instances = [];
-	}
-
-	/**
-	 * Set the globally available instance of the bindings.
-	 *
-	 * @return static
-	 */
-	public static function getInstance()
-	{
-		return static::$instance;
+			$this->aliases = [];
+			$this->resolved = [];
+			$this->bindings = [];
+			$this->instances = [];
+		}
 	}
 
 	/**
@@ -1314,7 +1389,6 @@ class Bindings implements ArrayAccess, BindingsContract
 	 *
 	 * @param  string $key
 	 * @param  mixed $value
-	 * @return void
 	 */
 	public function offsetSet( $key, $value )
 	{
@@ -1336,12 +1410,10 @@ class Bindings implements ArrayAccess, BindingsContract
 	 * Unset the value at a given offset.
 	 *
 	 * @param  string $key
-	 * @return void
 	 */
 	public function offsetUnset( $key )
 	{
 		$key = $this->normalize( $key );
-
 		unset( $this->bindings[$key], $this->instances[$key], $this->resolved[$key] );
 	}
 
@@ -1376,6 +1448,9 @@ class Bindings implements ArrayAccess, BindingsContract
 	 */
 	public function get( $key )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this[$key];
 	}
 }

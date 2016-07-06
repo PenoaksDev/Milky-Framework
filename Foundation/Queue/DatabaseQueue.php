@@ -2,15 +2,14 @@
 
 namespace Foundation\Queue;
 
-use DateTime;
 use Carbon\Carbon;
-use Foundation\Support\Collection;
+use DateTime;
 use Foundation\Database\Connection;
-use Foundation\Queue\Jobs\DatabaseJob;
 use Foundation\Database\Query\Expression;
-use Foundation\Contracts\Queue\Queue as QueueContract;
+use Foundation\Queue\Jobs\DatabaseJob;
+use Foundation\Support\Collection;
 
-class DatabaseQueue extends Queue implements QueueContract
+class DatabaseQueue extends Queue
 {
 	/**
 	 * The database connection instance.

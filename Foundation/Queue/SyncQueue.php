@@ -3,12 +3,11 @@
 namespace Foundation\Queue;
 
 use Exception;
-use Throwable;
-use Foundation\Queue\Jobs\SyncJob;
 use Foundation\Contracts\Queue\Job;
-use Foundation\Contracts\Queue\Queue as QueueContract;
+use Foundation\Queue\Jobs\SyncJob;
+use Throwable;
 
-class SyncQueue extends Queue implements QueueContract
+class SyncQueue extends Queue
 {
 	/**
 	 * Push a new job onto the queue.

@@ -1,21 +1,22 @@
 <?php
 
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Support\Collection;
-use Foundation\Support\HtmlString;
 use Foundation\Bindings\Bindings;
-use Foundation\Support\Debug\Dumper;
-use Foundation\Contracts\Bus\Dispatcher;
-use Foundation\Contracts\Support\Htmlable;
 use Foundation\Contracts\Auth\Access\Gate;
-use Foundation\Contracts\Routing\UrlGenerator;
-use Foundation\Contracts\Routing\ResponseFactory;
 use Foundation\Contracts\Auth\Factory as AuthFactory;
-use Foundation\Contracts\View\Factory as ViewFactory;
+use Foundation\Contracts\Bus\Dispatcher;
 use Foundation\Contracts\Cookie\Factory as CookieFactory;
-use Foundation\Database\Eloquent\Factory as EloquentFactory;
+use Foundation\Contracts\Routing\ResponseFactory;
+use Foundation\Contracts\Routing\UrlGenerator;
+use Foundation\Contracts\Support\Htmlable;
 use Foundation\Contracts\Validation\Factory as ValidationFactory;
+use Foundation\Contracts\View\Factory as ViewFactory;
+use Foundation\Database\Eloquent\Factory as EloquentFactory;
+use Foundation\Framework\Env;
+use Foundation\Support\Arr;
+use Foundation\Support\Collection;
+use Foundation\Support\Debug\Dumper;
+use Foundation\Support\HtmlString;
+use Foundation\Support\Str;
 
 define( '__', DIRECTORY_SEPARATOR );
 define( '__FW__', __DIR__ );
@@ -1100,11 +1101,11 @@ if ( !function_exists( 'action' ) )
 	 */
 	function action( $name, $parameters = [], $absolute = true )
 	{
-		return fw( 'url' )->action( $name, $parameters, $absolute );
+		return bindings( 'url' )->action( $name, $parameters, $absolute );
 	}
 }
 
-if ( !function_exists( 'fw' ) )
+if ( !function_exists( 'bindings' ) )
 {
 	/**
 	 * Get the available bindings instance.
@@ -1113,14 +1114,12 @@ if ( !function_exists( 'fw' ) )
 	 * @param  array $parameters
 	 * @return mixed|\Foundation\Framework
 	 */
-	function fw( $make = null, $parameters = [] )
+	function bindings( $make = null, $parameters = [] )
 	{
 		if ( is_null( $make ) )
-		{
-			return Bindings::getInstance();
-		}
+			return Bindings::i();
 
-		return Bindings::getInstance()->make( $make, $parameters );
+		return Bindings::i()->make( $make, $parameters );
 	}
 }
 
@@ -1134,7 +1133,7 @@ if ( !function_exists( 'fw_path' ) )
 	 */
 	function fw_path( $path = '' )
 	{
-		return fw( 'path' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return bindings( 'path' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
 	}
 }
 
@@ -1149,7 +1148,7 @@ if ( !function_exists( 'asset' ) )
 	 */
 	function asset( $path, $secure = null )
 	{
-		return fw( 'url' )->asset( $path, $secure );
+		return bindings( 'url' )->asset( $path, $secure );
 	}
 }
 
@@ -1165,11 +1164,11 @@ if ( !function_exists( 'auth' ) )
 	{
 		if ( is_null( $guard ) )
 		{
-			return fw( AuthFactory::class );
+			return bindings( AuthFactory::class );
 		}
 		else
 		{
-			return fw( AuthFactory::class )->guard( $guard );
+			return bindings( AuthFactory::class )->guard( $guard );
 		}
 	}
 }
@@ -1185,7 +1184,7 @@ if ( !function_exists( 'back' ) )
 	 */
 	function back( $status = 302, $headers = [] )
 	{
-		return fw( 'redirect' )->back( $status, $headers );
+		return bindings( 'redirect' )->back( $status, $headers );
 	}
 }
 
@@ -1199,7 +1198,7 @@ if ( !function_exists( 'base_path' ) )
 	 */
 	function base_path( $path = '' )
 	{
-		return fw()->basePath() . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return bindings()->basePath() . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
 	}
 }
 
@@ -1214,7 +1213,7 @@ if ( !function_exists( 'bcrypt' ) )
 	 */
 	function bcrypt( $value, $options = [] )
 	{
-		return fw( 'hash' )->make( $value, $options );
+		return bindings( 'hash' )->make( $value, $options );
 	}
 }
 
@@ -1233,15 +1232,15 @@ if ( !function_exists( 'config' ) )
 	{
 		if ( is_null( $key ) )
 		{
-			return fw( 'config' );
+			return bindings( 'config' );
 		}
 
 		if ( is_array( $key ) )
 		{
-			return fw( 'config' )->set( $key );
+			return bindings( 'config' )->set( $key );
 		}
 
-		return fw( 'config' )->get( $key, $default );
+		return bindings( 'config' )->get( $key, $default );
 	}
 }
 
@@ -1255,7 +1254,7 @@ if ( !function_exists( 'config_path' ) )
 	 */
 	function config_path( $path = '' )
 	{
-		return fw()->make( 'path.config' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return bindings()->make( 'path.config' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
 	}
 }
 
@@ -1275,7 +1274,7 @@ if ( !function_exists( 'cookie' ) )
 	 */
 	function cookie( $name = null, $value = null, $minutes = 0, $path = null, $domain = null, $secure = false, $httpOnly = true )
 	{
-		$cookie = fw( CookieFactory::class );
+		$cookie = bindings( CookieFactory::class );
 
 		if ( is_null( $name ) )
 		{
@@ -1310,7 +1309,7 @@ if ( !function_exists( 'csrf_token' ) )
 	 */
 	function csrf_token()
 	{
-		$session = fw( 'session' );
+		$session = bindings( 'session' );
 
 		if ( isset( $session ) )
 		{
@@ -1331,7 +1330,7 @@ if ( !function_exists( 'database_path' ) )
 	 */
 	function database_path( $path = '' )
 	{
-		return fw()->databasePath() . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return Env::get( 'path.database' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
 	}
 }
 
@@ -1345,7 +1344,7 @@ if ( !function_exists( 'decrypt' ) )
 	 */
 	function decrypt( $value )
 	{
-		return fw( 'encrypter' )->decrypt( $value );
+		return bindings( 'encrypter' )->decrypt( $value );
 	}
 }
 
@@ -1359,7 +1358,7 @@ if ( !function_exists( 'dispatch' ) )
 	 */
 	function dispatch( $job )
 	{
-		return fw( Dispatcher::class )->dispatch( $job );
+		return bindings( Dispatcher::class )->dispatch( $job );
 	}
 }
 
@@ -1405,7 +1404,7 @@ if ( !function_exists( 'encrypt' ) )
 	 */
 	function encrypt( $value )
 	{
-		return fw( 'encrypter' )->encrypt( $value );
+		return bindings( 'encrypter' )->encrypt( $value );
 	}
 }
 
@@ -1423,9 +1422,7 @@ if ( !function_exists( 'env' ) )
 		$value = getenv( $key );
 
 		if ( $value === false )
-		{
 			return value( $default );
-		}
 
 		switch ( strtolower( $value ) )
 		{
@@ -1444,9 +1441,7 @@ if ( !function_exists( 'env' ) )
 		}
 
 		if ( strlen( $value ) > 1 && Str::startsWith( $value, '"' ) && Str::endsWith( $value, '"' ) )
-		{
 			return substr( $value, 1, -1 );
-		}
 
 		return $value;
 	}
@@ -1464,7 +1459,7 @@ if ( !function_exists( 'event' ) )
 	 */
 	function event( $event, $payload = [], $halt = false )
 	{
-		return fw( 'events' )->fire( $event, $payload, $halt );
+		return bindings( 'events' )->fire( $event, $payload, $halt );
 	}
 }
 
@@ -1477,7 +1472,7 @@ if ( !function_exists( 'factory' ) )
 	 */
 	function factory()
 	{
-		$factory = fw( EloquentFactory::class );
+		$factory = bindings( EloquentFactory::class );
 
 		$arguments = func_get_args();
 
@@ -1523,10 +1518,10 @@ if ( !function_exists( 'logger' ) )
 	{
 		if ( is_null( $message ) )
 		{
-			return fw( 'log' );
+			return bindings( 'log' );
 		}
 
-		return fw( 'log' )->debug( $message, $context );
+		return bindings( 'log' )->debug( $message, $context );
 	}
 }
 
@@ -1555,7 +1550,7 @@ if ( !function_exists( 'old' ) )
 	 */
 	function old( $key = null, $default = null )
 	{
-		return fw( 'request' )->old( $key, $default );
+		return bindings( 'request' )->old( $key, $default );
 	}
 }
 
@@ -1571,7 +1566,7 @@ if ( !function_exists( 'policy' ) )
 	 */
 	function policy( $class )
 	{
-		return fw( Gate::class )->getPolicyFor( $class );
+		return bindings( Gate::class )->getPolicyFor( $class );
 	}
 }
 
@@ -1585,7 +1580,7 @@ if ( !function_exists( 'public_path' ) )
 	 */
 	function public_path( $path = '' )
 	{
-		return fw()->make( 'path.public' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return Env::get( 'path.public', 'public' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
 	}
 }
 
@@ -1604,10 +1599,10 @@ if ( !function_exists( 'redirect' ) )
 	{
 		if ( is_null( $to ) )
 		{
-			return fw( 'redirect' );
+			return bindings( 'redirect' );
 		}
 
-		return fw( 'redirect' )->to( $to, $status, $headers, $secure );
+		return bindings( 'redirect' )->to( $to, $status, $headers, $secure );
 	}
 }
 
@@ -1624,10 +1619,10 @@ if ( !function_exists( 'request' ) )
 	{
 		if ( is_null( $key ) )
 		{
-			return fw( 'request' );
+			return bindings( 'request' );
 		}
 
-		return fw( 'request' )->input( $key, $default );
+		return bindings( 'request' )->input( $key, $default );
 	}
 }
 
@@ -1641,7 +1636,7 @@ if ( !function_exists( 'resource_path' ) )
 	 */
 	function resource_path( $path = '' )
 	{
-		return fw()->basePath() . DIRECTORY_SEPARATOR . 'resources' . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return Env::get( 'path.base' ) . DIRECTORY_SEPARATOR . 'resources' . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
 	}
 }
 
@@ -1657,7 +1652,7 @@ if ( !function_exists( 'response' ) )
 	 */
 	function response( $content = '', $status = 200, array $headers = [] )
 	{
-		$factory = fw( ResponseFactory::class );
+		$factory = bindings( ResponseFactory::class );
 
 		if ( func_num_args() === 0 )
 		{
@@ -1680,7 +1675,7 @@ if ( !function_exists( 'route' ) )
 	 */
 	function route( $name, $parameters = [], $absolute = true )
 	{
-		return fw( 'url' )->route( $name, $parameters, $absolute );
+		return bindings( 'url' )->route( $name, $parameters, $absolute );
 	}
 }
 
@@ -1728,15 +1723,15 @@ if ( !function_exists( 'session' ) )
 	{
 		if ( is_null( $key ) )
 		{
-			return fw( 'session' );
+			return bindings( 'session' );
 		}
 
 		if ( is_array( $key ) )
 		{
-			return fw( 'session' )->put( $key );
+			return bindings( 'session' )->put( $key );
 		}
 
-		return fw( 'session' )->get( $key, $default );
+		return bindings( 'session' )->get( $key, $default );
 	}
 }
 
@@ -1750,7 +1745,7 @@ if ( !function_exists( 'storage_path' ) )
 	 */
 	function storage_path( $path = '' )
 	{
-		return fw( 'path.storage' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return Env::get( 'path.storage', 'storage' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
 	}
 }
 
@@ -1769,10 +1764,10 @@ if ( !function_exists( 'trans' ) )
 	{
 		if ( is_null( $id ) )
 		{
-			return fw( 'translator' );
+			return bindings( 'translator' );
 		}
 
-		return fw( 'translator' )->trans( $id, $parameters, $domain, $locale );
+		return bindings( 'translator' )->trans( $id, $parameters, $domain, $locale );
 	}
 }
 
@@ -1790,7 +1785,7 @@ if ( !function_exists( 'trans_choice' ) )
 	 */
 	function trans_choice( $id, $number, array $parameters = [], $domain = 'messages', $locale = null )
 	{
-		return fw( 'translator' )->transChoice( $id, $number, $parameters, $domain, $locale );
+		return bindings( 'translator' )->transChoice( $id, $number, $parameters, $domain, $locale );
 	}
 }
 
@@ -1808,10 +1803,10 @@ if ( !function_exists( 'url' ) )
 	{
 		if ( is_null( $path ) )
 		{
-			return fw( UrlGenerator::class );
+			return bindings( UrlGenerator::class );
 		}
 
-		return fw( UrlGenerator::class )->to( $path, $parameters, $secure );
+		return bindings( UrlGenerator::class )->to( $path, $parameters, $secure );
 	}
 }
 
@@ -1828,7 +1823,7 @@ if ( !function_exists( 'validator' ) )
 	 */
 	function validator( array $data = [], array $rules = [], array $messages = [], array $customAttributes = [] )
 	{
-		$factory = fw( ValidationFactory::class );
+		$factory = bindings( ValidationFactory::class );
 
 		if ( func_num_args() === 0 )
 		{
@@ -1851,12 +1846,10 @@ if ( !function_exists( 'view' ) )
 	 */
 	function view( $view = null, $data = [], $mergeData = [] )
 	{
-		$factory = fw( ViewFactory::class );
+		$factory = bindings( ViewFactory::class );
 
 		if ( func_num_args() === 0 )
-		{
 			return $factory;
-		}
 
 		return $factory->make( $view, $data, $mergeData );
 	}

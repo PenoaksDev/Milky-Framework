@@ -54,14 +54,14 @@ class View implements ArrayAccess, ViewContract
 	/**
 	 * Create a new view instance.
 	 *
-	 * @param  \Foundation\View\Factory  $factory
-	 * @param  \Foundation\View\Engines\EngineInterface  $engine
-	 * @param  string  $view
-	 * @param  string  $path
-	 * @param  mixed  $data
+	 * @param  \Foundation\View\Factory $factory
+	 * @param  \Foundation\View\Engines\EngineInterface $engine
+	 * @param  string $view
+	 * @param  string $path
+	 * @param  mixed $data
 	 * @return void
 	 */
-	public function __construct(Factory $factory, EngineInterface $engine, $view, $path, $data = [])
+	public function __construct( Factory $factory, EngineInterface $engine, $view, $path, $data = [] )
 	{
 		$this->view = $view;
 		$this->path = $path;
@@ -74,32 +74,34 @@ class View implements ArrayAccess, ViewContract
 	/**
 	 * Get the string contents of the view.
 	 *
-	 * @param  callable|null  $callback
+	 * @param  callable|null $callback
 	 * @return string
 	 *
 	 * @throws \Throwable
 	 */
-	public function render(callable $callback = null)
+	public function render( callable $callback = null )
 	{
 		try
-{
+		{
 			$contents = $this->renderContents();
 
-			$response = isset($callback) ? call_user_func($callback, $this, $contents) : null;
+			$response = isset( $callback ) ? call_user_func( $callback, $this, $contents ) : null;
 
 			// Once we have the contents of the view, we will flush the sections if we are
 			// done rendering all views so that there is nothing left hanging over when
 			// another view gets rendered in the future by the application developer.
 			$this->factory->flushSectionsIfDoneRendering();
 
-			return ! is_null($response) ? $response : $contents;
-		} catch (Exception $e)
-{
+			return !is_null( $response ) ? $response : $contents;
+		}
+		catch ( Exception $e )
+		{
 			$this->factory->flushSections();
 
 			throw $e;
-		} catch (Throwable $e)
-{
+		}
+		catch ( Throwable $e )
+		{
 			$this->factory->flushSections();
 
 			throw $e;
@@ -118,7 +120,7 @@ class View implements ArrayAccess, ViewContract
 		// clear out the sections for any separate views that may be rendered.
 		$this->factory->incrementRender();
 
-		$this->factory->callComposer($this);
+		$this->factory->callComposer( $this );
 
 		$contents = $this->getContents();
 
@@ -137,10 +139,10 @@ class View implements ArrayAccess, ViewContract
 	 */
 	public function renderSections()
 	{
-		return $this->render(function ()
-{
+		return $this->render( function ()
+		{
 			return $this->factory->getSections();
-		});
+		} );
 	}
 
 	/**
@@ -150,7 +152,7 @@ class View implements ArrayAccess, ViewContract
 	 */
 	protected function getContents()
 	{
-		return $this->engine->get($this->path, $this->gatherData());
+		return $this->engine->get( $this->path, $this->gatherData() );
 	}
 
 	/**
@@ -160,12 +162,12 @@ class View implements ArrayAccess, ViewContract
 	 */
 	protected function gatherData()
 	{
-		$data = array_merge($this->factory->getShared(), $this->data);
+		$data = array_merge( $this->factory->getShared(), $this->data );
 
-		foreach ($data as $key => $value)
-{
-			if ($value instanceof Renderable)
-{
+		foreach ( $data as $key => $value )
+		{
+			if ( $value instanceof Renderable )
+			{
 				$data[$key] = $value->render();
 			}
 		}
@@ -176,18 +178,18 @@ class View implements ArrayAccess, ViewContract
 	/**
 	 * Add a piece of data to the view.
 	 *
-	 * @param  string|array  $key
-	 * @param  mixed   $value
+	 * @param  string|array $key
+	 * @param  mixed $value
 	 * @return $this
 	 */
-	public function with($key, $value = null)
+	public function with( $key, $value = null )
 	{
-		if (is_array($key))
-{
-			$this->data = array_merge($this->data, $key);
+		if ( is_array( $key ) )
+		{
+			$this->data = array_merge( $this->data, $key );
 		}
-else
-{
+		else
+		{
 			$this->data[$key] = $value;
 		}
 
@@ -197,31 +199,31 @@ else
 	/**
 	 * Add a view instance to the view data.
 	 *
-	 * @param  string  $key
-	 * @param  string  $view
-	 * @param  array   $data
+	 * @param  string $key
+	 * @param  string $view
+	 * @param  array $data
 	 * @return $this
 	 */
-	public function nest($key, $view, array $data = [])
+	public function nest( $key, $view, array $data = [] )
 	{
-		return $this->with($key, $this->factory->make($view, $data));
+		return $this->with( $key, $this->factory->make( $view, $data ) );
 	}
 
 	/**
 	 * Add validation errors to the view.
 	 *
-	 * @param  \Foundation\Contracts\Support\MessageProvider|array  $provider
+	 * @param  \Foundation\Contracts\Support\MessageProvider|array $provider
 	 * @return $this
 	 */
-	public function withErrors($provider)
+	public function withErrors( $provider )
 	{
-		if ($provider instanceof MessageProvider)
-{
-			$this->with('errors', $provider->getMessageBag());
+		if ( $provider instanceof MessageProvider )
+		{
+			$this->with( 'errors', $provider->getMessageBag() );
 		}
-else
-{
-			$this->with('errors', new MessageBag((array) $provider));
+		else
+		{
+			$this->with( 'errors', new MessageBag( (array) $provider ) );
 		}
 
 		return $this;
@@ -290,10 +292,10 @@ else
 	/**
 	 * Set the path to the view.
 	 *
-	 * @param  string  $path
+	 * @param  string $path
 	 * @return void
 	 */
-	public function setPath($path)
+	public function setPath( $path )
 	{
 		$this->path = $path;
 	}
@@ -301,21 +303,21 @@ else
 	/**
 	 * Determine if a piece of data is bound.
 	 *
-	 * @param  string  $key
+	 * @param  string $key
 	 * @return bool
 	 */
-	public function offsetExists($key)
+	public function offsetExists( $key )
 	{
-		return array_key_exists($key, $this->data);
+		return array_key_exists( $key, $this->data );
 	}
 
 	/**
 	 * Get a piece of bound data to the view.
 	 *
-	 * @param  string  $key
+	 * @param  string $key
 	 * @return mixed
 	 */
-	public function offsetGet($key)
+	public function offsetGet( $key )
 	{
 		return $this->data[$key];
 	}
@@ -323,33 +325,33 @@ else
 	/**
 	 * Set a piece of data on the view.
 	 *
-	 * @param  string  $key
-	 * @param  mixed   $value
+	 * @param  string $key
+	 * @param  mixed $value
 	 * @return void
 	 */
-	public function offsetSet($key, $value)
+	public function offsetSet( $key, $value )
 	{
-		$this->with($key, $value);
+		$this->with( $key, $value );
 	}
 
 	/**
 	 * Unset a piece of data from the view.
 	 *
-	 * @param  string  $key
+	 * @param  string $key
 	 * @return void
 	 */
-	public function offsetUnset($key)
+	public function offsetUnset( $key )
 	{
-		unset($this->data[$key]);
+		unset( $this->data[$key] );
 	}
 
 	/**
 	 * Get a piece of data from the view.
 	 *
-	 * @param  string  $key
+	 * @param  string $key
 	 * @return mixed
 	 */
-	public function &__get($key)
+	public function &__get( $key )
 	{
 		return $this->data[$key];
 	}
@@ -357,54 +359,54 @@ else
 	/**
 	 * Set a piece of data on the view.
 	 *
-	 * @param  string  $key
-	 * @param  mixed   $value
+	 * @param  string $key
+	 * @param  mixed $value
 	 * @return void
 	 */
-	public function __set($key, $value)
+	public function __set( $key, $value )
 	{
-		$this->with($key, $value);
+		$this->with( $key, $value );
 	}
 
 	/**
 	 * Check if a piece of data is bound to the view.
 	 *
-	 * @param  string  $key
+	 * @param  string $key
 	 * @return bool
 	 */
-	public function __isset($key)
+	public function __isset( $key )
 	{
-		return isset($this->data[$key]);
+		return isset( $this->data[$key] );
 	}
 
 	/**
 	 * Remove a piece of bound data from the view.
 	 *
-	 * @param  string  $key
+	 * @param  string $key
 	 * @return bool
 	 */
-	public function __unset($key)
+	public function __unset( $key )
 	{
-		unset($this->data[$key]);
+		unset( $this->data[$key] );
 	}
 
 	/**
 	 * Dynamically bind parameters to the view.
 	 *
-	 * @param  string  $method
-	 * @param  array   $parameters
+	 * @param  string $method
+	 * @param  array $parameters
 	 * @return \Foundation\View\View
 	 *
 	 * @throws \BadMethodCallException
 	 */
-	public function __call($method, $parameters)
+	public function __call( $method, $parameters )
 	{
-		if (Str::startsWith($method, 'with'))
-{
-			return $this->with(Str::snake(substr($method, 4)), $parameters[0]);
+		if ( Str::startsWith( $method, 'with' ) )
+		{
+			return $this->with( Str::snake( substr( $method, 4 ) ), $parameters[0] );
 		}
 
-		throw new BadMethodCallException("Method [$method] does not exist on view.");
+		throw new BadMethodCallException( "Method [$method] does not exist on view." );
 	}
 
 	/**

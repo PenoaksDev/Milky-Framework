@@ -12,6 +12,7 @@ use Foundation\Support\Arr;
 use Foundation\Support\Collection;
 use Foundation\Support\Str;
 use Foundation\Support\Traits\Macroable;
+use Foundation\Traits\StaticAccess;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -19,7 +20,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Router implements RegistrarContract
 {
-	use Macroable;
+	use StaticAccess;
 
 	/**
 	 * The event dispatcher instance.
@@ -111,6 +112,8 @@ class Router implements RegistrarContract
 		$this->routes = new RouteCollection;
 		$this->bindings = $bindings;
 
+		static::$selfInstance = $this;
+
 		$this->bind( '_missing', function ( $v )
 		{
 			return explode( '/', $v );
@@ -126,6 +129,9 @@ class Router implements RegistrarContract
 	 */
 	public function get( $uri, $action = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->addRoute( ['GET', 'HEAD'], $uri, $action );
 	}
 
@@ -138,6 +144,9 @@ class Router implements RegistrarContract
 	 */
 	public function post( $uri, $action = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->addRoute( 'POST', $uri, $action );
 	}
 
@@ -150,6 +159,9 @@ class Router implements RegistrarContract
 	 */
 	public function put( $uri, $action = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->addRoute( 'PUT', $uri, $action );
 	}
 
@@ -162,6 +174,9 @@ class Router implements RegistrarContract
 	 */
 	public function patch( $uri, $action = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->addRoute( 'PATCH', $uri, $action );
 	}
 
@@ -174,6 +189,9 @@ class Router implements RegistrarContract
 	 */
 	public function delete( $uri, $action = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->addRoute( 'DELETE', $uri, $action );
 	}
 
@@ -186,6 +204,9 @@ class Router implements RegistrarContract
 	 */
 	public function options( $uri, $action = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->addRoute( 'OPTIONS', $uri, $action );
 	}
 
@@ -198,6 +219,8 @@ class Router implements RegistrarContract
 	 */
 	public function any( $uri, $action = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
 		$verbs = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
 		return $this->addRoute( $verbs, $uri, $action );
@@ -213,135 +236,48 @@ class Router implements RegistrarContract
 	 */
 	public function match( $methods, $uri, $action = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->addRoute( array_map( 'strtoupper', (array) $methods ), $uri, $action );
 	}
 
 	/**
-	 * Register an array of controllers with wildcard routing.
-	 *
-	 * @param  array $controllers
-	 * @return void
-	 *
-	 * @deprecated since version 5.2.
-	 */
-	public function controllers( array $controllers )
-	{
-		foreach ( $controllers as $uri => $controller )
-		{
-			$this->controller( $uri, $controller );
-		}
-	}
-
-	/**
-	 * Route a controller to a URI with wildcard routing.
-	 *
-	 * @param  string $uri
-	 * @param  string $controller
-	 * @param  array $names
-	 * @return void
-	 *
-	 * @deprecated since version 5.2.
-	 */
-	public function controller( $uri, $controller, $names = [] )
-	{
-		$prepended = $controller;
-
-		// First, we will check to see if a controller prefix has been registered in
-		// the route group. If it has, we will need to prefix it before trying to
-		// reflect into the class instance and pull out the method for routing.
-		if ( !empty( $this->groupStack ) )
-		{
-			$prepended = $this->prependGroupUses( $controller );
-		}
-
-		$routable = ( new ControllerInspector )->getRoutable( $prepended, $uri );
-
-		// When a controller is routed using this method, we use Reflection to parse
-		// out all of the routable methods for the controller, then register each
-		// route explicitly for the developers, so reverse routing is possible.
-		foreach ( $routable as $method => $routes )
-		{
-			foreach ( $routes as $route )
-			{
-				$this->registerInspected( $route, $controller, $method, $names );
-			}
-		}
-
-		$this->addFallthroughRoute( $controller, $uri );
-	}
-
-	/**
-	 * Register an inspected controller route.
-	 *
-	 * @param  array $route
-	 * @param  string $controller
-	 * @param  string $method
-	 * @param  array $names
-	 * @return void
-	 *
-	 * @deprecated since version 5.2.
-	 */
-	protected function registerInspected( $route, $controller, $method, &$names )
-	{
-		$action = ['uses' => $controller . '@' . $method];
-
-		// If a given controller method has been named, we will assign the name to the
-		// controller action array, which provides for a short-cut to method naming
-		// so you don't have to define an individual route for these controllers.
-		$action['as'] = Arr::get( $names, $method );
-
-		$this->{$route['verb']}( $route['uri'], $action );
-	}
-
-	/**
-	 * Add a fallthrough route for a controller.
-	 *
-	 * @param  string $controller
-	 * @param  string $uri
-	 * @return void
-	 *
-	 * @deprecated since version 5.2.
-	 */
-	protected function addFallthroughRoute( $controller, $uri )
-	{
-		$missing = $this->any( $uri . '/{_missing}', $controller . '@missingMethod' );
-
-		$missing->where( '_missing', '(.*)' );
-	}
-
-	/**
 	 * Set the unmapped global resource parameters to singular.
-	 *
-	 * @return void
 	 */
 	public function singularResourceParameters()
 	{
-		ResourceRegistrar::singularParameters();
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			ResourceRegistrar::singularParameters();
 	}
 
 	/**
 	 * Set the global resource parameter mapping.
 	 *
 	 * @param  array $parameters
-	 * @return void
 	 */
 	public function resourceParameters( array $parameters = [] )
 	{
-		ResourceRegistrar::setParameters( $parameters );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			ResourceRegistrar::setParameters( $parameters );
 	}
 
 	/**
 	 * Register an array of resource controllers.
 	 *
 	 * @param  array $resources
-	 * @return void
 	 */
 	public function resources( array $resources )
 	{
-		foreach ( $resources as $name => $controller )
-		{
-			$this->resource( $name, $controller );
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			foreach ( $resources as $name => $controller )
+				$this->resource( $name, $controller );
 	}
 
 	/**
@@ -350,42 +286,45 @@ class Router implements RegistrarContract
 	 * @param  string $name
 	 * @param  string $controller
 	 * @param  array $options
-	 * @return void
 	 */
 	public function resource( $name, $controller, array $options = [] )
 	{
-		if ( $this->bindings && $this->bindings->bound( 'Foundation\Routing\ResourceRegistrar' ) )
-		{
-			$registrar = $this->bindings->make( 'Foundation\Routing\ResourceRegistrar' );
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
 		else
 		{
-			$registrar = new ResourceRegistrar( $this );
-		}
+			if ( $this->bindings && $this->bindings->bound( 'Foundation\Routing\ResourceRegistrar' ) )
+				$registrar = $this->bindings->make( 'Foundation\Routing\ResourceRegistrar' );
+			else
+				$registrar = new ResourceRegistrar( $this );
 
-		$registrar->register( $name, $controller, $options );
+			$registrar->register( $name, $controller, $options );
+		}
 	}
 
 	/**
 	 * Register the typical authentication routes for an application.
-	 *
-	 * @return void
 	 */
 	public function auth()
 	{
-		// Authentication Routes...
-		$this->get( 'login', 'Auth\AuthController@showLoginForm' );
-		$this->post( 'login', 'Auth\AuthController@login' );
-		$this->get( 'logout', 'Auth\AuthController@logout' );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+		{
+			// Authentication Routes...
+			$this->get( 'login', 'Auth\AuthController@showLoginForm' );
+			$this->post( 'login', 'Auth\AuthController@login' );
+			$this->get( 'logout', 'Auth\AuthController@logout' );
 
-		// Registration Routes...
-		$this->get( 'register', 'Auth\AuthController@showRegistrationForm' );
-		$this->post( 'register', 'Auth\AuthController@register' );
+			// Registration Routes...
+			$this->get( 'register', 'Auth\AuthController@showRegistrationForm' );
+			$this->post( 'register', 'Auth\AuthController@register' );
 
-		// Password Reset Routes...
-		$this->get( 'password/reset/{token?}', 'Auth\PasswordController@showResetForm' );
-		$this->post( 'password/email', 'Auth\PasswordController@sendResetLinkEmail' );
-		$this->post( 'password/reset', 'Auth\PasswordController@reset' );
+			// Password Reset Routes...
+			$this->get( 'password/reset/{token?}', 'Auth\PasswordController@showResetForm' );
+			$this->post( 'password/email', 'Auth\PasswordController@sendResetLinkEmail' );
+			$this->post( 'password/reset', 'Auth\PasswordController@reset' );
+		}
 	}
 
 	/**
@@ -393,34 +332,42 @@ class Router implements RegistrarContract
 	 *
 	 * @param  array $attributes
 	 * @param  \Closure $callback
-	 * @return void
 	 */
 	public function group( array $attributes, Closure $callback )
 	{
-		$this->updateGroupStack( $attributes );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+		{
+			$this->updateGroupStack( $attributes );
 
-		// Once we have updated the group stack, we will execute the user Closure and
-		// merge in the groups attributes when the route is created. After we have
-		// run the callback, we will pop the attributes off of this group stack.
-		call_user_func( $callback, $this );
+			// Once we have updated the group stack, we will execute the user Closure and
+			// merge in the groups attributes when the route is created. After we have
+			// run the callback, we will pop the attributes off of this group stack.
+			call_user_func( $callback, $this );
 
-		array_pop( $this->groupStack );
+			array_pop( $this->groupStack );
+		}
 	}
 
 	/**
 	 * Update the group stack with the given attributes.
 	 *
 	 * @param  array $attributes
-	 * @return void
 	 */
 	protected function updateGroupStack( array $attributes )
 	{
-		if ( !empty( $this->groupStack ) )
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
 		{
-			$attributes = $this->mergeGroup( $attributes, end( $this->groupStack ) );
-		}
+			if ( !empty( $this->groupStack ) )
+			{
+				$attributes = $this->mergeGroup( $attributes, end( $this->groupStack ) );
+			}
 
-		$this->groupStack[] = $attributes;
+			$this->groupStack[] = $attributes;
+		}
 	}
 
 	/**
@@ -431,6 +378,9 @@ class Router implements RegistrarContract
 	 */
 	public function mergeWithLastGroup( $new )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->mergeGroup( $new, end( $this->groupStack ) );
 	}
 
@@ -443,6 +393,9 @@ class Router implements RegistrarContract
 	 */
 	public static function mergeGroup( $new, $old )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$new['namespace'] = static::formatUsesPrefix( $new, $old );
 
 		$new['prefix'] = static::formatGroupPrefix( $new, $old );
@@ -471,6 +424,9 @@ class Router implements RegistrarContract
 	 */
 	protected static function formatUsesPrefix( $new, $old )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( isset( $new['namespace'] ) )
 		{
 			return isset( $old['namespace'] ) ? trim( $old['namespace'], '\\' ) . '\\' . trim( $new['namespace'], '\\' ) : trim( $new['namespace'], '\\' );
@@ -488,6 +444,9 @@ class Router implements RegistrarContract
 	 */
 	protected static function formatGroupPrefix( $new, $old )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$oldPrefix = isset( $old['prefix'] ) ? $old['prefix'] : null;
 
 		if ( isset( $new['prefix'] ) )
@@ -505,6 +464,9 @@ class Router implements RegistrarContract
 	 */
 	public function getLastGroupPrefix()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( !empty( $this->groupStack ) )
 		{
 			$last = end( $this->groupStack );
@@ -525,6 +487,9 @@ class Router implements RegistrarContract
 	 */
 	protected function addRoute( $methods, $uri, $action )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->routes->add( $this->createRoute( $methods, $uri, $action ) );
 	}
 
@@ -538,13 +503,14 @@ class Router implements RegistrarContract
 	 */
 	protected function createRoute( $methods, $uri, $action )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		// If the route is routing to a controller we will parse the route action into
 		// an acceptable array format before registering it and creating this route
 		// instance itself. We need to build the Closure that will call this out.
 		if ( $this->actionReferencesController( $action ) )
-		{
 			$action = $this->convertToControllerAction( $action );
-		}
 
 		$route = $this->newRoute( $methods, $this->prefix( $uri ), $action );
 
@@ -571,6 +537,9 @@ class Router implements RegistrarContract
 	 */
 	protected function newRoute( $methods, $uri, $action )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return ( new Route( $methods, $uri, $action ) )->setRouter( $this )->setBindings( $this->bindings );
 	}
 
@@ -582,6 +551,9 @@ class Router implements RegistrarContract
 	 */
 	protected function prefix( $uri )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return trim( trim( $this->getLastGroupPrefix(), '/' ) . '/' . trim( $uri, '/' ), '/' ) ?: '/';
 	}
 
@@ -593,6 +565,9 @@ class Router implements RegistrarContract
 	 */
 	protected function addWhereClausesToRoute( $route )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$where = isset( $route->getAction()['where'] ) ? $route->getAction()['where'] : [];
 
 		$route->where( array_merge( $this->patterns, $where ) );
@@ -604,13 +579,16 @@ class Router implements RegistrarContract
 	 * Merge the group stack with the controller action.
 	 *
 	 * @param  \Foundation\Routing\Route $route
-	 * @return void
 	 */
 	protected function mergeGroupAttributesIntoRoute( $route )
 	{
-		$action = $this->mergeWithLastGroup( $route->getAction() );
-
-		$route->setAction( $action );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+		{
+			$action = $this->mergeWithLastGroup( $route->getAction() );
+			$route->setAction( $action );
+		}
 	}
 
 	/**
@@ -621,10 +599,11 @@ class Router implements RegistrarContract
 	 */
 	protected function actionReferencesController( $action )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( $action instanceof Closure )
-		{
 			return false;
-		}
 
 		return is_string( $action ) || ( isset( $action['uses'] ) && is_string( $action['uses'] ) );
 	}
@@ -637,18 +616,17 @@ class Router implements RegistrarContract
 	 */
 	protected function convertToControllerAction( $action )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( is_string( $action ) )
-		{
 			$action = ['uses' => $action];
-		}
 
 		// Here we'll merge any group "uses" statement if necessary so that the action
 		// has the proper clause for this property. Then we can simply set the name
 		// of the controller on the action and return the action array for usage.
 		if ( !empty( $this->groupStack ) )
-		{
 			$action['uses'] = $this->prependGroupUses( $action['uses'] );
-		}
 
 		// Here we will set this controller name on the action array just so we always
 		// have a copy of it for reference if we need it. This can be used while we
@@ -666,6 +644,9 @@ class Router implements RegistrarContract
 	 */
 	protected function prependGroupUses( $uses )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$group = end( $this->groupStack );
 
 		return isset( $group['namespace'] ) && strpos( $uses, '\\' ) !== 0 ? $group['namespace'] . '\\' . $uses : $uses;
@@ -679,8 +660,10 @@ class Router implements RegistrarContract
 	 */
 	public function dispatch( Request $request )
 	{
-		$this->currentRequest = $request;
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
 
+		$this->currentRequest = $request;
 		$response = $this->dispatchToRoute( $request );
 
 		return $this->prepareResponse( $request, $response );
@@ -694,6 +677,9 @@ class Router implements RegistrarContract
 	 */
 	public function dispatchToRoute( Request $request )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		// First we will find a route that matches this request. We will also set the
 		// route resolver on the request so middlewares assigned to the route will
 		// receive access to this route instance for checking of the parameters.
@@ -720,14 +706,17 @@ class Router implements RegistrarContract
 	 */
 	protected function runRouteWithinStack( Route $route, Request $request )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$shouldSkipMiddleware = $this->bindings->bound( 'middleware.disable' ) && $this->bindings->make( 'middleware.disable' ) === true;
 
 		$middleware = $shouldSkipMiddleware ? [] : $this->gatherRouteMiddlewares( $route );
 
 		return ( new Pipeline( $this->bindings ) )->send( $request )->through( $middleware )->then( function ( $request ) use ( $route )
-			{
-				return $this->prepareResponse( $request, $route->run( $request ) );
-			} );
+		{
+			return $this->prepareResponse( $request, $route->run( $request ) );
+		} );
 	}
 
 	/**
@@ -738,6 +727,9 @@ class Router implements RegistrarContract
 	 */
 	public function gatherRouteMiddlewares( Route $route )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return Collection::make( $route->middleware() )->map( function ( $name )
 		{
 			return Collection::make( $this->resolveMiddlewareClassName( $name ) );
@@ -752,6 +744,9 @@ class Router implements RegistrarContract
 	 */
 	public function resolveMiddlewareClassName( $name )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$map = $this->middleware;
 
 		// If the middleware is the name of a middleware group, we will return the array
@@ -787,6 +782,9 @@ class Router implements RegistrarContract
 	 */
 	protected function parseMiddlewareGroup( $name )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$results = [];
 
 		foreach ( $this->middlewareGroups[$name] as $middleware )
@@ -825,6 +823,9 @@ class Router implements RegistrarContract
 	 */
 	protected function findRoute( $request )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		$this->current = $route = $this->routes->match( $request );
 
 		$this->bindings->instance( 'Foundation\Routing\Route', $route );
@@ -840,13 +841,12 @@ class Router implements RegistrarContract
 	 */
 	protected function substituteBindings( $route )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		foreach ( $route->parameters() as $key => $value )
-		{
 			if ( isset( $this->binders[$key] ) )
-			{
 				$route->setParameter( $key, $this->performBinding( $key, $value, $route ) );
-			}
-		}
 
 		$this->substituteImplicitBindings( $route );
 
@@ -857,23 +857,27 @@ class Router implements RegistrarContract
 	 * Substitute the implicit Eloquent model bindings for the route.
 	 *
 	 * @param  \Foundation\Routing\Route $route
-	 * @return void
 	 */
 	protected function substituteImplicitBindings( $route )
 	{
-		$parameters = $route->parameters();
-
-		foreach ( $route->signatureParameters( Model::class ) as $parameter )
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
 		{
-			$class = $parameter->getClass();
+			$parameters = $route->parameters();
 
-			if ( array_key_exists( $parameter->name, $parameters ) && !$route->getParameter( $parameter->name ) instanceof Model )
+			foreach ( $route->signatureParameters( Model::class ) as $parameter )
 			{
-				$method = $parameter->isDefaultValueAvailable() ? 'first' : 'firstOrFail';
+				$class = $parameter->getClass();
 
-				$model = $class->newInstance();
+				if ( array_key_exists( $parameter->name, $parameters ) && !$route->getParameter( $parameter->name ) instanceof Model )
+				{
+					$method = $parameter->isDefaultValueAvailable() ? 'first' : 'firstOrFail';
 
-				$route->setParameter( $parameter->name, $model->where( $model->getRouteKeyName(), $parameters[$parameter->name] )->{$method}() );
+					$model = $class->newInstance();
+
+					$route->setParameter( $parameter->name, $model->where( $model->getRouteKeyName(), $parameters[$parameter->name] )->{$method}() );
+				}
 			}
 		}
 	}
@@ -888,6 +892,9 @@ class Router implements RegistrarContract
 	 */
 	protected function performBinding( $key, $value, $route )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return call_user_func( $this->binders[$key], $value, $route );
 	}
 
@@ -899,7 +906,10 @@ class Router implements RegistrarContract
 	 */
 	public function matched( $callback )
 	{
-		$this->events->listen( Events\RouteMatched::class, $callback );
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			$this->events->listen( Events\RouteMatched::class, $callback );
 	}
 
 	/**
@@ -909,6 +919,9 @@ class Router implements RegistrarContract
 	 */
 	public function getMiddleware()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->middleware;
 	}
 
@@ -921,6 +934,8 @@ class Router implements RegistrarContract
 	 */
 	public function middleware( $name, $class )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
 		$this->middleware[$name] = $class;
 
 		return $this;
@@ -935,6 +950,8 @@ class Router implements RegistrarContract
 	 */
 	public function middlewareGroup( $name, array $middleware )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
 		$this->middlewareGroups[$name] = $middleware;
 
 		return $this;
@@ -951,10 +968,11 @@ class Router implements RegistrarContract
 	 */
 	public function prependMiddlewareToGroup( $group, $middleware )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( isset( $this->middlewareGroups[$group] ) && !in_array( $middleware, $this->middlewareGroups[$group] ) )
-		{
 			array_unshift( $this->middlewareGroups[$group], $middleware );
-		}
 
 		return $this;
 	}
@@ -970,10 +988,11 @@ class Router implements RegistrarContract
 	 */
 	public function pushMiddlewareToGroup( $group, $middleware )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( isset( $this->middlewareGroups[$group] ) && !in_array( $middleware, $this->middlewareGroups[$group] ) )
-		{
 			$this->middlewareGroups[$group][] = $middleware;
-		}
 
 		return $this;
 	}
@@ -984,39 +1003,41 @@ class Router implements RegistrarContract
 	 * @param  string $key
 	 * @param  string $class
 	 * @param  \Closure|null $callback
-	 * @return void
 	 *
 	 * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
 	 */
 	public function model( $key, $class, Closure $callback = null )
 	{
-		$this->bind( $key, function ( $value ) use ( $class, $callback )
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
 		{
-			if ( is_null( $value ) )
+			$this->bind( $key, function ( $value ) use ( $class, $callback )
 			{
-				return;
-			}
+				if ( is_null( $value ) )
+					return null;
 
-			// For model binders, we will attempt to retrieve the models using the first
-			// method on the model instance. If we cannot retrieve the models we'll
-			// throw a not found exception otherwise we will return the instance.
-			$instance = $this->bindings->make( $class );
+				// For model binders, we will attempt to retrieve the models using the first
+				// method on the model instance. If we cannot retrieve the models we'll
+				// throw a not found exception otherwise we will return the instance.
+				$instance = $this->bindings->make( $class );
 
-			if ( $model = $instance->where( $instance->getRouteKeyName(), $value )->first() )
-			{
-				return $model;
-			}
+				if ( $model = $instance->where( $instance->getRouteKeyName(), $value )->first() )
+				{
+					return $model;
+				}
 
-			// If a callback was supplied to the method we will call that to determine
-			// what we should do when the model is not found. This just gives these
-			// developer a little greater flexibility to decide what will happen.
-			if ( $callback instanceof Closure )
-			{
-				return call_user_func( $callback, $value );
-			}
+				// If a callback was supplied to the method we will call that to determine
+				// what we should do when the model is not found. This just gives these
+				// developer a little greater flexibility to decide what will happen.
+				if ( $callback instanceof Closure )
+				{
+					return call_user_func( $callback, $value );
+				}
 
-			throw new NotFoundHttpException;
-		} );
+				throw new NotFoundHttpException;
+			} );
+		}
 	}
 
 	/**
@@ -1024,16 +1045,18 @@ class Router implements RegistrarContract
 	 *
 	 * @param  string $key
 	 * @param  string|callable $binder
-	 * @return void
 	 */
 	public function bind( $key, $binder )
 	{
-		if ( is_string( $binder ) )
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
 		{
-			$binder = $this->createClassBinding( $binder );
-		}
+			if ( is_string( $binder ) )
+				$binder = $this->createClassBinding( $binder );
 
-		$this->binders[str_replace( '-', '_', $key )] = $binder;
+			$this->binders[str_replace( '-', '_', $key )] = $binder;
+		}
 	}
 
 	/**
@@ -1044,6 +1067,9 @@ class Router implements RegistrarContract
 	 */
 	public function createClassBinding( $binding )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return function ( $value, $route ) use ( $binding )
 		{
 			// If the binding has an @ sign, we will assume it's being used to delimit
@@ -1064,25 +1090,29 @@ class Router implements RegistrarContract
 	 *
 	 * @param  string $key
 	 * @param  string $pattern
-	 * @return void
 	 */
 	public function pattern( $key, $pattern )
 	{
-		$this->patterns[$key] = $pattern;
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			$this->patterns[$key] = $pattern;
 	}
 
 	/**
 	 * Set a group of global where patterns on all routes.
 	 *
 	 * @param  array $patterns
-	 * @return void
 	 */
 	public function patterns( $patterns )
 	{
-		foreach ( $patterns as $key => $pattern )
-		{
-			$this->pattern( $key, $pattern );
-		}
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
+			foreach ( $patterns as $key => $pattern )
+			{
+				$this->pattern( $key, $pattern );
+			}
 	}
 
 	/**
@@ -1094,14 +1124,13 @@ class Router implements RegistrarContract
 	 */
 	public function prepareResponse( $request, $response )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( $response instanceof PsrResponseInterface )
-		{
 			$response = ( new HttpFoundationFactory )->createResponse( $response );
-		}
 		elseif ( !$response instanceof SymfonyResponse )
-		{
 			$response = new Response( $response );
-		}
 
 		return $response->prepare( $request );
 	}
@@ -1113,6 +1142,9 @@ class Router implements RegistrarContract
 	 */
 	public function hasGroupStack()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return !empty( $this->groupStack );
 	}
 
@@ -1123,6 +1155,9 @@ class Router implements RegistrarContract
 	 */
 	public function getGroupStack()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->groupStack;
 	}
 
@@ -1135,6 +1170,9 @@ class Router implements RegistrarContract
 	 */
 	public function input( $key, $default = null )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->current()->parameter( $key, $default );
 	}
 
@@ -1145,6 +1183,9 @@ class Router implements RegistrarContract
 	 */
 	public function getCurrentRoute()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->current();
 	}
 
@@ -1155,6 +1196,9 @@ class Router implements RegistrarContract
 	 */
 	public function current()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->current;
 	}
 
@@ -1166,6 +1210,9 @@ class Router implements RegistrarContract
 	 */
 	public function has( $name )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->routes->hasNamedRoute( $name );
 	}
 
@@ -1176,6 +1223,9 @@ class Router implements RegistrarContract
 	 */
 	public function currentRouteName()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->current() ? $this->current()->getName() : null;
 	}
 
@@ -1187,6 +1237,9 @@ class Router implements RegistrarContract
 	 */
 	public function is()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		foreach ( func_get_args() as $pattern )
 		{
 			if ( Str::is( $pattern, $this->currentRouteName() ) )
@@ -1206,6 +1259,9 @@ class Router implements RegistrarContract
 	 */
 	public function currentRouteNamed( $name )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->current() ? $this->current()->getName() == $name : false;
 	}
 
@@ -1216,10 +1272,11 @@ class Router implements RegistrarContract
 	 */
 	public function currentRouteAction()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		if ( !$this->current() )
-		{
 			return;
-		}
 
 		$action = $this->current()->getAction();
 
@@ -1234,13 +1291,12 @@ class Router implements RegistrarContract
 	 */
 	public function uses()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		foreach ( func_get_args() as $pattern )
-		{
 			if ( Str::is( $pattern, $this->currentRouteAction() ) )
-			{
 				return true;
-			}
-		}
 
 		return false;
 	}
@@ -1253,6 +1309,9 @@ class Router implements RegistrarContract
 	 */
 	public function currentRouteUses( $action )
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->currentRouteAction() == $action;
 	}
 
@@ -1263,6 +1322,9 @@ class Router implements RegistrarContract
 	 */
 	public function getCurrentRequest()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->currentRequest;
 	}
 
@@ -1273,6 +1335,9 @@ class Router implements RegistrarContract
 	 */
 	public function getRoutes()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->routes;
 	}
 
@@ -1280,18 +1345,21 @@ class Router implements RegistrarContract
 	 * Set the route collection instance.
 	 *
 	 * @param  \Foundation\Routing\RouteCollection $routes
-	 * @return void
 	 */
 	public function setRoutes( RouteCollection $routes )
 	{
-		foreach ( $routes as $route )
+		if ( static::wasStatic() )
+			static::__callStatic( __METHOD__, func_get_args() );
+		else
 		{
-			$route->setRouter( $this )->setBindings( $this->bindings );
+			foreach ( $routes as $route )
+			{
+				$route->setRouter( $this )->setBindings( $this->bindings );
+			}
+
+			$this->routes = $routes;
+			$this->bindings->instance( 'routes', $this->routes );
 		}
-
-		$this->routes = $routes;
-
-		$this->bindings->instance( 'routes', $this->routes );
 	}
 
 	/**
@@ -1301,6 +1369,9 @@ class Router implements RegistrarContract
 	 */
 	public function getPatterns()
 	{
+		if ( static::wasStatic() )
+			return static::__callStatic( __METHOD__, func_get_args() );
+
 		return $this->patterns;
 	}
 }

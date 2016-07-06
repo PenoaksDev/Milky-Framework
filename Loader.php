@@ -1,4 +1,5 @@
 <?php
+
 use Foundation\Support\Facades\Log;
 
 define( 'FRAMEWORK_START', microtime( true ) );
@@ -6,12 +7,16 @@ define( 'FRAMEWORK_START', microtime( true ) );
 /* Force the display of errors */
 ini_set( 'display_errors', 'On' );
 
+/* Prevent the display of E_NOTICE and E_STRICT */
+error_reporting( E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED );
+
 /**
  * Super simple exception handler, should never be seen if framework is operating normally
  */
-set_exception_handler( function ( Exception $e )
+set_exception_handler( function ( Throwable $e )
 {
-	echo "<h1 style='margin-bottom: 0;'>Exception Uncaught</h1><br /><b>" . ( new ReflectionClass( $e ) )->getShortName() . ": " . $e->getMessage() . "</b><br />\n";
+	echo( "<h1 style='margin-bottom: 0;'>Exception Uncaught</h1><br /><b>" . ( new ReflectionClass( $e ) )->getShortName() . ": " . $e->getMessage() . "</b><br />\n" );
+	echo( "<p>at " . $e->getFile() . " on line " . $e->getLine() . "</p>" );
 	echo( "<pre>" . $e->getTraceAsString() . "</pre>" );
 	die();
 } );

@@ -1,5 +1,4 @@
 <?php
-
 namespace Foundation\Providers;
 
 use Foundation\Barebones\ServiceProvider;
@@ -39,6 +38,14 @@ use Foundation\Console\EventGenerateCommand;
 use Foundation\Console\VendorPublishCommand;
 use Foundation\Database\Console\Seeds\SeederMakeCommand;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class ArtisanServiceProvider extends ServiceProvider
 {
 	/**

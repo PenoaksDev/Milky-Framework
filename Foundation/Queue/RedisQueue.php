@@ -2,13 +2,12 @@
 
 namespace Foundation\Queue;
 
+use Foundation\Queue\Jobs\RedisJob;
+use Foundation\Redis\Database;
 use Foundation\Support\Arr;
 use Foundation\Support\Str;
-use Foundation\Redis\Database;
-use Foundation\Queue\Jobs\RedisJob;
-use Foundation\Contracts\Queue\Queue as QueueContract;
 
-class RedisQueue extends Queue implements QueueContract
+class RedisQueue extends Queue
 {
 	/**
 	 * The Redis database instance.

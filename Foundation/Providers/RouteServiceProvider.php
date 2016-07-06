@@ -1,9 +1,8 @@
 <?php
-
-namespace Foundation\Support\Providers;
+namespace Foundation\Providers;
 
 use Foundation\Routing\Router;
-use Foundation\Support\ServiceProvider;
+use Foundation\Barebones\ServiceProvider;
 use Foundation\Contracts\Routing\UrlGenerator;
 
 class RouteServiceProvider extends ServiceProvider
@@ -18,25 +17,25 @@ class RouteServiceProvider extends ServiceProvider
 	/**
 	 * Bootstrap any application services.
 	 *
-	 * @param  \Foundation\Routing\Router  $router
+	 * @param  \Foundation\Routing\Router $router
 	 * @return void
 	 */
-	public function boot(Router $router)
+	public function boot( Router $router )
 	{
 		$this->setRootControllerNamespace();
 
-		if ($this->fw->routesAreCached())
-{
+		if ( $this->fw->routesAreCached() )
+		{
 			$this->loadCachedRoutes();
 		}
-else
-{
+		else
+		{
 			$this->loadRoutes();
 
-			$this->fw->booted(function () use ($router)
-{
+			$this->fw->booted( function () use ( $router )
+			{
 				$router->getRoutes()->refreshNameLookups();
-			});
+			} );
 		}
 	}
 
@@ -47,12 +46,12 @@ else
 	 */
 	protected function setRootControllerNamespace()
 	{
-		if (is_null($this->namespace))
-{
+		if ( is_null( $this->namespace ) )
+		{
 			return;
 		}
 
-		$this->fw->bindings[UrlGenerator::class]->setRootControllerNamespace($this->namespace);
+		$this->fw->bindings[UrlGenerator::class]->setRootControllerNamespace( $this->namespace );
 	}
 
 	/**
@@ -62,10 +61,10 @@ else
 	 */
 	protected function loadCachedRoutes()
 	{
-		$this->fw->booted(function ()
-{
+		$this->fw->booted( function ()
+		{
 			require $this->fw->getCachedRoutesPath();
-		});
+		} );
 	}
 
 	/**
@@ -75,28 +74,28 @@ else
 	 */
 	protected function loadRoutes()
 	{
-		$this->fw->call([$this, 'map']);
+		$this->fw->call( [$this, 'map'] );
 	}
 
 	/**
 	 * Load the standard routes file for the application.
 	 *
-	 * @param  string  $path
+	 * @param  string $path
 	 * @return mixed
 	 */
-	protected function loadRoutesFrom($path)
+	protected function loadRoutesFrom( $path )
 	{
-		$router = $this->fw->make(Router::class);
+		$router = $this->fw->make( Router::class );
 
-		if (is_null($this->namespace))
-{
+		if ( is_null( $this->namespace ) )
+		{
 			return require $path;
 		}
 
-		$router->group(['namespace' => $this->namespace], function (Router $router) use ($path)
-{
+		$router->group( ['namespace' => $this->namespace], function ( Router $router ) use ( $path )
+		{
 			require $path;
-		});
+		} );
 	}
 
 	/**
@@ -112,12 +111,12 @@ else
 	/**
 	 * Pass dynamic methods onto the router instance.
 	 *
-	 * @param  string  $method
-	 * @param  array  $parameters
+	 * @param  string $method
+	 * @param  array $parameters
 	 * @return mixed
 	 */
-	public function __call($method, $parameters)
+	public function __call( $method, $parameters )
 	{
-		return call_user_func_array([$this->fw->make(Router::class), $method], $parameters);
+		return call_user_func_array( [$this->fw->make( Router::class ), $method], $parameters );
 	}
 }

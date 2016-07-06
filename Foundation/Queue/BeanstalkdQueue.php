@@ -2,12 +2,11 @@
 
 namespace Foundation\Queue;
 
-use Pheanstalk\Pheanstalk;
-use Pheanstalk\Job as PheanstalkJob;
 use Foundation\Queue\Jobs\BeanstalkdJob;
-use Foundation\Contracts\Queue\Queue as QueueContract;
+use Pheanstalk\Job as PheanstalkJob;
+use Pheanstalk\Pheanstalk;
 
-class BeanstalkdQueue extends Queue implements QueueContract
+class BeanstalkdQueue extends Queue
 {
 	/**
 	 * The Pheanstalk instance.

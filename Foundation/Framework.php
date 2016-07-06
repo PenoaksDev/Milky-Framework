@@ -24,9 +24,13 @@ use Foundation\Events\ServiceProviderPreEvent;
 use Foundation\Filesystem\Filesystem;
 use Foundation\Framework\Env;
 use Foundation\Http\Request;
+use Foundation\Routing\Router;
 use Foundation\Routing\RoutingServiceProvider;
 use Foundation\Support\Arr;
+use Foundation\Support\Facades\View;
 use Foundation\Support\Str;
+use Foundation\View\Factory;
+use Foundation\View\ViewSkel;
 use RuntimeException;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
@@ -217,6 +221,7 @@ class Framework implements HttpKernelInterface
 		$this->loader = $loader;
 
 		$bindings = &$this->bindings;
+		$bindings->instance( Bindings::class, $bindings );
 
 		/* Store new instance of the ENV */
 		$env = new Env( $params );
@@ -244,9 +249,6 @@ class Framework implements HttpKernelInterface
 
 		/* Fires the LOADING runlevel event */
 		$events->fire( $this->runlevel, [$this] );
-
-		/* Setup default index, normally overridden */
-		$bindings['router']->get( '/', view( 'Foundation\View\Default' ) );
 
 		$aliases = [
 			'fw' => ['Foundation\Framework'],
@@ -314,12 +316,15 @@ class Framework implements HttpKernelInterface
 			}
 		}
 
+		/* Setup default index, normally overridden */
+		// Router::get( '/', ViewSkel::view( 'Foundation\View\Default' ) );
+
 		/* Init the Framework Kernel */
-		$bindings->singleton( Kernel::class, $env['kernel'] );
+		$bindings->singleton( Kernel::class, $env->get( 'kernel', KernelImpl::class ) );
 		$this->kernel = $this->bindings->make( Kernel::class );
 
 		/* Init exception handler */
-		$bindings->singleton( ExceptionHandler::class, $env['exceptionHandler'] );
+		$bindings->singleton( ExceptionHandler::class, $env->get( 'exceptionHandler', ExceptionHandler::class ) );
 
 		/* Fire INIT Runlevel Event */
 		$bindings['events']->fire( $this->runlevel->set( Runlevel::INIT ) );
@@ -331,6 +336,10 @@ class Framework implements HttpKernelInterface
 
 		/* Fire BOOT Runlevel Event */
 		$bindings['events']->fire( $this->runlevel->set( Runlevel::BOOT ) );
+
+		// Call the implemented boot method.
+		if ( method_exists( $this->kernel, 'boot' ) )
+			Bindings::call( [ $this->kernel, 'boot' ], ['mode' => 'http'] );
 
 		$this->bootstrap( new RegisterProviders() );
 		$this->bootstrap( new BootProviders() );
@@ -461,12 +470,8 @@ class Framework implements HttpKernelInterface
 		{
 			foreach ( $bootstrap as $b )
 				$this->bootstrap( $b );
-
 			return;
 		}
-
-		if ( $this->runlevel->get() <> Runlevel::BOOT )
-			throw new RuntimeException( "You can not bootstrap in any other runlevel besides INITIALIZING" );
 
 		$event = new BootstrapPreEvent( $bootstrap );
 		$this->bindings['events']->fire( $event, [$this] );

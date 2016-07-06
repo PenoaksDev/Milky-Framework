@@ -4,9 +4,8 @@ namespace Foundation\Queue;
 
 use Aws\Sqs\SqsClient;
 use Foundation\Queue\Jobs\SqsJob;
-use Foundation\Contracts\Queue\Queue as QueueContract;
 
-class SqsQueue extends Queue implements QueueContract
+class SqsQueue extends Queue
 {
 	/**
 	 * The Amazon SQS instance.

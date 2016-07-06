@@ -122,7 +122,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 * Resolve a queue connection instance.
 	 *
 	 * @param  string  $name
-	 * @return \Foundation\Contracts\Queue\Queue
+	 * @return Queue
 	 */
 	public function connection($name = null)
 	{
@@ -147,7 +147,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 * Resolve a queue connection.
 	 *
 	 * @param  string  $name
-	 * @return \Foundation\Contracts\Queue\Queue
+	 * @return Queue
 	 */
 	protected function resolve($name)
 	{

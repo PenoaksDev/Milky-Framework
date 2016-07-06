@@ -1,17 +1,22 @@
 <?php
-
 namespace Foundation\Queue;
 
 use Closure;
 use DateTime;
+use Foundation\Bindings\Bindings;
+use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
+use Foundation\Contracts\Queue\QueueableEntity;
+use Foundation\Framework;
 use Foundation\Support\Arr;
 use SuperClosure\Serializer;
-use Foundation\Framework;
-use Foundation\Contracts\Queue\QueueableEntity;
-use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
 
 abstract class Queue
 {
+	/**
+	 * @var EncrypterContract
+	 */
+	protected $crypt;
+
 	/**
 	 * The IoC bindings instance.
 	 *
@@ -22,107 +27,107 @@ abstract class Queue
 	/**
 	 * Push a new job onto the queue.
 	 *
-	 * @param  string  $queue
-	 * @param  string  $job
-	 * @param  mixed   $data
+	 * @param  string $queue
+	 * @param  string $job
+	 * @param  mixed $data
 	 * @return mixed
 	 */
-	public function pushOn($queue, $job, $data = '')
+	public function pushOn( $queue, $job, $data = '' )
 	{
-		return $this->push($job, $data, $queue);
+		return $this->push( $job, $data, $queue );
 	}
 
 	/**
 	 * Push a new job onto the queue after a delay.
 	 *
-	 * @param  string  $queue
-	 * @param  \DateTime|int  $delay
-	 * @param  string  $job
-	 * @param  mixed   $data
+	 * @param  string $queue
+	 * @param  \DateTime|int $delay
+	 * @param  string $job
+	 * @param  mixed $data
 	 * @return mixed
 	 */
-	public function laterOn($queue, $delay, $job, $data = '')
+	public function laterOn( $queue, $delay, $job, $data = '' )
 	{
-		return $this->later($delay, $job, $data, $queue);
+		return $this->later( $delay, $job, $data, $queue );
 	}
 
 	/**
 	 * Push an array of jobs onto the queue.
 	 *
-	 * @param  array   $jobs
-	 * @param  mixed   $data
-	 * @param  string  $queue
+	 * @param  array $jobs
+	 * @param  mixed $data
+	 * @param  string $queue
 	 * @return mixed
 	 */
-	public function bulk($jobs, $data = '', $queue = null)
+	public function bulk( $jobs, $data = '', $queue = null )
 	{
-		foreach ((array) $jobs as $job)
-{
-			$this->push($job, $data, $queue);
+		foreach ( (array) $jobs as $job )
+		{
+			$this->push( $job, $data, $queue );
 		}
 	}
 
 	/**
 	 * Create a payload string from the given job and data.
 	 *
-	 * @param  string  $job
-	 * @param  mixed   $data
-	 * @param  string  $queue
+	 * @param  string $job
+	 * @param  mixed $data
+	 * @param  string $queue
 	 * @return string
 	 */
-	protected function createPayload($job, $data = '', $queue = null)
+	protected function createPayload( $job, $data = '', $queue = null )
 	{
-		if ($job instanceof Closure)
-{
-			return json_encode($this->createClosurePayload($job, $data));
+		if ( $job instanceof Closure )
+		{
+			return json_encode( $this->createClosurePayload( $job, $data ) );
 		}
-elseif (is_object($job))
-{
-			return json_encode([
+		elseif ( is_object( $job ) )
+		{
+			return json_encode( [
 				'job' => 'Foundation\Queue\CallQueuedHandler@call',
-				'data' => ['commandName' => get_class($job), 'command' => serialize(clone $job)],
-			]);
+				'data' => ['commandName' => get_class( $job ), 'command' => serialize( clone ( (object) $job ) )],
+			] );
 		}
 
-		return json_encode($this->createPlainPayload($job, $data));
+		return json_encode( $this->createPlainPayload( $job, $data ) );
 	}
 
 	/**
 	 * Create a typical, "plain" queue payload array.
 	 *
-	 * @param  string  $job
-	 * @param  mixed  $data
+	 * @param  string $job
+	 * @param  mixed $data
 	 * @return array
 	 */
-	protected function createPlainPayload($job, $data)
+	protected function createPlainPayload( $job, $data )
 	{
-		return ['job' => $job, 'data' => $this->prepareQueueableEntities($data)];
+		return ['job' => $job, 'data' => $this->prepareQueueableEntities( $data )];
 	}
 
 	/**
 	 * Prepare any queueable entities for storage in the queue.
 	 *
-	 * @param  mixed  $data
+	 * @param  mixed $data
 	 * @return mixed
 	 */
-	protected function prepareQueueableEntities($data)
+	protected function prepareQueueableEntities( $data )
 	{
-		if ($data instanceof QueueableEntity)
-{
-			return $this->prepareQueueableEntity($data);
+		if ( $data instanceof QueueableEntity )
+		{
+			return $this->prepareQueueableEntity( $data );
 		}
 
-		if (is_array($data))
-{
-			$data = array_map(function ($d)
-{
-				if (is_array($d))
-{
-					return $this->prepareQueueableEntities($d);
+		if ( is_array( $data ) )
+		{
+			$data = array_map( function ( $d )
+			{
+				if ( is_array( $d ) )
+				{
+					return $this->prepareQueueableEntities( $d );
 				}
 
-				return $this->prepareQueueableEntity($d);
-			}, $data);
+				return $this->prepareQueueableEntity( $d );
+			}, $data );
 		}
 
 		return $data;
@@ -131,14 +136,14 @@ elseif (is_object($job))
 	/**
 	 * Prepare a single queueable entity for storage on the queue.
 	 *
-	 * @param  mixed  $value
+	 * @param  mixed $value
 	 * @return mixed
 	 */
-	protected function prepareQueueableEntity($value)
+	protected function prepareQueueableEntity( $value )
 	{
-		if ($value instanceof QueueableEntity)
-{
-			return '::entity::|'.get_class($value).'|'.$value->getQueueableId();
+		if ( $value instanceof QueueableEntity )
+		{
+			return '::entity::|' . get_class( $value ) . '|' . $value->getQueueableId();
 		}
 
 		return $value;
@@ -147,43 +152,43 @@ elseif (is_object($job))
 	/**
 	 * Create a payload string for the given Closure job.
 	 *
-	 * @param  \Closure  $job
-	 * @param  mixed	 $data
+	 * @param  \Closure $job
+	 * @param  mixed $data
 	 * @return array
 	 */
-	protected function createClosurePayload($job, $data)
+	protected function createClosurePayload( $job, $data )
 	{
-		$closure = $this->crypt->encrypt((new Serializer)->serialize($job));
+		$closure = $this->crypt->encrypt( ( new Serializer )->serialize( $job ) );
 
-		return ['job' => 'IlluminateQueueClosure', 'data' => compact('closure')];
+		return ['job' => 'IlluminateQueueClosure', 'data' => compact( 'closure' )];
 	}
 
 	/**
 	 * Set additional meta on a payload string.
 	 *
-	 * @param  string  $payload
-	 * @param  string  $key
-	 * @param  string  $value
+	 * @param  string $payload
+	 * @param  string $key
+	 * @param  string $value
 	 * @return string
 	 */
-	protected function setMeta($payload, $key, $value)
+	protected function setMeta( $payload, $key, $value )
 	{
-		$payload = json_decode($payload, true);
+		$payload = json_decode( $payload, true );
 
-		return json_encode(Arr::set($payload, $key, $value));
+		return json_encode( Arr::set( $payload, $key, $value ) );
 	}
 
 	/**
 	 * Calculate the number of seconds with the given delay.
 	 *
-	 * @param  \DateTime|int  $delay
+	 * @param  \DateTime|int $delay
 	 * @return int
 	 */
-	protected function getSeconds($delay)
+	protected function getSeconds( $delay )
 	{
-		if ($delay instanceof DateTime)
-{
-			return max(0, $delay->getTimestamp() - $this->getTime());
+		if ( $delay instanceof DateTime )
+		{
+			return max( 0, $delay->getTimestamp() - $this->getTime() );
 		}
 
 		return (int) $delay;
@@ -202,10 +207,10 @@ elseif (is_object($job))
 	/**
 	 * Set the IoC bindings instance.
 	 *
-	 * @param  \Foundation\Framework  $bindings
+	 * @param  Bindings $bindings
 	 * @return void
 	 */
-	public function setBindings(Bindings $bindings)
+	public function setBindings( Bindings $bindings )
 	{
 		$this->bindings = $bindings;
 	}
@@ -213,11 +218,50 @@ elseif (is_object($job))
 	/**
 	 * Set the encrypter instance.
 	 *
-	 * @param  \Foundation\Contracts\Encryption\Encrypter  $crypt
+	 * @param  \Foundation\Contracts\Encryption\Encrypter $crypt
 	 * @return void
 	 */
-	public function setEncrypter(EncrypterContract $crypt)
+	public function setEncrypter( EncrypterContract $crypt )
 	{
 		$this->crypt = $crypt;
 	}
+
+	/**
+	 * Push a new job onto the queue.
+	 *
+	 * @param  string  $job
+	 * @param  mixed   $data
+	 * @param  string  $queue
+	 * @return mixed
+	 */
+	public abstract function push($job, $data = '', $queue = null);
+
+	/**
+	 * Push a raw payload onto the queue.
+	 *
+	 * @param  string  $payload
+	 * @param  string  $queue
+	 * @param  array   $options
+	 * @return mixed
+	 */
+	public abstract function pushRaw($payload, $queue = null, array $options = []);
+
+	/**
+	 * Push a new job onto the queue after a delay.
+	 *
+	 * @param  \DateTime|int  $delay
+	 * @param  string  $job
+	 * @param  mixed   $data
+	 * @param  string  $queue
+	 * @return mixed
+	 */
+	public abstract function later($delay, $job, $data = '', $queue = null);
+
+	/**
+	 * Pop the next job off of the queue.
+	 *
+	 * @param  string  $queue
+	 * @return \Foundation\Contracts\Queue\Job|null
+	 */
+	public abstract function pop($queue = null);
 }
