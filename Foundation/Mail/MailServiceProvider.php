@@ -1,10 +1,17 @@
 <?php
-
 namespace Foundation\Mail;
 
 use Swift_Mailer;
-use Foundation\Support\ServiceProvider;
+use Foundation\Barebones\ServiceProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class MailServiceProvider extends ServiceProvider
 {
 	/**
@@ -23,52 +30,50 @@ class MailServiceProvider extends ServiceProvider
 	{
 		$this->registerSwiftMailer();
 
-		$this->fw->bindings->singleton('mailer', function ($fw)
-{
+		$this->fw->bindings->singleton( 'mailer', function ( $fw )
+		{
 			// Once we have create the mailer instance, we will set a bindings instance
 			// on the mailer. This allows us to resolve mailer classes via bindingss
 			// for maximum testability on said classes instead of passing Closures.
-			$mailer = new Mailer(
-				$fw->bindings['view'], $fw->bindings['swift.mailer'], $fw->bindings['events']
-			);
+			$mailer = new Mailer( $fw->bindings['view'], $fw->bindings['swift.mailer'], $fw->bindings['events'] );
 
-			$this->setMailerDependencies($mailer, $fw);
+			$this->setMailerDependencies( $mailer, $fw );
 
 			// If a "from" address is set, we will set it on the mailer so that all mail
 			// messages sent by the applications will utilize the same "from" address
 			// on each one, which makes the developer's life a lot more convenient.
 			$from = $fw->bindings['config']['mail.from'];
 
-			if (is_array($from) && isset($from['address']))
-{
-				$mailer->alwaysFrom($from['address'], $from['name']);
+			if ( is_array( $from ) && isset( $from['address'] ) )
+			{
+				$mailer->alwaysFrom( $from['address'], $from['name'] );
 			}
 
 			$to = $fw->bindings['config']['mail.to'];
 
-			if (is_array($to) && isset($to['address']))
-{
-				$mailer->alwaysTo($to['address'], $to['name']);
+			if ( is_array( $to ) && isset( $to['address'] ) )
+			{
+				$mailer->alwaysTo( $to['address'], $to['name'] );
 			}
 
 			return $mailer;
-		});
+		} );
 	}
 
 	/**
 	 * Set a few dependencies on the mailer instance.
 	 *
-	 * @param  \Foundation\Mail\Mailer  $mailer
-	 * @param  \Foundation\Framework  $fw
+	 * @param  \Foundation\Mail\Mailer $mailer
+	 * @param  \Foundation\Framework $fw
 	 * @return void
 	 */
-	protected function setMailerDependencies($mailer, $fw)
+	protected function setMailerDependencies( $mailer, $fw )
 	{
-		$mailer->setBindings($fw);
+		$mailer->setBindings( $fw );
 
-		if ($fw->bound('queue'))
-{
-			$mailer->setQueue($fw->bindings['queue.connection']);
+		if ( $fw->bound( 'queue' ) )
+		{
+			$mailer->setQueue( $fw->bindings['queue.connection'] );
 		}
 	}
 
@@ -84,10 +89,10 @@ class MailServiceProvider extends ServiceProvider
 		// Once we have the transporter registered, we will register the actual Swift
 		// mailer instance, passing in the transport instances, which allows us to
 		// override this transporter instances during fw start-up if necessary.
-		$this->fw->bindings['swift.mailer'] = $this->fw->bindings->share(function ($fw)
-{
-			return new Swift_Mailer($fw->bindings['swift.transport']->driver());
-		});
+		$this->fw->bindings['swift.mailer'] = $this->fw->bindings->share( function ( $fw )
+		{
+			return new Swift_Mailer( $fw->bindings['swift.transport']->driver() );
+		} );
 	}
 
 	/**
@@ -97,10 +102,10 @@ class MailServiceProvider extends ServiceProvider
 	 */
 	protected function registerSwiftTransport()
 	{
-		$this->fw->bindings['swift.transport'] = $this->fw->bindings->share(function ($fw)
-{
-			return new TransportManager($fw);
-		});
+		$this->fw->bindings['swift.transport'] = $this->fw->bindings->share( function ( $fw )
+		{
+			return new TransportManager( $fw );
+		} );
 	}
 
 	/**

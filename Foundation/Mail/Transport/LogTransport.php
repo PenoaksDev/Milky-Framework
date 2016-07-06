@@ -1,11 +1,18 @@
 <?php
-
 namespace Foundation\Mail\Transport;
 
 use Swift_Mime_Message;
 use Swift_Mime_MimeEntity;
 use Psr\Log\LoggerInterface;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class LogTransport extends Transport
 {
 	/**
@@ -18,10 +25,10 @@ class LogTransport extends Transport
 	/**
 	 * Create a new log transport instance.
 	 *
-	 * @param  \Psr\Log\LoggerInterface  $logger
+	 * @param  \Psr\Log\LoggerInterface $logger
 	 * @return void
 	 */
-	public function __construct(LoggerInterface $logger)
+	public function __construct( LoggerInterface $logger )
 	{
 		$this->logger = $logger;
 	}
@@ -29,11 +36,11 @@ class LogTransport extends Transport
 	/**
 	 * {@inheritdoc}
 	 */
-	public function send(Swift_Mime_Message $message, &$failedRecipients = null)
+	public function send( Swift_Mime_Message $message, &$failedRecipients = null )
 	{
-		$this->beforeSendPerformed($message);
+		$this->beforeSendPerformed( $message );
 
-		$this->logger->debug($this->getMimeEntityString($message));
+		$this->logger->debug( $this->getMimeEntityString( $message ) );
 	}
 
 	/**
@@ -42,13 +49,13 @@ class LogTransport extends Transport
 	 * @param  \Swift_Mime_MimeEntity $entity
 	 * @return string
 	 */
-	protected function getMimeEntityString(Swift_Mime_MimeEntity $entity)
+	protected function getMimeEntityString( Swift_Mime_MimeEntity $entity )
 	{
-		$string = (string) $entity->getHeaders().PHP_EOL.$entity->getBody();
+		$string = (string) $entity->getHeaders() . PHP_EOL . $entity->getBody();
 
-		foreach ($entity->getChildren() as $children)
-{
-			$string .= PHP_EOL.PHP_EOL.$this->getMimeEntityString($children);
+		foreach ( $entity->getChildren() as $children )
+		{
+			$string .= PHP_EOL . PHP_EOL . $this->getMimeEntityString( $children );
 		}
 
 		return $string;

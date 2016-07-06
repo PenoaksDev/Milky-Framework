@@ -1,10 +1,17 @@
 <?php
-
 namespace Foundation\Mail\Transport;
 
 use Swift_Mime_Message;
 use GuzzleHttp\ClientInterface;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class SparkPostTransport extends Transport
 {
 	/**
@@ -24,11 +31,11 @@ class SparkPostTransport extends Transport
 	/**
 	 * Create a new SparkPost transport instance.
 	 *
-	 * @param  \GuzzleHttp\ClientInterface  $client
-	 * @param  string  $key
+	 * @param  \GuzzleHttp\ClientInterface $client
+	 * @param  string $key
 	 * @return void
 	 */
-	public function __construct(ClientInterface $client, $key)
+	public function __construct( ClientInterface $client, $key )
 	{
 		$this->client = $client;
 		$this->key = $key;
@@ -37,13 +44,13 @@ class SparkPostTransport extends Transport
 	/**
 	 * {@inheritdoc}
 	 */
-	public function send(Swift_Mime_Message $message, &$failedRecipients = null)
+	public function send( Swift_Mime_Message $message, &$failedRecipients = null )
 	{
-		$this->beforeSendPerformed($message);
+		$this->beforeSendPerformed( $message );
 
-		$recipients = $this->getRecipients($message);
+		$recipients = $this->getRecipients( $message );
 
-		$message->setBcc([]);
+		$message->setBcc( [] );
 
 		$options = [
 			'headers' => [
@@ -57,7 +64,7 @@ class SparkPostTransport extends Transport
 			],
 		];
 
-		return $this->client->post('https://api.sparkpost.com/api/v1/transmissions', $options);
+		return $this->client->post( 'https://api.sparkpost.com/api/v1/transmissions', $options );
 	}
 
 	/**
@@ -68,29 +75,29 @@ class SparkPostTransport extends Transport
 	 * @param  \Swift_Mime_Message $message
 	 * @return array
 	 */
-	protected function getRecipients(Swift_Mime_Message $message)
+	protected function getRecipients( Swift_Mime_Message $message )
 	{
 		$to = [];
 
-		if ($message->getTo())
-{
-			$to = array_merge($to, array_keys($message->getTo()));
+		if ( $message->getTo() )
+		{
+			$to = array_merge( $to, array_keys( $message->getTo() ) );
 		}
 
-		if ($message->getCc())
-{
-			$to = array_merge($to, array_keys($message->getCc()));
+		if ( $message->getCc() )
+		{
+			$to = array_merge( $to, array_keys( $message->getCc() ) );
 		}
 
-		if ($message->getBcc())
-{
-			$to = array_merge($to, array_keys($message->getBcc()));
+		if ( $message->getBcc() )
+		{
+			$to = array_merge( $to, array_keys( $message->getBcc() ) );
 		}
 
-		$recipients = array_map(function ($address)
-{
-			return compact('address');
-		}, $to);
+		$recipients = array_map( function ( $address )
+		{
+			return compact( 'address' );
+		}, $to );
 
 		return $recipients;
 	}
@@ -108,10 +115,10 @@ class SparkPostTransport extends Transport
 	/**
 	 * Set the API key being used by the transport.
 	 *
-	 * @param  string  $key
+	 * @param  string $key
 	 * @return string
 	 */
-	public function setKey($key)
+	public function setKey( $key )
 	{
 		return $this->key = $key;
 	}

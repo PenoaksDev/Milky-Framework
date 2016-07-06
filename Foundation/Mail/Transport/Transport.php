@@ -1,5 +1,4 @@
 <?php
-
 namespace Foundation\Mail\Transport;
 
 use Swift_Transport;

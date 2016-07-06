@@ -3,6 +3,7 @@ namespace Foundation;
 
 use Closure;
 use Composer\Autoload\ClassLoader;
+use Foundation\Barebones\Bootstrap;
 use Foundation\Barebones\ServiceProvider;
 use Foundation\Bindings\Bindings;
 use Foundation\Bootstrap\BootProviders;
@@ -477,7 +478,11 @@ class Framework implements HttpKernelInterface
 		$this->bindings['events']->fire( $event, [$this] );
 		if ( !$event->isCancelled() )
 		{
-			$this->bindings->make( $bootstrap )->bootstrap( $this );
+			if ( !$bootstrap instanceof Bootstrap)
+				$bootstrap = $this->bindings->make( $bootstrap );
+
+			if ( method_exists( $bootstrap, 'bootstrap' ) )
+				$this->bindings->call( [ $bootstrap, 'bootstrap' ], [$this] );
 			$this->bindings['events']->fire( new BootstrapPostEvent( $bootstrap ), [$this] );
 		}
 	}

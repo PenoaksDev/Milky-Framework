@@ -1008,7 +1008,7 @@ class Bindings implements ArrayAccess
 	 * @param  \ReflectionParameter $parameter
 	 * @return mixed
 	 *
-	 * @throws \Illuminate\Contracts\Bindings\BindingResolutionException
+	 * @throws BindingResolutionException
 	 */
 	protected function resolveNonClass( ReflectionParameter $parameter )
 	{
@@ -1287,9 +1287,7 @@ class Bindings implements ArrayAccess
 			return static::__callStatic( __METHOD__, func_get_args() );
 
 		if ( !isset( $this->aliases[$abstract] ) )
-		{
 			return $abstract;
-		}
 
 		return $this->getAlias( $this->aliases[$abstract] );
 	}
