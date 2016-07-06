@@ -59,9 +59,9 @@
     "filp/whoops": "^2.1"
   },
   "replace": {
-    "illuminate/auth": "self.version",
-    "illuminate/broadcasting": "self.version",
-    "illuminate/bus": "self.version",
+    "illuminate/auth": "self.version as 6.0",
+    "illuminate/broadcasting": "self.version as 6.0",
+    "illuminate/bus": "self.version as 6.0",
     "illuminate/cache": "self.version",
     "illuminate/config": "self.version",
     "illuminate/console": "self.version",
@@ -84,7 +84,7 @@
     "illuminate/routing": "self.version",
     "illuminate/session": "self.version",
     "illuminate/support": "self.version",
-    "illuminate/translation": "self.version",
+    "illuminate/translation": "self.version as 6.0",
     "illuminate/validation": "self.version",
     "illuminate/view": "self.version"
   },
