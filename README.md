@@ -26,18 +26,14 @@ Be sure you have the following dependencies installed.
 You can simply install Penoaks Framework by issuing the Composer `create-project` command in your terminal:
 
 ```bash
-composer create-project --prefer-dist penoaks/framework framework
+composer create-project --prefer-dist penoaks/framework-project project
 ```
 
-You can also alternatively install the Framework by simply cloning our repository and issuing the Composer `update` command in your terminal.
+You can also alternatively install the Framework by simply requiring our repository in your composer project, remember to at least reference our framework-project for example project files.
 
 ```bash
-composer update
+composer require penoaks/framework
 ```
-
-### Your First Project
-
-With Penoaks Framework, no application or user files are kept in the framework directory. Instead views, controllers, etc, are kept in the `src` (customizable) directory found in your webroot. Because of this you can simply update your installation by deleting the old framework directory and reinstalling. You should only need the `index.php` and `.htaccess` files to setup proper routing from there. Be sure you have the `mod_rewrite` apache module enabled.
 
 #### .htaccess
 

@@ -6,19 +6,15 @@
     "penoaks"
   ],
   "license": "MIT",
-  "homepage": "http://penoaks.com/development/framework",
+  "homepage": "https://github.com/PenoaksDev",
   "support": {
     "issues": "https://github.com/PenoaksDev/Framework/issues",
     "source": "https://github.com/PenoaksDev/Framework"
   },
   "authors": [
     {
-      "name": "Chiori-chan",
-      "email": "me@chiorichan.com"
-    },
-    {
       "name": "Penoaks Publishing Co.",
-      "email": "admin@penoaks.com"
+      "email": "development@penoaks.com"
     }
   ],
   "require": {
@@ -58,36 +54,6 @@
     "penoaks/framework-exceptions": "^8.6",
     "filp/whoops": "^2.1"
   },
-  "replace": {
-    "illuminate/auth": "self.version as 5.0",
-    "illuminate/broadcasting": "self.version as 5.0",
-    "illuminate/bus": "self.version as 5.0",
-    "illuminate/cache": "self.version as 5.0",
-    "illuminate/config": "self.version as 5.0",
-    "illuminate/console": "self.version as 5.0",
-    "illuminate/container": "self.version as 5.0",
-    "illuminate/contracts": "self.version as 5.0",
-    "illuminate/cookie": "self.version as 5.0",
-    "illuminate/database": "self.version as 5.0",
-    "illuminate/encryption": "self.version as 5.0",
-    "illuminate/events": "self.version as 5.0",
-    "illuminate/exception": "self.version as 5.0",
-    "illuminate/filesystem": "self.version as 5.0",
-    "illuminate/hashing": "self.version as 5.0",
-    "illuminate/http": "self.version as 5.0",
-    "illuminate/log": "self.version as 5.0",
-    "illuminate/mail": "self.version as 5.0",
-    "illuminate/pagination": "self.version as 5.0",
-    "illuminate/pipeline": "self.version as 5.0",
-    "illuminate/queue": "self.version as 5.0",
-    "illuminate/redis": "self.version as 5.0",
-    "illuminate/routing": "self.version as 5.0",
-    "illuminate/session": "self.version as 5.0",
-    "illuminate/support": "self.version as 5.0",
-    "illuminate/translation": "self.version as 5.0",
-    "illuminate/validation": "self.version as 5.0",
-    "illuminate/view": "self.version as 5.0"
-  },
   "suggest": {
     "aws/aws-sdk-php": "Required to use the SQS queue driver and SES mail driver (~3.0).",
     "doctrine/dbal": "Required to rename columns and drop SQLite columns (~2.4).",
@@ -101,6 +67,17 @@
     "symfony/css-selector": "Required to use some of the crawler integration testing tools (2.8.*|3.0.*).",
     "symfony/dom-crawler": "Required to use most of the crawler integration testing tools (2.8.*|3.0.*).",
     "symfony/psr-http-message-bridge": "Required to psr7 bridging features (0.2.*)."
+  },
+  "autoload": {
+    "classmap": [
+      "src/Queue/FrameworkQueueClosure.php"
+    ],
+    "files": [
+      "src/Functions.php"
+    ],
+    "psr-4": {
+      "Penoaks\\": "src/"
+    }
   },
   "type": "framework",
   "minimum-stability": "dev",
