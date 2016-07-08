@@ -1,18 +1,18 @@
 <?php
 
-namesapce Penoaks\Filesystem;
+namespace Penoaks\Filesystem;
 
 use RuntimeException;
 use InvalidArgumentException;
-use Foundation\Support\Collection;
+use Penoaks\Support\Collection;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Adapter\Local as LocalAdapter;
-use Foundation\Contracts\Filesystem\Filesystem as FilesystemContract;
-use Foundation\Contracts\Filesystem\Cloud as CloudFilesystemContract;
-use Foundation\Contracts\Filesystem\FileNotFoundException as ContractFileNotFoundException;
+use Penoaks\Contracts\Filesystem\Filesystem as FilesystemContract;
+use Penoaks\Contracts\Filesystem\Cloud as CloudFilesystemContract;
+use Penoaks\Contracts\Filesystem\FileNotFoundException as ContractFileNotFoundException;
 
 class FilesystemAdapter implements FilesystemContract, CloudFilesystemContract
 {

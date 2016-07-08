@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Auth\Passwords;
+namespace Penoaks\Auth\Passwords;
 
-use Foundation\Support\Str;
+use Penoaks\Support\Str;
 use InvalidArgumentException;
-use Foundation\Contracts\Auth\PasswordBrokerFactory as FactoryContract;
+use Penoaks\Contracts\Auth\PasswordBrokerFactory as FactoryContract;
 
 class PasswordBrokerManager implements FactoryContract
 {

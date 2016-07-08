@@ -1,14 +1,14 @@
 <?php
 
-namesapce Penoaks\Auth\Passwords;
+namespace Penoaks\Auth\Passwords;
 
 use Closure;
-use Foundation\Support\Arr;
+use Penoaks\Support\Arr;
 use UnexpectedValueException;
-use Foundation\Contracts\Auth\UserProvider;
-use Foundation\Contracts\Mail\Mailer as MailerContract;
-use Foundation\Contracts\Auth\PasswordBroker as PasswordBrokerContract;
-use Foundation\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Penoaks\Contracts\Auth\UserProvider;
+use Penoaks\Contracts\Mail\Mailer as MailerContract;
+use Penoaks\Contracts\Auth\PasswordBroker as PasswordBrokerContract;
+use Penoaks\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 class PasswordBroker implements PasswordBrokerContract
 {

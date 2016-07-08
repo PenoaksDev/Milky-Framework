@@ -1,22 +1,22 @@
 <?php
 
-namesapce Penoaks\Exceptions;
+namespace Penoaks\Exceptions;
 
 use Exception;
 use Psr\Log\LoggerInterface;
-use Foundation\Http\Response;
-use Foundation\Auth\AuthenticationException;
-use Foundation\Validation\ValidationException;
-use Foundation\Auth\Access\AuthorizationException;
-use Foundation\Http\Exception\HttpResponseException;
+use Penoaks\Http\Response;
+use Penoaks\Auth\AuthenticationException;
+use Penoaks\Validation\ValidationException;
+use Penoaks\Auth\Access\AuthorizationException;
+use Penoaks\Http\Exception\HttpResponseException;
 use Symfony\Component\Debug\Exception\FlattenException;
-use Foundation\Database\Eloquent\ModelNotFoundException;
+use Penoaks\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
-use Foundation\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
+use Penoaks\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 
 class Handler implements ExceptionHandlerContract
 {

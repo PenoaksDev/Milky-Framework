@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent\Relations;
+namespace Penoaks\Database\Eloquent\Relations;
 
-use Foundation\Database\Eloquent\Builder;
+use Penoaks\Database\Eloquent\Builder;
 
 class MorphPivot extends Pivot
 {

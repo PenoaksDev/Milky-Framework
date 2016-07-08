@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class SessionServiceProvider extends ServiceProvider
 {

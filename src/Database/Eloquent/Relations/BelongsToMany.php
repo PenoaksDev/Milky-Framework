@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent\Relations;
+namespace Penoaks\Database\Eloquent\Relations;
 
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Database\Eloquent\Model;
-use Foundation\Database\Eloquent\Builder;
-use Foundation\Database\Eloquent\Collection;
-use Foundation\Database\Eloquent\ModelNotFoundException;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\Database\Eloquent\Model;
+use Penoaks\Database\Eloquent\Builder;
+use Penoaks\Database\Eloquent\Collection;
+use Penoaks\Database\Eloquent\ModelNotFoundException;
 
 class BelongsToMany extends Relation
 {

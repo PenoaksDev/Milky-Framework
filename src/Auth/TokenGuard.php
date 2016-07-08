@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Http\Request;
-use Foundation\Contracts\Auth\Guard;
-use Foundation\Contracts\Auth\UserProvider;
+use Penoaks\Http\Request;
+use Penoaks\Contracts\Auth\Guard;
+use Penoaks\Contracts\Auth\UserProvider;
 
 class TokenGuard implements Guard
 {

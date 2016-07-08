@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
 use Countable;
 use ArrayIterator;
 use IteratorAggregate;
-use Foundation\Support\Arr;
-use Foundation\Http\Request;
-use Foundation\Http\Response;
+use Penoaks\Support\Arr;
+use Penoaks\Http\Request;
+use Penoaks\Http\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 

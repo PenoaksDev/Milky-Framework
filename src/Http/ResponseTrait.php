@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Http;
+namespace Penoaks\Http;
 
-use Foundation\Http\Exception\HttpResponseException;
+use Penoaks\Http\Exception\HttpResponseException;
 
 trait ResponseTrait
 {

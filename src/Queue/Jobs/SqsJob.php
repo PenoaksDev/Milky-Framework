@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Queue\Jobs;
+namespace Penoaks\Queue\Jobs;
 
 use Aws\Sqs\SqsClient;
-use Foundation\Framework;
-use Foundation\Contracts\Queue\Job as JobContract;
+use Penoaks\Framework;
+use Penoaks\Contracts\Queue\Job as JobContract;
 
 class SqsJob extends Job implements JobContract
 {

@@ -1,15 +1,15 @@
 <?php
 
-namesapce Penoaks\Bus;
+namespace Penoaks\Bus;
 
 use Closure;
 use RuntimeException;
-use Foundation\Pipeline\Pipeline;
-use Foundation\Contracts\Queue\Queue;
-use Foundation\Contracts\Queue\ShouldQueue;
-use Foundation\Framework;
-use Foundation\Contracts\Bus\QueueingDispatcher;
-use Foundation\Contracts\Bus\Dispatcher as DispatcherContract;
+use Penoaks\Pipeline\Pipeline;
+use Penoaks\Contracts\Queue\Queue;
+use Penoaks\Contracts\Queue\ShouldQueue;
+use Penoaks\Framework;
+use Penoaks\Contracts\Bus\QueueingDispatcher;
+use Penoaks\Contracts\Bus\Dispatcher as DispatcherContract;
 
 class Dispatcher implements DispatcherContract, QueueingDispatcher
 {

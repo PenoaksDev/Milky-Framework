@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Database\Schema\Grammars;
+namespace Penoaks\Database\Schema\Grammars;
 
-use Foundation\Support\Fluent;
-use Foundation\Database\Connection;
-use Foundation\Database\Schema\Blueprint;
+use Penoaks\Support\Fluent;
+use Penoaks\Database\Connection;
+use Penoaks\Database\Schema\Blueprint;
 
 class SQLiteGrammar extends Grammar
 {

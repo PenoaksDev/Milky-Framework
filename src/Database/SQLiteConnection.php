@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
-use Foundation\Database\Query\Processors\SQLiteProcessor;
+use Penoaks\Database\Query\Processors\SQLiteProcessor;
 use Doctrine\DBAL\Driver\PDOSqlite\Driver as DoctrineDriver;
-use Foundation\Database\Query\Grammars\SQLiteGrammar as QueryGrammar;
-use Foundation\Database\Schema\Grammars\SQLiteGrammar as SchemaGrammar;
+use Penoaks\Database\Query\Grammars\SQLiteGrammar as QueryGrammar;
+use Penoaks\Database\Schema\Grammars\SQLiteGrammar as SchemaGrammar;
 
 class SQLiteConnection extends Connection
 {

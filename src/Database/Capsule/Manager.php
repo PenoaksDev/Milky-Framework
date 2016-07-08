@@ -1,14 +1,14 @@
 <?php
 
-namesapce Penoaks\Database\Capsule;
+namespace Penoaks\Database\Capsule;
 
 use PDO;
-use Foundation\Framework;
-use Foundation\Database\DatabaseManager;
-use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Support\Traits\CapsuleManagerTrait;
-use Foundation\Database\Eloquent\Model as Eloquent;
-use Foundation\Database\Connectors\ConnectionFactory;
+use Penoaks\Framework;
+use Penoaks\Database\DatabaseManager;
+use Penoaks\Contracts\Events\Dispatcher;
+use Penoaks\Support\Traits\CapsuleManagerTrait;
+use Penoaks\Database\Eloquent\Model as Eloquent;
+use Penoaks\Database\Connectors\ConnectionFactory;
 
 class Manager
 {

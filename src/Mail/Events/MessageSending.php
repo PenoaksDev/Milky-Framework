@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Mail\Events;
+namespace Penoaks\Mail\Events;
 
 class MessageSending
 {

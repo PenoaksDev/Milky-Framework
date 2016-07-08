@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Queue\Connectors;
+namespace Penoaks\Queue\Connectors;
 
 interface ConnectorInterface
 {

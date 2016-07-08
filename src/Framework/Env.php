@@ -1,9 +1,11 @@
 <?php
-namesapce Penoaks\Framework;
+namespace Penoaks\Framework;
 
 use Closure;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Events\EnvMissingEvent;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 
 class Env implements \ArrayAccess
 {
@@ -23,6 +25,7 @@ class Env implements \ArrayAccess
 	 */
 	public function __construct( array $params )
 	{
+		static::$selfInstance = $this;
 		$this->variables = $params;
 	}
 
@@ -34,11 +37,10 @@ class Env implements \ArrayAccess
 		{
 			if ( is_array( $params ) )
 				$this->variables = array_merge_recursive( $this->variables, $params );
+			else if ( is_null( $value ) )
+				unset( $this->variables[$params] );
 			else
-				if ( is_null( $value ) )
-					unset( $this->variables[$params] );
-				else
-					$this->variables[$params] = $value;
+				$this->variables[$params] = $value;
 		}
 	}
 
@@ -52,11 +54,22 @@ class Env implements \ArrayAccess
 		$keys = explode( '.', $key );
 		$value = static::i()->variables;
 
-		foreach ( $keys as $key )
+		foreach ( $keys as $k )
 		{
-			if ( !is_array( $value ) || !array_key_exists( $key, $value ) )
-				return $def;
-			$value = $value[$key];
+			if ( !is_array( $value ) || !array_key_exists( $k, $value ) )
+			{
+				$value = null;
+				break;
+			}
+			$value = $value[$k];
+		}
+
+		if ( is_null( $value ) )
+		{
+			$event = new EnvMissingEvent( $keys, $def );
+			Bindings::get( 'events' )->fire( $event );
+
+			return $event->isCancelled() ? $def : $event->getDefault();
 		}
 
 		return $value;

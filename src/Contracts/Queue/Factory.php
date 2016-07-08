@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Queue;
+namespace Penoaks\Contracts\Queue;
 
 interface Factory
 {

@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
 use Exception;
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 use Symfony\Component\Process\ProcessUtils;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\PhpExecutableFinder;

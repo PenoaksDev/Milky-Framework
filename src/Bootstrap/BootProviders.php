@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\Bootstrap;
+namespace Penoaks\Bootstrap;
 
-use Foundation\Framework;
-use Foundation\Interfaces\Bootstrap;
+use Penoaks\Framework;
+use Penoaks\Interfaces\Bootstrap;
 
 class BootProviders implements Bootstrap
 {

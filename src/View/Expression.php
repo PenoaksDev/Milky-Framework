@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\View;
+namespace Penoaks\View;
 
-use Foundation\Support\HtmlString;
+use Penoaks\Support\HtmlString;
 
 /**
  * @deprecated since version 5.2. Use Penoaks\Support\HtmlString.

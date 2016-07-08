@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 use Exception;
-use Foundation\Contracts\Queue\Job;
-use Foundation\Queue\Jobs\SyncJob;
+use Penoaks\Contracts\Queue\Job;
+use Penoaks\Queue\Jobs\SyncJob;
 use Throwable;
 
 class SyncQueue extends Queue

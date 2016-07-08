@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
 use Carbon\Carbon;
 use SessionHandlerInterface;
-use Foundation\Contracts\Auth\Guard;
-use Foundation\Database\ConnectionInterface;
-use Foundation\Framework;
+use Penoaks\Contracts\Auth\Guard;
+use Penoaks\Database\ConnectionInterface;
+use Penoaks\Framework;
 
 class DatabaseSessionHandler implements SessionHandlerInterface, ExistenceAwareInterface
 {

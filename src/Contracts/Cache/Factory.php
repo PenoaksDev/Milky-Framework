@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Cache;
+namespace Penoaks\Contracts\Cache;
 
 interface Factory
 {

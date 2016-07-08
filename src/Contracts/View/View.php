@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Contracts\View;
+namespace Penoaks\Contracts\View;
 
-use Foundation\Contracts\Support\Renderable;
+use Penoaks\Contracts\Support\Renderable;
 
 interface View extends Renderable
 {

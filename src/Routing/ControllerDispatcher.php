@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
-use Foundation\Http\Request;
-use Foundation\Support\Collection;
-use Foundation\Framework;
+use Penoaks\Http\Request;
+use Penoaks\Support\Collection;
+use Penoaks\Framework;
 
 class ControllerDispatcher
 {

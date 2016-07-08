@@ -3,7 +3,7 @@
 namespace {{namespace}}Http\Controllers;
 
 use {{namespace}}Http\Requests;
-use Foundation\Http\Request;
+use Penoaks\Http\Request;
 
 class HomeController extends Controller
 {

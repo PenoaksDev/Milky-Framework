@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Auth\Access;
+namespace Penoaks\Auth\Access;
 
 class Response
 {

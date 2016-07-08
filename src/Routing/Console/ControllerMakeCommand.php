@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Routing\Console;
+namespace Penoaks\Routing\Console;
 
-use Foundation\Console\GeneratorCommand;
+use Penoaks\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 class ControllerMakeCommand extends GeneratorCommand

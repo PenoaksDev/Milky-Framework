@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database\Migrations;
+namespace Penoaks\Database\Migrations;
 
 abstract class Migration
 {

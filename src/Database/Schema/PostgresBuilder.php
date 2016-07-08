@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database\Schema;
+namespace Penoaks\Database\Schema;
 
 class PostgresBuilder extends Builder
 {

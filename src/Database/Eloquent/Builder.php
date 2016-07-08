@@ -1,15 +1,15 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent;
+namespace Penoaks\Database\Eloquent;
 
 use Closure;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Pagination\Paginator;
-use Foundation\Database\Query\Expression;
-use Foundation\Pagination\LengthAwarePaginator;
-use Foundation\Database\Eloquent\Relations\Relation;
-use Foundation\Database\Query\Builder as QueryBuilder;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\Pagination\Paginator;
+use Penoaks\Database\Query\Expression;
+use Penoaks\Pagination\LengthAwarePaginator;
+use Penoaks\Database\Eloquent\Relations\Relation;
+use Penoaks\Database\Query\Builder as QueryBuilder;
 
 class Builder
 {

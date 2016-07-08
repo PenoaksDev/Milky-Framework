@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
-use Foundation\Queue\Jobs\RedisJob;
-use Foundation\Redis\Database;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Queue\Jobs\RedisJob;
+use Penoaks\Redis\Database;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 
 class RedisQueue extends Queue
 {

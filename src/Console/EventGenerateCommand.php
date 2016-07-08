@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Support\Str;
-use Foundation\Console\Command;
+use Penoaks\Support\Str;
+use Penoaks\Console\Command;
 
 class EventGenerateCommand extends Command
 {

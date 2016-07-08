@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
 use Psy\Shell;
 use Psy\Configuration;
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 
 class TinkerCommand extends Command

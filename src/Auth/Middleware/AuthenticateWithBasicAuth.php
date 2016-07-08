@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Auth\Middleware;
+namespace Penoaks\Auth\Middleware;
 
 use Closure;
-use Foundation\Contracts\Auth\Factory as AuthFactory;
+use Penoaks\Contracts\Auth\Factory as AuthFactory;
 
 class AuthenticateWithBasicAuth
 {

@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Auth\Passwords;
+namespace Penoaks\Auth\Passwords;
 
 trait CanResetPassword
 {

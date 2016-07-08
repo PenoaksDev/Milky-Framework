@@ -1,8 +1,8 @@
 <?php
 
-use Foundation\Testing\WithoutMiddleware;
-use Foundation\Testing\DatabaseMigrations;
-use Foundation\Testing\DatabaseTransactions;
+use Penoaks\Testing\WithoutMiddleware;
+use Penoaks\Testing\DatabaseMigrations;
+use Penoaks\Testing\DatabaseTransactions;
 
 class DummyClass extends TestCase
 {

@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
 use ClassPreloader\Factory;
-use Foundation\Console\Command;
-use Foundation\Support\Composer;
+use Penoaks\Console\Command;
+use Penoaks\Support\Composer;
 use Symfony\Component\Console\Input\InputOption;
 use ClassPreloader\Exceptions\VisitorExceptionInterface;
 

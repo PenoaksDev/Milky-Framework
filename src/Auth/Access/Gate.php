@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Auth\Access;
+namespace Penoaks\Auth\Access;
 
-use Foundation\Support\Str;
+use Penoaks\Support\Str;
 use InvalidArgumentException;
-use Foundation\Framework;
-use Foundation\Contracts\Auth\Access\Gate as GateContract;
+use Penoaks\Framework;
+use Penoaks\Contracts\Auth\Access\Gate as GateContract;
 
 class Gate implements GateContract
 {

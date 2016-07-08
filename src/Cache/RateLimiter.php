@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
-use Foundation\Contracts\Cache\Repository as Cache;
+use Penoaks\Contracts\Cache\Repository as Cache;
 
 class RateLimiter
 {

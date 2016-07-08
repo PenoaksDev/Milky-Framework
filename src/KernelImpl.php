@@ -1,7 +1,7 @@
 <?php
-namespace Foundation;
+namespace Penoaks;
 
-use Foundation\Barebones\Kernel;
+use Penoaks\Barebones\Kernel;
 
 /**
  * The MIT License (MIT)

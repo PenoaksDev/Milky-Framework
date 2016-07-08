@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Cache\Console;
+namespace Penoaks\Cache\Console;
 
-use Foundation\Console\Command;
-use Foundation\Cache\CacheManager;
+use Penoaks\Console\Command;
+use Penoaks\Cache\CacheManager;
 use Symfony\Component\Console\Input\InputArgument;
 
 class ClearCommand extends Command

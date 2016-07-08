@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
-use Foundation\Support\ServiceProvider;
-use Foundation\Database\Console\Seeds\SeedCommand;
+use Penoaks\Support\ServiceProvider;
+use Penoaks\Database\Console\Seeds\SeedCommand;
 
 class SeedServiceProvider extends ServiceProvider
 {

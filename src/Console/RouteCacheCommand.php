@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Console\Command;
-use Foundation\Filesystem\Filesystem;
-use Foundation\Routing\RouteCollection;
+use Penoaks\Console\Command;
+use Penoaks\Filesystem\Filesystem;
+use Penoaks\Routing\RouteCollection;
 
 class RouteCacheCommand extends Command
 {

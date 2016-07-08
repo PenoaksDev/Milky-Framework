@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Validation;
+namespace Penoaks\Validation;
 
-use Foundation\Validation\ValidationException as BaseException;
+use Penoaks\Validation\ValidationException as BaseException;
 
 /**
  * @deprecated since 5.2.7. Use Penoaks\Validation\ValidationException.

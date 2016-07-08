@@ -2,7 +2,7 @@
 
 namespace DummyNamespace;
 
-use Foundation\Http\Request;
+use Penoaks\Http\Request;
 
 use DummyRootNamespaceHttp\Requests;
 use DummyRootNamespaceHttp\Controllers\Controller;

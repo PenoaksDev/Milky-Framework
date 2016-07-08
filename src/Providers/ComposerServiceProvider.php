@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\Providers;
+namespace Penoaks\Providers;
 
-use Foundation\Support\Composer;
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\Composer;
+use Penoaks\Support\ServiceProvider;
 
 /**
  * The MIT License (MIT)

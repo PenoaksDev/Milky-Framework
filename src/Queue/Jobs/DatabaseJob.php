@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Queue\Jobs;
+namespace Penoaks\Queue\Jobs;
 
-use Foundation\Queue\DatabaseQueue;
-use Foundation\Framework;
-use Foundation\Contracts\Queue\Job as JobContract;
+use Penoaks\Queue\DatabaseQueue;
+use Penoaks\Framework;
+use Penoaks\Contracts\Queue\Job as JobContract;
 
 class DatabaseJob extends Job implements JobContract
 {

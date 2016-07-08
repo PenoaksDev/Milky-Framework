@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Routing\Exceptions;
+namespace Penoaks\Routing\Exceptions;
 
 use Exception;
 

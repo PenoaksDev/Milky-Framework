@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Events;
+namespace Penoaks\Events;
 
 /**
  * The MIT License (MIT)
@@ -10,8 +10,8 @@ namesapce Penoaks\Events;
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
 
-use Foundation\Barebones\Event;
-use Foundation\Barebones\ServiceProvider;
+use Penoaks\Barebones\Event;
+use Penoaks\Barebones\ServiceProvider;
 
 class ServiceProviderPostEvent implements Event
 {

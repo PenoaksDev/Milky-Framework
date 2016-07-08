@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Auth\Access\Gate;
-use Foundation\Support\ServiceProvider;
-use Foundation\Contracts\Auth\Access\Gate as GateContract;
-use Foundation\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Penoaks\Auth\Access\Gate;
+use Penoaks\Support\ServiceProvider;
+use Penoaks\Contracts\Auth\Access\Gate as GateContract;
+use Penoaks\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
 class AuthServiceProvider extends ServiceProvider
 {

@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Pipeline;
+namespace Penoaks\Contracts\Pipeline;
 
 use Closure;
 

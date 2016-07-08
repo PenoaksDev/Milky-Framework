@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Redis;
+namespace Penoaks\Contracts\Redis;
 
 interface Database
 {

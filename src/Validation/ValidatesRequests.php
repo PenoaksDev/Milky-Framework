@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Validation;
+namespace Penoaks\Validation;
 
-use Foundation\Http\Request;
-use Foundation\Http\JsonResponse;
-use Foundation\Routing\UrlGenerator;
-use Foundation\Contracts\Validation\Factory;
-use Foundation\Contracts\Validation\Validator;
+use Penoaks\Http\Request;
+use Penoaks\Http\JsonResponse;
+use Penoaks\Routing\UrlGenerator;
+use Penoaks\Contracts\Validation\Factory;
+use Penoaks\Contracts\Validation\Validator;
 
 trait ValidatesRequests
 {

@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Http\Middleware;
+namespace Penoaks\Http\Middleware;
 
 use Closure;
-use Foundation\Contracts\Auth\Access\Gate;
+use Penoaks\Contracts\Auth\Access\Gate;
 
 class Authorize
 {

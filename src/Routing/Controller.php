@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
 use BadMethodCallException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

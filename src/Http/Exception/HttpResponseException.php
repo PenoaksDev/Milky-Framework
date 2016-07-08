@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Http\Exception;
+namespace Penoaks\Http\Exception;
 
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;

@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Lang;
+namespace Penoaks\Contracts\Lang;
 
 use Exception;
 

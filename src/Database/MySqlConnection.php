@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
-use Foundation\Database\Schema\MySqlBuilder;
-use Foundation\Database\Query\Processors\MySqlProcessor;
+use Penoaks\Database\Schema\MySqlBuilder;
+use Penoaks\Database\Query\Processors\MySqlProcessor;
 use Doctrine\DBAL\Driver\PDOMySql\Driver as DoctrineDriver;
-use Foundation\Database\Query\Grammars\MySqlGrammar as QueryGrammar;
-use Foundation\Database\Schema\Grammars\MySqlGrammar as SchemaGrammar;
+use Penoaks\Database\Query\Grammars\MySqlGrammar as QueryGrammar;
+use Penoaks\Database\Schema\Grammars\MySqlGrammar as SchemaGrammar;
 
 class MySqlConnection extends Connection
 {

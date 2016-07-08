@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
 use Exception;
-use Foundation\Support\Arr;
-use Foundation\Filesystem\Filesystem;
-use Foundation\Contracts\Cache\Store;
+use Penoaks\Support\Arr;
+use Penoaks\Filesystem\Filesystem;
+use Penoaks\Contracts\Cache\Store;
 
 class FileStore implements Store
 {

@@ -1,23 +1,23 @@
 <?php
 
-namesapce Penoaks\Testing\Concerns;
+namespace Penoaks\Testing\Concerns;
 
 use Closure;
 use InvalidArgumentException;
-use Foundation\Http\UploadedFile;
+use Penoaks\Http\UploadedFile;
 use Symfony\Component\DomCrawler\Form;
 use Symfony\Component\DomCrawler\Crawler;
-use Foundation\Testing\HttpException;
-use Foundation\Testing\Constraints\HasText;
-use Foundation\Testing\Constraints\HasLink;
-use Foundation\Testing\Constraints\HasValue;
-use Foundation\Testing\Constraints\HasSource;
-use Foundation\Testing\Constraints\IsChecked;
-use Foundation\Testing\Constraints\HasElement;
-use Foundation\Testing\Constraints\IsSelected;
-use Foundation\Testing\Constraints\HasInElement;
-use Foundation\Testing\Constraints\PageConstraint;
-use Foundation\Testing\Constraints\ReversePageConstraint;
+use Penoaks\Testing\HttpException;
+use Penoaks\Testing\Constraints\HasText;
+use Penoaks\Testing\Constraints\HasLink;
+use Penoaks\Testing\Constraints\HasValue;
+use Penoaks\Testing\Constraints\HasSource;
+use Penoaks\Testing\Constraints\IsChecked;
+use Penoaks\Testing\Constraints\HasElement;
+use Penoaks\Testing\Constraints\IsSelected;
+use Penoaks\Testing\Constraints\HasInElement;
+use Penoaks\Testing\Constraints\PageConstraint;
+use Penoaks\Testing\Constraints\ReversePageConstraint;
 use PHPUnit_Framework_ExpectationFailedException as PHPUnitException;
 
 trait InteractsWithPages

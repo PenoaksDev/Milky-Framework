@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
 use PDO;
 use Closure;
@@ -9,14 +9,14 @@ use Throwable;
 use LogicException;
 use RuntimeException;
 use DateTimeInterface;
-use Foundation\Support\Arr;
-use Foundation\Database\Query\Expression;
-use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Database\Query\Processors\Processor;
+use Penoaks\Support\Arr;
+use Penoaks\Database\Query\Expression;
+use Penoaks\Contracts\Events\Dispatcher;
+use Penoaks\Database\Query\Processors\Processor;
 use Doctrine\DBAL\Connection as DoctrineConnection;
-use Foundation\Database\Query\Builder as QueryBuilder;
-use Foundation\Database\Schema\Builder as SchemaBuilder;
-use Foundation\Database\Query\Grammars\Grammar as QueryGrammar;
+use Penoaks\Database\Query\Builder as QueryBuilder;
+use Penoaks\Database\Schema\Builder as SchemaBuilder;
+use Penoaks\Database\Query\Grammars\Grammar as QueryGrammar;
 
 class Connection implements ConnectionInterface
 {

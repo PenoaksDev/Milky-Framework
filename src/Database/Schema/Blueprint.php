@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Database\Schema;
+namespace Penoaks\Database\Schema;
 
 use Closure;
-use Foundation\Support\Fluent;
-use Foundation\Database\Connection;
-use Foundation\Database\Schema\Grammars\Grammar;
+use Penoaks\Support\Fluent;
+use Penoaks\Database\Connection;
+use Penoaks\Database\Schema\Grammars\Grammar;
 
 class Blueprint
 {

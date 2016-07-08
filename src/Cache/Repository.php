@@ -1,16 +1,16 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
 use Closure;
 use DateTime;
 use ArrayAccess;
 use Carbon\Carbon;
 use BadMethodCallException;
-use Foundation\Contracts\Cache\Store;
-use Foundation\Support\Traits\Macroable;
-use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Contracts\Cache\Repository as CacheContract;
+use Penoaks\Contracts\Cache\Store;
+use Penoaks\Support\Traits\Macroable;
+use Penoaks\Contracts\Events\Dispatcher;
+use Penoaks\Contracts\Cache\Repository as CacheContract;
 
 class Repository implements CacheContract, ArrayAccess
 {

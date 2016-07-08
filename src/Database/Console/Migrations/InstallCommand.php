@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Database\Console\Migrations;
+namespace Penoaks\Database\Console\Migrations;
 
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
-use Foundation\Database\Migrations\MigrationRepositoryInterface;
+use Penoaks\Database\Migrations\MigrationRepositoryInterface;
 
 class InstallCommand extends Command
 {

@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Events\Traits;
+namespace Penoaks\Events\Traits;
 
 /**
  * The MIT License (MIT)

@@ -1,18 +1,18 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
-use Foundation\Support\ServiceProvider;
-use Foundation\Database\Migrations\Migrator;
-use Foundation\Database\Migrations\MigrationCreator;
-use Foundation\Database\Console\Migrations\ResetCommand;
-use Foundation\Database\Console\Migrations\StatusCommand;
-use Foundation\Database\Console\Migrations\InstallCommand;
-use Foundation\Database\Console\Migrations\MigrateCommand;
-use Foundation\Database\Console\Migrations\RefreshCommand;
-use Foundation\Database\Console\Migrations\RollbackCommand;
-use Foundation\Database\Console\Migrations\MigrateMakeCommand;
-use Foundation\Database\Migrations\DatabaseMigrationRepository;
+use Penoaks\Support\ServiceProvider;
+use Penoaks\Database\Migrations\Migrator;
+use Penoaks\Database\Migrations\MigrationCreator;
+use Penoaks\Database\Console\Migrations\ResetCommand;
+use Penoaks\Database\Console\Migrations\StatusCommand;
+use Penoaks\Database\Console\Migrations\InstallCommand;
+use Penoaks\Database\Console\Migrations\MigrateCommand;
+use Penoaks\Database\Console\Migrations\RefreshCommand;
+use Penoaks\Database\Console\Migrations\RollbackCommand;
+use Penoaks\Database\Console\Migrations\MigrateMakeCommand;
+use Penoaks\Database\Migrations\DatabaseMigrationRepository;
 
 class MigrationServiceProvider extends ServiceProvider
 {

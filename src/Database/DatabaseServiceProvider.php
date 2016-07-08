@@ -1,14 +1,14 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
 use Faker\Factory as FakerFactory;
 use Faker\Generator as FakerGenerator;
-use Foundation\Database\Eloquent\Model;
-use Foundation\Support\ServiceProvider;
-use Foundation\Database\Eloquent\QueueEntityResolver;
-use Foundation\Database\Connectors\ConnectionFactory;
-use Foundation\Database\Eloquent\Factory as EloquentFactory;
+use Penoaks\Database\Eloquent\Model;
+use Penoaks\Support\ServiceProvider;
+use Penoaks\Database\Eloquent\QueueEntityResolver;
+use Penoaks\Database\Connectors\ConnectionFactory;
+use Penoaks\Database\Eloquent\Factory as EloquentFactory;
 
 class DatabaseServiceProvider extends ServiceProvider
 {

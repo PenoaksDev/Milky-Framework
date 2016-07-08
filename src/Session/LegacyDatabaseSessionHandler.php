@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
 use Carbon\Carbon;
 use SessionHandlerInterface;
-use Foundation\Database\ConnectionInterface;
+use Penoaks\Database\ConnectionInterface;
 
 /**
  * @deprecated since version 5.2. Use Penoaks\Session\DatabaseSessionHandler.

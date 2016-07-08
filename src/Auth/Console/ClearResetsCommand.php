@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Auth\Console;
+namespace Penoaks\Auth\Console;
 
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 
 class ClearResetsCommand extends Command
 {

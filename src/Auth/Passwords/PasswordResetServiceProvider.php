@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Auth\Passwords;
+namespace Penoaks\Auth\Passwords;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class PasswordResetServiceProvider extends ServiceProvider
 {

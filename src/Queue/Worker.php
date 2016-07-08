@@ -1,15 +1,15 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 use Exception;
 use Throwable;
-use Foundation\Contracts\Queue\Job;
-use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Contracts\Debug\ExceptionHandler;
-use Foundation\Queue\Failed\FailedJobProviderInterface;
+use Penoaks\Contracts\Queue\Job;
+use Penoaks\Contracts\Events\Dispatcher;
+use Penoaks\Contracts\Debug\ExceptionHandler;
+use Penoaks\Queue\Failed\FailedJobProviderInterface;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
-use Foundation\Contracts\Cache\Repository as CacheContract;
+use Penoaks\Contracts\Cache\Repository as CacheContract;
 
 class Worker
 {

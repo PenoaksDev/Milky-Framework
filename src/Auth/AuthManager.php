@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
 use Closure;
 use InvalidArgumentException;
-use Foundation\Contracts\Auth\Factory as FactoryContract;
+use Penoaks\Contracts\Auth\Factory as FactoryContract;
 
 class AuthManager implements FactoryContract
 {

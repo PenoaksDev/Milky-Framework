@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Routing\Events;
+namespace Penoaks\Routing\Events;
 
 class RouteMatched
 {

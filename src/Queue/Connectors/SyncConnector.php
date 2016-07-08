@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Queue\Connectors;
+namespace Penoaks\Queue\Connectors;
 
-use Foundation\Queue\SyncQueue;
+use Penoaks\Queue\SyncQueue;
 
 class SyncConnector implements ConnectorInterface
 {

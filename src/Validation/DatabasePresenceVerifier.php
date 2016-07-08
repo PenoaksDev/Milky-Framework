@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Validation;
+namespace Penoaks\Validation;
 
-use Foundation\Support\Str;
-use Foundation\Database\ConnectionResolverInterface;
+use Penoaks\Support\Str;
+use Penoaks\Database\ConnectionResolverInterface;
 
 class DatabasePresenceVerifier implements PresenceVerifierInterface
 {

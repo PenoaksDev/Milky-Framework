@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent;
+namespace Penoaks\Database\Eloquent;
 
 use Closure;
 use Faker\Generator as Faker;

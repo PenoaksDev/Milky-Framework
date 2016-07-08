@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Pipeline;
+namespace Penoaks\Pipeline;
 
 use Closure;
-use Foundation\Bindings\Bindings;
-use Foundation\Contracts\Pipeline\Pipeline as PipelineContract;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Contracts\Pipeline\Pipeline as PipelineContract;
 
 class Pipeline implements PipelineContract
 {

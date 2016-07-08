@@ -1,14 +1,23 @@
 <?php
-namesapce Penoaks\Bootstrap;
+namespace Penoaks\Bootstrap;
 
 use ErrorException;
 use Exception;
-use Foundation\Framework;
-use Foundation\Interfaces\Bootstrap;
+use Penoaks\Barebones\Bootstrap;
+use Penoaks\Barebones\ExceptionHandler;
+use Penoaks\Framework;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class HandleExceptions implements Bootstrap
 {
 	/**
@@ -21,45 +30,43 @@ class HandleExceptions implements Bootstrap
 	/**
 	 * Bootstrap the given application.
 	 *
-	 * @param  \Penoaks\Framework  $fw
+	 * @param  \Penoaks\Framework $fw
 	 * @return void
 	 */
-	public function bootstrap(Framework $fw)
+	public function bootstrap( Framework $fw )
 	{
 		$this->fw = $fw;
 
-		error_reporting(-1);
+		error_reporting( -1 );
 
-		set_error_handler([$this, 'handleError']);
+		set_error_handler( [$this, 'handleError'] );
 
-		set_exception_handler([$this, 'handleException']);
+		set_exception_handler( [$this, 'handleException'] );
 
-		register_shutdown_function([$this, 'handleShutdown']);
+		register_shutdown_function( [$this, 'handleShutdown'] );
 
-		if (! $fw->environment('testing'))
-{
-			ini_set('display_errors', 'Off');
+		if ( !$fw->environment( 'production' ) )
+		{
+			ini_set( 'display_errors', 'On' );
 		}
 	}
 
 	/**
 	 * Convert a PHP error to an ErrorException.
 	 *
-	 * @param  int  $level
-	 * @param  string  $message
-	 * @param  string  $file
-	 * @param  int  $line
-	 * @param  array  $context
+	 * @param  int $level
+	 * @param  string $message
+	 * @param  string $file
+	 * @param  int $line
+	 * @param  array $context
 	 * @return void
 	 *
 	 * @throws \ErrorException
 	 */
-	public function handleError($level, $message, $file = '', $line = 0, $context = [])
+	public function handleError( $level, $message, $file = '', $line = 0, $context = [] )
 	{
-		if (error_reporting() & $level)
-{
-			throw new ErrorException($message, 0, $level, $file, $line);
-		}
+		if ( error_reporting() & $level )
+			throw new ErrorException( $message, 0, $level, $file, $line );
 	}
 
 	/**
@@ -69,48 +76,48 @@ class HandleExceptions implements Bootstrap
 	 * the HTTP and Console kernels. But, fatal error exceptions must
 	 * be handled differently since they are not normal exceptions.
 	 *
-	 * @param  \Throwable  $e
+	 * @param  \Throwable $e
 	 * @return void
 	 */
-	public function handleException($e)
+	public function handleException( $e )
 	{
-		if (! $e instanceof Exception)
-{
-			$e = new FatalThrowableError($e);
+		if ( !$e instanceof Exception )
+		{
+			$e = new FatalThrowableError( $e );
 		}
 
-		$this->getExceptionHandler()->report($e);
+		$this->getExceptionHandler()->report( $e );
 
-		if ($this->fw->runningInConsole())
-{
-			$this->renderForConsole($e);
+		if ( $this->fw->runningInConsole() )
+		{
+			$this->renderForConsole( $e );
 		}
-else
-{
-			$this->renderHttpResponse($e);
+		else
+		{
+			$this->renderHttpResponse( $e );
 		}
 	}
 
 	/**
 	 * Render an exception to the console.
 	 *
-	 * @param  \Exception  $e
+	 * @param  \Exception $e
 	 * @return void
 	 */
-	protected function renderForConsole(Exception $e)
+	protected function renderForConsole( Exception $e )
 	{
-		$this->getExceptionHandler()->renderForConsole(new ConsoleOutput, $e);
+		$this->getExceptionHandler()->renderForConsole( new ConsoleOutput, $e );
 	}
 
 	/**
 	 * Render an exception as an HTTP response and send it.
 	 *
-	 * @param  \Exception  $e
+	 * @param  \Exception $e
 	 * @return void
 	 */
-	protected function renderHttpResponse(Exception $e)
+	protected function renderHttpResponse( Exception $e )
 	{
-		$this->getExceptionHandler()->render($this->fw->bindings['request'], $e)->send();
+		$this->getExceptionHandler()->render( $this->fw->bindings['request'], $e )->send();
 	}
 
 	/**
@@ -120,44 +127,42 @@ else
 	 */
 	public function handleShutdown()
 	{
-		if (! is_null($error = error_get_last()) && $this->isFatal($error['type']))
-{
-			$this->handleException($this->fatalExceptionFromError($error, 0));
+		if ( !is_null( $error = error_get_last() ) && $this->isFatal( $error['type'] ) )
+		{
+			$this->handleException( $this->fatalExceptionFromError( $error, 0 ) );
 		}
 	}
 
 	/**
 	 * Create a new fatal exception instance from an error array.
 	 *
-	 * @param  array  $error
-	 * @param  int|null  $traceOffset
+	 * @param  array $error
+	 * @param  int|null $traceOffset
 	 * @return \Symfony\Component\Debug\Exception\FatalErrorException
 	 */
-	protected function fatalExceptionFromError(array $error, $traceOffset = null)
+	protected function fatalExceptionFromError( array $error, $traceOffset = null )
 	{
-		return new FatalErrorException(
-			$error['message'], $error['type'], 0, $error['file'], $error['line'], $traceOffset
-		);
+		return new FatalErrorException( $error['message'], $error['type'], 0, $error['file'], $error['line'], $traceOffset );
 	}
 
 	/**
 	 * Determine if the error type is fatal.
 	 *
-	 * @param  int  $type
+	 * @param  int $type
 	 * @return bool
 	 */
-	protected function isFatal($type)
+	protected function isFatal( $type )
 	{
-		return in_array($type, [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE]);
+		return in_array( $type, [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE] );
 	}
 
 	/**
 	 * Get an instance of the exception handler.
 	 *
-	 * @return \Penoaks\Contracts\Debug\ExceptionHandler
+	 * @return ExceptionHandler
 	 */
 	protected function getExceptionHandler()
 	{
-		return $this->fw->make('Penoaks\Contracts\Debug\ExceptionHandler');
+		return $this->fw->bindings->make( 'Penoaks\Barebones\ExceptionHandler' );
 	}
 }

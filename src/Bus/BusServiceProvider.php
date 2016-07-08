@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Bus;
+namespace Penoaks\Bus;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class BusServiceProvider extends ServiceProvider
 {

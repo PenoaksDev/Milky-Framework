@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
-use Foundation\Contracts\Queue\Job;
-use Foundation\Contracts\Bus\Dispatcher;
+use Penoaks\Contracts\Queue\Job;
+use Penoaks\Contracts\Bus\Dispatcher;
 
 class CallQueuedHandler
 {

@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database\Console\Migrations;
+namespace Penoaks\Database\Console\Migrations;
 
-use Foundation\Support\Composer;
-use Foundation\Database\Migrations\MigrationCreator;
+use Penoaks\Support\Composer;
+use Penoaks\Database\Migrations\MigrationCreator;
 
 class MigrateMakeCommand extends BaseCommand
 {

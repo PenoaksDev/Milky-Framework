@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Pagination;
+namespace Penoaks\Pagination;
 
-use Foundation\Contracts\Pagination\LengthAwarePaginator as PaginatorContract;
+use Penoaks\Contracts\Pagination\LengthAwarePaginator as PaginatorContract;
 
 class UrlWindow
 {

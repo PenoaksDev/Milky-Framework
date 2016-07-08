@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Testing\Constraints;
+namespace Penoaks\Testing\Constraints;
 
 class HasText extends PageConstraint
 {

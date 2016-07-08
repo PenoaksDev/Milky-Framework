@@ -1,18 +1,18 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
 use RuntimeException;
-use Foundation\Support\Str;
-use Foundation\Http\Response;
-use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Contracts\Auth\UserProvider;
-use Foundation\Contracts\Auth\StatefulGuard;
+use Penoaks\Support\Str;
+use Penoaks\Http\Response;
+use Penoaks\Contracts\Events\Dispatcher;
+use Penoaks\Contracts\Auth\UserProvider;
+use Penoaks\Contracts\Auth\StatefulGuard;
 use Symfony\Component\HttpFoundation\Request;
-use Foundation\Contracts\Auth\SupportsBasicAuth;
-use Foundation\Contracts\Cookie\QueueingFactory as CookieJar;
+use Penoaks\Contracts\Auth\SupportsBasicAuth;
+use Penoaks\Contracts\Cookie\QueueingFactory as CookieJar;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Foundation\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Penoaks\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
 class SessionGuard implements StatefulGuard, SupportsBasicAuth
 {

@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Redis;
+namespace Penoaks\Redis;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class RedisServiceProvider extends ServiceProvider
 {

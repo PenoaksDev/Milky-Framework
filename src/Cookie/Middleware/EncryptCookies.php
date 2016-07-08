@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Cookie\Middleware;
+namespace Penoaks\Cookie\Middleware;
 
 use Closure;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Foundation\Contracts\Encryption\DecryptException;
-use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
+use Penoaks\Contracts\Encryption\DecryptException;
+use Penoaks\Contracts\Encryption\Encrypter as EncrypterContract;
 
 class EncryptCookies
 {

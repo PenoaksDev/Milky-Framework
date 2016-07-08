@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Penoaks\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
 /**
  * These methods are typically the same across all guards.

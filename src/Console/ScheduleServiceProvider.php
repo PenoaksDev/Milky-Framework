@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class ScheduleServiceProvider extends ServiceProvider
 {

@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\View\Compilers;
+namespace Penoaks\View\Compilers;
 
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 
 class BladeCompiler extends Compiler implements CompilerInterface
 {

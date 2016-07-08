@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Bus;
+namespace Penoaks\Contracts\Bus;
 
 interface Dispatcher
 {

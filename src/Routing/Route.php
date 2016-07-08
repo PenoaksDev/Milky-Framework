@@ -1,23 +1,23 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
 use Closure;
-use Foundation\Bindings\Bindings;
+use Penoaks\Bindings\Bindings;
 use LogicException;
 use ReflectionMethod;
 use ReflectionFunction;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Http\Request;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\Http\Request;
 use UnexpectedValueException;
-use Foundation\Framework;
-use Foundation\Routing\Matching\UriValidator;
-use Foundation\Routing\Matching\HostValidator;
-use Foundation\Routing\Matching\MethodValidator;
-use Foundation\Routing\Matching\SchemeValidator;
+use Penoaks\Framework;
+use Penoaks\Routing\Matching\UriValidator;
+use Penoaks\Routing\Matching\HostValidator;
+use Penoaks\Routing\Matching\MethodValidator;
+use Penoaks\Routing\Matching\SchemeValidator;
 use Symfony\Component\Routing\Route as SymfonyRoute;
-use Foundation\Http\Exception\HttpResponseException;
+use Penoaks\Http\Exception\HttpResponseException;
 
 class Route
 {

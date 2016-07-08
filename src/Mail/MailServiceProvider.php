@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\Mail;
+namespace Penoaks\Mail;
 
 use Swift_Mailer;
-use Foundation\Barebones\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
 /**
  * The MIT License (MIT)

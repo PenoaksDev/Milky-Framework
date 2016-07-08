@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database\Query;
+namespace Penoaks\Database\Query;
 
 class Expression
 {

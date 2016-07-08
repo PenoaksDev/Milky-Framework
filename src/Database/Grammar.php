@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
-use Foundation\Database\Query\Expression;
+use Penoaks\Database\Query\Expression;
 
 abstract class Grammar
 {

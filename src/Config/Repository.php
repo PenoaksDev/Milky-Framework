@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Config;
+namespace Penoaks\Config;
 
 use ArrayAccess;
-use Foundation\Support\Arr;
-use Foundation\Contracts\Config\Repository as ConfigContract;
+use Penoaks\Support\Arr;
+use Penoaks\Contracts\Config\Repository as ConfigContract;
 
 class Repository implements ArrayAccess, ConfigContract
 {

@@ -1,6 +1,6 @@
 <?php
 
-use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
+use Penoaks\Contracts\Encryption\Encrypter as EncrypterContract;
 
 class FrameworkQueueClosure
 {

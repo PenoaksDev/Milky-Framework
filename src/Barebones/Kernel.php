@@ -1,13 +1,13 @@
 <?php
-namesapce Penoaks\Barebones;
+namespace Penoaks\Barebones;
 
 use Exception;
-use Foundation\Events\Runlevel;
-use Foundation\Framework;
-use Foundation\Framework\Env;
-use Foundation\Routing\Pipeline;
-use Foundation\Routing\Router;
-use Foundation\Support\Facades\Facade;
+use Penoaks\Events\Runlevel;
+use Penoaks\Framework;
+use Penoaks\Framework\Env;
+use Penoaks\Routing\Pipeline;
+use Penoaks\Routing\Router;
+use Penoaks\Support\Facades\Facade;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Throwable;
 

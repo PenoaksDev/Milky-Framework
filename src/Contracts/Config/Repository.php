@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Config;
+namespace Penoaks\Contracts\Config;
 
 interface Repository
 {

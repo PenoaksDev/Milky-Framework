@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Http\Request;
-use Foundation\Support\Facades\Auth;
-use Foundation\Support\Facades\Lang;
+use Penoaks\Http\Request;
+use Penoaks\Support\Facades\Auth;
+use Penoaks\Support\Facades\Lang;
 
 trait AuthenticatesUsers
 {

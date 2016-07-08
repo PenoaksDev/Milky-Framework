@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Auth\Console;
+namespace Penoaks\Auth\Console;
 
-use Foundation\Console\Command;
-use Foundation\Console\AppNamespaceDetectorTrait;
+use Penoaks\Console\Command;
+use Penoaks\Console\AppNamespaceDetectorTrait;
 
 class MakeAuthCommand extends Command
 {

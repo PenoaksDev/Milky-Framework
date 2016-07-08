@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Database\Query\Processors;
+namespace Penoaks\Database\Query\Processors;
 
-use Foundation\Database\Query\Builder;
+use Penoaks\Database\Query\Builder;
 
 class PostgresProcessor extends Processor
 {

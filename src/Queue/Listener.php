@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 use Closure;
 use Symfony\Component\Process\Process;

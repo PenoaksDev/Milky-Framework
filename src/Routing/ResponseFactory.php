@@ -1,17 +1,17 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
 use JsonSerializable;
-use Foundation\Support\Str;
-use Foundation\Http\Response;
-use Foundation\Http\JsonResponse;
-use Foundation\Support\Traits\Macroable;
-use Foundation\Contracts\Support\Arrayable;
-use Foundation\Contracts\View\Factory as ViewFactory;
+use Penoaks\Support\Str;
+use Penoaks\Http\Response;
+use Penoaks\Http\JsonResponse;
+use Penoaks\Support\Traits\Macroable;
+use Penoaks\Contracts\Support\Arrayable;
+use Penoaks\Contracts\View\Factory as ViewFactory;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Foundation\Contracts\Routing\ResponseFactory as FactoryContract;
+use Penoaks\Contracts\Routing\ResponseFactory as FactoryContract;
 
 class ResponseFactory implements FactoryContract
 {

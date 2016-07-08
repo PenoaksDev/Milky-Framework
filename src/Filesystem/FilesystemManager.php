@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Filesystem;
+namespace Penoaks\Filesystem;
 
 use Closure;
 use Aws\S3\S3Client;
 use OpenCloud\Rackspace;
-use Foundation\Support\Arr;
+use Penoaks\Support\Arr;
 use InvalidArgumentException;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\FilesystemInterface;
@@ -14,7 +14,7 @@ use League\Flysystem\Adapter\Ftp as FtpAdapter;
 use League\Flysystem\Rackspace\RackspaceAdapter;
 use League\Flysystem\Adapter\Local as LocalAdapter;
 use League\Flysystem\AwsS3v3\AwsS3Adapter as S3Adapter;
-use Foundation\Contracts\Filesystem\Factory as FactoryContract;
+use Penoaks\Contracts\Filesystem\Factory as FactoryContract;
 
 class FilesystemManager implements FactoryContract
 {

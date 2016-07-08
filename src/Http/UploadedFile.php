@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Http;
+namespace Penoaks\Http;
 
-use Foundation\Support\Traits\Macroable;
+use Penoaks\Support\Traits\Macroable;
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 
 class UploadedFile extends SymfonyUploadedFile

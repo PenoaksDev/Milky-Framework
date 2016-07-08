@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Queue\Jobs;
+namespace Penoaks\Queue\Jobs;
 
-use Foundation\Framework;
-use Foundation\Contracts\Queue\Job as JobContract;
+use Penoaks\Framework;
+use Penoaks\Contracts\Queue\Job as JobContract;
 
 class SyncJob extends Job implements JobContract
 {

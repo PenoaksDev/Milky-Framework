@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Queue\Capsule;
+namespace Penoaks\Queue\Capsule;
 
-use Foundation\Queue\QueueManager;
-use Foundation\Framework;
-use Foundation\Queue\QueueServiceProvider;
-use Foundation\Support\Traits\CapsuleManagerTrait;
+use Penoaks\Queue\QueueManager;
+use Penoaks\Framework;
+use Penoaks\Queue\QueueServiceProvider;
+use Penoaks\Support\Traits\CapsuleManagerTrait;
 
 class Manager
 {

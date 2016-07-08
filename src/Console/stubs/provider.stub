@@ -2,7 +2,7 @@
 
 namespace DummyNamespace;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class DummyClass extends ServiceProvider
 {

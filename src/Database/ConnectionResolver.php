@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
 class ConnectionResolver implements ConnectionResolverInterface
 {

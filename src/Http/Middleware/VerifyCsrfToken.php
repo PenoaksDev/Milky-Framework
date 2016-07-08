@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Http\Middleware;
+namespace Penoaks\Http\Middleware;
 
 use Closure;
-use Foundation\Framework;
+use Penoaks\Framework;
 use Symfony\Component\HttpFoundation\Cookie;
-use Foundation\Contracts\Encryption\Encrypter;
-use Foundation\Session\TokenMismatchException;
+use Penoaks\Contracts\Encryption\Encrypter;
+use Penoaks\Session\TokenMismatchException;
 
 class VerifyCsrfToken
 {

@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\Providers;
+namespace Penoaks\Providers;
 
-use Foundation\Events\Dispatcher;
-use Foundation\Barebones\ServiceProvider;
+use Penoaks\Events\Dispatcher;
+use Penoaks\Barebones\ServiceProvider;
 
 /**
  * The MIT License (MIT)

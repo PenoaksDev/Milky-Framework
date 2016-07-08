@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Routing\Matching;
+namespace Penoaks\Routing\Matching;
 
-use Foundation\Http\Request;
-use Foundation\Routing\Route;
+use Penoaks\Http\Request;
+use Penoaks\Routing\Route;
 
 interface ValidatorInterface
 {

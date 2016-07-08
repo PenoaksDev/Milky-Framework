@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent;
+namespace Penoaks\Database\Eloquent;
 
 use LogicException;
-use Foundation\Support\Arr;
-use Foundation\Contracts\Queue\QueueableCollection;
-use Foundation\Support\Collection as BaseCollection;
+use Penoaks\Support\Arr;
+use Penoaks\Contracts\Queue\QueueableCollection;
+use Penoaks\Support\Collection as BaseCollection;
 
 class Collection extends BaseCollection implements QueueableCollection
 {

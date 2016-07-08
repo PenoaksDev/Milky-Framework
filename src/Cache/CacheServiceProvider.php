@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
-use Foundation\Support\ServiceProvider;
-use Foundation\Cache\Console\ClearCommand;
+use Penoaks\Support\ServiceProvider;
+use Penoaks\Cache\Console\ClearCommand;
 
 class CacheServiceProvider extends ServiceProvider
 {

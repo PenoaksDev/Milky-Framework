@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Queue\Jobs;
+namespace Penoaks\Queue\Jobs;
 
 use DateTime;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 
 abstract class Job
 {

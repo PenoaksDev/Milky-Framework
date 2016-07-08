@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database\Connectors;
+namespace Penoaks\Database\Connectors;
 
 use PDO;
-use Foundation\Support\Arr;
+use Penoaks\Support\Arr;
 
 class SqlServerConnector extends Connector implements ConnectorInterface
 {

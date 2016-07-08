@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
-use Foundation\Support\Str;
+use Penoaks\Support\Str;
 
 class ResourceRegistrar
 {

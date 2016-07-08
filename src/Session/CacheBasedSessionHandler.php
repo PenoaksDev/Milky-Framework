@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
 use SessionHandlerInterface;
-use Foundation\Contracts\Cache\Repository as CacheContract;
+use Penoaks\Contracts\Cache\Repository as CacheContract;
 
 class CacheBasedSessionHandler implements SessionHandlerInterface
 {

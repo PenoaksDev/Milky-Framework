@@ -2,7 +2,7 @@
 
 namespace DummyNamespace;
 
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 
 class DummyClass extends Command
 {

@@ -1,21 +1,21 @@
 <?php
 
-namesapce Penoaks\Database\Query;
+namespace Penoaks\Database\Query;
 
 use Closure;
 use RuntimeException;
 use BadMethodCallException;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 use InvalidArgumentException;
-use Foundation\Support\Collection;
-use Foundation\Pagination\Paginator;
-use Foundation\Support\Traits\Macroable;
-use Foundation\Contracts\Support\Arrayable;
-use Foundation\Database\ConnectionInterface;
-use Foundation\Database\Query\Grammars\Grammar;
-use Foundation\Pagination\LengthAwarePaginator;
-use Foundation\Database\Query\Processors\Processor;
+use Penoaks\Support\Collection;
+use Penoaks\Pagination\Paginator;
+use Penoaks\Support\Traits\Macroable;
+use Penoaks\Contracts\Support\Arrayable;
+use Penoaks\Database\ConnectionInterface;
+use Penoaks\Database\Query\Grammars\Grammar;
+use Penoaks\Pagination\LengthAwarePaginator;
+use Penoaks\Database\Query\Processors\Processor;
 
 class Builder
 {

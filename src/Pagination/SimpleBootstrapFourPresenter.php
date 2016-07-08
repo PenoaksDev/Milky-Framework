@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Pagination;
+namespace Penoaks\Pagination;
 
-use Foundation\Support\HtmlString;
-use Foundation\Contracts\Pagination\Paginator as PaginatorContract;
+use Penoaks\Support\HtmlString;
+use Penoaks\Contracts\Pagination\Paginator as PaginatorContract;
 
 class SimpleBootstrapFourPresenter extends BootstrapFourPresenter
 {

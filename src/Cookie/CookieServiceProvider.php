@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Cookie;
+namespace Penoaks\Cookie;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class CookieServiceProvider extends ServiceProvider
 {

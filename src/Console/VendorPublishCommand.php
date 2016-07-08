@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 use League\Flysystem\MountManager;
-use Foundation\Filesystem\Filesystem;
-use Foundation\Support\ServiceProvider;
+use Penoaks\Filesystem\Filesystem;
+use Penoaks\Support\ServiceProvider;
 use League\Flysystem\Filesystem as Flysystem;
 use League\Flysystem\Adapter\Local as LocalAdapter;
 

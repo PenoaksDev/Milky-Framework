@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database\Query\Processors;
+namespace Penoaks\Database\Query\Processors;
 
 class SQLiteProcessor extends Processor
 {

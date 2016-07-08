@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Cookie;
+namespace Penoaks\Contracts\Cookie;
 
 interface Factory
 {

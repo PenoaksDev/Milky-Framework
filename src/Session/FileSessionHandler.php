@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
 use Carbon\Carbon;
 use SessionHandlerInterface;
 use Symfony\Component\Finder\Finder;
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Filesystem\Filesystem;
 
 class FileSessionHandler implements SessionHandlerInterface
 {

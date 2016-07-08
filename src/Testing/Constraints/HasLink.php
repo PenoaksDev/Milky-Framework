@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Testing\Constraints;
+namespace Penoaks\Testing\Constraints;
 
-use Foundation\Support\Str;
-use Foundation\Support\Facades\URL;
+use Penoaks\Support\Str;
+use Penoaks\Support\Facades\URL;
 
 class HasLink extends PageConstraint
 {

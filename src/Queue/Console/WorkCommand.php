@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Queue\Console;
+namespace Penoaks\Queue\Console;
 
 use Carbon\Carbon;
-use Foundation\Queue\Worker;
-use Foundation\Console\Command;
-use Foundation\Contracts\Queue\Job;
-use Foundation\Queue\Events\JobFailed;
-use Foundation\Queue\Events\JobProcessed;
+use Penoaks\Queue\Worker;
+use Penoaks\Console\Command;
+use Penoaks\Contracts\Queue\Job;
+use Penoaks\Queue\Events\JobFailed;
+use Penoaks\Queue\Events\JobProcessed;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 

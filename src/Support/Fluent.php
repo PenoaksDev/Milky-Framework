@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Support;
+namespace Penoaks\Support;
 
 use ArrayAccess;
 use JsonSerializable;
-use Foundation\Contracts\Support\Jsonable;
-use Foundation\Contracts\Support\Arrayable;
+use Penoaks\Contracts\Support\Jsonable;
+use Penoaks\Contracts\Support\Arrayable;
 
 class Fluent implements ArrayAccess, Arrayable, Jsonable, JsonSerializable
 {

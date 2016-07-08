@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Testing\Concerns;
+namespace Penoaks\Testing\Concerns;
 
-use Foundation\Contracts\Console\Kernel;
+use Penoaks\Contracts\Console\Kernel;
 
 trait InteractsWithConsole
 {

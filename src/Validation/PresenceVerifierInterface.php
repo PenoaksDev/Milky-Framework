@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Validation;
+namespace Penoaks\Validation;
 
 interface PresenceVerifierInterface
 {

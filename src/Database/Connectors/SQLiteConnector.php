@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database\Connectors;
+namespace Penoaks\Database\Connectors;
 
 use InvalidArgumentException;
 

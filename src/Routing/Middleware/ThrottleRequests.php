@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Routing\Middleware;
+namespace Penoaks\Routing\Middleware;
 
 use Closure;
-use Foundation\Cache\RateLimiter;
+use Penoaks\Cache\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
 
 class ThrottleRequests

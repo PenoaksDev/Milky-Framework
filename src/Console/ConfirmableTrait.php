@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
 use Closure;
 

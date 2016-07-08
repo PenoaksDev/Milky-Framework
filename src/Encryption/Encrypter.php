@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Encryption;
+namespace Penoaks\Encryption;
 
 use RuntimeException;
-use Foundation\Contracts\Encryption\DecryptException;
-use Foundation\Contracts\Encryption\EncryptException;
-use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
+use Penoaks\Contracts\Encryption\DecryptException;
+use Penoaks\Contracts\Encryption\EncryptException;
+use Penoaks\Contracts\Encryption\Encrypter as EncrypterContract;
 
 class Encrypter extends BaseEncrypter implements EncrypterContract
 {

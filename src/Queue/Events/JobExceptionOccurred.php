@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Queue\Events;
+namespace Penoaks\Queue\Events;
 
 class JobExceptionOccurred
 {

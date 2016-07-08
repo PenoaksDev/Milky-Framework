@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
-use Foundation\Queue\Jobs\BeanstalkdJob;
+use Penoaks\Queue\Jobs\BeanstalkdJob;
 use Pheanstalk\Job as PheanstalkJob;
 use Pheanstalk\Pheanstalk;
 

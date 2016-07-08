@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Support;
+namespace Penoaks\Support;
 
 use Countable;
 use ArrayAccess;
@@ -9,9 +9,9 @@ use CachingIterator;
 use JsonSerializable;
 use IteratorAggregate;
 use InvalidArgumentException;
-use Foundation\Support\Traits\Macroable;
-use Foundation\Contracts\Support\Jsonable;
-use Foundation\Contracts\Support\Arrayable;
+use Penoaks\Support\Traits\Macroable;
+use Penoaks\Contracts\Support\Jsonable;
+use Penoaks\Contracts\Support\Arrayable;
 
 class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate, Jsonable, JsonSerializable
 {

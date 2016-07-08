@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
 use Exception;
-use Foundation\Support\Collection;
-use Foundation\Framework;
-use Foundation\Database\Eloquent\Model;
+use Penoaks\Support\Collection;
+use Penoaks\Framework;
+use Penoaks\Database\Eloquent\Model;
 use Symfony\Component\VarDumper\Caster\Caster;
 
 class IlluminateCaster

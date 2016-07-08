@@ -1,16 +1,16 @@
 <?php
 
-namesapce Penoaks\Pagination;
+namespace Penoaks\Pagination;
 
 use Countable;
 use ArrayAccess;
 use JsonSerializable;
 use IteratorAggregate;
-use Foundation\Support\Collection;
-use Foundation\Contracts\Support\Jsonable;
-use Foundation\Contracts\Support\Arrayable;
-use Foundation\Contracts\Pagination\Presenter;
-use Foundation\Contracts\Pagination\Paginator as PaginatorContract;
+use Penoaks\Support\Collection;
+use Penoaks\Contracts\Support\Jsonable;
+use Penoaks\Contracts\Support\Arrayable;
+use Penoaks\Contracts\Pagination\Presenter;
+use Penoaks\Contracts\Pagination\Paginator as PaginatorContract;
 
 class Paginator extends AbstractPaginator implements Arrayable, ArrayAccess, Countable, IteratorAggregate, JsonSerializable, Jsonable, PaginatorContract
 {

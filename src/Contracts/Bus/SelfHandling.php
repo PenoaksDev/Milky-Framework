@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Bus;
+namespace Penoaks\Contracts\Bus;
 
 /**
  * @deprecated since version 5.2. Remove from jobs since self-handling is default.

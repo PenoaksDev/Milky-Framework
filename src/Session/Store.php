@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 use SessionHandlerInterface;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;

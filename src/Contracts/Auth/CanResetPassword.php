@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Auth;
+namespace Penoaks\Contracts\Auth;
 
 interface CanResetPassword
 {

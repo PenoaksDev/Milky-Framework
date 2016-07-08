@@ -2,7 +2,7 @@
 
 namespace DummyNamespace;
 
-use Foundation\Database\Eloquent\Model;
+use Penoaks\Database\Eloquent\Model;
 
 class DummyClass extends Model
 {

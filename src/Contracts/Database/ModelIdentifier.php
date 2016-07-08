@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Database;
+namespace Penoaks\Contracts\Database;
 
 class ModelIdentifier
 {

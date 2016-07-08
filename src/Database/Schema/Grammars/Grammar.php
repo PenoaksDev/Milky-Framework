@@ -1,18 +1,18 @@
 <?php
 
-namesapce Penoaks\Database\Schema\Grammars;
+namespace Penoaks\Database\Schema\Grammars;
 
 use RuntimeException;
 use Doctrine\DBAL\Types\Type;
-use Foundation\Support\Fluent;
+use Penoaks\Support\Fluent;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\TableDiff;
-use Foundation\Database\Connection;
+use Penoaks\Database\Connection;
 use Doctrine\DBAL\Schema\Comparator;
-use Foundation\Database\Query\Expression;
-use Foundation\Database\Schema\Blueprint;
-use Foundation\Database\Grammar as BaseGrammar;
+use Penoaks\Database\Query\Expression;
+use Penoaks\Database\Schema\Blueprint;
+use Penoaks\Database\Grammar as BaseGrammar;
 use Doctrine\DBAL\Schema\AbstractSchemaManager as SchemaManager;
 
 abstract class Grammar extends BaseGrammar

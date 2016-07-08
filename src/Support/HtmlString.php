@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Support;
+namespace Penoaks\Support;
 
-use Foundation\Contracts\Support\Htmlable;
+use Penoaks\Contracts\Support\Htmlable;
 
 class HtmlString implements Htmlable
 {

@@ -1,14 +1,14 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
 use Closure;
 use Exception;
 use Throwable;
 use Doctrine\DBAL\Driver\PDOSqlsrv\Driver as DoctrineDriver;
-use Foundation\Database\Query\Processors\SqlServerProcessor;
-use Foundation\Database\Query\Grammars\SqlServerGrammar as QueryGrammar;
-use Foundation\Database\Schema\Grammars\SqlServerGrammar as SchemaGrammar;
+use Penoaks\Database\Query\Processors\SqlServerProcessor;
+use Penoaks\Database\Query\Grammars\SqlServerGrammar as QueryGrammar;
+use Penoaks\Database\Schema\Grammars\SqlServerGrammar as SchemaGrammar;
 
 class SqlServerConnection extends Connection
 {

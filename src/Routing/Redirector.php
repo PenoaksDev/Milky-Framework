@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
-use Foundation\Http\RedirectResponse;
-use Foundation\Session\Store as SessionStore;
+use Penoaks\Http\RedirectResponse;
+use Penoaks\Session\Store as SessionStore;
 
 class Redirector
 {

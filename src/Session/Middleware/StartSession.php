@@ -1,15 +1,15 @@
 <?php
 
-namesapce Penoaks\Session\Middleware;
+namespace Penoaks\Session\Middleware;
 
 use Closure;
 use Carbon\Carbon;
-use Foundation\Support\Arr;
-use Foundation\Http\Request;
-use Foundation\Session\SessionManager;
-use Foundation\Session\SessionInterface;
+use Penoaks\Support\Arr;
+use Penoaks\Http\Request;
+use Penoaks\Session\SessionManager;
+use Penoaks\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Cookie;
-use Foundation\Session\CookieSessionHandler;
+use Penoaks\Session\CookieSessionHandler;
 use Symfony\Component\HttpFoundation\Response;
 
 class StartSession

@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 use Closure;
 use InvalidArgumentException;
-use Foundation\Contracts\Queue\Factory as FactoryContract;
-use Foundation\Contracts\Queue\Monitor as MonitorContract;
+use Penoaks\Contracts\Queue\Factory as FactoryContract;
+use Penoaks\Contracts\Queue\Monitor as MonitorContract;
 
 class QueueManager implements FactoryContract, MonitorContract
 {

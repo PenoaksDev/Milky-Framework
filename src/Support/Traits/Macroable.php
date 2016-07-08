@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Support\Traits;
+namespace Penoaks\Support\Traits;
 
 use Closure;
 use BadMethodCallException;

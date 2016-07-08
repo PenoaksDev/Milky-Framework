@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 class NullQueue extends Queue
 {

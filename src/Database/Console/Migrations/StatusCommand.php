@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Database\Console\Migrations;
+namespace Penoaks\Database\Console\Migrations;
 
-use Foundation\Database\Migrations\Migrator;
+use Penoaks\Database\Migrations\Migrator;
 use Symfony\Component\Console\Input\InputOption;
 
 class StatusCommand extends BaseCommand

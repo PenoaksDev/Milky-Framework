@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Console\Command;
-use Foundation\Support\Composer;
+use Penoaks\Console\Command;
+use Penoaks\Support\Composer;
 use Symfony\Component\Finder\Finder;
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Filesystem\Filesystem;
 use Symfony\Component\Console\Input\InputArgument;
 
 class AppNameCommand extends Command

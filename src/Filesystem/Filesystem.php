@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Filesystem;
+namespace Penoaks\Filesystem;
 
 use ErrorException;
 use FilesystemIterator;
 use Symfony\Component\Finder\Finder;
-use Foundation\Support\Traits\Macroable;
-use Foundation\Contracts\Filesystem\FileNotFoundException;
+use Penoaks\Support\Traits\Macroable;
+use Penoaks\Contracts\Filesystem\FileNotFoundException;
 
 class Filesystem
 {

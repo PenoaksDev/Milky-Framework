@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\View;
+namespace Penoaks\Contracts\View;
 
 interface Factory
 {

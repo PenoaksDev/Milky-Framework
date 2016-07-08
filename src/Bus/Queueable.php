@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Bus;
+namespace Penoaks\Bus;
 
 trait Queueable
 {

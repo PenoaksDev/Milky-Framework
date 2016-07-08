@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
-use Foundation\Contracts\Cache\Store;
+use Penoaks\Contracts\Cache\Store;
 
 class ApcStore extends TaggableStore implements Store
 {

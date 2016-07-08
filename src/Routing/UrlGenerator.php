@@ -1,15 +1,15 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Http\Request;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\Http\Request;
 use InvalidArgumentException;
-use Foundation\Support\Traits\Macroable;
-use Foundation\Contracts\Routing\UrlRoutable;
-use Foundation\Routing\Exceptions\UrlGenerationException;
-use Foundation\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
+use Penoaks\Support\Traits\Macroable;
+use Penoaks\Contracts\Routing\UrlRoutable;
+use Penoaks\Routing\Exceptions\UrlGenerationException;
+use Penoaks\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
 
 class UrlGenerator implements UrlGeneratorContract
 {

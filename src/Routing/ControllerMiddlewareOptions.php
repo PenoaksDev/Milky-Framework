@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
 class ControllerMiddlewareOptions
 {

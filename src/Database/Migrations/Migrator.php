@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Database\Migrations;
+namespace Penoaks\Database\Migrations;
 
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Filesystem\Filesystem;
-use Foundation\Database\ConnectionResolverInterface as Resolver;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\Filesystem\Filesystem;
+use Penoaks\Database\ConnectionResolverInterface as Resolver;
 
 class Migrator
 {

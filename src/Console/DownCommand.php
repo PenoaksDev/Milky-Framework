@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 
 class DownCommand extends Command
 {

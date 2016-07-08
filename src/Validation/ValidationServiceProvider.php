@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Validation;
+namespace Penoaks\Validation;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class ValidationServiceProvider extends ServiceProvider
 {

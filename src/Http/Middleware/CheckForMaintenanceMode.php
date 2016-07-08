@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Http\Middleware;
+namespace Penoaks\Http\Middleware;
 
 use Closure;
-use Foundation\Framework;
+use Penoaks\Framework;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CheckForMaintenanceMode

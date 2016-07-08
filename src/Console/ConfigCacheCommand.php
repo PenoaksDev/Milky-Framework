@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Console\Command;
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Console\Command;
+use Penoaks\Filesystem\Filesystem;
 
 class ConfigCacheCommand extends Command
 {

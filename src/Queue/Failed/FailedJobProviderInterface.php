@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Queue\Failed;
+namespace Penoaks\Queue\Failed;
 
 interface FailedJobProviderInterface
 {

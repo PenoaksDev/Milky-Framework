@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
-use Foundation\Contracts\Queue\Job as JobContract;
+use Penoaks\Contracts\Queue\Job as JobContract;
 
 trait InteractsWithQueue
 {

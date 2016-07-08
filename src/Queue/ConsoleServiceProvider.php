@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
-use Foundation\Support\ServiceProvider;
-use Foundation\Queue\Console\RetryCommand;
-use Foundation\Queue\Console\ListFailedCommand;
-use Foundation\Queue\Console\FlushFailedCommand;
-use Foundation\Queue\Console\ForgetFailedCommand;
+use Penoaks\Support\ServiceProvider;
+use Penoaks\Queue\Console\RetryCommand;
+use Penoaks\Queue\Console\ListFailedCommand;
+use Penoaks\Queue\Console\FlushFailedCommand;
+use Penoaks\Queue\Console\ForgetFailedCommand;
 
 class ConsoleServiceProvider extends ServiceProvider
 {

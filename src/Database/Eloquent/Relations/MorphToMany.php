@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent\Relations;
+namespace Penoaks\Database\Eloquent\Relations;
 
-use Foundation\Support\Arr;
-use Foundation\Database\Eloquent\Model;
-use Foundation\Database\Eloquent\Builder;
+use Penoaks\Support\Arr;
+use Penoaks\Database\Eloquent\Model;
+use Penoaks\Database\Eloquent\Builder;
 
 class MorphToMany extends BelongsToMany
 {

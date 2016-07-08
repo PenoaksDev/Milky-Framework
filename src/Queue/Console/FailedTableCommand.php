@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Queue\Console;
+namespace Penoaks\Queue\Console;
 
-use Foundation\Support\Str;
-use Foundation\Console\Command;
-use Foundation\Support\Composer;
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Support\Str;
+use Penoaks\Console\Command;
+use Penoaks\Support\Composer;
+use Penoaks\Filesystem\Filesystem;
 
 class FailedTableCommand extends Command
 {

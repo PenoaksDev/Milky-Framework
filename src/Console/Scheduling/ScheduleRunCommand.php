@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Console\Scheduling;
+namespace Penoaks\Console\Scheduling;
 
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 
 class ScheduleRunCommand extends Command
 {

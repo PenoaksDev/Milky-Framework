@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Support;
+namespace Penoaks\Support;
 
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils;
 use Symfony\Component\Process\PhpExecutableFinder;

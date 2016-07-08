@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
 use Carbon\Carbon;
 use SessionHandlerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Foundation\Contracts\Cookie\QueueingFactory as CookieJar;
+use Penoaks\Contracts\Cookie\QueueingFactory as CookieJar;
 
 class CookieSessionHandler implements SessionHandlerInterface
 {

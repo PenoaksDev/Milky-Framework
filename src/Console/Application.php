@@ -1,15 +1,15 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Framework;
+use Penoaks\Contracts\Events\Dispatcher;
+use Penoaks\Framework;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
-use Foundation\Contracts\Console\Application as ApplicationContract;
+use Penoaks\Contracts\Console\Application as ApplicationContract;
 
 class Application extends SymfonyApplication implements ApplicationContract
 {

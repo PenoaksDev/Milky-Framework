@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Queue\Console;
+namespace Penoaks\Queue\Console;
 
-use Foundation\Support\Arr;
-use Foundation\Console\Command;
+use Penoaks\Support\Arr;
+use Penoaks\Console\Command;
 
 class ListFailedCommand extends Command
 {

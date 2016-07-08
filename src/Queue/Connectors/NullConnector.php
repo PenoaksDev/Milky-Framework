@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Queue\Connectors;
+namespace Penoaks\Queue\Connectors;
 
-use Foundation\Queue\NullQueue;
+use Penoaks\Queue\NullQueue;
 
 class NullConnector implements ConnectorInterface
 {

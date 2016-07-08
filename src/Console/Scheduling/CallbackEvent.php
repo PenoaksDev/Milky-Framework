@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Console\Scheduling;
+namespace Penoaks\Console\Scheduling;
 
 use LogicException;
 use InvalidArgumentException;
-use Foundation\Framework;
+use Penoaks\Framework;
 
 class CallbackEvent extends Event
 {

@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
 use Closure;
 use Throwable;
 use Exception;
-use Foundation\Http\Request;
-use Foundation\Contracts\Debug\ExceptionHandler;
-use Foundation\Pipeline\Pipeline as BasePipeline;
+use Penoaks\Http\Request;
+use Penoaks\Contracts\Debug\ExceptionHandler;
+use Penoaks\Pipeline\Pipeline as BasePipeline;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 /**

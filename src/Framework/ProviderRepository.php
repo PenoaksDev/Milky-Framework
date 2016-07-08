@@ -10,9 +10,9 @@ namespace Foundation;
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
 
-use Foundation\Barebones\ServiceProvider;
-use Foundation\Filesystem\Filesystem;
-use Foundation\Framework as ApplicationContract;
+use Penoaks\Barebones\ServiceProvider;
+use Penoaks\Filesystem\Filesystem;
+use Penoaks\Framework as ApplicationContract;
 
 class ProviderRepository
 {

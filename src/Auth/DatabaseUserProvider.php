@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Support\Str;
-use Foundation\Contracts\Auth\UserProvider;
-use Foundation\Database\ConnectionInterface;
-use Foundation\Contracts\Hashing\Hasher as HasherContract;
-use Foundation\Contracts\Auth\Authenticatable as UserContract;
+use Penoaks\Support\Str;
+use Penoaks\Contracts\Auth\UserProvider;
+use Penoaks\Database\ConnectionInterface;
+use Penoaks\Contracts\Hashing\Hasher as HasherContract;
+use Penoaks\Contracts\Auth\Authenticatable as UserContract;
 
 class DatabaseUserProvider implements UserProvider
 {

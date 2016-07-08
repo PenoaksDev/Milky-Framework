@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database\Schema;
+namespace Penoaks\Database\Schema;
 
 use Closure;
-use Foundation\Database\Connection;
+use Penoaks\Database\Connection;
 
 class Builder
 {

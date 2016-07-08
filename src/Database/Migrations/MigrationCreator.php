@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Database\Migrations;
+namespace Penoaks\Database\Migrations;
 
 use Closure;
-use Foundation\Support\Str;
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Support\Str;
+use Penoaks\Filesystem\Filesystem;
 
 class MigrationCreator
 {

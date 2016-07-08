@@ -1,18 +1,18 @@
 <?php
 
-namesapce Penoaks\View;
+namespace Penoaks\View;
 
 use Exception;
 use Throwable;
 use ArrayAccess;
 use BadMethodCallException;
-use Foundation\Support\Str;
-use Foundation\Support\MessageBag;
-use Foundation\Contracts\Support\Arrayable;
-use Foundation\View\Engines\EngineInterface;
-use Foundation\Contracts\Support\Renderable;
-use Foundation\Contracts\Support\MessageProvider;
-use Foundation\Contracts\View\View as ViewContract;
+use Penoaks\Support\Str;
+use Penoaks\Support\MessageBag;
+use Penoaks\Contracts\Support\Arrayable;
+use Penoaks\View\Engines\EngineInterface;
+use Penoaks\Contracts\Support\Renderable;
+use Penoaks\Contracts\Support\MessageProvider;
+use Penoaks\Contracts\View\View as ViewContract;
 
 class View implements ArrayAccess, ViewContract
 {

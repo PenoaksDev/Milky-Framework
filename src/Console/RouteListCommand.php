@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Routing\Route;
-use Foundation\Routing\Router;
-use Foundation\Console\Command;
-use Foundation\Routing\Controller;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\Routing\Route;
+use Penoaks\Routing\Router;
+use Penoaks\Console\Command;
+use Penoaks\Routing\Controller;
 use Symfony\Component\Console\Input\InputOption;
 
 class RouteListCommand extends Command

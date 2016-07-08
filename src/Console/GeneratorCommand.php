@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Support\Str;
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Support\Str;
+use Penoaks\Filesystem\Filesystem;
 use Symfony\Component\Console\Input\InputArgument;
 
 abstract class GeneratorCommand extends Command

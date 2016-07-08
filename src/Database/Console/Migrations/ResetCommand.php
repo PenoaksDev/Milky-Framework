@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Database\Console\Migrations;
+namespace Penoaks\Database\Console\Migrations;
 
-use Foundation\Console\Command;
-use Foundation\Console\ConfirmableTrait;
-use Foundation\Database\Migrations\Migrator;
+use Penoaks\Console\Command;
+use Penoaks\Console\ConfirmableTrait;
+use Penoaks\Database\Migrations\Migrator;
 use Symfony\Component\Console\Input\InputOption;
 
 class ResetCommand extends Command

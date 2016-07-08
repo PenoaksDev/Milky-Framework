@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent\Relations;
+namespace Penoaks\Database\Eloquent\Relations;
 
 use Closure;
-use Foundation\Support\Arr;
-use Foundation\Database\Eloquent\Model;
-use Foundation\Database\Eloquent\Builder;
-use Foundation\Database\Query\Expression;
-use Foundation\Database\Eloquent\Collection;
+use Penoaks\Support\Arr;
+use Penoaks\Database\Eloquent\Model;
+use Penoaks\Database\Eloquent\Builder;
+use Penoaks\Database\Query\Expression;
+use Penoaks\Database\Eloquent\Collection;
 
 abstract class Relation
 {

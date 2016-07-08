@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Database\Query\Grammars;
+namespace Penoaks\Database\Query\Grammars;
 
-use Foundation\Support\Str;
-use Foundation\Database\Query\Builder;
-use Foundation\Database\Query\JsonExpression;
+use Penoaks\Support\Str;
+use Penoaks\Database\Query\Builder;
+use Penoaks\Database\Query\JsonExpression;
 
 class MySqlGrammar extends Grammar
 {

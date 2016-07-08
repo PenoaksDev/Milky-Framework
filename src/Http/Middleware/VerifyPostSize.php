@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Http\Middleware;
+namespace Penoaks\Http\Middleware;
 
 use Closure;
-use Foundation\Http\Exception\PostTooLargeException;
+use Penoaks\Http\Exception\PostTooLargeException;
 
 class VerifyPostSize
 {

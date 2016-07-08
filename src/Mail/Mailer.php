@@ -1,17 +1,17 @@
 <?php
-namesapce Penoaks\Mail;
+namespace Penoaks\Mail;
 
 use Closure;
-use Foundation\Bindings\Bindings;
-use Foundation\Contracts\Mail\Mailer as MailerContract;
-use Foundation\Contracts\Mail\MailQueue as MailQueueContract;
-use Foundation\Contracts\Queue\Queue as QueueContract;
-use Foundation\Contracts\View\Factory;
-use Foundation\Events\Dispatcher;
-use Foundation\Framework;
-use Foundation\Queue\Queue;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Contracts\Mail\Mailer as MailerContract;
+use Penoaks\Contracts\Mail\MailQueue as MailQueueContract;
+use Penoaks\Contracts\Queue\Queue as QueueContract;
+use Penoaks\Contracts\View\Factory;
+use Penoaks\Events\Dispatcher;
+use Penoaks\Framework;
+use Penoaks\Queue\Queue;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 use InvalidArgumentException;
 use SuperClosure\Serializer;
 use Swift_Mailer;

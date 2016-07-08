@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Http\Request;
-use Foundation\Cache\RateLimiter;
-use Foundation\Auth\Events\Lockout;
-use Foundation\Support\Facades\Lang;
+use Penoaks\Http\Request;
+use Penoaks\Cache\RateLimiter;
+use Penoaks\Auth\Events\Lockout;
+use Penoaks\Support\Facades\Lang;
 
 trait ThrottlesLogins
 {

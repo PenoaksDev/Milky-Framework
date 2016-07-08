@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Filesystem;
+namespace Penoaks\Filesystem;
 
 use Symfony\Component\Finder\Finder;
 

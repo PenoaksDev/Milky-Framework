@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Http\Request;
-use Foundation\Support\Facades\Auth;
+use Penoaks\Http\Request;
+use Penoaks\Support\Facades\Auth;
 
 trait RegistersUsers
 {

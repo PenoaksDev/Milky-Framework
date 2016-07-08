@@ -1,18 +1,18 @@
 <?php
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
 use Closure;
-use Foundation\Bindings\Bindings;
-use Foundation\Contracts\Routing\Registrar as RegistrarContract;
-use Foundation\Database\Eloquent\Model;
-use Foundation\Events\Dispatcher;
-use Foundation\Http\Request;
-use Foundation\Http\Response;
-use Foundation\Support\Arr;
-use Foundation\Support\Collection;
-use Foundation\Support\Str;
-use Foundation\Support\Traits\Macroable;
-use Foundation\Traits\StaticAccess;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Contracts\Routing\Registrar as RegistrarContract;
+use Penoaks\Database\Eloquent\Model;
+use Penoaks\Events\Dispatcher;
+use Penoaks\Http\Request;
+use Penoaks\Http\Response;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Collection;
+use Penoaks\Support\Str;
+use Penoaks\Support\Traits\Macroable;
+use Penoaks\Traits\StaticAccess;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;

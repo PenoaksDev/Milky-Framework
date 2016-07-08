@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Auth\Events;
+namespace Penoaks\Auth\Events;
 
 class Failed
 {

@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent;
+namespace Penoaks\Database\Eloquent;
 
 use Closure;
 use DateTime;
@@ -10,28 +10,28 @@ use Carbon\Carbon;
 use LogicException;
 use JsonSerializable;
 use DateTimeInterface;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 use InvalidArgumentException;
-use Foundation\Contracts\Support\Jsonable;
-use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Contracts\Support\Arrayable;
-use Foundation\Contracts\Routing\UrlRoutable;
-use Foundation\Contracts\Queue\QueueableEntity;
-use Foundation\Database\Eloquent\Relations\Pivot;
-use Foundation\Database\Eloquent\Relations\HasOne;
-use Foundation\Database\Eloquent\Relations\HasMany;
-use Foundation\Database\Eloquent\Relations\MorphTo;
-use Foundation\Database\Eloquent\Relations\Relation;
-use Foundation\Database\Eloquent\Relations\MorphOne;
-use Foundation\Support\Collection as BaseCollection;
-use Foundation\Database\Eloquent\Relations\MorphMany;
-use Foundation\Database\Eloquent\Relations\BelongsTo;
-use Foundation\Database\Query\Builder as QueryBuilder;
-use Foundation\Database\Eloquent\Relations\MorphToMany;
-use Foundation\Database\Eloquent\Relations\BelongsToMany;
-use Foundation\Database\Eloquent\Relations\HasManyThrough;
-use Foundation\Database\ConnectionResolverInterface as Resolver;
+use Penoaks\Contracts\Support\Jsonable;
+use Penoaks\Contracts\Events\Dispatcher;
+use Penoaks\Contracts\Support\Arrayable;
+use Penoaks\Contracts\Routing\UrlRoutable;
+use Penoaks\Contracts\Queue\QueueableEntity;
+use Penoaks\Database\Eloquent\Relations\Pivot;
+use Penoaks\Database\Eloquent\Relations\HasOne;
+use Penoaks\Database\Eloquent\Relations\HasMany;
+use Penoaks\Database\Eloquent\Relations\MorphTo;
+use Penoaks\Database\Eloquent\Relations\Relation;
+use Penoaks\Database\Eloquent\Relations\MorphOne;
+use Penoaks\Support\Collection as BaseCollection;
+use Penoaks\Database\Eloquent\Relations\MorphMany;
+use Penoaks\Database\Eloquent\Relations\BelongsTo;
+use Penoaks\Database\Query\Builder as QueryBuilder;
+use Penoaks\Database\Eloquent\Relations\MorphToMany;
+use Penoaks\Database\Eloquent\Relations\BelongsToMany;
+use Penoaks\Database\Eloquent\Relations\HasManyThrough;
+use Penoaks\Database\ConnectionResolverInterface as Resolver;
 
 abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializable, QueueableEntity, UrlRoutable
 {

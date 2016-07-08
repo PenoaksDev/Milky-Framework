@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Broadcasting\Broadcasters;
+namespace Penoaks\Broadcasting\Broadcasters;
 
 use Pusher;
-use Foundation\Contracts\Broadcasting\Broadcaster;
+use Penoaks\Contracts\Broadcasting\Broadcaster;
 
 class PusherBroadcaster implements Broadcaster
 {

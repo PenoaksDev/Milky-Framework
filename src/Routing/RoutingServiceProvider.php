@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
-use Foundation\Framework;
-use Foundation\Barebones\ServiceProvider;
+use Penoaks\Framework;
+use Penoaks\Barebones\ServiceProvider;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 use Zend\Diactoros\Response as PsrResponse;
 

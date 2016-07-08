@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Logging;
+namespace Penoaks\Contracts\Logging;
 
 interface Log
 {

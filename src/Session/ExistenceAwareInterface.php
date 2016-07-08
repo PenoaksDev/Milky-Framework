@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
 interface ExistenceAwareInterface
 {

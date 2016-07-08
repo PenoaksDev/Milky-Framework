@@ -1,17 +1,17 @@
 <?php
 
-namesapce Penoaks\Http;
+namespace Penoaks\Http;
 
-use Foundation\Http\Request;
-use Foundation\Http\Response;
-use Foundation\Http\JsonResponse;
-use Foundation\Routing\Redirector;
-use Foundation\Framework;
-use Foundation\Contracts\Validation\Validator;
-use Foundation\Http\Exception\HttpResponseException;
-use Foundation\Validation\ValidatesWhenResolvedTrait;
-use Foundation\Contracts\Validation\ValidatesWhenResolved;
-use Foundation\Contracts\Validation\Factory as ValidationFactory;
+use Penoaks\Http\Request;
+use Penoaks\Http\Response;
+use Penoaks\Http\JsonResponse;
+use Penoaks\Routing\Redirector;
+use Penoaks\Framework;
+use Penoaks\Contracts\Validation\Validator;
+use Penoaks\Http\Exception\HttpResponseException;
+use Penoaks\Validation\ValidatesWhenResolvedTrait;
+use Penoaks\Contracts\Validation\ValidatesWhenResolved;
+use Penoaks\Contracts\Validation\Factory as ValidationFactory;
 
 class FormRequest extends Request implements ValidatesWhenResolved
 {

@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Database\Migrations;
+namespace Penoaks\Database\Migrations;
 
-use Foundation\Database\ConnectionResolverInterface as Resolver;
+use Penoaks\Database\ConnectionResolverInterface as Resolver;
 
 class DatabaseMigrationRepository implements MigrationRepositoryInterface
 {

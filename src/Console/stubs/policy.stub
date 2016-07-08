@@ -2,7 +2,7 @@
 
 namespace DummyNamespace;
 
-use Foundation\Auth\Access\HandlesAuthorization;
+use Penoaks\Auth\Access\HandlesAuthorization;
 
 class DummyClass
 {

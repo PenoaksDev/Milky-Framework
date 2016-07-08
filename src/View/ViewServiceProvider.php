@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\View;
+namespace Penoaks\View;
 
-use Foundation\View\Engines\PhpEngine;
-use Foundation\Support\ServiceProvider;
-use Foundation\View\Engines\CompilerEngine;
-use Foundation\View\Engines\EngineResolver;
-use Foundation\View\Compilers\BladeCompiler;
+use Penoaks\View\Engines\PhpEngine;
+use Penoaks\Support\ServiceProvider;
+use Penoaks\View\Engines\CompilerEngine;
+use Penoaks\View\Engines\EngineResolver;
+use Penoaks\View\Compilers\BladeCompiler;
 
 class ViewServiceProvider extends ServiceProvider
 {

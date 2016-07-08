@@ -1,17 +1,24 @@
 <?php
-
-namesapce Penoaks\Console;
+namespace Penoaks;
 
 use Exception;
-use Throwable;
-use Foundation\Contracts\Events\Dispatcher;
-use Foundation\Console\Scheduling\Schedule;
-use Foundation\Console\Application as Artisan;
-use Foundation\Framework;
-use Foundation\Contracts\Console\Kernel as KernelContract;
+use Penoaks\Barebones\Kernel;
+use Penoaks\Console\Application as Artisan;
+use Penoaks\Console\Scheduling\Schedule;
+use Penoaks\Events\Dispatcher;
+use Penoaks\Framework;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
+use Throwable;
 
-class Kernel implements KernelContract
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
+class ConsoleKernel extends Kernel
 {
 	/**
 	 * The application implementation.
@@ -23,7 +30,7 @@ class Kernel implements KernelContract
 	/**
 	 * The event dispatcher implementation.
 	 *
-	 * @var \Penoaks\Contracts\Events\Dispatcher
+	 * @var Dispatcher
 	 */
 	protected $events;
 
@@ -53,8 +60,8 @@ class Kernel implements KernelContract
 	/**
 	 * Create a new console kernel instance.
 	 *
-	 * @param  \Penoaks\Framework  $fw
-	 * @param  \Penoaks\Contracts\Events\Dispatcher  $events
+	 * @param  Framework  $fw
+	 * @param  Dispatcher  $events
 	 * @return void
 	 */
 	public function __construct(Framework $fw, Dispatcher $events)

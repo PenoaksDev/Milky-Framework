@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Mail;
+namespace Penoaks\Contracts\Mail;
 
 interface Mailer
 {

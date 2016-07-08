@@ -7,7 +7,7 @@ The Illuminate Database component is a full database toolkit for PHP, providing 
 First, create a new "Capsule" manager instance. Capsule aims to make configuring the library for usage outside of the Framework framework as easy as possible.
 
 ```PHP
-use Foundation\Database\Capsule\Manager as Capsule;
+use Penoaks\Database\Capsule\Manager as Capsule;
 
 $capsule = new Capsule;
 
@@ -23,8 +23,8 @@ $capsule->addConnection([
 ]);
 
 // Set the event dispatcher used by Eloquent models... (optional)
-use Foundation\Events\Dispatcher;
-use Foundation\Framework;
+use Penoaks\Events\Dispatcher;
+use Penoaks\Framework;
 $capsule->setEventDispatcher(new Dispatcher(new Bindings));
 
 // Make this Capsule instance available globally via static methods... (optional)

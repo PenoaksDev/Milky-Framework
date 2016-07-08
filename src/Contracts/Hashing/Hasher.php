@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Hashing;
+namespace Penoaks\Contracts\Hashing;
 
 interface Hasher
 {

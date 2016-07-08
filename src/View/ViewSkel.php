@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\View;
+namespace Penoaks\View;
 
-use Foundation\Bindings\Bindings;
-use Foundation\Contracts\View\Factory as ViewFactory;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Contracts\View\Factory as ViewFactory;
 
 /**
  * The MIT License (MIT)

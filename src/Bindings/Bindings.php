@@ -1,5 +1,15 @@
 <?php
-namesapce Penoaks\Bindings;
+namespace Penoaks\Bindings;
+
+use ArrayAccess;
+use Closure;
+use Penoaks\Contracts\Lang\BindingResolutionException;
+use Penoaks\Framework;
+use InvalidArgumentException;
+use ReflectionClass;
+use ReflectionFunction;
+use ReflectionMethod;
+use ReflectionParameter;
 
 /**
  * The MIT License (MIT)
@@ -9,17 +19,6 @@ namesapce Penoaks\Bindings;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-
-use ArrayAccess;
-use Closure;
-use Foundation\Contracts\Lang\BindingResolutionException;
-use Foundation\Framework;
-use InvalidArgumentException;
-use ReflectionClass;
-use ReflectionFunction;
-use ReflectionMethod;
-use ReflectionParameter;
-
 class Bindings implements ArrayAccess
 {
 	use \Penoaks\Traits\StaticAccess;
@@ -1444,11 +1443,8 @@ class Bindings implements ArrayAccess
 	 * @param  string $key
 	 * @return mixed
 	 */
-	public function get( $key )
+	public static function get( $key )
 	{
-		if ( static::wasStatic() )
-			return static::__callStatic( __METHOD__, func_get_args() );
-
-		return $this[$key];
+		return static::i()->make( $key );
 	}
 }

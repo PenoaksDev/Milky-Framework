@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database\Query\Grammars;
+namespace Penoaks\Database\Query\Grammars;
 
-use Foundation\Support\Str;
-use Foundation\Database\Query\Builder;
+use Penoaks\Support\Str;
+use Penoaks\Database\Query\Builder;
 
 class PostgresGrammar extends Grammar
 {

@@ -7,7 +7,7 @@ The Framework Queue component provides a unified API across a variety of differe
 First, create a new Queue `Capsule` manager instance. Similar to the "Capsule" provided for the Eloquent ORM, the queue Capsule aims to make configuring the library for usage outside of the Framework framework as easy as possible.
 
 ```PHP
-use Foundation\Queue\Capsule\Manager as Queue;
+use Penoaks\Queue\Capsule\Manager as Queue;
 
 $queue = new Queue;
 

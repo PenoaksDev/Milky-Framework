@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
-use Foundation\Contracts\Cache\Store;
-use Foundation\Redis\Database as Redis;
+use Penoaks\Contracts\Cache\Store;
+use Penoaks\Redis\Database as Redis;
 
 class RedisStore extends TaggableStore implements Store
 {

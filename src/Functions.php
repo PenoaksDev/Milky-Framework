@@ -1,22 +1,22 @@
 <?php
 
-use Foundation\Bindings\Bindings;
-use Foundation\Contracts\Auth\Access\Gate;
-use Foundation\Contracts\Auth\Factory as AuthFactory;
-use Foundation\Contracts\Bus\Dispatcher;
-use Foundation\Contracts\Cookie\Factory as CookieFactory;
-use Foundation\Contracts\Routing\ResponseFactory;
-use Foundation\Contracts\Routing\UrlGenerator;
-use Foundation\Contracts\Support\Htmlable;
-use Foundation\Contracts\Validation\Factory as ValidationFactory;
-use Foundation\Contracts\View\Factory as ViewFactory;
-use Foundation\Database\Eloquent\Factory as EloquentFactory;
-use Foundation\Framework\Env;
-use Foundation\Support\Arr;
-use Foundation\Support\Collection;
-use Foundation\Support\Debug\Dumper;
-use Foundation\Support\HtmlString;
-use Foundation\Support\Str;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Contracts\Auth\Access\Gate;
+use Penoaks\Contracts\Auth\Factory as AuthFactory;
+use Penoaks\Contracts\Bus\Dispatcher;
+use Penoaks\Contracts\Cookie\Factory as CookieFactory;
+use Penoaks\Contracts\Routing\ResponseFactory;
+use Penoaks\Contracts\Routing\UrlGenerator;
+use Penoaks\Contracts\Support\Htmlable;
+use Penoaks\Contracts\Validation\Factory as ValidationFactory;
+use Penoaks\Contracts\View\Factory as ViewFactory;
+use Penoaks\Database\Eloquent\Factory as EloquentFactory;
+use Penoaks\Framework\Env;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Collection;
+use Penoaks\Support\Debug\Dumper;
+use Penoaks\Support\HtmlString;
+use Penoaks\Support\Str;
 
 define( '__', DIRECTORY_SEPARATOR );
 define( '__FW__', __DIR__ );

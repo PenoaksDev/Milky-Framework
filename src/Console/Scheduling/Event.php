@@ -1,16 +1,16 @@
 <?php
 
-namesapce Penoaks\Console\Scheduling;
+namespace Penoaks\Console\Scheduling;
 
 use Closure;
 use Carbon\Carbon;
 use LogicException;
 use Cron\CronExpression;
 use GuzzleHttp\Client as HttpClient;
-use Foundation\Contracts\Mail\Mailer;
+use Penoaks\Contracts\Mail\Mailer;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils;
-use Foundation\Framework;
+use Penoaks\Framework;
 
 class Event
 {

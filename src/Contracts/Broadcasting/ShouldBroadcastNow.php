@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Broadcasting;
+namespace Penoaks\Contracts\Broadcasting;
 
 interface ShouldBroadcastNow extends ShouldBroadcast
 {

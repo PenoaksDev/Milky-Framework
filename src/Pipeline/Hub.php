@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Pipeline;
+namespace Penoaks\Pipeline;
 
 use Closure;
-use Foundation\Framework;
-use Foundation\Contracts\Pipeline\Hub as HubContract;
+use Penoaks\Framework;
+use Penoaks\Contracts\Pipeline\Hub as HubContract;
 
 class Hub implements HubContract
 {

@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Auth\Events;
+namespace Penoaks\Auth\Events;
 
-use Foundation\Http\Request;
+use Penoaks\Http\Request;
 
 class Lockout
 {

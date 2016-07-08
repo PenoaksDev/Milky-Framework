@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Queue\Console;
+namespace Penoaks\Queue\Console;
 
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 
 class ForgetFailedCommand extends Command

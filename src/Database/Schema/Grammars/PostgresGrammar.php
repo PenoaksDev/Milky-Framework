@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database\Schema\Grammars;
+namespace Penoaks\Database\Schema\Grammars;
 
-use Foundation\Support\Fluent;
-use Foundation\Database\Schema\Blueprint;
+use Penoaks\Support\Fluent;
+use Penoaks\Database\Schema\Blueprint;
 
 class PostgresGrammar extends Grammar
 {

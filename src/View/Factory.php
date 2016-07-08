@@ -1,13 +1,13 @@
 <?php
-namesapce Penoaks\View;
+namespace Penoaks\View;
 
 use Closure;
-use Foundation\Events\Dispatcher;
-use Foundation\Contracts\Support\Arrayable;
-use Foundation\Contracts\View\Factory as FactoryContract;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\View\Engines\EngineResolver;
+use Penoaks\Events\Dispatcher;
+use Penoaks\Contracts\Support\Arrayable;
+use Penoaks\Contracts\View\Factory as FactoryContract;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\View\Engines\EngineResolver;
 use InvalidArgumentException;
 
 class Factory implements FactoryContract

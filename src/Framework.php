@@ -3,30 +3,34 @@ namespace Penoaks;
 
 use Closure;
 use Composer\Autoload\ClassLoader;
-use Foundation\Barebones\Bootstrap;
-use Foundation\Barebones\ServiceProvider;
-use Foundation\Bindings\Bindings;
-use Foundation\Bootstrap\BootProviders;
-use Foundation\Bootstrap\ConfigureLogging;
-use Foundation\Bootstrap\HandleExceptions;
-use Foundation\Bootstrap\LoadConfiguration;
-use Foundation\Bootstrap\RegisterFacades;
-use Foundation\Bootstrap\RegisterProviders;
-use Foundation\Config\Repository;
-use Foundation\Contracts\Debug\ExceptionHandler;
-use Foundation\Events\BootstrapPostEvent;
-use Foundation\Events\BootstrapPreEvent;
-use Foundation\Events\Dispatcher;
-use Foundation\Events\LocaleChangedEvent;
-use Foundation\Events\Runlevel;
-use Foundation\Events\ServiceProviderPostEvent;
-use Foundation\Events\ServiceProviderPreEvent;
-use Foundation\Filesystem\Filesystem;
-use Foundation\Framework\Env;
-use Foundation\Http\Request;
-use Foundation\Routing\RoutingServiceProvider;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Foundation\ProviderRepository;
+use Penoaks\Barebones\Bootstrap;
+use Penoaks\Barebones\ExceptionHandler;
+use Penoaks\Barebones\Kernel;
+use Penoaks\Barebones\ServiceProvider;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Bootstrap\BootProviders;
+use Penoaks\Bootstrap\ConfigureLogging;
+use Penoaks\Bootstrap\HandleExceptions;
+use Penoaks\Bootstrap\LoadConfiguration;
+use Penoaks\Bootstrap\RegisterFacades;
+use Penoaks\Bootstrap\RegisterProviders;
+use Penoaks\Config\Repository;
+use Penoaks\Events\BootstrapPostEvent;
+use Penoaks\Events\BootstrapPreEvent;
+use Penoaks\Events\Dispatcher;
+use Penoaks\Events\EnvMissingEvent;
+use Penoaks\Events\LocaleChangedEvent;
+use Penoaks\Events\Runlevel;
+use Penoaks\Events\ServiceProviderPostEvent;
+use Penoaks\Events\ServiceProviderPreEvent;
+use Penoaks\Filesystem\Filesystem;
+use Penoaks\Framework\Env;
+use Penoaks\Framework\Exceptions\Handler;
+use Penoaks\Http\Request;
+use Penoaks\Routing\RoutingServiceProvider;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 use RuntimeException;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
@@ -55,13 +59,6 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class Framework implements HttpKernelInterface
 {
-	/**
-	 * The Penoaks Framework version.
-	 *
-	 * @var string
-	 */
-	const VERSION = '6.0.0';
-
 	/**
 	 * Stores a static instance of this framework
 	 *
@@ -227,7 +224,8 @@ class Framework implements HttpKernelInterface
 		/* Store default path values in ENV */
 		$env->set( ['path' => $paths] );
 
-		$loader->set( "", $env->get( 'path.src' ) );
+		/* TODO Detect namespace */
+		$loader->set( "Shared\\", $env->get( 'path.src' ) );
 
 		$this->runlevel = new Runlevel();
 
@@ -236,6 +234,8 @@ class Framework implements HttpKernelInterface
 		{
 			return $bindings->make( 'Penoaks\Contracts\Queue\Factory' );
 		} );
+
+		$events->listenEvents( $this );
 
 		/* Save Events Dispatcher */
 		$bindings->instance( 'events', $events );
@@ -320,10 +320,10 @@ class Framework implements HttpKernelInterface
 		$this->kernel = $this->bindings->make( Kernel::class );
 
 		/* Init exception handler */
-		$bindings->singleton( ExceptionHandler::class, $env->get( 'exceptionHandler', ExceptionHandler::class ) );
+		$bindings->singleton( ExceptionHandler::class, $env->get( 'exceptions', Handler::class ) );
 
 		/* Fire INIT Runlevel Event */
-		$bindings['events']->fire( $this->runlevel->set( Runlevel::INIT ) );
+		$events->fire( $this->runlevel->set( Runlevel::INIT ) );
 
 		$this->bootstrap( new LoadConfiguration() );
 		$this->bootstrap( new ConfigureLogging() );
@@ -331,17 +331,24 @@ class Framework implements HttpKernelInterface
 		$this->bootstrap( new RegisterFacades() );
 
 		/* Fire BOOT Runlevel Event */
-		$bindings['events']->fire( $this->runlevel->set( Runlevel::BOOT ) );
+		$events->fire( $this->runlevel->set( Runlevel::BOOT ) );
 
 		// Call the implemented boot method.
 		if ( method_exists( $this->kernel, 'boot' ) )
-			Bindings::call( [$this->kernel, 'boot'], ['mode' => 'http'] );
+			$bindings->call( [$this->kernel, 'boot'], ['mode' => 'http'] );
 
 		$this->bootstrap( new RegisterProviders() );
 		$this->bootstrap( new BootProviders() );
 
 		/* Fire DONE Runlevel Event */
-		$bindings['events']->fire( $this->runlevel->set( Runlevel::DONE ) );
+		$events->fire( $this->runlevel->set( Runlevel::DONE ) );
+	}
+	
+	public function onEnvMissingEvent( EnvMissingEvent $event )
+	{
+		$keys = $event->keys;
+		if ( count( $keys ) == 2 && $keys[0] == 'path' ) // e.g., path.logs
+			$event->setDefault( Env::get( 'path.base' ) . __ . $keys[1] );
 	}
 
 	/**
@@ -372,7 +379,7 @@ class Framework implements HttpKernelInterface
 	 */
 	public function version()
 	{
-		return static::VERSION;
+		return "Penoaks Framework (6.0.0)";
 	}
 
 	/**

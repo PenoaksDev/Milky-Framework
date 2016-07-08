@@ -1,20 +1,20 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 use IlluminateQueueClosure;
-use Foundation\Support\ServiceProvider;
-use Foundation\Queue\Console\WorkCommand;
-use Foundation\Queue\Console\ListenCommand;
-use Foundation\Queue\Console\RestartCommand;
-use Foundation\Queue\Connectors\SqsConnector;
-use Foundation\Queue\Connectors\NullConnector;
-use Foundation\Queue\Connectors\SyncConnector;
-use Foundation\Queue\Connectors\RedisConnector;
-use Foundation\Queue\Failed\NullFailedJobProvider;
-use Foundation\Queue\Connectors\DatabaseConnector;
-use Foundation\Queue\Connectors\BeanstalkdConnector;
-use Foundation\Queue\Failed\DatabaseFailedJobProvider;
+use Penoaks\Support\ServiceProvider;
+use Penoaks\Queue\Console\WorkCommand;
+use Penoaks\Queue\Console\ListenCommand;
+use Penoaks\Queue\Console\RestartCommand;
+use Penoaks\Queue\Connectors\SqsConnector;
+use Penoaks\Queue\Connectors\NullConnector;
+use Penoaks\Queue\Connectors\SyncConnector;
+use Penoaks\Queue\Connectors\RedisConnector;
+use Penoaks\Queue\Failed\NullFailedJobProvider;
+use Penoaks\Queue\Connectors\DatabaseConnector;
+use Penoaks\Queue\Connectors\BeanstalkdConnector;
+use Penoaks\Queue\Failed\DatabaseFailedJobProvider;
 
 class QueueServiceProvider extends ServiceProvider
 {

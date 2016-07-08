@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\Barebones;
+namespace Penoaks\Barebones;
 
 use BadMethodCallException;
-use Foundation\Console\Events\ArtisanStarting;
+use Penoaks\Console\Events\ArtisanStarting;
 
 abstract class ServiceProvider
 {

@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\View\Engines;
+namespace Penoaks\View\Engines;
 
 interface EngineInterface
 {

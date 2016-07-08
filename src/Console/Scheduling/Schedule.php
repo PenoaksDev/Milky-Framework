@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Console\Scheduling;
+namespace Penoaks\Console\Scheduling;
 
 use Symfony\Component\Process\ProcessUtils;
 use Symfony\Component\Process\PhpExecutableFinder;

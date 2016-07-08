@@ -1,9 +1,9 @@
 <?php
-namesapce Penoaks\Providers;
+namespace Penoaks\Providers;
 
-use Foundation\Routing\Router;
-use Foundation\Barebones\ServiceProvider;
-use Foundation\Contracts\Routing\UrlGenerator;
+use Penoaks\Routing\Router;
+use Penoaks\Barebones\ServiceProvider;
+use Penoaks\Contracts\Routing\UrlGenerator;
 
 class RouteServiceProvider extends ServiceProvider
 {

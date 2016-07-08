@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Queue\Connectors;
+namespace Penoaks\Queue\Connectors;
 
-use Foundation\Support\Arr;
-use Foundation\Queue\DatabaseQueue;
-use Foundation\Database\ConnectionResolverInterface;
+use Penoaks\Support\Arr;
+use Penoaks\Queue\DatabaseQueue;
+use Penoaks\Database\ConnectionResolverInterface;
 
 class DatabaseConnector implements ConnectorInterface
 {

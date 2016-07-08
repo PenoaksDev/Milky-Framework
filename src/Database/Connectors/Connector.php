@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Database\Connectors;
+namespace Penoaks\Database\Connectors;
 
 use PDO;
 use Exception;
-use Foundation\Support\Arr;
-use Foundation\Database\DetectsLostConnections;
+use Penoaks\Support\Arr;
+use Penoaks\Database\DetectsLostConnections;
 
 class Connector
 {

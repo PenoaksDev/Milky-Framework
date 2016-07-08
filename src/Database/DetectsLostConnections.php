@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
 use Exception;
-use Foundation\Support\Str;
+use Penoaks\Support\Str;
 
 trait DetectsLostConnections
 {

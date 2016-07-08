@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Support\Str;
-use Foundation\Console\GeneratorCommand;
+use Penoaks\Support\Str;
+use Penoaks\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 class ModelMakeCommand extends GeneratorCommand

@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Broadcasting\Broadcasters;
+namespace Penoaks\Broadcasting\Broadcasters;
 
-use Foundation\Contracts\Broadcasting\Broadcaster;
-use Foundation\Contracts\Redis\Database as RedisDatabase;
+use Penoaks\Contracts\Broadcasting\Broadcaster;
+use Penoaks\Contracts\Redis\Database as RedisDatabase;
 
 class RedisBroadcaster implements Broadcaster
 {

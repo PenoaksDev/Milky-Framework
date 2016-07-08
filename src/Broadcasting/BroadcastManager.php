@@ -1,15 +1,15 @@
 <?php
 
-namesapce Penoaks\Broadcasting;
+namespace Penoaks\Broadcasting;
 
 use Pusher;
 use Closure;
-use Foundation\Support\Arr;
+use Penoaks\Support\Arr;
 use InvalidArgumentException;
-use Foundation\Broadcasting\Broadcasters\LogBroadcaster;
-use Foundation\Broadcasting\Broadcasters\RedisBroadcaster;
-use Foundation\Broadcasting\Broadcasters\PusherBroadcaster;
-use Foundation\Contracts\Broadcasting\Factory as FactoryContract;
+use Penoaks\Broadcasting\Broadcasters\LogBroadcaster;
+use Penoaks\Broadcasting\Broadcasters\RedisBroadcaster;
+use Penoaks\Broadcasting\Broadcasters\PusherBroadcaster;
+use Penoaks\Contracts\Broadcasting\Factory as FactoryContract;
 
 class BroadcastManager implements FactoryContract
 {

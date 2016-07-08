@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
-use Foundation\Support\Manager;
+use Penoaks\Support\Manager;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NullSessionHandler;
 
 class SessionManager extends Manager

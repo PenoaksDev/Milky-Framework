@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Auth\Passwords;
+namespace Penoaks\Auth\Passwords;
 
 use Carbon\Carbon;
-use Foundation\Support\Str;
-use Foundation\Database\ConnectionInterface;
-use Foundation\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Penoaks\Support\Str;
+use Penoaks\Database\ConnectionInterface;
+use Penoaks\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 class DatabaseTokenRepository implements TokenRepositoryInterface
 {

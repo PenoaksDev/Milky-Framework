@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Http\Request;
-use Foundation\Contracts\Auth\Guard;
+use Penoaks\Http\Request;
+use Penoaks\Contracts\Auth\Guard;
 
 class RequestGuard implements Guard
 {

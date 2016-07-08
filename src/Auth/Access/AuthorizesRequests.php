@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Auth\Access;
+namespace Penoaks\Auth\Access;
 
-use Foundation\Contracts\Auth\Access\Gate;
+use Penoaks\Contracts\Auth\Access\Gate;
 
 trait AuthorizesRequests
 {

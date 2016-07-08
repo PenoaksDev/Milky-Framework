@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
 use Memcached;
-use Foundation\Contracts\Cache\Store;
+use Penoaks\Contracts\Cache\Store;
 
 class MemcachedStore extends TaggableStore implements Store
 {

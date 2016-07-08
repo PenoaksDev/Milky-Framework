@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Auth\Passwords;
+namespace Penoaks\Auth\Passwords;
 
-use Foundation\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Penoaks\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 interface TokenRepositoryInterface
 {

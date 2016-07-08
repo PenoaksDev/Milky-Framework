@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\View;
+namespace Penoaks\View;
 
 interface ViewFinderInterface
 {

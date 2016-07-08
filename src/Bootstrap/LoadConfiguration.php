@@ -1,11 +1,11 @@
 <?php
-namesapce Penoaks\Bootstrap;
+namespace Penoaks\Bootstrap;
 
-use Foundation\Barebones\Bootstrap;
-use Foundation\Config\Repository;
-use Foundation\Contracts\Config\Repository as RepositoryContract;
-use Foundation\Framework;
-use Foundation\Framework\Env;
+use Penoaks\Barebones\Bootstrap;
+use Penoaks\Config\Repository;
+use Penoaks\Contracts\Config\Repository as RepositoryContract;
+use Penoaks\Framework;
+use Penoaks\Framework\Env;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -72,12 +72,12 @@ class LoadConfiguration implements Bootstrap
 				if ( ends_with( $file->getFilename(), '.json' ) )
 					$repository->set( $nesting . basename( $file->getRealPath(), '.json' ), json_decode( file_get_contents( $file ) ) );
 
-				if ( ends_with( $file->getFilename(), '.php' ) && is_array( $array = require( $file->getRealPath() ) ) )
+				if ( ends_with( $file->getFilename(), '.php' ) && is_array( $array = include_once( $file->getRealPath() ) ) )
 				{
 					$repository->set( $nesting . basename( $file->getRealPath(), '.php' ), $array );
 				}
 			}
-			catch ( \Exception $e )
+			catch ( \Throwable $e )
 			{
 				// TODO Pass configuration failures to the ExceptionHandler
 				throw new \RuntimeException( "Failed to load configuration file [" . $file->getRealPath() . "]: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() );

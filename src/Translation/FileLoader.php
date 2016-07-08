@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Translation;
+namespace Penoaks\Translation;
 
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Filesystem\Filesystem;
 
 class FileLoader implements LoaderInterface
 {

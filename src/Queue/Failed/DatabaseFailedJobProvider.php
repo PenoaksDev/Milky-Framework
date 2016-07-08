@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Queue\Failed;
+namespace Penoaks\Queue\Failed;
 
 use Carbon\Carbon;
-use Foundation\Database\ConnectionResolverInterface;
+use Penoaks\Database\ConnectionResolverInterface;
 
 class DatabaseFailedJobProvider implements FailedJobProviderInterface
 {

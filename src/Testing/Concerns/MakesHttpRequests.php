@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Testing\Concerns;
+namespace Penoaks\Testing\Concerns;
 
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Http\Request;
-use Foundation\Contracts\View\View;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\Http\Request;
+use Penoaks\Contracts\View\View;
 use PHPUnit_Framework_Assert as PHPUnit;
 use PHPUnit_Framework_ExpectationFailedException;
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;

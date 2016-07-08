@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Bus;
+namespace Penoaks\Bus;
 
-use Foundation\Contracts\Bus\Dispatcher;
+use Penoaks\Contracts\Bus\Dispatcher;
 
 trait DispatchesJobs
 {

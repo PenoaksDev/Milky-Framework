@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\View;
+namespace Penoaks\View;
 
 use InvalidArgumentException;
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Filesystem\Filesystem;
 
 class FileViewFinder implements ViewFinderInterface
 {

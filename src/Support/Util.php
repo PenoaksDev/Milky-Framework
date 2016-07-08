@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Support;
+namespace Penoaks\Support;
 
 use Calendar;
 

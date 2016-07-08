@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
 abstract class TaggableStore
 {

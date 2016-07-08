@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
 use Closure;
 use Exception;
-use Foundation\Contracts\Cache\Store;
-use Foundation\Database\ConnectionInterface;
-use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
+use Penoaks\Contracts\Cache\Store;
+use Penoaks\Database\ConnectionInterface;
+use Penoaks\Contracts\Encryption\Encrypter as EncrypterContract;
 
 class DatabaseStore implements Store
 {

@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
 use PDO;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 use InvalidArgumentException;
-use Foundation\Database\Connectors\ConnectionFactory;
+use Penoaks\Database\Connectors\ConnectionFactory;
 
 class DatabaseManager implements ConnectionResolverInterface
 {

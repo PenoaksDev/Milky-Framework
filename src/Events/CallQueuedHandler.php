@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Events;
+namespace Penoaks\Events;
 
 /**
  * The MIT License (MIT)
@@ -10,9 +10,9 @@ namesapce Penoaks\Events;
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
 
-use Foundation\Barebones\Event;
-use Foundation\Contracts\Queue\Job;
-use Foundation\Framework;
+use Penoaks\Barebones\Event;
+use Penoaks\Contracts\Queue\Job;
+use Penoaks\Framework;
 
 class CallQueuedHandler implements Event
 {

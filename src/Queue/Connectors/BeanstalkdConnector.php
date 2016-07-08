@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Queue\Connectors;
+namespace Penoaks\Queue\Connectors;
 
 use Pheanstalk\Pheanstalk;
-use Foundation\Support\Arr;
+use Penoaks\Support\Arr;
 use Pheanstalk\PheanstalkInterface;
-use Foundation\Queue\BeanstalkdQueue;
+use Penoaks\Queue\BeanstalkdQueue;
 
 class BeanstalkdConnector implements ConnectorInterface
 {

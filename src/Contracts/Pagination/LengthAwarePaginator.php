@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Pagination;
+namespace Penoaks\Contracts\Pagination;
 
 interface LengthAwarePaginator extends Paginator
 {

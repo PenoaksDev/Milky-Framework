@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
-use Foundation\Console\Command;
-use Foundation\Framework;
+use Penoaks\Console\Command;
+use Penoaks\Framework;
 
 abstract class Seeder
 {

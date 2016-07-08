@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Database\Query\Grammars;
+namespace Penoaks\Database\Query\Grammars;
 
-use Foundation\Database\Query\Builder;
+use Penoaks\Database\Query\Builder;
 
 class SQLiteGrammar extends Grammar
 {

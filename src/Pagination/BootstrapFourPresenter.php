@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Pagination;
+namespace Penoaks\Pagination;
 
-use Foundation\Support\HtmlString;
-use Foundation\Contracts\Pagination\Paginator as PaginatorContract;
-use Foundation\Contracts\Pagination\Presenter as PresenterContract;
+use Penoaks\Support\HtmlString;
+use Penoaks\Contracts\Pagination\Paginator as PaginatorContract;
+use Penoaks\Contracts\Pagination\Presenter as PresenterContract;
 
 class BootstrapFourPresenter implements PresenterContract
 {

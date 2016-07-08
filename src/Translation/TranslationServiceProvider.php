@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Translation;
+namespace Penoaks\Translation;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class TranslationServiceProvider extends ServiceProvider
 {

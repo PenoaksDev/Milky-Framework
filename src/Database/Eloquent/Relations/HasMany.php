@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent\Relations;
+namespace Penoaks\Database\Eloquent\Relations;
 
-use Foundation\Database\Eloquent\Collection;
+use Penoaks\Database\Eloquent\Collection;
 
 class HasMany extends HasOneOrMany
 {

@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Testing;
+namespace Penoaks\Testing;
 
 use PHPUnit_Framework_ExpectationFailedException;
 

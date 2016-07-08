@@ -1,21 +1,23 @@
 <?php
-namesapce Penoaks\Bootstrap;
+namespace Penoaks\Bootstrap;
 
-use Foundation\Framework;
-use Foundation\Http\Request;
+use Penoaks\Barebones\Bootstrap;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Framework;
+use Penoaks\Http\Request;
 
 class SetRequestForConsole implements Bootstrap
 {
 	/**
 	 * Bootstrap the given application.
 	 *
-	 * @param  \Penoaks\Framework  $fw
+	 * @param  \Penoaks\Framework $fw
 	 * @return void
 	 */
-	public function bootstrap(Framework $fw)
+	public function bootstrap( Bindings $bindings )
 	{
-		$url = $fw->make('config')->get('app.url', 'http://localhost');
+		$url = $bindings->make( 'config' )->get( 'app.url', 'http://localhost' );
 
-		$fw->bindings->instance('request', Request::create($url, 'GET', [], [], [], $_SERVER));
+		$bindings->instance( 'request', Request::create( $url, 'GET', [], [], [], $_SERVER ) );
 	}
 }

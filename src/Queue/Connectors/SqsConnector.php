@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Queue\Connectors;
+namespace Penoaks\Queue\Connectors;
 
 use Aws\Sqs\SqsClient;
-use Foundation\Support\Arr;
-use Foundation\Queue\SqsQueue;
+use Penoaks\Support\Arr;
+use Penoaks\Queue\SqsQueue;
 
 class SqsConnector implements ConnectorInterface
 {

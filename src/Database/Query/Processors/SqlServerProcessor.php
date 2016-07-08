@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database\Query\Processors;
+namespace Penoaks\Database\Query\Processors;
 
 use Exception;
-use Foundation\Database\Query\Builder;
+use Penoaks\Database\Query\Builder;
 
 class SqlServerProcessor extends Processor
 {

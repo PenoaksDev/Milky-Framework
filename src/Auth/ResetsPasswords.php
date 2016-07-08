@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Support\Str;
-use Foundation\Http\Request;
-use Foundation\Mail\Message;
-use Foundation\Support\Facades\Auth;
-use Foundation\Support\Facades\Password;
+use Penoaks\Support\Str;
+use Penoaks\Http\Request;
+use Penoaks\Mail\Message;
+use Penoaks\Support\Facades\Auth;
+use Penoaks\Support\Facades\Password;
 
 trait ResetsPasswords
 {

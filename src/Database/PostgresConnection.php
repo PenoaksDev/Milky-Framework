@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Database;
+namespace Penoaks\Database;
 
-use Foundation\Database\Schema\PostgresBuilder;
+use Penoaks\Database\Schema\PostgresBuilder;
 use Doctrine\DBAL\Driver\PDOPgSql\Driver as DoctrineDriver;
-use Foundation\Database\Query\Processors\PostgresProcessor;
-use Foundation\Database\Query\Grammars\PostgresGrammar as QueryGrammar;
-use Foundation\Database\Schema\Grammars\PostgresGrammar as SchemaGrammar;
+use Penoaks\Database\Query\Processors\PostgresProcessor;
+use Penoaks\Database\Query\Grammars\PostgresGrammar as QueryGrammar;
+use Penoaks\Database\Schema\Grammars\PostgresGrammar as SchemaGrammar;
 
 class PostgresConnection extends Connection
 {

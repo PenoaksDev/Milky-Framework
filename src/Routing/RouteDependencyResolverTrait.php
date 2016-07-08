@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Routing;
+namespace Penoaks\Routing;
 
 use ReflectionMethod;
 use ReflectionParameter;
-use Foundation\Support\Arr;
+use Penoaks\Support\Arr;
 use ReflectionFunctionAbstract;
 
 trait RouteDependencyResolverTrait

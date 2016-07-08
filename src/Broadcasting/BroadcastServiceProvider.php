@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Broadcasting;
+namespace Penoaks\Broadcasting;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class BroadcastServiceProvider extends ServiceProvider
 {

@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\View\Compilers;
+namespace Penoaks\View\Compilers;
 
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Filesystem\Filesystem;
 
 abstract class Compiler
 {

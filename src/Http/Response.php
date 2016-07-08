@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Http;
+namespace Penoaks\Http;
 
 use Exception;
 use ArrayObject;
 use JsonSerializable;
-use Foundation\Contracts\Support\Jsonable;
-use Foundation\Contracts\Support\Renderable;
+use Penoaks\Contracts\Support\Jsonable;
+use Penoaks\Contracts\Support\Renderable;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
 
 class Response extends BaseResponse

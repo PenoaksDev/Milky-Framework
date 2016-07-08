@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Queue\Jobs;
+namespace Penoaks\Queue\Jobs;
 
-use Foundation\Support\Arr;
-use Foundation\Queue\RedisQueue;
-use Foundation\Framework;
-use Foundation\Contracts\Queue\Job as JobContract;
+use Penoaks\Support\Arr;
+use Penoaks\Queue\RedisQueue;
+use Penoaks\Framework;
+use Penoaks\Contracts\Queue\Job as JobContract;
 
 class RedisJob extends Job implements JobContract
 {

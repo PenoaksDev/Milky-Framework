@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
 use InvalidArgumentException;
 

@@ -1,8 +1,7 @@
 <?php
+namespace Penoaks\Support;
 
-namesapce Penoaks\Support;
-
-use Foundation\Support\Traits\Macroable;
+use Penoaks\Support\Traits\Macroable;
 
 class Str
 {

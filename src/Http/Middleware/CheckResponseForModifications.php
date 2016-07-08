@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Http\Middleware;
+namespace Penoaks\Http\Middleware;
 
 use Closure;
 use Symfony\Component\HttpFoundation\Response;

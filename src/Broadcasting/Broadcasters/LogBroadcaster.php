@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Broadcasting\Broadcasters;
+namespace Penoaks\Broadcasting\Broadcasters;
 
 use Psr\Log\LoggerInterface;
-use Foundation\Contracts\Broadcasting\Broadcaster;
+use Penoaks\Contracts\Broadcasting\Broadcaster;
 
 class LogBroadcaster implements Broadcaster
 {

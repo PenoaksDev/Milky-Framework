@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Validation;
+namespace Penoaks\Validation;
 
 use Closure;
 use DateTime;
@@ -9,17 +9,17 @@ use Exception;
 use DateTimeZone;
 use RuntimeException;
 use DateTimeInterface;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
 use BadMethodCallException;
 use InvalidArgumentException;
-use Foundation\Support\Fluent;
-use Foundation\Support\MessageBag;
-use Foundation\Framework;
+use Penoaks\Support\Fluent;
+use Penoaks\Support\MessageBag;
+use Penoaks\Framework;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Foundation\Contracts\Validation\Validator as ValidatorContract;
+use Penoaks\Contracts\Validation\Validator as ValidatorContract;
 
 class Validator implements ValidatorContract
 {

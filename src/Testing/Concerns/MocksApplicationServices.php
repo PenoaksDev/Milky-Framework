@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Testing\Concerns;
+namespace Penoaks\Testing\Concerns;
 
 use Mockery;
 use Exception;

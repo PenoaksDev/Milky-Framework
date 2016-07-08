@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 use Carbon\Carbon;
 use DateTime;
-use Foundation\Database\Connection;
-use Foundation\Database\Query\Expression;
-use Foundation\Queue\Jobs\DatabaseJob;
-use Foundation\Support\Collection;
+use Penoaks\Database\Connection;
+use Penoaks\Database\Query\Expression;
+use Penoaks\Queue\Jobs\DatabaseJob;
+use Penoaks\Support\Collection;
 
 class DatabaseQueue extends Queue
 {

@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Encryption;
+namespace Penoaks\Encryption;
 
-use Foundation\Contracts\Encryption\DecryptException;
+use Penoaks\Contracts\Encryption\DecryptException;
 
 abstract class BaseEncrypter
 {

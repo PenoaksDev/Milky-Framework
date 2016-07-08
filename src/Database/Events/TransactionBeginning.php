@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database\Events;
+namespace Penoaks\Database\Events;
 
 class TransactionBeginning extends ConnectionEvent
 {

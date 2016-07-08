@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Bootstrap;
+namespace Penoaks\Bootstrap;
 
-use Foundation\AliasLoader;
-use Foundation\Framework;
-use Foundation\Interfaces\Bootstrap;
-use Foundation\Support\Facades\Facade;
+use Penoaks\Framework\AliasLoader;
+use Penoaks\Barebones\Bootstrap;
+use Penoaks\Framework;
+use Penoaks\Support\Facades\Facade;
 
 class RegisterFacades implements Bootstrap
 {

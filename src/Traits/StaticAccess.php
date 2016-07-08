@@ -1,8 +1,9 @@
 <?php
-namesapce Penoaks\Traits;
+namespace Penoaks\Traits;
 
-use Foundation\Bindings\Bindings;
-use Foundation\Framework;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Framework;
+use Penoaks\Support\Facades\Log;
 
 /**
  * The MIT License (MIT)
@@ -62,8 +63,8 @@ trait StaticAccess
 	 */
 	public static function i()
 	{
-		if ( __CLASS__ != "Penoaks\\Bindings\\Bindings" && is_null ( static::$selfInstance ) )
-			Bindings::i()->get( __CLASS__ );
+		if ( __CLASS__ != "Penoaks\\Bindings\\Bindings" && is_null( static::$selfInstance ) )
+			Bindings::i()->make( __CLASS__ );
 
 		return static::$selfInstance;
 	}

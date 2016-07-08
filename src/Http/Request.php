@@ -1,15 +1,15 @@
 <?php
 
-namesapce Penoaks\Http;
+namespace Penoaks\Http;
 
 use Closure;
 use ArrayAccess;
 use SplFileInfo;
 use RuntimeException;
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Support\Traits\Macroable;
-use Foundation\Contracts\Support\Arrayable;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\Support\Traits\Macroable;
+use Penoaks\Contracts\Support\Arrayable;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 

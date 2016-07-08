@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Console\GeneratorCommand;
+use Penoaks\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 class JobMakeCommand extends GeneratorCommand

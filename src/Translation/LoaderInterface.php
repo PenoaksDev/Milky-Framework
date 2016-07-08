@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Translation;
+namespace Penoaks\Translation;
 
 interface LoaderInterface
 {

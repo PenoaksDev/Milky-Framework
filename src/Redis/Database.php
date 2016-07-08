@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Redis;
+namespace Penoaks\Redis;
 
 use Closure;
 use Predis\Client;
-use Foundation\Support\Arr;
-use Foundation\Contracts\Redis\Database as DatabaseContract;
+use Penoaks\Support\Arr;
+use Penoaks\Contracts\Redis\Database as DatabaseContract;
 
 class Database implements DatabaseContract
 {

@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Bindings;
+namespace Penoaks\Bindings;
 
 class ContextualBindingBuilder
 {

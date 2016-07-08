@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Queue\Connectors;
+namespace Penoaks\Queue\Connectors;
 
-use Foundation\Support\Arr;
-use Foundation\Redis\Database;
-use Foundation\Queue\RedisQueue;
+use Penoaks\Support\Arr;
+use Penoaks\Redis\Database;
+use Penoaks\Queue\RedisQueue;
 
 class RedisConnector implements ConnectorInterface
 {

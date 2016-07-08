@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Testing\Constraints;
+namespace Penoaks\Testing\Constraints;
 
 use PHPUnit_Framework_Constraint;
 use Symfony\Component\DomCrawler\Crawler;

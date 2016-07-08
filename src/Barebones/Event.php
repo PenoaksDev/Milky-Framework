@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Barebones;
+namespace Penoaks\Barebones;
 
 /**
  * The MIT License (MIT)

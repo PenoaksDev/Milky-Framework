@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Cache\Events;
+namespace Penoaks\Cache\Events;
 
 class KeyWritten
 {

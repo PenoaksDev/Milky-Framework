@@ -1,7 +1,7 @@
 <?php
 
-use Foundation\Database\Schema\Blueprint;
-use Foundation\Database\Migrations\Migration;
+use Penoaks\Database\Schema\Blueprint;
+use Penoaks\Database\Migrations\Migration;
 
 class CreateSessionsTable extends Migration
 {

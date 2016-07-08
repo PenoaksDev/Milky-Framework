@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Auth;
+namespace Penoaks\Auth;
 
-use Foundation\Contracts\Auth\Authenticatable as UserContract;
+use Penoaks\Contracts\Auth\Authenticatable as UserContract;
 
 class GenericUser implements UserContract
 {

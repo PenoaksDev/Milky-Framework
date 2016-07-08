@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Cache;
+namespace Penoaks\Cache;
 
 use Closure;
-use Foundation\Support\Arr;
+use Penoaks\Support\Arr;
 use InvalidArgumentException;
-use Foundation\Contracts\Cache\Store;
-use Foundation\Contracts\Cache\Factory as FactoryContract;
+use Penoaks\Contracts\Cache\Store;
+use Penoaks\Contracts\Cache\Factory as FactoryContract;
 
 class CacheManager implements FactoryContract
 {

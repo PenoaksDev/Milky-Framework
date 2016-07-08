@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Broadcasting;
+namespace Penoaks\Broadcasting;
 
 use ReflectionClass;
 use ReflectionProperty;
-use Foundation\Contracts\Queue\Job;
-use Foundation\Contracts\Support\Arrayable;
-use Foundation\Contracts\Broadcasting\Broadcaster;
+use Penoaks\Contracts\Queue\Job;
+use Penoaks\Contracts\Support\Arrayable;
+use Penoaks\Contracts\Broadcasting\Broadcaster;
 
 class BroadcastEvent
 {

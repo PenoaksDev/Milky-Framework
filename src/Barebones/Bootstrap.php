@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Barebones;
+namespace Penoaks\Barebones;
 
 interface Bootstrap
 {

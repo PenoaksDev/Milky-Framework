@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Queue\Console;
+namespace Penoaks\Queue\Console;
 
-use Foundation\Queue\Listener;
-use Foundation\Console\Command;
+use Penoaks\Queue\Listener;
+use Penoaks\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 

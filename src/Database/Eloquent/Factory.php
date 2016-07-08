@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent;
+namespace Penoaks\Database\Eloquent;
 
 use ArrayAccess;
 use Faker\Generator as Faker;

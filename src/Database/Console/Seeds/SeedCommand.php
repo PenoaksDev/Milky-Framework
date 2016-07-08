@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Database\Console\Seeds;
+namespace Penoaks\Database\Console\Seeds;
 
-use Foundation\Console\Command;
-use Foundation\Database\Eloquent\Model;
-use Foundation\Console\ConfirmableTrait;
+use Penoaks\Console\Command;
+use Penoaks\Database\Eloquent\Model;
+use Penoaks\Console\ConfirmableTrait;
 use Symfony\Component\Console\Input\InputOption;
-use Foundation\Database\ConnectionResolverInterface as Resolver;
+use Penoaks\Database\ConnectionResolverInterface as Resolver;
 
 class SeedCommand extends Command
 {

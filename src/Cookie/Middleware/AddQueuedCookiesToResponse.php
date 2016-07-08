@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Cookie\Middleware;
+namespace Penoaks\Cookie\Middleware;
 
 use Closure;
-use Foundation\Contracts\Cookie\QueueingFactory as CookieJar;
+use Penoaks\Contracts\Cookie\QueueingFactory as CookieJar;
 
 class AddQueuedCookiesToResponse
 {

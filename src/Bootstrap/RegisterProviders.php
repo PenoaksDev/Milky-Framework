@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\Bootstrap;
+namespace Penoaks\Bootstrap;
 
-use Foundation\Framework;
-use Foundation\Interfaces\Bootstrap;
+use Penoaks\Barebones\Bootstrap;
+use Penoaks\Framework;
 
 class RegisterProviders implements Bootstrap
 {

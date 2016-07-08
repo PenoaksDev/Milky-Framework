@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Support\Facades;
+namespace Penoaks\Support\Facades;
 
 /**
  * @see \Penoaks\View\Factory

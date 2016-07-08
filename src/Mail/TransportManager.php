@@ -1,17 +1,17 @@
 <?php
-namesapce Penoaks\Mail;
+namespace Penoaks\Mail;
 
 use Aws\Ses\SesClient;
-use Foundation\Support\Arr;
-use Foundation\Support\Manager;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Manager;
 use GuzzleHttp\Client as HttpClient;
 use Swift_SmtpTransport as SmtpTransport;
 use Swift_MailTransport as MailTransport;
-use Foundation\Mail\Transport\LogTransport;
-use Foundation\Mail\Transport\SesTransport;
-use Foundation\Mail\Transport\MailgunTransport;
-use Foundation\Mail\Transport\MandrillTransport;
-use Foundation\Mail\Transport\SparkPostTransport;
+use Penoaks\Mail\Transport\LogTransport;
+use Penoaks\Mail\Transport\SesTransport;
+use Penoaks\Mail\Transport\MailgunTransport;
+use Penoaks\Mail\Transport\MandrillTransport;
+use Penoaks\Mail\Transport\SparkPostTransport;
 use Swift_SendmailTransport as SendmailTransport;
 
 /**

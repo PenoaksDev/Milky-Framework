@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Hashing;
+namespace Penoaks\Hashing;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class HashServiceProvider extends ServiceProvider
 {

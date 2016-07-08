@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\View\Engines;
+namespace Penoaks\View\Engines;
 
 use Exception;
 use ErrorException;
-use Foundation\View\Compilers\CompilerInterface;
+use Penoaks\View\Compilers\CompilerInterface;
 
 class CompilerEngine extends PhpEngine
 {

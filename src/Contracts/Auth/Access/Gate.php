@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Auth\Access;
+namespace Penoaks\Contracts\Auth\Access;
 
 interface Gate
 {

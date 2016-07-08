@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Support;
+namespace Penoaks\Support;
 
 use Countable;
 use JsonSerializable;
-use Foundation\Contracts\Support\Jsonable;
-use Foundation\Contracts\Support\Arrayable;
-use Foundation\Contracts\Support\MessageProvider;
-use Foundation\Contracts\Support\MessageBag as MessageBagContract;
+use Penoaks\Contracts\Support\Jsonable;
+use Penoaks\Contracts\Support\Arrayable;
+use Penoaks\Contracts\Support\MessageProvider;
+use Penoaks\Contracts\Support\MessageBag as MessageBagContract;
 
 class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, MessageBagContract, MessageProvider
 {

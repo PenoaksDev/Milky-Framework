@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Validation;
+namespace Penoaks\Validation;
 
 use Closure;
-use Foundation\Support\Str;
-use Foundation\Framework;
+use Penoaks\Support\Str;
+use Penoaks\Framework;
 use Symfony\Component\Translation\TranslatorInterface;
-use Foundation\Contracts\Validation\Factory as FactoryContract;
+use Penoaks\Contracts\Validation\Factory as FactoryContract;
 
 class Factory implements FactoryContract
 {

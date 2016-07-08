@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Encryption;
+namespace Penoaks\Encryption;
 
 use RuntimeException;
-use Foundation\Support\Str;
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\Str;
+use Penoaks\Support\ServiceProvider;
 
 class EncryptionServiceProvider extends ServiceProvider
 {

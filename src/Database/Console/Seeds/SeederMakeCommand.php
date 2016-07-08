@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Database\Console\Seeds;
+namespace Penoaks\Database\Console\Seeds;
 
-use Foundation\Support\Composer;
-use Foundation\Filesystem\Filesystem;
-use Foundation\Console\GeneratorCommand;
+use Penoaks\Support\Composer;
+use Penoaks\Filesystem\Filesystem;
+use Penoaks\Console\GeneratorCommand;
 
 class SeederMakeCommand extends GeneratorCommand
 {

@@ -3,8 +3,8 @@
 namespace DummyNamespace;
 
 use DummyRootNamespaceEvents\Event;
-use Foundation\Queue\SerializesModels;
-use Foundation\Contracts\Broadcasting\ShouldBroadcast;
+use Penoaks\Queue\SerializesModels;
+use Penoaks\Contracts\Broadcasting\ShouldBroadcast;
 
 class DummyClass extends Event
 {

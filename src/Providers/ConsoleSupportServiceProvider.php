@@ -1,7 +1,7 @@
 <?php
-namesapce Penoaks\Providers;
+namespace Penoaks\Providers;
 
-use Foundation\Support\AggregateServiceProvider;
+use Penoaks\Support\AggregateServiceProvider;
 
 /**
  * The MIT License (MIT)

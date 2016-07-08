@@ -1,13 +1,13 @@
 <?php
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 use Closure;
 use DateTime;
-use Foundation\Bindings\Bindings;
-use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
-use Foundation\Contracts\Queue\QueueableEntity;
-use Foundation\Framework;
-use Foundation\Support\Arr;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Contracts\Encryption\Encrypter as EncrypterContract;
+use Penoaks\Contracts\Queue\QueueableEntity;
+use Penoaks\Framework;
+use Penoaks\Support\Arr;
 use SuperClosure\Serializer;
 
 abstract class Queue

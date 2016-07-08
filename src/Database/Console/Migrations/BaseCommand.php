@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Database\Console\Migrations;
+namespace Penoaks\Database\Console\Migrations;
 
-use Foundation\Console\Command;
+use Penoaks\Console\Command;
 
 class BaseCommand extends Command
 {

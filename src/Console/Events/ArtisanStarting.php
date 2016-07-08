@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Console\Events;
+namespace Penoaks\Console\Events;
 
 class ArtisanStarting
 {

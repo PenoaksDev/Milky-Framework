@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\Providers;
+namespace Penoaks\Providers;
 
-use Foundation\Barebones\ServiceProvider;
-use Foundation\Contracts\Auth\Access\Gate as GateContract;
+use Penoaks\Barebones\ServiceProvider;
+use Penoaks\Contracts\Auth\Access\Gate as GateContract;
 
 /**
  * The MIT License (MIT)

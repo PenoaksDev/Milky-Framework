@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent\Relations;
+namespace Penoaks\Database\Eloquent\Relations;
 
-use Foundation\Database\Eloquent\Model;
-use Foundation\Database\Eloquent\Builder;
-use Foundation\Database\Query\Expression;
-use Foundation\Database\Eloquent\Collection;
+use Penoaks\Database\Eloquent\Model;
+use Penoaks\Database\Eloquent\Builder;
+use Penoaks\Database\Query\Expression;
+use Penoaks\Database\Eloquent\Collection;
 
 class BelongsTo extends Relation
 {

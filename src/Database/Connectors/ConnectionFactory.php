@@ -1,15 +1,15 @@
 <?php
 
-namesapce Penoaks\Database\Connectors;
+namespace Penoaks\Database\Connectors;
 
 use PDO;
-use Foundation\Support\Arr;
+use Penoaks\Support\Arr;
 use InvalidArgumentException;
-use Foundation\Database\MySqlConnection;
-use Foundation\Database\SQLiteConnection;
-use Foundation\Database\PostgresConnection;
-use Foundation\Database\SqlServerConnection;
-use Foundation\Framework;
+use Penoaks\Database\MySqlConnection;
+use Penoaks\Database\SQLiteConnection;
+use Penoaks\Database\PostgresConnection;
+use Penoaks\Database\SqlServerConnection;
+use Penoaks\Framework;
 
 class ConnectionFactory
 {

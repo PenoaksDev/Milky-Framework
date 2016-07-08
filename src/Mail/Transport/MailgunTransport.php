@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Mail\Transport;
+namespace Penoaks\Mail\Transport;
 
 use Swift_Mime_Message;
 use GuzzleHttp\Post\PostFile;

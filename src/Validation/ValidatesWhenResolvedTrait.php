@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Validation;
+namespace Penoaks\Validation;
 
-use Foundation\Contracts\Validation\ValidationException;
-use Foundation\Contracts\Validation\UnauthorizedException;
+use Penoaks\Contracts\Validation\ValidationException;
+use Penoaks\Contracts\Validation\UnauthorizedException;
 
 /**
  * Provides default implementation of ValidatesWhenResolved contract.

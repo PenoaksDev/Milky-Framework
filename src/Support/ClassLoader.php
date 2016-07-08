@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Support;
+namespace Penoaks\Support;
 
 class ClassLoader
 {

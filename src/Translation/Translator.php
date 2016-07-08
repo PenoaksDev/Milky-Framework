@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Translation;
+namespace Penoaks\Translation;
 
-use Foundation\Support\Arr;
-use Foundation\Support\Str;
-use Foundation\Support\Collection;
-use Foundation\Support\NamespacedItemResolver;
+use Penoaks\Support\Arr;
+use Penoaks\Support\Str;
+use Penoaks\Support\Collection;
+use Penoaks\Support\NamespacedItemResolver;
 use Symfony\Component\Translation\MessageSelector;
 use Symfony\Component\Translation\TranslatorInterface;
 

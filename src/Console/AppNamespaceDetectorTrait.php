@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Framework;
+use Penoaks\Framework;
 
 trait AppNamespaceDetectorTrait
 {

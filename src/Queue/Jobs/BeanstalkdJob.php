@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Queue\Jobs;
+namespace Penoaks\Queue\Jobs;
 
 use Pheanstalk\Pheanstalk;
-use Foundation\Framework;
+use Penoaks\Framework;
 use Pheanstalk\Job as PheanstalkJob;
-use Foundation\Contracts\Queue\Job as JobContract;
+use Penoaks\Contracts\Queue\Job as JobContract;
 
 class BeanstalkdJob extends Job implements JobContract
 {

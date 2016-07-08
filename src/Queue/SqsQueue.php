@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 use Aws\Sqs\SqsClient;
-use Foundation\Queue\Jobs\SqsJob;
+use Penoaks\Queue\Jobs\SqsJob;
 
 class SqsQueue extends Queue
 {

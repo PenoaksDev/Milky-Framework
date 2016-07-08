@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Testing\Concerns;
+namespace Penoaks\Testing\Concerns;
 
-use Foundation\Contracts\Auth\Authenticatable as UserContract;
+use Penoaks\Contracts\Auth\Authenticatable as UserContract;
 
 trait ImpersonatesUsers
 {

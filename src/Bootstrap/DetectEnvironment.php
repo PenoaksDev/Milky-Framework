@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Bootstrap;
+namespace Penoaks\Bootstrap;
 
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
-use Foundation\Framework;
-use Foundation\Interfaces\Bootstrap;
+use Penoaks\Framework;
+use Penoaks\Interfaces\Bootstrap;
 
 class DetectEnvironment implements Bootstrap
 {

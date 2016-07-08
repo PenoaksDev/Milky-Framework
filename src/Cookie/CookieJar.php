@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Cookie;
+namespace Penoaks\Cookie;
 
-use Foundation\Support\Arr;
+use Penoaks\Support\Arr;
 use Symfony\Component\HttpFoundation\Cookie;
-use Foundation\Contracts\Cookie\QueueingFactory as JarContract;
+use Penoaks\Contracts\Cookie\QueueingFactory as JarContract;
 
 class CookieJar implements JarContract
 {

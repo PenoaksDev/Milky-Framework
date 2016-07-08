@@ -1,12 +1,12 @@
 <?php
-namesapce Penoaks\Events;
+namespace Penoaks\Events;
 
 use Exception;
-use Foundation\Bindings\Bindings;
-use Foundation\Contracts\Broadcasting\ShouldBroadcast;
-use Foundation\Contracts\Broadcasting\ShouldBroadcastNow;
-use Foundation\Framework;
-use Foundation\Support\Str;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Contracts\Broadcasting\ShouldBroadcast;
+use Penoaks\Contracts\Broadcasting\ShouldBroadcastNow;
+use Penoaks\Framework;
+use Penoaks\Support\Str;
 use ReflectionClass;
 
 /**

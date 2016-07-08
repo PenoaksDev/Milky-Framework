@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Events\Traits;
+namespace Penoaks\Events\Traits;
 
 /**
  * The MIT License (MIT)
@@ -15,7 +15,7 @@ trait DynamicProperties
 	/**
 	 * @var array
 	 */
-	public $values;
+	private $values;
 
 	/**
 	 * Get property

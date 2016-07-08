@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Providers;
+namespace Penoaks\Providers;
 
-use Foundation\Routing\Redirector;
-use Foundation\Support\ServiceProvider;
-use Foundation\Http\FormRequest;
+use Penoaks\Routing\Redirector;
+use Penoaks\Support\ServiceProvider;
+use Penoaks\Http\FormRequest;
 use Symfony\Component\HttpFoundation\Request;
-use Foundation\Contracts\Validation\ValidatesWhenResolved;
+use Penoaks\Contracts\Validation\ValidatesWhenResolved;
 
 class FoundationServiceProvider extends ServiceProvider
 {

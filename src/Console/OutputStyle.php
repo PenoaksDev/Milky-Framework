@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Input\InputInterface;

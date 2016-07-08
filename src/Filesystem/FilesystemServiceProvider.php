@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Filesystem;
+namespace Penoaks\Filesystem;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class FilesystemServiceProvider extends ServiceProvider
 {

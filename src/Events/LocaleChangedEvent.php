@@ -1,5 +1,5 @@
 <?php
-namesapce Penoaks\Events;
+namespace Penoaks\Events;
 
 /**
  * The MIT License (MIT)
@@ -10,7 +10,7 @@ namesapce Penoaks\Events;
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
 
-use Foundation\Barebones\Event;
+use Penoaks\Barebones\Event;
 
 class LocaleChangedEvent implements Event
 {

@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Session;
+namespace Penoaks\Session;
 
 use SessionHandlerInterface;
-use Foundation\Contracts\Encryption\DecryptException;
-use Foundation\Contracts\Encryption\Encrypter as EncrypterContract;
+use Penoaks\Contracts\Encryption\DecryptException;
+use Penoaks\Contracts\Encryption\Encrypter as EncrypterContract;
 
 class EncryptedStore extends Store
 {

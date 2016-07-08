@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Pagination;
+namespace Penoaks\Pagination;
 
 use Closure;
 use ArrayIterator;
-use Foundation\Support\Str;
-use Foundation\Support\Collection;
-use Foundation\Contracts\Support\Htmlable;
+use Penoaks\Support\Str;
+use Penoaks\Support\Collection;
+use Penoaks\Contracts\Support\Htmlable;
 
 abstract class AbstractPaginator implements Htmlable
 {

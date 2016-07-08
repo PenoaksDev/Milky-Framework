@@ -1,6 +1,6 @@
 <?php
 
-use Foundation\Database\Seeder;
+use Penoaks\Database\Seeder;
 
 class DummyClass extends Seeder
 {

@@ -1,8 +1,8 @@
 <?php
-namesapce Penoaks\Support;
+namespace Penoaks\Support;
 
 use Countable;
-use Foundation\Contracts\Support\MessageBag as MessageBagContract;
+use Penoaks\Contracts\Support\MessageBag as MessageBagContract;
 
 /*
  * The MIT License (MIT)

@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Support;
+namespace Penoaks\Support;
 
 use ArrayAccess;
-use Foundation\Support\Traits\Macroable;
+use Penoaks\Support\Traits\Macroable;
 
 /*
  * The MIT License (MIT)

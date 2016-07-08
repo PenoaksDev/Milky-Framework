@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Support;
+namespace Penoaks\Contracts\Support;
 
 interface Arrayable
 {

@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Contracts\Validation;
+namespace Penoaks\Contracts\Validation;
 
 use RuntimeException;
-use Foundation\Contracts\Support\MessageProvider;
+use Penoaks\Contracts\Support\MessageProvider;
 
 class ValidationException extends RuntimeException
 {

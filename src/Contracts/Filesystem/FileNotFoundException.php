@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Filesystem;
+namespace Penoaks\Contracts\Filesystem;
 
 use Exception;
 

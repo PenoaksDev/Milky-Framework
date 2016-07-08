@@ -1,12 +1,12 @@
 <?php
 
-namesapce Penoaks\Queue;
+namespace Penoaks\Queue;
 
 use ReflectionClass;
 use ReflectionProperty;
-use Foundation\Contracts\Queue\QueueableEntity;
-use Foundation\Contracts\Database\ModelIdentifier;
-use Foundation\Database\Eloquent\Collection as EloquentCollection;
+use Penoaks\Contracts\Queue\QueueableEntity;
+use Penoaks\Contracts\Database\ModelIdentifier;
+use Penoaks\Database\Eloquent\Collection as EloquentCollection;
 
 trait SerializesModels
 {

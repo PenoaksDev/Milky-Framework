@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database\Query\Grammars;
+namespace Penoaks\Database\Query\Grammars;
 
-use Foundation\Database\Query\Builder;
-use Foundation\Database\Grammar as BaseGrammar;
+use Penoaks\Database\Query\Builder;
+use Penoaks\Database\Grammar as BaseGrammar;
 
 class Grammar extends BaseGrammar
 {

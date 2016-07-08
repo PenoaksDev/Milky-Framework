@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Validation;
+namespace Penoaks\Contracts\Validation;
 
 use RuntimeException;
 

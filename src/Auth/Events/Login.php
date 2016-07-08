@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Auth\Events;
+namespace Penoaks\Auth\Events;
 
-use Foundation\Queue\SerializesModels;
+use Penoaks\Queue\SerializesModels;
 
 class Login
 {

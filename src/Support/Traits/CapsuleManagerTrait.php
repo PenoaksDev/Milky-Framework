@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Support\Traits;
+namespace Penoaks\Support\Traits;
 
-use Foundation\Support\Fluent;
-use Foundation\Framework;
+use Penoaks\Support\Fluent;
+use Penoaks\Framework;
 
 trait CapsuleManagerTrait
 {

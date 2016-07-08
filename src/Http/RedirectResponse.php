@@ -1,13 +1,13 @@
 <?php
 
-namesapce Penoaks\Http;
+namespace Penoaks\Http;
 
 use BadMethodCallException;
-use Foundation\Support\Str;
-use Foundation\Support\MessageBag;
-use Foundation\Support\ViewErrorBag;
-use Foundation\Session\Store as SessionStore;
-use Foundation\Contracts\Support\MessageProvider;
+use Penoaks\Support\Str;
+use Penoaks\Support\MessageBag;
+use Penoaks\Support\ViewErrorBag;
+use Penoaks\Session\Store as SessionStore;
+use Penoaks\Contracts\Support\MessageProvider;
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse as BaseRedirectResponse;
 

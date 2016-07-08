@@ -3,9 +3,9 @@
 namespace DummyNamespace;
 
 use DummyRootNamespaceJobs\Job;
-use Foundation\Queue\SerializesModels;
-use Foundation\Queue\InteractsWithQueue;
-use Foundation\Contracts\Queue\ShouldQueue;
+use Penoaks\Queue\SerializesModels;
+use Penoaks\Queue\InteractsWithQueue;
+use Penoaks\Contracts\Queue\ShouldQueue;
 
 class DummyClass extends Job implements ShouldQueue
 {

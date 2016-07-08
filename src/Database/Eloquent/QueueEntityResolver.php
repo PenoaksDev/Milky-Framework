@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Database\Eloquent;
+namespace Penoaks\Database\Eloquent;
 
-use Foundation\Contracts\Queue\EntityNotFoundException;
-use Foundation\Contracts\Queue\EntityResolver as EntityResolverContract;
+use Penoaks\Contracts\Queue\EntityNotFoundException;
+use Penoaks\Contracts\Queue\EntityResolver as EntityResolverContract;
 
 class QueueEntityResolver implements EntityResolverContract
 {

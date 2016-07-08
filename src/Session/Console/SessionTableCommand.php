@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\Session\Console;
+namespace Penoaks\Session\Console;
 
-use Foundation\Console\Command;
-use Foundation\Support\Composer;
-use Foundation\Filesystem\Filesystem;
+use Penoaks\Console\Command;
+use Penoaks\Support\Composer;
+use Penoaks\Filesystem\Filesystem;
 
 class SessionTableCommand extends Command
 {

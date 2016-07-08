@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Pagination;
+namespace Penoaks\Pagination;
 
 trait BootstrapFourNextPreviousButtonRendererTrait
 {

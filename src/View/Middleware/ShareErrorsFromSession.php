@@ -1,10 +1,10 @@
 <?php
 
-namesapce Penoaks\View\Middleware;
+namespace Penoaks\View\Middleware;
 
 use Closure;
-use Foundation\Support\ViewErrorBag;
-use Foundation\Contracts\View\Factory as ViewFactory;
+use Penoaks\Support\ViewErrorBag;
+use Penoaks\Contracts\View\Factory as ViewFactory;
 
 class ShareErrorsFromSession
 {

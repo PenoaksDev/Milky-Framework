@@ -1,9 +1,9 @@
 <?php
 
-namesapce Penoaks\Hashing;
+namespace Penoaks\Hashing;
 
 use RuntimeException;
-use Foundation\Contracts\Hashing\Hasher as HasherContract;
+use Penoaks\Contracts\Hashing\Hasher as HasherContract;
 
 class BcryptHasher implements HasherContract
 {

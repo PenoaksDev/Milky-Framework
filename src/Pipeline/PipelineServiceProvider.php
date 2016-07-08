@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Pipeline;
+namespace Penoaks\Pipeline;
 
-use Foundation\Support\ServiceProvider;
+use Penoaks\Support\ServiceProvider;
 
 class PipelineServiceProvider extends ServiceProvider
 {

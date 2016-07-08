@@ -1,6 +1,6 @@
 <?php
 
-namesapce Penoaks\Contracts\Routing;
+namespace Penoaks\Contracts\Routing;
 
 interface UrlGenerator
 {

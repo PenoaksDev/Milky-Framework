@@ -1,11 +1,11 @@
 <?php
 
-namesapce Penoaks\Http;
+namespace Penoaks\Http;
 
 use JsonSerializable;
 use InvalidArgumentException;
-use Foundation\Contracts\Support\Jsonable;
-use Foundation\Contracts\Support\Arrayable;
+use Penoaks\Contracts\Support\Jsonable;
+use Penoaks\Contracts\Support\Arrayable;
 use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 
 class JsonResponse extends BaseJsonResponse

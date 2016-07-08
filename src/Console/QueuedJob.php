@@ -1,8 +1,8 @@
 <?php
 
-namesapce Penoaks\Console;
+namespace Penoaks\Console;
 
-use Foundation\Contracts\Console\Kernel as KernelContract;
+use Penoaks\Contracts\Console\Kernel as KernelContract;
 
 class QueuedJob
 {
