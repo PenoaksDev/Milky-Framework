@@ -6,8 +6,6 @@ use Penoaks\Support\Arr;
 
 class Config implements ArrayAccess
 {
-	use \Penoaks\Traits\StaticAccess;
-
 	/**
 	 * All of the configuration items.
 	 *
@@ -23,7 +21,6 @@ class Config implements ArrayAccess
 	 */
 	public function __construct( array $items = [] )
 	{
-		static::$selfInstance = $this;
 		$this->items = $items;
 	}
 
@@ -33,9 +30,9 @@ class Config implements ArrayAccess
 	 * @param  string $key
 	 * @return bool
 	 */
-	public static function has( $key )
+	public function has( $key )
 	{
-		return Arr::has( static::i()->items, $key );
+		return Arr::has( $this->items, $key );
 	}
 
 	/**
@@ -45,9 +42,9 @@ class Config implements ArrayAccess
 	 * @param  mixed $default
 	 * @return mixed
 	 */
-	public static function get( $key, $default = null )
+	public function get( $key, $default = null )
 	{
-		return Arr::get( static::i()->items, $key, $default );
+		return Arr::get( $this->items, $key, $default );
 	}
 
 	/**
@@ -58,9 +55,7 @@ class Config implements ArrayAccess
 	 */
 	public function set( $key, $value = null )
 	{
-		if ( static::wasStatic() )
-			static::__callStatic( __METHOD__, func_get_args() );
-		else if ( is_array( $key ) )
+		if ( is_array( $key ) )
 			foreach ( $key as $innerKey => $innerValue )
 				Arr::set( $this->items, $innerKey, $innerValue );
 		else
@@ -75,14 +70,9 @@ class Config implements ArrayAccess
 	 */
 	public function prepend( $key, $value )
 	{
-		if ( static::wasStatic() )
-			static::__callStatic( __METHOD__, func_get_args() );
-		else
-		{
-			$array = $this->get( $key );
-			array_unshift( $array, $value );
-			$this->set( $key, $array );
-		}
+		$array = $this->get( $key );
+		array_unshift( $array, $value );
+		$this->set( $key, $array );
 	}
 
 	/**
@@ -93,14 +83,9 @@ class Config implements ArrayAccess
 	 */
 	public function push( $key, $value )
 	{
-		if ( static::wasStatic() )
-			static::__callStatic( __METHOD__, func_get_args() );
-		else
-		{
-			$array = $this->get( $key );
-			$array[] = $value;
-			$this->set( $key, $array );
-		}
+		$array = $this->get( $key );
+		$array[] = $value;
+		$this->set( $key, $array );
 	}
 
 	/**
@@ -110,8 +95,6 @@ class Config implements ArrayAccess
 	 */
 	public function all()
 	{
-		if ( static::wasStatic() )
-			return static::__callStatic( __METHOD__, func_get_args() );
 		return $this->items;
 	}
 

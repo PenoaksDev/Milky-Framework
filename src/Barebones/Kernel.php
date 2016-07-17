@@ -8,7 +8,6 @@ use Penoaks\Framework;
 use Penoaks\Framework\Env;
 use Penoaks\Routing\Pipeline;
 use Penoaks\Routing\Router;
-use Penoaks\Support\Facades\Facade;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Throwable;
 

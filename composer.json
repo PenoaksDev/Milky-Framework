@@ -22,6 +22,7 @@
     "ext-mbstring": "*",
     "ext-openssl": "*",
     "penoaks/framework-installer": "dev-bleeding",
+    "illuminate/routing": "^5.2",
     "classpreloader/classpreloader": "~3.0",
     "doctrine/inflector": "~1.0",
     "jeremeamia/superclosure": "~2.2",

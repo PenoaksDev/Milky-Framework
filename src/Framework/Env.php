@@ -1,10 +1,11 @@
 <?php
 namespace Penoaks\Framework;
 
-use Closure;
 use ArrayAccess;
+use Closure;
 use Penoaks\Bindings\Bindings;
 use Penoaks\Events\EnvMissingEvent;
+use Penoaks\Filesystem\Filesystem;
 use Penoaks\Support\Arr;
 use Penoaks\Support\Str;
 
@@ -31,21 +32,23 @@ class Env implements ArrayAccess
 	{
 		static::$selfInstance = $this;
 		$this->variables = $params;
+
+
 	}
 
-	public static function  i()
+	public static function i()
 	{
 		return static::$selfInstance;
 	}
 
 	public function set( $params, $value = null )
 	{
-			if ( is_array( $params ) )
-				$this->variables = array_merge_recursive( $this->variables, $params );
-			else if ( is_null( $value ) )
-				unset( $this->variables[$params] );
-			else
-				$this->variables[$params] = $value;
+		if ( is_array( $params ) )
+			$this->variables = array_merge_recursive( $this->variables, $params );
+		else if ( is_null( $value ) )
+			unset( $this->variables[$params] );
+		else
+			$this->variables[$params] = $value;
 	}
 
 	/**
@@ -70,6 +73,9 @@ class Env implements ArrayAccess
 
 		if ( is_null( $value ) )
 		{
+			if ( ( $val = getenv( $key ) ) !== false )
+				return $val;
+
 			$event = new EnvMissingEvent( $keys, $def );
 			Bindings::get( 'events' )->fire( $event );
 
@@ -77,6 +83,16 @@ class Env implements ArrayAccess
 		}
 
 		return $value;
+	}
+
+	public function __set( $key, $value )
+	{
+		$this->set( $key, $value );
+	}
+
+	public function __get( $key )
+	{
+		return $this->get( $key );
 	}
 
 	public function offsetExists( $key )
