@@ -3,33 +3,28 @@ namespace Penoaks;
 
 use Closure;
 use Composer\Autoload\ClassLoader;
-use Foundation\ProviderRepository;
 use Penoaks\Barebones\Bootstrap;
 use Penoaks\Barebones\ExceptionHandler;
 use Penoaks\Barebones\Kernel;
-use Penoaks\Barebones\ServiceProvider;
 use Penoaks\Bindings\Bindings;
-use Penoaks\Bootstrap\BootProviders;
 use Penoaks\Bootstrap\ConfigureLogging;
 use Penoaks\Bootstrap\HandleExceptions;
 use Penoaks\Bootstrap\LoadConfiguration;
-use Penoaks\Bootstrap\RegisterFacades;
-use Penoaks\Bootstrap\RegisterProviders;
-use Penoaks\Config\Repository;
+use Penoaks\Config\Config;
 use Penoaks\Events\BootstrapPostEvent;
 use Penoaks\Events\BootstrapPreEvent;
 use Penoaks\Events\Dispatcher;
 use Penoaks\Events\EnvMissingEvent;
 use Penoaks\Events\LocaleChangedEvent;
 use Penoaks\Events\Runlevel;
-use Penoaks\Events\ServiceProviderPostEvent;
-use Penoaks\Events\ServiceProviderPreEvent;
-use Penoaks\Filesystem\Filesystem;
+use Penoaks\Framework\AliasLoader;
 use Penoaks\Framework\Env;
 use Penoaks\Framework\Exceptions\Handler;
+use Penoaks\Framework\ProviderRepository;
 use Penoaks\Http\Request;
+use Penoaks\Routing\Router;
 use Penoaks\Routing\RoutingServiceProvider;
-use Penoaks\Support\Arr;
+use Penoaks\Support\DynamicArray;
 use Penoaks\Support\Str;
 use RuntimeException;
 use Symfony\Component\Debug\Exception\FlattenException;
@@ -67,13 +62,6 @@ class Framework implements HttpKernelInterface
 	protected static $framework;
 
 	/**
-	 * Stores the classloader for later use.
-	 *
-	 * @var ClassLoader
-	 */
-	protected $loader;
-
-	/**
 	 * Stores the environment class
 	 *
 	 * @var Env
@@ -90,14 +78,14 @@ class Framework implements HttpKernelInterface
 	/**
 	 * Stores the Config instance.
 	 *
-	 * @var Repository
+	 * @var Config
 	 */
 	public $config;
 
 	/**
 	 * Stores the framework kernel.
 	 *
-	 * @var \Penoaks\Kernel
+	 * @var Kernel
 	 */
 	public $kernel;
 
@@ -109,11 +97,25 @@ class Framework implements HttpKernelInterface
 	public $bindings;
 
 	/**
-	 * Indicates if the application has "booted".
+	 * Stores the Events Dispatcher instance
 	 *
-	 * @var bool
+	 * @var Dispatcher
 	 */
-	protected $booted = false;
+	public $events;
+
+	/**
+	 * Holds the registered list of commands
+	 *
+	 * @var DynamicArray
+	 */
+	public $commands;
+
+	/**
+	 * Holds the registered list of service providers
+	 *
+	 * @var ProviderRepository
+	 */
+	public $providers;
 
 	/**
 	 * The array of booting callbacks.
@@ -135,20 +137,6 @@ class Framework implements HttpKernelInterface
 	 * @var array
 	 */
 	protected $terminatingCallbacks = [];
-
-	/**
-	 * All of the registered service providers.
-	 *
-	 * @var array
-	 */
-	protected $serviceProviders = [];
-
-	/**
-	 * The names of the loaded service providers.
-	 *
-	 * @var array
-	 */
-	protected $loadedProviders = [];
 
 	/**
 	 * The deferred services and their providers.
@@ -198,56 +186,33 @@ class Framework implements HttpKernelInterface
 	public function __construct( ClassLoader $loader, array $params = [], array $paths = [] )
 	{
 		if ( !is_null( static::$framework ) )
-		{
 			throw new RuntimeException( "The Framework has already been started" );
-		}
+		static::$framework = $this;
 
-		foreach ( ['base', 'src', 'config', 'cache', 'vendor'] as $key )
-		{
+		foreach ( ['base', 'src', 'config', 'cache', 'vendor', 'storage'] as $key )
 			if ( !array_key_exists( $key, $paths ) )
-			{
 				throw new RuntimeException( "The " . $key . " path is not set. Paths base, src, config, and vendor are required." );
-			}
-		}
 
+		$this->commands = new DynamicArray();
+		$this->providers = new ProviderRepository();
 		$this->bindings = new Bindings( $this );
-		$this->loader = $loader;
 
 		$bindings = &$this->bindings;
-		$bindings->instance( Bindings::class, $bindings );
+		$bindings->instance( 'fw', $this, [Framework::class] );
+		$bindings->instance( 'loader', $loader, [ClassLoader::class] );
+		$bindings->instance( 'bindings', $bindings, [Bindings::class] );
 
-		/* Store new instance of the ENV */
+		/* Init the ENV Instance */
 		$env = new Env( $params );
-		$bindings->instance( Env::class, $env );
+
+		/* Save ENV instance */
+		$bindings->instance( 'env', $env, [Env::class] );
 		$this->env = &$env;
 
 		/* Store default path values in ENV */
 		$env->set( ['path' => $paths] );
 
-		/* TODO Detect namespace */
-		$loader->set( "Shared\\", $env->get( 'path.src' ) );
-
-		$this->runlevel = new Runlevel();
-
-		/* Init the Events Dispatcher */
-		$events = ( new Dispatcher( $bindings ) )->setQueueResolver( function () use ( $bindings )
-		{
-			return $bindings->make( 'Penoaks\Contracts\Queue\Factory' );
-		} );
-
-		$events->listenEvents( $this );
-
-		/* Save Events Dispatcher */
-		$bindings->instance( 'events', $events );
-
-		/* Init Routing */
-		$this->provider( new RoutingServiceProvider( $this ) );
-
-		/* Fires the LOADING runlevel event */
-		$events->fire( $this->runlevel, [$this] );
-
 		$aliases = [
-			'fw' => ['Penoaks\Framework'],
 			'auth' => ['Penoaks\Auth\AuthManager', 'Penoaks\Contracts\Auth\Factory'],
 			'auth.driver' => ['Penoaks\Contracts\Auth\Guard'],
 			'blade.compiler' => ['Penoaks\View\Compilers\BladeCompiler'],
@@ -269,7 +234,7 @@ class Framework implements HttpKernelInterface
 			'filesystem.cloud' => ['Penoaks\Contracts\Filesystem\Cloud'],
 			'hash' => ['Penoaks\Contracts\Hashing\Hasher'],
 			'translator' => ['Penoaks\Translation\Translator', 'Symfony\Component\Translation\TranslatorInterface'],
-			'log' => ['Penoaks\Log\Writer', 'Penoaks\Contracts\Logging\Log', 'Psr\Log\LoggerInterface'],
+			'log' => [\Penoaks\Logging\Log::class, \Psr\Log\LoggerInterface::class],
 			'mailer' => [
 				'Penoaks\Mail\Mailer',
 				'Penoaks\Contracts\Mail\Mailer',
@@ -292,9 +257,8 @@ class Framework implements HttpKernelInterface
 			'queue.failer' => ['Penoaks\Queue\Failed\FailedJobProviderInterface'],
 			'redirect' => ['Penoaks\Routing\Redirector'],
 			'redis' => ['Penoaks\Redis\Database', 'Penoaks\Contracts\Redis\Database'],
-			'request' => ['Penoaks\Http\Request', 'Symfony\Component\HttpFoundation\Request'],
-			'router' => ['Penoaks\Routing\Router', 'Penoaks\Contracts\Routing\Registrar'],
-			'session' => ['Penoaks\Session\SessionManager'],
+			'request' => [\Penoaks\Http\Request::class, \Symfony\Component\HttpFoundation\Request::class],
+			'session' => [\Penoaks\Session\SessionManager::class],
 			'session.store' => [
 				'Penoaks\Session\Store',
 				'Symfony\Component\HttpFoundation\Session\SessionInterface'
@@ -304,23 +268,47 @@ class Framework implements HttpKernelInterface
 			'view' => ['Penoaks\View\Factory', 'Penoaks\Contracts\View\Factory'],
 		];
 
-		foreach ( $aliases as $key => $aliases2 )
+		foreach ( $aliases as $key => $alias )
+			$bindings->alias( $key, $alias );
+
+		/* TODO Detect namespace */
+		$loader->set( "Shared\\", $env->get( 'path.src' ) );
+
+		$loader->set( "Illuminate\\", __DIR__ . "/../../framework-laravel-compat/src" ); // TEMP
+
+		$this->runlevel = new Runlevel();
+
+		/* Init the Events Dispatcher */
+		$events = ( new Dispatcher( $bindings ) )->setQueueResolver( function () use ( $bindings )
 		{
-			foreach ( $aliases2 as $alias )
-			{
-				$bindings->alias( $key, $alias );
-			}
-		}
+			return $bindings->make( 'Penoaks\Contracts\Queue\Factory' );
+		} );
+
+		/* Save Events Dispatcher Instance */
+		$bindings->instance( 'events', $events );
+		$this->events = &$events;
+
+		/* Register Framework Events */
+		$events->listenEvents( $this );
+
+		/* Init Routing */
+		$this->providers->add( new RoutingServiceProvider( $bindings ) );
+
+		/* Fires the LOADING runlevel event */
+		$events->fire( $this->runlevel, [$this] );
 
 		/* Setup default index, normally overridden */
 		// Router::get( '/', ViewSkel::view( 'Penoaks\View\Default' ) );
 
+		/* Init the Http Router */
+		$bindings->singleton( 'router', $env->get( 'router', Router::class ), [\Penoaks\Contracts\Routing\Registrar::class] );
+
 		/* Init the Framework Kernel */
-		$bindings->singleton( Kernel::class, $env->get( 'kernel', KernelImpl::class ) );
-		$this->kernel = $this->bindings->make( Kernel::class );
+		$bindings->singleton( 'kernel', $env->get( 'kernel', KernelImpl::class ), [Kernel::class] );
+		$this->kernel = $this->bindings->make( 'kernel' );
 
 		/* Init exception handler */
-		$bindings->singleton( ExceptionHandler::class, $env->get( 'exceptions', Handler::class ) );
+		$bindings->singleton( 'exceptions', $env->get( 'exceptions', Handler::class ), [ExceptionHandler::class] );
 
 		/* Fire INIT Runlevel Event */
 		$events->fire( $this->runlevel->set( Runlevel::INIT ) );
@@ -328,22 +316,37 @@ class Framework implements HttpKernelInterface
 		$this->bootstrap( new LoadConfiguration() );
 		$this->bootstrap( new ConfigureLogging() );
 		$this->bootstrap( new HandleExceptions() );
-		$this->bootstrap( new RegisterFacades() );
 
 		/* Fire BOOT Runlevel Event */
 		$events->fire( $this->runlevel->set( Runlevel::BOOT ) );
 
+		$this->commands->on( 'add', function ()
+		{
+
+		} );
+
 		// Call the implemented boot method.
 		if ( method_exists( $this->kernel, 'boot' ) )
-			$bindings->call( [$this->kernel, 'boot'], ['mode' => 'http'] );
+			$bindings->call( [$this->kernel, 'boot'] );
 
-		$this->bootstrap( new RegisterProviders() );
-		$this->bootstrap( new BootProviders() );
+		// Once the application has booted we will also fire some "booted" callbacks
+		// for any listeners that need to do work after this initial booting gets
+		// finished. This is useful when ordering the boot-up processes we run.
+		$this->fireAppCallbacks( $this->bootingCallbacks );
+
+		$this->providers->bootProviders();
 
 		/* Fire DONE Runlevel Event */
 		$events->fire( $this->runlevel->set( Runlevel::DONE ) );
+
+		$this->fireAppCallbacks( $this->bootedCallbacks );
 	}
-	
+
+	public function loadAliases( array $aliases )
+	{
+		AliasLoader::getInstance( $aliases )->register();
+	}
+
 	public function onEnvMissingEvent( EnvMissingEvent $event )
 	{
 		$keys = $event->keys;
@@ -369,7 +372,7 @@ class Framework implements HttpKernelInterface
 	 */
 	public function isRunlevel( $level )
 	{
-		return $this->runlevel->get() == $level || strtolower( $this->runlevel->asString() ) == strtolower( $level );
+		return $this->runlevel->get() == $level || strtolower( Runlevel::asString( $this->runlevel->get() ) ) == strtolower( $level );
 	}
 
 	/**
@@ -452,16 +455,6 @@ class Framework implements HttpKernelInterface
 	}
 
 	/**
-	 * Register all of the configured providers.
-	 *
-	 * @return void
-	 */
-	public function registerConfiguredProviders()
-	{
-		( new ProviderRepository( $this, new Filesystem, $this->env->get( 'path.cache' ) . __ . 'cachedProviders.php' ) )->load( $this->config['app.providers'] );
-	}
-
-	/**
 	 * Run the given array of bootstrap classes.
 	 *
 	 * @param \Penoaks\Barebones\Bootstrap|array $bootstrappers
@@ -484,107 +477,11 @@ class Framework implements HttpKernelInterface
 			if ( !$bootstrap instanceof Bootstrap )
 				$bootstrap = $this->bindings->make( $bootstrap );
 
-			if ( method_exists( $bootstrap, 'bootstrap' ) )
-				$this->bindings->call( [$bootstrap, 'bootstrap'], [$this] );
+			if ( method_exists( $bootstrap, 'boot' ) )
+				$this->bindings->call( [$bootstrap, 'boot'], [$this] );
+
 			$this->bindings['events']->fire( new BootstrapPostEvent( $bootstrap ), [$this] );
 		}
-	}
-
-	/**
-	 * Register a service provider with the application.
-	 *
-	 * @param  ServiceProvider|string|array $provider
-	 * @param  array $options
-	 * @param  bool $force
-	 * @return ServiceProvider|array
-	 */
-	public function provider( $provider, $options = [], $force = false )
-	{
-		if ( is_array( $provider ) )
-		{
-			$arr = [];
-			foreach ( $provider as $p )
-				$arr[] = $this->provider( $p );
-
-			return $arr;
-		}
-
-		if ( ( $registered = $this->getProvider( $provider ) ) && !$force )
-			return $registered;
-
-		/**
-		 * Is the given "provider" is a string, we will resolve it.
-		 *
-		 * @var ServiceProvider $instance
-		 */
-		$instance = is_string( $provider ) ? $this->resolveProviderClass( $provider ) : $provider;
-
-		$event = new ServiceProviderPreEvent( $instance );
-		$this->bindings['events']->fire( $event, [$this] );
-		if ( $event->isCancelled() )
-			return null;
-
-		$instance->register();
-
-		// Once we have registered the service we will iterate through the options
-		// and set each of them on the application so they will be available on
-		// the actual loading of the service objects and for developer usage.
-		foreach ( $options as $key => $value )
-			$this->bindings[$key] = $value;
-
-		$this->markAsRegistered( $instance );
-
-		// If the application has already booted, we will call this boot method on
-		// the provider class so it has an opportunity to do its boot logic and
-		// will be ready for any usage by the developer's application logic.
-		if ( $this->booted )
-			$this->bootProvider( $instance );
-
-		$this->bindings['events']->fire( new ServiceProviderPostEvent( $instance ) );
-
-		return $instance;
-	}
-
-	/**
-	 * Get the registered service provider instance if it exists.
-	 *
-	 * @param  ServiceProvider|string $provider
-	 * @return ServiceProvider|null
-	 */
-	public function getProvider( $provider )
-	{
-		$name = is_string( $provider ) ? $provider : get_class( $provider );
-
-		return Arr::first( $this->serviceProviders, function ( $key, $value ) use ( $name )
-		{
-			return $value instanceof $name;
-		} );
-	}
-
-	/**
-	 * Resolve a service provider instance from the class name.
-	 *
-	 * @param  string $provider
-	 * @return ServiceProvider
-	 */
-	public function resolveProviderClass( $provider )
-	{
-		return new $provider( $this );
-	}
-
-	/**
-	 * Mark the given provider as registered.
-	 *
-	 * @param  ServiceProvider $provider
-	 * @return void
-	 */
-	protected function markAsRegistered( $provider )
-	{
-		$this->bindings['events']->fire( $class = get_class( $provider ), [$provider] );
-
-		$this->serviceProviders[] = $provider;
-
-		$this->loadedProviders[$class] = true;
 	}
 
 	/**
@@ -653,9 +550,7 @@ class Framework implements HttpKernelInterface
 	public function make( $abstract )
 	{
 		if ( $this->bound( $abstract ) )
-		{
 			$this->loadDeferredProvider( $abstract );
-		}
 	}
 
 	/**
@@ -688,50 +583,7 @@ class Framework implements HttpKernelInterface
 	 */
 	public function isBooted()
 	{
-		return $this->booted;
-	}
-
-	/**
-	 * Boot the application's service providers.
-	 *
-	 * @return void
-	 */
-	public function boot()
-	{
-		if ( $this->booted )
-		{
-			return;
-		}
-
-		// Once the application has booted we will also fire some "booted" callbacks
-		// for any listeners that need to do work after this initial booting gets
-		// finished. This is useful when ordering the boot-up processes we run.
-		$this->fireAppCallbacks( $this->bootingCallbacks );
-
-		array_walk( $this->serviceProviders, function ( $p )
-		{
-			$this->bootProvider( $p );
-		} );
-
-		$this->booted = true;
-
-		$this->fireAppCallbacks( $this->bootedCallbacks );
-	}
-
-	/**
-	 * Boot the given service provider.
-	 *
-	 * @param  ServiceProvider $provider
-	 * @return mixed
-	 */
-	protected function bootProvider( ServiceProvider $provider )
-	{
-		if ( method_exists( $provider, 'boot' ) )
-		{
-			return $this->bindings->call( [$provider, 'boot'] );
-		}
-
-		return false;
+		return $this->isRunlevel( Runlevel::DONE );
 	}
 
 	/**

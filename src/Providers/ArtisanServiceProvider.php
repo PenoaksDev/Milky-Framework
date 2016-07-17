@@ -1,42 +1,42 @@
 <?php
 namespace Penoaks\Providers;
 
-use Penoaks\Barebones\ServiceProvider;
-use Penoaks\Queue\Console\TableCommand;
-use Penoaks\Auth\Console\MakeAuthCommand;
-use Penoaks\Console\UpCommand;
-use Penoaks\Console\DownCommand;
 use Penoaks\Auth\Console\ClearResetsCommand;
-use Penoaks\Console\ServeCommand;
+use Penoaks\Auth\Console\MakeAuthCommand;
+use Penoaks\Barebones\ServiceProvider;
 use Penoaks\Cache\Console\CacheTableCommand;
-use Penoaks\Queue\Console\FailedTableCommand;
-use Penoaks\Console\TinkerCommand;
-use Penoaks\Console\JobMakeCommand;
 use Penoaks\Console\AppNameCommand;
-use Penoaks\Console\OptimizeCommand;
-use Penoaks\Console\TestMakeCommand;
-use Penoaks\Console\RouteListCommand;
-use Penoaks\Console\EventMakeCommand;
-use Penoaks\Console\ModelMakeCommand;
-use Penoaks\Console\ViewClearCommand;
-use Penoaks\Session\Console\SessionTableCommand;
-use Penoaks\Console\PolicyMakeCommand;
-use Penoaks\Console\RouteCacheCommand;
-use Penoaks\Console\RouteClearCommand;
-use Penoaks\Routing\Console\ControllerMakeCommand;
-use Penoaks\Routing\Console\MiddlewareMakeCommand;
+use Penoaks\Console\ClearCompiledCommand;
 use Penoaks\Console\ConfigCacheCommand;
 use Penoaks\Console\ConfigClearCommand;
 use Penoaks\Console\ConsoleMakeCommand;
+use Penoaks\Console\DownCommand;
 use Penoaks\Console\EnvironmentCommand;
-use Penoaks\Console\KeyGenerateCommand;
-use Penoaks\Console\RequestMakeCommand;
-use Penoaks\Console\ListenerMakeCommand;
-use Penoaks\Console\ProviderMakeCommand;
-use Penoaks\Console\ClearCompiledCommand;
 use Penoaks\Console\EventGenerateCommand;
+use Penoaks\Console\EventMakeCommand;
+use Penoaks\Console\JobMakeCommand;
+use Penoaks\Console\KeyGenerateCommand;
+use Penoaks\Console\ListenerMakeCommand;
+use Penoaks\Console\ModelMakeCommand;
+use Penoaks\Console\OptimizeCommand;
+use Penoaks\Console\PolicyMakeCommand;
+use Penoaks\Console\ProviderMakeCommand;
+use Penoaks\Console\RequestMakeCommand;
+use Penoaks\Console\RouteCacheCommand;
+use Penoaks\Console\RouteClearCommand;
+use Penoaks\Console\RouteListCommand;
+use Penoaks\Console\ServeCommand;
+use Penoaks\Console\TestMakeCommand;
+use Penoaks\Console\TinkerCommand;
+use Penoaks\Console\UpCommand;
 use Penoaks\Console\VendorPublishCommand;
+use Penoaks\Console\ViewClearCommand;
 use Penoaks\Database\Console\Seeds\SeederMakeCommand;
+use Penoaks\Queue\Console\FailedTableCommand;
+use Penoaks\Queue\Console\TableCommand;
+use Penoaks\Routing\Console\ControllerMakeCommand;
+use Penoaks\Routing\Console\MiddlewareMakeCommand;
+use Penoaks\Session\Console\SessionTableCommand;
 
 /**
  * The MIT License (MIT)
@@ -113,27 +113,27 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->registerCommands($this->commands);
+		$this->registerCommands( $this->commands );
 
-		$this->registerCommands($this->devCommands);
+		$this->registerCommands( $this->devCommands );
 	}
 
 	/**
 	 * Register the given commands.
 	 *
-	 * @param  array  $commands
+	 * @param  array $commands
 	 * @return void
 	 */
-	protected function registerCommands(array $commands)
+	protected function registerCommands( array $commands )
 	{
-		foreach (array_keys($commands) as $command)
-{
+		foreach ( array_keys( $commands ) as $command )
+		{
 			$method = "register{$command}Command";
 
-			call_user_func_array([$this, $method], []);
+			call_user_func_array( [$this, $method], [] );
 		}
 
-		$this->commands(array_values($commands));
+		$this->commands( array_values( $commands ) );
 	}
 
 	/**
@@ -143,10 +143,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerAppNameCommand()
 	{
-		$this->fw->bindings->singleton('command.app.name', function ($fw)
-{
-			return new AppNameCommand($fw->bindings['composer'], $fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.app.name', function ( $bindings )
+		{
+			return new AppNameCommand( $bindings['composer'], $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -156,10 +156,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerAuthMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.auth.make', function ($fw)
-{
+		$this->bindings->singleton( 'command.auth.make', function ( $bindings )
+		{
 			return new MakeAuthCommand;
-		});
+		} );
 	}
 
 	/**
@@ -169,10 +169,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerCacheTableCommand()
 	{
-		$this->fw->bindings->singleton('command.cache.table', function ($fw)
-{
-			return new CacheTableCommand($fw->bindings['files'], $fw->bindings['composer']);
-		});
+		$this->bindings->singleton( 'command.cache.table', function ( $bindings )
+		{
+			return new CacheTableCommand( $bindings['files'], $bindings['composer'] );
+		} );
 	}
 
 	/**
@@ -182,10 +182,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerClearCompiledCommand()
 	{
-		$this->fw->bindings->singleton('command.clear-compiled', function ()
-{
+		$this->bindings->singleton( 'command.clear-compiled', function ()
+		{
 			return new ClearCompiledCommand;
-		});
+		} );
 	}
 
 	/**
@@ -195,10 +195,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerClearResetsCommand()
 	{
-		$this->fw->bindings->singleton('command.auth.resets.clear', function ()
-{
+		$this->bindings->singleton( 'command.auth.resets.clear', function ()
+		{
 			return new ClearResetsCommand;
-		});
+		} );
 	}
 
 	/**
@@ -208,10 +208,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerConfigCacheCommand()
 	{
-		$this->fw->bindings->singleton('command.config.cache', function ($fw)
-{
-			return new ConfigCacheCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.config.cache', function ( $bindings )
+		{
+			return new ConfigCacheCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -221,10 +221,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerConfigClearCommand()
 	{
-		$this->fw->bindings->singleton('command.config.clear', function ($fw)
-{
-			return new ConfigClearCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.config.clear', function ( $bindings )
+		{
+			return new ConfigClearCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -234,10 +234,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerConsoleMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.console.make', function ($fw)
-{
-			return new ConsoleMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.console.make', function ( $bindings )
+		{
+			return new ConsoleMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -247,10 +247,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerControllerMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.controller.make', function ($fw)
-{
-			return new ControllerMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.controller.make', function ( $bindings )
+		{
+			return new ControllerMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -260,10 +260,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerEventGenerateCommand()
 	{
-		$this->fw->bindings->singleton('command.event.generate', function ()
-{
+		$this->bindings->singleton( 'command.event.generate', function ()
+		{
 			return new EventGenerateCommand;
-		});
+		} );
 	}
 
 	/**
@@ -273,10 +273,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerEventMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.event.make', function ($fw)
-{
-			return new EventMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.event.make', function ( $bindings )
+		{
+			return new EventMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -286,10 +286,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerDownCommand()
 	{
-		$this->fw->bindings->singleton('command.down', function ()
-{
+		$this->bindings->singleton( 'command.down', function ()
+		{
 			return new DownCommand;
-		});
+		} );
 	}
 
 	/**
@@ -299,10 +299,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerEnvironmentCommand()
 	{
-		$this->fw->bindings->singleton('command.environment', function ()
-{
+		$this->bindings->singleton( 'command.environment', function ()
+		{
 			return new EnvironmentCommand;
-		});
+		} );
 	}
 
 	/**
@@ -312,10 +312,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerJobMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.job.make', function ($fw)
-{
-			return new JobMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.job.make', function ( $bindings )
+		{
+			return new JobMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -325,10 +325,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerKeyGenerateCommand()
 	{
-		$this->fw->bindings->singleton('command.key.generate', function ()
-{
+		$this->bindings->singleton( 'command.key.generate', function ()
+		{
 			return new KeyGenerateCommand;
-		});
+		} );
 	}
 
 	/**
@@ -338,10 +338,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerListenerMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.listener.make', function ($fw)
-{
-			return new ListenerMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.listener.make', function ( $bindings )
+		{
+			return new ListenerMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -351,10 +351,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerMiddlewareMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.middleware.make', function ($fw)
-{
-			return new MiddlewareMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.middleware.make', function ( $bindings )
+		{
+			return new MiddlewareMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -364,10 +364,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerModelMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.model.make', function ($fw)
-{
-			return new ModelMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.model.make', function ( $bindings )
+		{
+			return new ModelMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -377,10 +377,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerOptimizeCommand()
 	{
-		$this->fw->bindings->singleton('command.optimize', function ($fw)
-{
-			return new OptimizeCommand($fw->bindings['composer']);
-		});
+		$this->bindings->singleton( 'command.optimize', function ( $bindings )
+		{
+			return new OptimizeCommand( $bindings['composer'] );
+		} );
 	}
 
 	/**
@@ -390,10 +390,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerProviderMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.provider.make', function ($fw)
-{
-			return new ProviderMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.provider.make', function ( $bindings )
+		{
+			return new ProviderMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -403,10 +403,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerQueueFailedTableCommand()
 	{
-		$this->fw->bindings->singleton('command.queue.failed-table', function ($fw)
-{
-			return new FailedTableCommand($fw->bindings['files'], $fw->bindings['composer']);
-		});
+		$this->bindings->singleton( 'command.queue.failed-table', function ( $bindings )
+		{
+			return new FailedTableCommand( $bindings['files'], $bindings['composer'] );
+		} );
 	}
 
 	/**
@@ -416,10 +416,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerQueueTableCommand()
 	{
-		$this->fw->bindings->singleton('command.queue.table', function ($fw)
-{
-			return new TableCommand($fw->bindings['files'], $fw->bindings['composer']);
-		});
+		$this->bindings->singleton( 'command.queue.table', function ( $bindings )
+		{
+			return new TableCommand( $bindings['files'], $bindings['composer'] );
+		} );
 	}
 
 	/**
@@ -429,10 +429,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerRequestMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.request.make', function ($fw)
-{
-			return new RequestMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.request.make', function ( $bindings )
+		{
+			return new RequestMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -442,10 +442,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerSeederMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.seeder.make', function ($fw)
-{
-			return new SeederMakeCommand($fw->bindings['files'], $fw->bindings['composer']);
-		});
+		$this->bindings->singleton( 'command.seeder.make', function ( $bindings )
+		{
+			return new SeederMakeCommand( $bindings['files'], $bindings['composer'] );
+		} );
 	}
 
 	/**
@@ -455,10 +455,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerSessionTableCommand()
 	{
-		$this->fw->bindings->singleton('command.session.table', function ($fw)
-{
-			return new SessionTableCommand($fw->bindings['files'], $fw->bindings['composer']);
-		});
+		$this->bindings->singleton( 'command.session.table', function ( $bindings )
+		{
+			return new SessionTableCommand( $bindings['files'], $bindings['composer'] );
+		} );
 	}
 
 	/**
@@ -468,10 +468,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerRouteCacheCommand()
 	{
-		$this->fw->bindings->singleton('command.route.cache', function ($fw)
-{
-			return new RouteCacheCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.route.cache', function ( $bindings )
+		{
+			return new RouteCacheCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -481,10 +481,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerRouteClearCommand()
 	{
-		$this->fw->bindings->singleton('command.route.clear', function ($fw)
-{
-			return new RouteClearCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.route.clear', function ( $bindings )
+		{
+			return new RouteClearCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -494,10 +494,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerRouteListCommand()
 	{
-		$this->fw->bindings->singleton('command.route.list', function ($fw)
-{
-			return new RouteListCommand($fw->bindings['router']);
-		});
+		$this->bindings->singleton( 'command.route.list', function ( $bindings )
+		{
+			return new RouteListCommand( $bindings['router'] );
+		} );
 	}
 
 	/**
@@ -507,10 +507,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerServeCommand()
 	{
-		$this->fw->bindings->singleton('command.serve', function ()
-{
+		$this->bindings->singleton( 'command.serve', function ()
+		{
 			return new ServeCommand;
-		});
+		} );
 	}
 
 	/**
@@ -520,10 +520,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerTestMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.test.make', function ($fw)
-{
-			return new TestMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.test.make', function ( $bindings )
+		{
+			return new TestMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -533,10 +533,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerTinkerCommand()
 	{
-		$this->fw->bindings->singleton('command.tinker', function ()
-{
+		$this->bindings->singleton( 'command.tinker', function ()
+		{
 			return new TinkerCommand;
-		});
+		} );
 	}
 
 	/**
@@ -546,10 +546,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerUpCommand()
 	{
-		$this->fw->bindings->singleton('command.up', function ()
-{
+		$this->bindings->singleton( 'command.up', function ()
+		{
 			return new UpCommand;
-		});
+		} );
 	}
 
 	/**
@@ -559,10 +559,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerVendorPublishCommand()
 	{
-		$this->fw->bindings->singleton('command.vendor.publish', function ($fw)
-{
-			return new VendorPublishCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.vendor.publish', function ( $bindings )
+		{
+			return new VendorPublishCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -572,10 +572,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerViewClearCommand()
 	{
-		$this->fw->bindings->singleton('command.view.clear', function ($fw)
-{
-			return new ViewClearCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.view.clear', function ( $bindings )
+		{
+			return new ViewClearCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -585,10 +585,10 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	protected function registerPolicyMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.policy.make', function ($fw)
-{
-			return new PolicyMakeCommand($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'command.policy.make', function ( $bindings )
+		{
+			return new PolicyMakeCommand( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -598,13 +598,13 @@ class ArtisanServiceProvider extends ServiceProvider
 	 */
 	public function provides()
 	{
-		if ($this->fw->environment('production'))
-{
-			return array_values($this->commands);
+		if ( $this->fw->environment( 'production' ) )
+		{
+			return array_values( $this->commands );
 		}
-else
-{
-			return array_merge(array_values($this->commands), array_values($this->devCommands));
+		else
+		{
+			return array_merge( array_values( $this->commands ), array_values( $this->devCommands ) );
 		}
 	}
 }

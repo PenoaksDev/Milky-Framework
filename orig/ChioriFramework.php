@@ -154,7 +154,7 @@
 				throw new LogException("No valid log location defined!");
 			
 			if ( !is_writable( $log_path ) && $this->log_levels["file"] > -1 )
-				throw new LogException("Log location is not writeable by the webserver!");
+				throw new LogException("Logging location is not writeable by the webserver!");
 			
 			$siteID = $this->getConfig()->getString("siteID", CONFIG_SITE);
 			

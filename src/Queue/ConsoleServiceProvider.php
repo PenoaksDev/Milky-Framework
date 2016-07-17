@@ -1,13 +1,20 @@
 <?php
-
 namespace Penoaks\Queue;
 
-use Penoaks\Support\ServiceProvider;
-use Penoaks\Queue\Console\RetryCommand;
-use Penoaks\Queue\Console\ListFailedCommand;
+use Penoaks\Barebones\ServiceProvider;
 use Penoaks\Queue\Console\FlushFailedCommand;
 use Penoaks\Queue\Console\ForgetFailedCommand;
+use Penoaks\Queue\Console\ListFailedCommand;
+use Penoaks\Queue\Console\RetryCommand;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class ConsoleServiceProvider extends ServiceProvider
 {
 	/**
@@ -24,30 +31,27 @@ class ConsoleServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->fw->bindings->singleton('command.queue.failed', function ()
-{
+		$this->bindings->singleton( 'command.queue.failed', function ()
+		{
 			return new ListFailedCommand;
-		});
+		} );
 
-		$this->fw->bindings->singleton('command.queue.retry', function ()
-{
+		$this->bindings->singleton( 'command.queue.retry', function ()
+		{
 			return new RetryCommand;
-		});
+		} );
 
-		$this->fw->bindings->singleton('command.queue.forget', function ()
-{
+		$this->bindings->singleton( 'command.queue.forget', function ()
+		{
 			return new ForgetFailedCommand;
-		});
+		} );
 
-		$this->fw->bindings->singleton('command.queue.flush', function ()
-{
+		$this->bindings->singleton( 'command.queue.flush', function ()
+		{
 			return new FlushFailedCommand;
-		});
+		} );
 
-		$this->commands(
-			'command.queue.failed', 'command.queue.retry',
-			'command.queue.forget', 'command.queue.flush'
-		);
+		$this->commands( 'command.queue.failed', 'command.queue.retry', 'command.queue.forget', 'command.queue.flush' );
 	}
 
 	/**
@@ -58,8 +62,10 @@ class ConsoleServiceProvider extends ServiceProvider
 	public function provides()
 	{
 		return [
-			'command.queue.failed', 'command.queue.retry',
-			'command.queue.forget', 'command.queue.flush',
+			'command.queue.failed',
+			'command.queue.retry',
+			'command.queue.forget',
+			'command.queue.flush',
 		];
 	}
 }

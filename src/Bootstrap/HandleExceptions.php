@@ -5,6 +5,7 @@ use ErrorException;
 use Exception;
 use Penoaks\Barebones\Bootstrap;
 use Penoaks\Barebones\ExceptionHandler;
+use Penoaks\Facades\Log;
 use Penoaks\Framework;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Debug\Exception\FatalErrorException;
@@ -33,7 +34,7 @@ class HandleExceptions implements Bootstrap
 	 * @param  \Penoaks\Framework $fw
 	 * @return void
 	 */
-	public function bootstrap( Framework $fw )
+	public function boot( Framework $fw )
 	{
 		$this->fw = $fw;
 
@@ -81,20 +82,28 @@ class HandleExceptions implements Bootstrap
 	 */
 	public function handleException( $e )
 	{
-		if ( !$e instanceof Exception )
+		try
 		{
-			$e = new FatalThrowableError( $e );
-		}
+			if ( !$e instanceof Exception )
+			{
+				$e = new FatalThrowableError( $e );
+			}
 
-		$this->getExceptionHandler()->report( $e );
+			$this->getExceptionHandler()->report( $e );
 
-		if ( $this->fw->runningInConsole() )
-		{
-			$this->renderForConsole( $e );
+			if ( $this->fw->runningInConsole() )
+			{
+				$this->renderForConsole( $e );
+			}
+			else
+			{
+				$this->renderHttpResponse( $e );
+			}
 		}
-		else
+		catch ( \Throwable $t )
 		{
-			$this->renderHttpResponse( $e );
+			Log::critical( "Failed to handle exception with exception: " . $t->getMessage() );
+			throw $e; // Forward exception, we failed!
 		}
 	}
 
@@ -128,9 +137,7 @@ class HandleExceptions implements Bootstrap
 	public function handleShutdown()
 	{
 		if ( !is_null( $error = error_get_last() ) && $this->isFatal( $error['type'] ) )
-		{
 			$this->handleException( $this->fatalExceptionFromError( $error, 0 ) );
-		}
 	}
 
 	/**

@@ -1,9 +1,16 @@
 <?php
-
 namespace Penoaks\Pipeline;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class PipelineServiceProvider extends ServiceProvider
 {
 	/**
@@ -20,9 +27,7 @@ class PipelineServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->fw->bindings->singleton(
-			'Penoaks\Contracts\Pipeline\Hub', 'Penoaks\Pipeline\Hub'
-		);
+		$this->bindings->singleton( 'Penoaks\Contracts\Pipeline\Hub', 'Penoaks\Pipeline\Hub' );
 	}
 
 	/**

@@ -12,6 +12,7 @@ use Penoaks\Http\Response;
 use Penoaks\Validation\ValidationException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Debug\Exception\FlattenException;
+use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 

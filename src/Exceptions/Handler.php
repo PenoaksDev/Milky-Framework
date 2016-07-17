@@ -3,22 +3,21 @@
 namespace Penoaks\Exceptions;
 
 use Exception;
-use Psr\Log\LoggerInterface;
-use Penoaks\Http\Response;
-use Penoaks\Auth\AuthenticationException;
-use Penoaks\Validation\ValidationException;
 use Penoaks\Auth\Access\AuthorizationException;
-use Penoaks\Http\Exception\HttpResponseException;
-use Symfony\Component\Debug\Exception\FlattenException;
+use Penoaks\Auth\AuthenticationException;
 use Penoaks\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Penoaks\Http\Exception\HttpResponseException;
+use Penoaks\Http\Response;
+use Penoaks\Validation\ValidationException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application as ConsoleApplication;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
-use Penoaks\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class Handler implements ExceptionHandlerContract
+class Handler
 {
 	/**
 	 * The log implementation.

@@ -3,5 +3,5 @@ namespace Penoaks\Barebones;
 
 interface Bootstrap
 {
-
+	
 }

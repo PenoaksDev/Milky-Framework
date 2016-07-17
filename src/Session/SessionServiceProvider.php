@@ -1,9 +1,16 @@
 <?php
-
 namespace Penoaks\Session;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class SessionServiceProvider extends ServiceProvider
 {
 	/**
@@ -17,7 +24,7 @@ class SessionServiceProvider extends ServiceProvider
 
 		$this->registerSessionDriver();
 
-		$this->fw->bindings->singleton('Penoaks\Session\Middleware\StartSession');
+		$this->bindings->singleton( 'Penoaks\Session\Middleware\StartSession' );
 	}
 
 	/**
@@ -27,10 +34,10 @@ class SessionServiceProvider extends ServiceProvider
 	 */
 	protected function registerSessionManager()
 	{
-		$this->fw->bindings->singleton('session', function ($fw)
-{
-			return new SessionManager($fw);
-		});
+		$this->bindings->singleton( 'session', function ( $bindings )
+		{
+			return new SessionManager( $bindings );
+		} );
 	}
 
 	/**
@@ -40,14 +47,14 @@ class SessionServiceProvider extends ServiceProvider
 	 */
 	protected function registerSessionDriver()
 	{
-		$this->fw->bindings->singleton('session.store', function ($fw)
-{
+		$this->bindings->singleton( 'session.store', function ( $bindings )
+		{
 			// First, we will create the session manager which is responsible for the
 			// creation of the various session drivers when they are needed by the
 			// application instance, and will resolve them on a lazy load basis.
-			$manager = $fw->bindings['session'];
+			$manager = $bindings['session'];
 
 			return $manager->driver();
-		});
+		} );
 	}
 }

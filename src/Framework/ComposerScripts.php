@@ -1,7 +1,8 @@
 <?php
 namespace Penoaks\Framework;
 
-use \Composer\Script\Event;
+use Composer\Script\Event;
+use Penoaks\Framework;
 
 /*
  * The MIT License (MIT)
@@ -45,8 +46,9 @@ class ComposerScripts
 	 */
 	protected static function clearCompiled()
 	{
-		$framework = new Application( getcwd() );
+		// $framework = new Framework( getcwd() );
 
+		/*
 		if ( file_exists( $compiledPath = $framework->getCachedCompilePath() ) )
 		{
 			@unlink( $compiledPath );
@@ -56,5 +58,6 @@ class ComposerScripts
 		{
 			@unlink( $servicesPath );
 		}
+		*/
 	}
 }

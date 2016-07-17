@@ -1,13 +1,21 @@
 <?php
-
 namespace Penoaks\Database\Console\Seeds;
 
 use Penoaks\Console\Command;
-use Penoaks\Database\Eloquent\Model;
 use Penoaks\Console\ConfirmableTrait;
-use Symfony\Component\Console\Input\InputOption;
 use Penoaks\Database\ConnectionResolverInterface as Resolver;
+use Penoaks\Database\Eloquent\Model;
+use Penoaks\Facades\Bindings;
+use Symfony\Component\Console\Input\InputOption;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class SeedCommand extends Command
 {
 	use ConfirmableTrait;
@@ -36,10 +44,10 @@ class SeedCommand extends Command
 	/**
 	 * Create a new database seed command instance.
 	 *
-	 * @param  \Penoaks\Database\ConnectionResolverInterface  $resolver
+	 * @param  \Penoaks\Database\ConnectionResolverInterface $resolver
 	 * @return void
 	 */
-	public function __construct(Resolver $resolver)
+	public function __construct( Resolver $resolver )
 	{
 		parent::__construct();
 
@@ -53,17 +61,17 @@ class SeedCommand extends Command
 	 */
 	public function fire()
 	{
-		if (! $this->confirmToProceed())
-{
+		if ( !$this->confirmToProceed() )
+		{
 			return;
 		}
 
-		$this->resolver->setDefaultConnection($this->getDatabase());
+		$this->resolver->setDefaultConnection( $this->getDatabase() );
 
-		Model::unguarded(function ()
-{
+		Model::unguarded( function ()
+		{
 			$this->getSeeder()->run();
-		});
+		} );
 	}
 
 	/**
@@ -73,9 +81,11 @@ class SeedCommand extends Command
 	 */
 	protected function getSeeder()
 	{
-		$class = $this->framework->make($this->input->getOption('class'));
+		$class = Bindings::make( $this->input->getOption( 'class' ) );
+		if ( method_exists( $class, 'setCommand' ) )
+			$class->setCommand( $this );
 
-		return $class->setBindings($this->framework)->setCommand($this);
+		return $class;
 	}
 
 	/**
@@ -85,9 +95,9 @@ class SeedCommand extends Command
 	 */
 	protected function getDatabase()
 	{
-		$database = $this->input->getOption('database');
+		$database = $this->input->getOption( 'database' );
 
-		return $database ?: $this->framework['config']['database.default'];
+		return $database ?: Bindings::get( 'config' )['database.default'];
 	}
 
 	/**

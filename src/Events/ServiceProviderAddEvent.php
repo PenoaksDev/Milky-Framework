@@ -13,7 +13,7 @@ namespace Penoaks\Events;
 use Penoaks\Barebones\Event;
 use Penoaks\Barebones\ServiceProvider;
 
-class ServiceProviderPostEvent implements Event
+class ServiceProviderAddEvent implements Event
 {
 	/**
 	 * @var ServiceProvider

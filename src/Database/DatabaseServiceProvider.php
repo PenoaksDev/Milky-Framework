@@ -1,15 +1,22 @@
 <?php
-
 namespace Penoaks\Database;
 
 use Faker\Factory as FakerFactory;
 use Faker\Generator as FakerGenerator;
-use Penoaks\Database\Eloquent\Model;
-use Penoaks\Support\ServiceProvider;
-use Penoaks\Database\Eloquent\QueueEntityResolver;
+use Penoaks\Barebones\ServiceProvider;
 use Penoaks\Database\Connectors\ConnectionFactory;
 use Penoaks\Database\Eloquent\Factory as EloquentFactory;
+use Penoaks\Database\Eloquent\Model;
+use Penoaks\Database\Eloquent\QueueEntityResolver;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class DatabaseServiceProvider extends ServiceProvider
 {
 	/**
@@ -19,9 +26,9 @@ class DatabaseServiceProvider extends ServiceProvider
 	 */
 	public function boot()
 	{
-		Model::setConnectionResolver($this->fw->bindings['db']);
+		Model::setConnectionResolver( $this->bindings['db'] );
 
-		Model::setEventDispatcher($this->fw->bindings['events']);
+		Model::setEventDispatcher( $this->bindings['events'] );
 	}
 
 	/**
@@ -40,23 +47,23 @@ class DatabaseServiceProvider extends ServiceProvider
 		// The connection factory is used to create the actual connection instances on
 		// the database. We will inject the factory into the manager so that it may
 		// make the connections while they are actually needed and not of before.
-		$this->fw->bindings->singleton('db.factory', function ($fw)
-{
-			return new ConnectionFactory($fw);
-		});
+		$this->bindings->singleton( 'db.factory', function ( $bindings )
+		{
+			return new ConnectionFactory( $bindings );
+		} );
 
 		// The database manager is used to resolve various connections, since multiple
 		// connections might be managed. It also implements the connection resolver
 		// interface which may be used by other components requiring connections.
-		$this->fw->bindings->singleton('db', function ($fw)
-{
-			return new DatabaseManager($fw, $fw->bindings['db.factory']);
-		});
+		$this->bindings->singleton( 'db', function ( $bindings )
+		{
+			return new DatabaseManager( $bindings, $bindings['db.factory'] );
+		} );
 
-		$this->fw->bindings->bind('db.connection', function ($fw)
-{
-			return $fw->bindings['db']->connection();
-		});
+		$this->bindings->bind( 'db.connection', function ( $bindings )
+		{
+			return $bindings['db']->connection();
+		} );
 	}
 
 	/**
@@ -66,17 +73,17 @@ class DatabaseServiceProvider extends ServiceProvider
 	 */
 	protected function registerEloquentFactory()
 	{
-		$this->fw->bindings->singleton(FakerGenerator::class, function ()
-{
+		$this->bindings->singleton( FakerGenerator::class, function ()
+		{
 			return FakerFactory::create();
-		});
+		} );
 
-		$this->fw->bindings->singleton(EloquentFactory::class, function ($fw)
-{
-			$faker = $fw->make(FakerGenerator::class);
+		$this->bindings->singleton( EloquentFactory::class, function ( $bindings )
+		{
+			$faker = $bindings->make( FakerGenerator::class );
 
-			return EloquentFactory::construct($faker, database_path('factories'));
-		});
+			return EloquentFactory::construct( $faker, database_path( 'factories' ) );
+		} );
 	}
 
 	/**
@@ -86,9 +93,9 @@ class DatabaseServiceProvider extends ServiceProvider
 	 */
 	protected function registerQueueableEntityResolver()
 	{
-		$this->fw->bindings->singleton('Penoaks\Contracts\Queue\EntityResolver', function ()
-{
+		$this->bindings->singleton( 'Penoaks\Contracts\Queue\EntityResolver', function ()
+		{
 			return new QueueEntityResolver;
-		});
+		} );
 	}
 }

@@ -3,10 +3,10 @@ namespace Penoaks\Bootstrap;
 
 use Monolog\Logger as Monolog;
 use Penoaks\Barebones\Bootstrap;
-use Penoaks\Bindings\Bindings;
+use Penoaks\Config\Config;
 use Penoaks\Framework;
 use Penoaks\Framework\Env;
-use Penoaks\Log\Writer;
+use Penoaks\Logging\Log;
 
 /**
  * The MIT License (MIT)
@@ -23,7 +23,7 @@ class ConfigureLogging implements Bootstrap
 	 *
 	 * @param  Framework $fw
 	 */
-	public function bootstrap( Framework $fw )
+	public function boot( Framework $fw )
 	{
 		$log = $this->registerLogger( $fw );
 
@@ -33,80 +33,56 @@ class ConfigureLogging implements Bootstrap
 		if ( $fw->hasMonologConfigurator() )
 			call_user_func( $fw->getMonologConfigurator(), $log->getMonolog() );
 		else
-			$this->configureHandlers( $fw, $log );
+			$this->configureHandlers( Config::get('app.log'), $log );
 	}
 
 	/**
 	 * Register the logger instance in the bindings.
 	 *
 	 * @param  Framework $fw
-	 * @return Writer
+	 * @return Log
 	 */
 	protected function registerLogger( Framework $fw )
 	{
-		$fw->bindings->instance( 'log', $log = new Writer( new Monolog( $fw->environment() ), $fw->bindings['events'] ) );
+		$fw->bindings->instance( 'log', $log = new Log( new Monolog( $fw->environment() ), $fw->bindings['events'] ) );
 		return $log;
 	}
 
 	/**
 	 * Configure the Monolog handlers for the application.
 	 *
-	 * @param  Framework $fw
-	 * @param  Writer $log
+	 * @param  string $handler
+	 * @param  Log $log
 	 */
-	protected function configureHandlers( Framework $fw, Writer $log )
+	protected function configureHandlers( $handler, Log $log )
 	{
-		$method = 'configure' . ucfirst( $fw->bindings['config']['app.log'] ) . 'Handler';
-		$this->{$method}( $fw->bindings, $log );
-	}
-
-	/**
-	 * Configure the Monolog handlers for the application.
-	 *
-	 * @param  Bindings $fw
-	 * @param  Writer $log
-	 * @return void
-	 */
-	protected function configureSingleHandler( Bindings $bindings, Writer $log )
-	{
-		$log->useFiles( Env::get( 'path.storage' ) . __ . 'logs/default.log', $bindings->make( 'config' )->get( 'app.log_level', 'debug' ) );
-	}
-
-	/**
-	 * Configure the Monolog handlers for the application.
-	 *
-	 * @param  Bindings $fw
-	 * @param  Writer $log
-	 * @return void
-	 */
-	protected function configureDailyHandler( Bindings $bindings, Writer $log )
-	{
-		$config = $bindings->get( 'config' );
-		$maxFiles = $config->get( 'app.log_max_files' );
-		$log->useDailyFiles( Env::get( 'path.storage' ) . __ . 'logs/default.log', is_null( $maxFiles ) ? 5 : $maxFiles, $config->get( 'app.log_level', 'debug' ) );
-	}
-
-	/**
-	 * Configure the Monolog handlers for the application.
-	 *
-	 * @param  Bindings $fw
-	 * @param  Writer $log
-	 * @return void
-	 */
-	protected function configureSyslogHandler( Bindings $bindings, Writer $log )
-	{
-		$log->useSyslog( 'framework', $bindings->make( 'config' )->get( 'app.log_level', 'debug' ) );
-	}
-
-	/**
-	 * Configure the Monolog handlers for the application.
-	 *
-	 * @param  Bindings $fw
-	 * @param  Writer $log
-	 * @return void
-	 */
-	protected function configureErrorlogHandler( Bindings $bindings, Writer $log )
-	{
-		$log->useErrorLog( $bindings->make( 'config' )->get( 'app.log_level', 'debug' ) );
+		switch ( strtolower( $handler ) )
+		{
+			case "single":
+			{
+				$log->useFiles( Env::get( 'path.storage' ) . __ . 'logs/default.log', Config::get( 'app.log_level', 'debug' ) );
+				break;
+			}
+			case "daily":
+			{
+				$maxFiles = Config::get( 'app.log_max_files' );
+				$log->useDailyFiles( Env::get( 'path.storage' ) . __ . 'logs/default.log', is_null( $maxFiles ) ? 5 : $maxFiles, Config::get( 'app.log_level', 'debug' ) );
+				break;
+			}
+			case "syslog":
+			{
+				$log->useSyslog( 'framework', Config::get( 'app.log_level', 'debug' ) );
+				break;
+			}
+			case "errorlog":
+			{
+				$log->useErrorLog( Config::get( 'app.log_level', 'debug' ) );
+				break;
+			}
+			default:
+			{
+				throw new \RuntimeException( $handler . " is not a valid log handler." );
+			}
+		}
 	}
 }

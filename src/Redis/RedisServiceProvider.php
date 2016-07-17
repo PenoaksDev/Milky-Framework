@@ -1,9 +1,16 @@
 <?php
-
 namespace Penoaks\Redis;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class RedisServiceProvider extends ServiceProvider
 {
 	/**
@@ -20,10 +27,10 @@ class RedisServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->fw->bindings->singleton('redis', function ($fw)
-{
-			return new Database($fw->bindings['config']['database.redis']);
-		});
+		$this->bindings->singleton( 'redis', function ( $bindings )
+		{
+			return new Database( $bindings['config']['database.redis'] );
+		} );
 	}
 
 	/**

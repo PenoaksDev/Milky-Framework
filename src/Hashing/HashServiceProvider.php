@@ -1,9 +1,16 @@
 <?php
-
 namespace Penoaks\Hashing;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class HashServiceProvider extends ServiceProvider
 {
 	/**
@@ -20,10 +27,10 @@ class HashServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->fw->bindings->singleton('hash', function ()
-{
+		$this->bindings->singleton( 'hash', function ()
+		{
 			return new BcryptHasher;
-		});
+		} );
 	}
 
 	/**

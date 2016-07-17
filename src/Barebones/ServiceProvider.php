@@ -2,16 +2,19 @@
 namespace Penoaks\Barebones;
 
 use BadMethodCallException;
+use Penoaks\Bindings\Bindings;
 use Penoaks\Console\Events\ArtisanStarting;
+use Penoaks\Framework;
+use Penoaks\Framework\Env;
 
 abstract class ServiceProvider
 {
 	/**
-	 * The application instance.
+	 * The bindings.
 	 *
-	 * @var \Penoaks\Framework
+	 * @var Bindings
 	 */
-	protected $fw;
+	protected $bindings;
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -37,20 +40,13 @@ abstract class ServiceProvider
 	/**
 	 * Create a new service provider instance.
 	 *
-	 * @param  \Penoaks\Framework $fw
+	 * @param  Framework $fw
 	 * @return void
 	 */
-	public function __construct( $fw )
+	public function __construct( Bindings $bindings )
 	{
-		$this->fw = $fw;
+		$this->bindings = $bindings;
 	}
-
-	/**
-	 * Register the service provider.
-	 *
-	 * @return void
-	 */
-	abstract public function register();
 
 	/**
 	 * Merge the given configuration with the existing configuration.
@@ -61,9 +57,9 @@ abstract class ServiceProvider
 	 */
 	protected function mergeConfigFrom( $path, $key )
 	{
-		$config = $this->fw->bindings['config']->get( $key, [] );
+		$config = $this->bindings['config']->get( $key, [] );
 
-		$this->fw->bindings['config']->set( $key, array_merge( require $path, $config ) );
+		$this->bindings['config']->set( $key, array_merge( require $path, $config ) );
 	}
 
 	/**
@@ -75,12 +71,10 @@ abstract class ServiceProvider
 	 */
 	protected function loadViewsFrom( $path, $namespace )
 	{
-		if ( is_dir( $fwPath = $this->fw->basePath() . '/resources/views/vendor/' . $namespace ) )
-		{
-			$this->fw->bindings['view']->addNamespace( $namespace, $fwPath );
-		}
+		if ( is_dir( $fwPath = Env::get( 'path.src' ) . __ . ucwords( $namespace ) ) )
+			$this->bindings['view']->addNamespace( $namespace, $fwPath );
 
-		$this->fw->bindings['view']->addNamespace( $namespace, $path );
+		$this->bindings['view']->addNamespace( $namespace, $path );
 	}
 
 	/**
@@ -92,7 +86,7 @@ abstract class ServiceProvider
 	 */
 	protected function loadTranslationsFrom( $path, $namespace )
 	{
-		$this->fw->bindings['translator']->addNamespace( $namespace, $path );
+		$this->bindings['translator']->addNamespace( $namespace, $path );
 	}
 
 	/**
@@ -181,7 +175,7 @@ abstract class ServiceProvider
 		// To register the commands with Artisan, we will grab each of the arguments
 		// passed into the method and listen for Artisan "start" event which will
 		// give us the Artisan console instance which we will give commands to.
-		$events = $this->fw->bindings['events'];
+		$events = $this->bindings['events'];
 
 		$events->listen( ArtisanStarting::class, function ( $event ) use ( $commands )
 		{
@@ -244,5 +238,10 @@ abstract class ServiceProvider
 			return;
 
 		throw new BadMethodCallException( "Call to undefined method [{$method}]" );
+	}
+
+	public function __get( $key )
+	{
+		return Bindings::get( $key );
 	}
 }

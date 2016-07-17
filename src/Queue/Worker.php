@@ -138,7 +138,7 @@ else
 	protected function daemonShouldRun()
 	{
 		return $this->manager->isDownForMaintenance()
-					? false : $this->events->until('illuminate.queue.looping') !== false;
+					? false : $this->events->until('framework.queue.looping') !== false;
 	}
 
 	/**
@@ -328,7 +328,7 @@ else
 	}
 
 	/**
-	 * Log a failed job into storage.
+	 * Logging a failed job into storage.
 	 *
 	 * @param  string  $connection
 	 * @param  \Penoaks\Contracts\Queue\Job  $job

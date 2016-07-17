@@ -64,7 +64,7 @@ trait StaticAccess
 	public static function i()
 	{
 		if ( __CLASS__ != "Penoaks\\Bindings\\Bindings" && is_null( static::$selfInstance ) )
-			Bindings::i()->make( __CLASS__ );
+			Bindings::get( __CLASS__ );
 
 		return static::$selfInstance;
 	}

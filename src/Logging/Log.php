@@ -1,6 +1,5 @@
 <?php
-
-namespace Penoaks\Log;
+namespace Penoaks\Logging;
 
 use Closure;
 use InvalidArgumentException;
@@ -11,14 +10,22 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Logger;
 use Monolog\Logger as MonologLogger;
-use Penoaks\Contracts\Logging\Log as LogContract;
 use Penoaks\Contracts\Support\Arrayable;
 use Penoaks\Contracts\Support\Jsonable;
 use Penoaks\Events\Dispatcher;
+use Penoaks\Facades\StaticFacade;
 use Psr\Log\LoggerInterface as PsrLoggerInterface;
 use RuntimeException;
 
-class Writer implements LogContract, PsrLoggerInterface
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
+class Log implements PsrLoggerInterface
 {
 	/**
 	 * The Monolog logger instance.
@@ -32,10 +39,10 @@ class Writer implements LogContract, PsrLoggerInterface
 	 *
 	 * @var Dispatcher
 	 */
-	protected $dispatcher;
+	protected $events;
 
 	/**
-	 * The Log levels.
+	 * The Logging levels.
 	 *
 	 * @var array
 	 */
@@ -56,16 +63,14 @@ class Writer implements LogContract, PsrLoggerInterface
 	 * @param  Logger $monolog
 	 * @param  Dispatcher $dispatcher
 	 */
-	public function __construct( MonologLogger $monolog, Dispatcher $dispatcher = null )
+	public function __construct( MonologLogger $monolog, Dispatcher $events )
 	{
 		$this->monolog = $monolog;
-
-		if ( isset( $dispatcher ) )
-			$this->dispatcher = $dispatcher;
+		$this->events = $events;
 	}
 
 	/**
-	 * Log an emergency message to the logs.
+	 * Logging an emergency message to the logs.
 	 *
 	 * @param  string $message
 	 * @param  array $context
@@ -76,7 +81,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	}
 
 	/**
-	 * Log an alert message to the logs.
+	 * Logging an alert message to the logs.
 	 *
 	 * @param  string $message
 	 * @param  array $context
@@ -87,7 +92,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	}
 
 	/**
-	 * Log a critical message to the logs.
+	 * Logging a critical message to the logs.
 	 *
 	 * @param  string $message
 	 * @param  array $context
@@ -98,7 +103,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	}
 
 	/**
-	 * Log an error message to the logs.
+	 * Logging an error message to the logs.
 	 *
 	 * @param  string $message
 	 * @param  array $context
@@ -109,7 +114,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	}
 
 	/**
-	 * Log a warning message to the logs.
+	 * Logging a warning message to the logs.
 	 *
 	 * @param  string $message
 	 * @param  array $context
@@ -120,7 +125,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	}
 
 	/**
-	 * Log a notice to the logs.
+	 * Logging a notice to the logs.
 	 *
 	 * @param  string $message
 	 * @param  array $context
@@ -131,7 +136,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	}
 
 	/**
-	 * Log an informational message to the logs.
+	 * Logging an informational message to the logs.
 	 *
 	 * @param  string $message
 	 * @param  array $context
@@ -142,7 +147,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	}
 
 	/**
-	 * Log a debug message to the logs.
+	 * Logging a debug message to the logs.
 	 *
 	 * @param  string $message
 	 * @param  array $context
@@ -153,7 +158,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	}
 
 	/**
-	 * Log a message to the logs.
+	 * Logging a message to the logs.
 	 *
 	 * @param  string $level
 	 * @param  string $message
@@ -186,7 +191,6 @@ class Writer implements LogContract, PsrLoggerInterface
 	protected function writeLog( $level, $message, $context )
 	{
 		$this->fireLogEvent( $level, $message = $this->formatMessage( $message ), $context );
-
 		$this->monolog->{$level}( $message, $context );
 	}
 
@@ -252,11 +256,9 @@ class Writer implements LogContract, PsrLoggerInterface
 	public function listen( Closure $callback )
 	{
 		if ( !isset( $this->dispatcher ) )
-		{
 			throw new RuntimeException( 'Events dispatcher has not been set.' );
-		}
 
-		$this->dispatcher->listen( 'illuminate.log', $callback );
+		$this->events->listen( 'framework.log', $callback );
 	}
 
 	/**
@@ -273,7 +275,7 @@ class Writer implements LogContract, PsrLoggerInterface
 		// that aggregate all of the log messages for a given "request" cycle.
 		if ( isset( $this->dispatcher ) )
 		{
-			$this->dispatcher->fire( 'illuminate.log', compact( 'level', 'message', 'context' ) );
+			$this->events->fire( 'framework.log', compact( 'level', 'message', 'context' ) );
 		}
 	}
 
@@ -286,17 +288,11 @@ class Writer implements LogContract, PsrLoggerInterface
 	protected function formatMessage( $message )
 	{
 		if ( is_array( $message ) )
-		{
 			return var_export( $message, true );
-		}
 		elseif ( $message instanceof Jsonable )
-		{
 			return $message->toJson();
-		}
 		elseif ( $message instanceof Arrayable )
-		{
 			return var_export( $message->toArray(), true );
-		}
 
 		return $message;
 	}
@@ -312,9 +308,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	protected function parseLevel( $level )
 	{
 		if ( isset( $this->levels[$level] ) )
-		{
 			return $this->levels[$level];
-		}
 
 		throw new InvalidArgumentException( 'Invalid log level.' );
 	}
@@ -322,7 +316,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	/**
 	 * Get the underlying Monolog instance.
 	 *
-	 * @return \Monolog\Logger
+	 * @return Logger
 	 */
 	public function getMonolog()
 	{
@@ -342,7 +336,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	/**
 	 * Get the event dispatcher instance.
 	 *
-	 * @return \Penoaks\Contracts\Events\Dispatcher
+	 * @return Dispatcher
 	 */
 	public function getEventDispatcher()
 	{
@@ -352,7 +346,7 @@ class Writer implements LogContract, PsrLoggerInterface
 	/**
 	 * Set the event dispatcher instance.
 	 *
-	 * @param  \Penoaks\Contracts\Events\Dispatcher $dispatcher
+	 * @param  Dispatcher $dispatcher
 	 */
 	public function setEventDispatcher( Dispatcher $dispatcher )
 	{

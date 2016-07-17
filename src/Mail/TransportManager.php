@@ -150,7 +150,7 @@ class TransportManager extends Manager
 	}
 
 	/**
-	 * Create an instance of the Log Swift Transport driver.
+	 * Create an instance of the Logging Swift Transport driver.
 	 *
 	 * @return \Penoaks\Mail\Transport\LogTransport
 	 */

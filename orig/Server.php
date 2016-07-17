@@ -264,7 +264,7 @@
 			$length = 120;
 				
 			if ( $this->firstCall )
-				$log .= "\n\n<Log Message>" . str_repeat(" ", $length - 13) . "     <Time>        <Level>   <Line> <File>\n";
+				$log .= "\n\n<Logging Message>" . str_repeat(" ", $length - 13) . "     <Time>        <Level>   <Line> <File>\n";
 				
 			$this->firstCall = false;
 				

@@ -1,9 +1,16 @@
 <?php
-
 namespace Penoaks\Translation;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class TranslationServiceProvider extends ServiceProvider
 {
 	/**
@@ -22,21 +29,21 @@ class TranslationServiceProvider extends ServiceProvider
 	{
 		$this->registerLoader();
 
-		$this->fw->bindings->singleton('translator', function ($fw)
-{
-			$loader = $fw->bindings['translation.loader'];
+		$this->bindings->singleton( 'translator', function ( $bindings )
+		{
+			$loader = $bindings['translation.loader'];
 
 			// When registering the translator component, we'll need to set the default
 			// locale as well as the fallback locale. So, we'll grab the application
 			// configuration so we can easily get both of these values from there.
-			$locale = $fw->bindings['config']['app.locale'];
+			$locale = $bindings['config']['app.locale'];
 
-			$trans = new Translator($loader, $locale);
+			$trans = new Translator( $loader, $locale );
 
-			$trans->setFallback($fw->bindings['config']['app.fallback_locale']);
+			$trans->setFallback( $bindings['config']['app.fallback_locale'] );
 
 			return $trans;
-		});
+		} );
 	}
 
 	/**
@@ -46,10 +53,10 @@ class TranslationServiceProvider extends ServiceProvider
 	 */
 	protected function registerLoader()
 	{
-		$this->fw->bindings->singleton('translation.loader', function ($fw)
-{
-			return new FileLoader($fw->bindings['files'], $fw->bindings['path.lang']);
-		});
+		$this->bindings->singleton( 'translation.loader', function ( $bindings )
+		{
+			return new FileLoader( $bindings['files'], $bindings['path.lang'] );
+		} );
 	}
 
 	/**

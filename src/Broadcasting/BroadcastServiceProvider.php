@@ -2,7 +2,7 @@
 
 namespace Penoaks\Broadcasting;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
 class BroadcastServiceProvider extends ServiceProvider
 {
@@ -20,19 +20,17 @@ class BroadcastServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->fw->bindings->singleton('Penoaks\Broadcasting\BroadcastManager', function ($fw)
-{
-			return new BroadcastManager($fw);
-		});
+		$this->bindings->singleton( 'Penoaks\Broadcasting\BroadcastManager', function ( $bindings )
+		{
+			return new BroadcastManager( $bindings );
+		} );
 
-		$this->fw->bindings->singleton('Penoaks\Contracts\Broadcasting\Broadcaster', function ($fw)
-{
-			return $fw->make('Penoaks\Broadcasting\BroadcastManager')->connection();
-		});
+		$this->bindings->singleton( 'Penoaks\Contracts\Broadcasting\Broadcaster', function ( $bindings )
+		{
+			return $bindings->make( 'Penoaks\Broadcasting\BroadcastManager' )->connection();
+		} );
 
-		$this->fw->bindings->alias(
-			'Penoaks\Broadcasting\BroadcastManager', 'Penoaks\Contracts\Broadcasting\Factory'
-		);
+		$this->bindings->alias( 'Penoaks\Broadcasting\BroadcastManager', 'Penoaks\Contracts\Broadcasting\Factory' );
 	}
 
 	/**

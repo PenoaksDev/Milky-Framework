@@ -1,9 +1,16 @@
 <?php
-
 namespace Penoaks\Validation;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class ValidationServiceProvider extends ServiceProvider
 {
 	/**
@@ -32,20 +39,20 @@ class ValidationServiceProvider extends ServiceProvider
 	 */
 	protected function registerValidationFactory()
 	{
-		$this->fw->bindings->singleton('validator', function ($fw)
-{
-			$validator = new Factory($fw->bindings['translator'], $fw);
+		$this->bindings->singleton( 'validator', function ( $bindings )
+		{
+			$validator = new Factory( $bindings['translator'], $bindings );
 
 			// The validation presence verifier is responsible for determining the existence
 			// of values in a given data collection, typically a relational database or
 			// other persistent data stores. And it is used to check for uniqueness.
-			if (isset($fw->bindings['validation.presence']))
-{
-				$validator->setPresenceVerifier($fw->bindings['validation.presence']);
+			if ( isset( $bindings['validation.presence'] ) )
+			{
+				$validator->setPresenceVerifier( $bindings['validation.presence'] );
 			}
 
 			return $validator;
-		});
+		} );
 	}
 
 	/**
@@ -55,10 +62,10 @@ class ValidationServiceProvider extends ServiceProvider
 	 */
 	protected function registerPresenceVerifier()
 	{
-		$this->fw->bindings->singleton('validation.presence', function ($fw)
-{
-			return new DatabasePresenceVerifier($fw->bindings['db']);
-		});
+		$this->bindings->singleton( 'validation.presence', function ( $bindings )
+		{
+			return new DatabasePresenceVerifier( $bindings['db'] );
+		} );
 	}
 
 	/**
@@ -69,7 +76,8 @@ class ValidationServiceProvider extends ServiceProvider
 	public function provides()
 	{
 		return [
-			'validator', 'validation.presence',
+			'validator',
+			'validation.presence',
 		];
 	}
 }

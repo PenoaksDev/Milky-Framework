@@ -1,13 +1,20 @@
 <?php
-
 namespace Penoaks\View;
 
-use Penoaks\View\Engines\PhpEngine;
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
+use Penoaks\View\Compilers\BladeCompiler;
 use Penoaks\View\Engines\CompilerEngine;
 use Penoaks\View\Engines\EngineResolver;
-use Penoaks\View\Compilers\BladeCompiler;
+use Penoaks\View\Engines\PhpEngine;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class ViewServiceProvider extends ServiceProvider
 {
 	/**
@@ -31,60 +38,60 @@ class ViewServiceProvider extends ServiceProvider
 	 */
 	public function registerEngineResolver()
 	{
-		$this->fw->bindings->singleton('view.engine.resolver', function ()
-{
+		$this->bindings->singleton( 'view.engine.resolver', function ()
+		{
 			$resolver = new EngineResolver;
 
 			// Next we will register the various engines with the resolver so that the
 			// environment can resolve the engines it needs for various views based
 			// on the extension of view files. We call a method for each engines.
-			foreach (['php', 'blade'] as $engine)
-{
-				$this->{'register'.ucfirst($engine).'Engine'}($resolver);
+			foreach ( ['php', 'blade'] as $engine )
+			{
+				$this->{'register' . ucfirst( $engine ) . 'Engine'}( $resolver );
 			}
 
 			return $resolver;
-		});
+		} );
 	}
 
 	/**
 	 * Register the PHP engine implementation.
 	 *
-	 * @param  \Penoaks\View\Engines\EngineResolver  $resolver
+	 * @param  \Penoaks\View\Engines\EngineResolver $resolver
 	 * @return void
 	 */
-	public function registerPhpEngine($resolver)
+	public function registerPhpEngine( $resolver )
 	{
-		$resolver->register('php', function ()
-{
+		$resolver->register( 'php', function ()
+		{
 			return new PhpEngine;
-		});
+		} );
 	}
 
 	/**
 	 * Register the Blade engine implementation.
 	 *
-	 * @param  \Penoaks\View\Engines\EngineResolver  $resolver
+	 * @param  \Penoaks\View\Engines\EngineResolver $resolver
 	 * @return void
 	 */
-	public function registerBladeEngine($resolver)
+	public function registerBladeEngine( $resolver )
 	{
-		$fw = $this->fw;
+		$bindings = $this->fw;
 
 		// The Compiler engine requires an instance of the CompilerInterface, which in
 		// this case will be the Blade compiler, so we'll first create the compiler
 		// instance to pass into the engine so it can compile the views properly.
-		$fw->singleton('blade.compiler', function ($fw)
-{
-			$cache = $fw->bindings['config']['view.compiled'];
+		$bindings->singleton( 'blade.compiler', function ( $bindings )
+		{
+			$cache = $bindings['config']['view.compiled'];
 
-			return new BladeCompiler($fw->bindings['files'], $cache);
-		});
+			return new BladeCompiler( $bindings['files'], $cache );
+		} );
 
-		$resolver->register('blade', function () use ($fw)
-{
-			return new CompilerEngine($fw->bindings['blade.compiler']);
-		});
+		$resolver->register( 'blade', function () use ( $bindings )
+		{
+			return new CompilerEngine( $bindings['blade.compiler'] );
+		} );
 	}
 
 	/**
@@ -94,12 +101,12 @@ class ViewServiceProvider extends ServiceProvider
 	 */
 	public function registerViewFinder()
 	{
-		$this->fw->bindings->bind('view.finder', function ($fw)
-{
-			$paths = $fw->bindings['config']['view.paths'];
+		$this->bindings->bind( 'view.finder', function ( $bindings )
+		{
+			$paths = $bindings['config']['view.paths'];
 
-			return new FileViewFinder($fw->bindings['files'], $paths);
-		});
+			return new FileViewFinder( $bindings['files'], $paths );
+		} );
 	}
 
 	/**
@@ -109,25 +116,25 @@ class ViewServiceProvider extends ServiceProvider
 	 */
 	public function registerFactory()
 	{
-		$this->fw->bindings->singleton('view', function ($fw)
-{
+		$this->bindings->singleton( 'view', function ( $bindings )
+		{
 			// Next we need to grab the engine resolver instance that will be used by the
 			// environment. The resolver will be used by an environment to get each of
 			// the various engine implementations such as plain PHP or Blade engine.
-			$resolver = $fw->bindings['view.engine.resolver'];
+			$resolver = $bindings['view.engine.resolver'];
 
-			$finder = $fw->bindings['view.finder'];
+			$finder = $bindings['view.finder'];
 
-			$env = new Factory($resolver, $finder, $fw->bindings['events']);
+			$env = new Factory( $resolver, $finder, $bindings['events'] );
 
 			// We will also set the bindings instance on this view environment since the
 			// view composers may be classes registered in the bindings, which allows
 			// for great testable, flexible composers for the application developer.
-			$env->setBindings($fw);
+			$env->setBindings( $bindings );
 
-			$env->share('fw', $fw);
+			$env->share( 'fw', $bindings->get( 'fw' ) );
 
 			return $env;
-		});
+		} );
 	}
 }

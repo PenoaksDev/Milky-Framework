@@ -2,7 +2,7 @@
 
 namespace Penoaks\Bus;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
 class BusServiceProvider extends ServiceProvider
 {
@@ -20,21 +20,17 @@ class BusServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->fw->bindings->singleton('Penoaks\Bus\Dispatcher', function ($fw)
-{
-			return new Dispatcher($fw, function ($connection = null) use ($fw)
-{
-				return $fw->bindings['Penoaks\Contracts\Queue\Factory']->connection($connection);
-			});
-		});
+		$this->bindings->singleton( 'Penoaks\Bus\Dispatcher', function ( $bindings )
+		{
+			return new Dispatcher( $bindings, function ( $connection = null ) use ( $bindings )
+			{
+				return $bindings['Penoaks\Contracts\Queue\Factory']->connection( $connection );
+			} );
+		} );
 
-		$this->fw->bindings->alias(
-			'Penoaks\Bus\Dispatcher', 'Penoaks\Contracts\Bus\Dispatcher'
-		);
+		$this->bindings->alias( 'Penoaks\Bus\Dispatcher', 'Penoaks\Contracts\Bus\Dispatcher' );
 
-		$this->fw->bindings->alias(
-			'Penoaks\Bus\Dispatcher', 'Penoaks\Contracts\Bus\QueueingDispatcher'
-		);
+		$this->bindings->alias( 'Penoaks\Bus\Dispatcher', 'Penoaks\Contracts\Bus\QueueingDispatcher' );
 	}
 
 	/**

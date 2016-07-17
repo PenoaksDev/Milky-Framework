@@ -173,7 +173,7 @@ trait AuthenticatesUsers
 	}
 
 	/**
-	 * Log the user out of the application.
+	 * Logging the user out of the application.
 	 *
 	 * @return \Penoaks\Http\Response
 	 */

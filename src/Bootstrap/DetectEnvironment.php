@@ -5,7 +5,7 @@ namespace Penoaks\Bootstrap;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Penoaks\Framework;
-use Penoaks\Interfaces\Bootstrap;
+use Penoaks\Barebones\Bootstrap;
 
 class DetectEnvironment implements Bootstrap
 {
@@ -15,7 +15,7 @@ class DetectEnvironment implements Bootstrap
 	 * @param  \Penoaks\Framework $fw
 	 * @return void
 	 */
-	public function bootstrap( Framework $fw )
+	public function boot( Framework $fw )
 	{
 		if ( !$fw->configurationIsCached() )
 		{

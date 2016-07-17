@@ -239,7 +239,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	}
 
 	/**
-	 * Log a user into the application without sessions or cookies.
+	 * Logging a user into the application without sessions or cookies.
 	 *
 	 * @param  array  $credentials
 	 * @return bool
@@ -451,7 +451,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	}
 
 	/**
-	 * Log a user into the application.
+	 * Logging a user into the application.
 	 *
 	 * @param  \Penoaks\Contracts\Auth\Authenticatable  $user
 	 * @param  bool  $remember
@@ -508,7 +508,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	}
 
 	/**
-	 * Log the given user ID into the application.
+	 * Logging the given user ID into the application.
 	 *
 	 * @param  mixed  $id
 	 * @param  bool   $remember
@@ -529,7 +529,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	}
 
 	/**
-	 * Log the given user ID into the application without sessions or cookies.
+	 * Logging the given user ID into the application without sessions or cookies.
 	 *
 	 * @param  mixed  $id
 	 * @return bool
@@ -573,7 +573,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	}
 
 	/**
-	 * Log the user out of the application.
+	 * Logging the user out of the application.
 	 *
 	 * @return void
 	 */

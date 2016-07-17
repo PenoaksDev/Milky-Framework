@@ -1,13 +1,21 @@
 <?php
-
 namespace Penoaks\Providers;
 
-use Penoaks\Routing\Redirector;
-use Penoaks\Support\ServiceProvider;
-use Penoaks\Http\FormRequest;
-use Symfony\Component\HttpFoundation\Request;
+use Penoaks\Barebones\ServiceProvider;
+use Penoaks\Bindings\Bindings;
 use Penoaks\Contracts\Validation\ValidatesWhenResolved;
+use Penoaks\Http\FormRequest;
+use Penoaks\Routing\Redirector;
+use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class FoundationServiceProvider extends ServiceProvider
 {
 	/**
@@ -23,58 +31,45 @@ class FoundationServiceProvider extends ServiceProvider
 	/**
 	 * Bootstrap the application services.
 	 *
-	 * @return void
+	 * @param Bindings $bindings
 	 */
-	public function boot()
+	public function boot( $bindings )
 	{
-		$this->configureFormRequests();
-	}
-
-	/**
-	 * Configure the form request related services.
-	 *
-	 * @return void
-	 */
-	protected function configureFormRequests()
-	{
-		$this->fw->afterResolving(function (ValidatesWhenResolved $resolved)
-{
+		$bindings->afterResolving( function ( ValidatesWhenResolved $resolved )
+		{
 			$resolved->validate();
-		});
+		} );
 
-		$this->fw->resolving(function (FormRequest $request, $fw)
-{
-			$this->initializeRequest($request, $fw->bindings['request']);
+		$bindings->resolving( function ( FormRequest $request, Bindings $bindings )
+		{
+			$this->initializeRequest( $request, $bindings->get( 'request' ) );
 
-			$request->setBindings($fw)->setRedirector($fw->make(Redirector::class));
-		});
+			$request->setBindings( $bindings )->setRedirector( $bindings->make( Redirector::class ) );
+		} );
 	}
 
 	/**
 	 * Initialize the form request with data from the given request.
 	 *
-	 * @param  \Penoaks\Http\FormRequest  $form
-	 * @param  \Symfony\Component\HttpFoundation\Request  $current
+	 * @param  FormRequest $form
+	 * @param  Request $current
 	 * @return void
 	 */
-	protected function initializeRequest(FormRequest $form, Request $current)
+	protected function initializeRequest( FormRequest $form, Request $current )
 	{
 		$files = $current->files->all();
 
-		$files = is_array($files) ? array_filter($files) : $files;
+		$files = is_array( $files ) ? array_filter( $files ) : $files;
 
-		$form->initialize(
-			$current->query->all(), $current->request->all(), $current->attributes->all(),
-			$current->cookies->all(), $files, $current->server->all(), $current->getContent()
-		);
+		$form->initialize( $current->query->all(), $current->request->all(), $current->attributes->all(), $current->cookies->all(), $files, $current->server->all(), $current->getContent() );
 
-		if ($session = $current->getSession())
-{
-			$form->setSession($session);
+		if ( $session = $current->getSession() )
+		{
+			$form->setSession( $session );
 		}
 
-		$form->setUserResolver($current->getUserResolver());
+		$form->setUserResolver( $current->getUserResolver() );
 
-		$form->setRouteResolver($current->getRouteResolver());
+		$form->setRouteResolver( $current->getRouteResolver() );
 	}
 }

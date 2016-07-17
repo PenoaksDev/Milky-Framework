@@ -1,9 +1,16 @@
 <?php
-
 namespace Penoaks\Auth\Passwords;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class PasswordResetServiceProvider extends ServiceProvider
 {
 	/**
@@ -30,15 +37,15 @@ class PasswordResetServiceProvider extends ServiceProvider
 	 */
 	protected function registerPasswordBroker()
 	{
-		$this->fw->bindings->singleton('auth.password', function ($fw)
-{
-			return new PasswordBrokerManager($fw);
-		});
+		$this->bindings->singleton( 'auth.password', function ( $bindings )
+		{
+			return new PasswordBrokerManager( $bindings );
+		} );
 
-		$this->fw->bindings->bind('auth.password.broker', function ($fw)
-{
-			return $fw->make('auth.password')->broker();
-		});
+		$this->bindings->bind( 'auth.password.broker', function ( $bindings )
+		{
+			return $bindings->make( 'auth.password' )->broker();
+		} );
 	}
 
 	/**

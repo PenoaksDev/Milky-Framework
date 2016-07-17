@@ -49,6 +49,48 @@ if ( !function_exists( 'append_config' ) )
 	}
 }
 
+if ( !function_exists( 'args_with_keys' ) )
+{
+	/**
+	 * Match an array of values with the method variable names
+	 *
+	 * @param $method
+	 * @param $args
+	 * @param bool $includeOptional
+	 * @return mixed
+	 */
+	function args_with_keys( array $args, $class = null, $method = null, $includeOptional = false )
+	{
+		if ( is_null( $class ) || is_null( $method ) )
+		{
+			$trace = debug_backtrace()[1];
+
+			$class = $trace['class'];
+			$method = $trace['function'];
+		}
+
+		$reflection = new \ReflectionMethod( $class, $method );
+
+		if ( count( $args ) < $reflection->getNumberOfRequiredParameters() )
+			throw new \RuntimeException( "Something went wrong! We had less than the required number of parameters." );
+
+		foreach ( $reflection->getParameters() as $param )
+		{
+			if ( isset( $args[$param->getPosition()] ) )
+			{
+				$args[$param->getName()] = $args[$param->getPosition()];
+				unset( $args[$param->getPosition()] );
+			}
+			else if ( $includeOptional && $param->isOptional() )
+			{
+				$args[$param->getName()] = $param->getDefaultValue();
+			}
+		}
+
+		return $args;
+	}
+}
+
 if ( !function_exists( 'array_add' ) )
 {
 	/**
@@ -1508,7 +1550,7 @@ if ( !function_exists( 'info' ) )
 if ( !function_exists( 'logger' ) )
 {
 	/**
-	 * Log a debug message to the logs.
+	 * Logging a debug message to the logs.
 	 *
 	 * @param  string $message
 	 * @param  array $context

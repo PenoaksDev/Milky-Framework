@@ -1,8 +1,8 @@
 <?php
 namespace Penoaks\Providers;
 
+use Penoaks\Barebones\ServiceProvider;
 use Penoaks\Support\Composer;
-use Penoaks\Support\ServiceProvider;
 
 /**
  * The MIT License (MIT)
@@ -28,10 +28,10 @@ class ComposerServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->fw->bindings->singleton('composer', function ($fw)
-{
-			return new Composer($fw->bindings['files'], $fw->basePath());
-		});
+		$this->bindings->singleton( 'composer', function ( $bindings )
+		{
+			return new Composer( $bindings['files'], $bindings->basePath() );
+		} );
 	}
 
 	/**

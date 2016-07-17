@@ -3,6 +3,7 @@ namespace Penoaks\Barebones;
 
 use Exception;
 use Penoaks\Events\Runlevel;
+use Penoaks\Facades\Request;
 use Penoaks\Framework;
 use Penoaks\Framework\Env;
 use Penoaks\Routing\Pipeline;
@@ -108,19 +109,16 @@ abstract class Kernel
 		try
 		{
 			$request->enableHttpMethodParameterOverride();
-
 			$response = $this->sendRequestThroughRouter( $request );
 		}
 		catch ( Exception $e )
 		{
 			$this->fw->reportException( $e );
-
 			$response = $this->fw->renderException( $request, $e );
 		}
 		catch ( Throwable $e )
 		{
 			$this->fw->reportException( $e = new FatalThrowableError( $e ) );
-
 			$response = $this->fw->renderException( $request, $e );
 		}
 
@@ -138,7 +136,7 @@ abstract class Kernel
 	protected function sendRequestThroughRouter( $request )
 	{
 		$this->fw->bindings->instance( 'request', $request );
-		Facade::clearResolvedInstance( 'request' );
+		Request::__reset();
 
 		return ( new Pipeline( $this->fw->bindings ) )->send( $request )->through( $this->fw->shouldSkipMiddleware() ? [] : $this->middleware )->then( $this->dispatchToRouter() );
 	}

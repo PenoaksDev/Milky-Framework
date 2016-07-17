@@ -1,17 +1,13 @@
 <?php
-
 namespace Penoaks\Http;
 
-use Penoaks\Http\Request;
-use Penoaks\Http\Response;
-use Penoaks\Http\JsonResponse;
-use Penoaks\Routing\Redirector;
-use Penoaks\Framework;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Contracts\Validation\Factory as ValidationFactory;
+use Penoaks\Contracts\Validation\ValidatesWhenResolved;
 use Penoaks\Contracts\Validation\Validator;
 use Penoaks\Http\Exception\HttpResponseException;
+use Penoaks\Routing\Redirector;
 use Penoaks\Validation\ValidatesWhenResolvedTrait;
-use Penoaks\Contracts\Validation\ValidatesWhenResolved;
-use Penoaks\Contracts\Validation\Factory as ValidationFactory;
 
 class FormRequest extends Request implements ValidatesWhenResolved
 {
@@ -73,16 +69,17 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	 */
 	protected function getValidatorInstance()
 	{
-		$factory = $this->bindings->make(ValidationFactory::class);
+		$factory = $this->bindings->make( ValidationFactory::class );
 
-		if (method_exists($this, 'validator'))
-{
-			return $this->bindings->call([$this, 'validator'], compact('factory'));
+		if ( method_exists( $this, 'validator' ) )
+		{
+			return $this->bindings->call( [$this, 'validator'], compact( 'factory' ) );
 		}
 
-		return $factory->make(
-			$this->validationData(), $this->bindings->call([$this, 'rules']), $this->messages(), $this->attributes()
-		);
+		return $factory->make( $this->validationData(), $this->bindings->call( [
+			$this,
+			'rules'
+		] ), $this->messages(), $this->attributes() );
 	}
 
 	/**
@@ -98,16 +95,14 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	/**
 	 * Handle a failed validation attempt.
 	 *
-	 * @param  \Penoaks\Contracts\Validation\Validator  $validator
+	 * @param  \Penoaks\Contracts\Validation\Validator $validator
 	 * @return void
 	 *
 	 * @throws \Penoaks\Http\Exception\HttpResponseException
 	 */
-	protected function failedValidation(Validator $validator)
+	protected function failedValidation( Validator $validator )
 	{
-		throw new HttpResponseException($this->response(
-			$this->formatErrors($validator)
-		));
+		throw new HttpResponseException( $this->response( $this->formatErrors( $validator ) ) );
 	}
 
 	/**
@@ -117,9 +112,9 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	 */
 	protected function passesAuthorization()
 	{
-		if (method_exists($this, 'authorize'))
-{
-			return $this->bindings->call([$this, 'authorize']);
+		if ( method_exists( $this, 'authorize' ) )
+		{
+			return $this->bindings->call( [$this, 'authorize'] );
 		}
 
 		return false;
@@ -134,25 +129,23 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	 */
 	protected function failedAuthorization()
 	{
-		throw new HttpResponseException($this->forbiddenResponse());
+		throw new HttpResponseException( $this->forbiddenResponse() );
 	}
 
 	/**
 	 * Get the proper failed validation response for the request.
 	 *
-	 * @param  array  $errors
+	 * @param  array $errors
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
-	public function response(array $errors)
+	public function response( array $errors )
 	{
-		if (($this->ajax() && ! $this->pjax()) || $this->wantsJson())
-{
-			return new JsonResponse($errors, 422);
+		if ( ( $this->ajax() && !$this->pjax() ) || $this->wantsJson() )
+		{
+			return new JsonResponse( $errors, 422 );
 		}
 
-		return $this->redirector->to($this->getRedirectUrl())
-										->withInput($this->except($this->dontFlash))
-										->withErrors($errors, $this->errorBag);
+		return $this->redirector->to( $this->getRedirectUrl() )->withInput( $this->except( $this->dontFlash ) )->withErrors( $errors, $this->errorBag );
 	}
 
 	/**
@@ -162,16 +155,16 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	 */
 	public function forbiddenResponse()
 	{
-		return new Response('Forbidden', 403);
+		return new Response( 'Forbidden', 403 );
 	}
 
 	/**
 	 * Format the errors from the given Validator instance.
 	 *
-	 * @param  \Penoaks\Contracts\Validation\Validator  $validator
+	 * @param  \Penoaks\Contracts\Validation\Validator $validator
 	 * @return array
 	 */
-	protected function formatErrors(Validator $validator)
+	protected function formatErrors( Validator $validator )
 	{
 		return $validator->getMessageBag()->toArray();
 	}
@@ -185,17 +178,17 @@ class FormRequest extends Request implements ValidatesWhenResolved
 	{
 		$url = $this->redirector->getUrlGenerator();
 
-		if ($this->redirect)
-{
-			return $url->to($this->redirect);
+		if ( $this->redirect )
+		{
+			return $url->to( $this->redirect );
 		}
-elseif ($this->redirectRoute)
-{
-			return $url->route($this->redirectRoute);
+		elseif ( $this->redirectRoute )
+		{
+			return $url->route( $this->redirectRoute );
 		}
-elseif ($this->redirectAction)
-{
-			return $url->action($this->redirectAction);
+		elseif ( $this->redirectAction )
+		{
+			return $url->action( $this->redirectAction );
 		}
 
 		return $url->previous();
@@ -204,10 +197,10 @@ elseif ($this->redirectAction)
 	/**
 	 * Set the Redirector instance.
 	 *
-	 * @param  \Penoaks\Routing\Redirector  $redirector
+	 * @param  \Penoaks\Routing\Redirector $redirector
 	 * @return $this
 	 */
-	public function setRedirector(Redirector $redirector)
+	public function setRedirector( Redirector $redirector )
 	{
 		$this->redirector = $redirector;
 
@@ -217,10 +210,10 @@ elseif ($this->redirectAction)
 	/**
 	 * Set the bindings implementation.
 	 *
-	 * @param  \Penoaks\Framework  $bindings
+	 * @param  \Penoaks\Framework $bindings
 	 * @return $this
 	 */
-	public function setBindings(Bindings $bindings)
+	public function setBindings( Bindings $bindings )
 	{
 		$this->bindings = $bindings;
 

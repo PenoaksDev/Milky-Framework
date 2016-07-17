@@ -1,9 +1,16 @@
 <?php
-
 namespace Penoaks\Filesystem;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class FilesystemServiceProvider extends ServiceProvider
 {
 	/**
@@ -25,10 +32,10 @@ class FilesystemServiceProvider extends ServiceProvider
 	 */
 	protected function registerNativeFilesystem()
 	{
-		$this->fw->bindings->singleton('files', function ()
-{
+		$this->bindings->singleton( 'files', function ()
+		{
 			return new Filesystem;
-		});
+		} );
 	}
 
 	/**
@@ -40,15 +47,15 @@ class FilesystemServiceProvider extends ServiceProvider
 	{
 		$this->registerManager();
 
-		$this->fw->bindings->singleton('filesystem.disk', function ()
-{
-			return $this->fw->bindings['filesystem']->disk($this->getDefaultDriver());
-		});
+		$this->bindings->singleton( 'filesystem.disk', function ()
+		{
+			return $this->bindings['filesystem']->disk( $this->getDefaultDriver() );
+		} );
 
-		$this->fw->bindings->singleton('filesystem.cloud', function ()
-{
-			return $this->fw->bindings['filesystem']->disk($this->getCloudDriver());
-		});
+		$this->bindings->singleton( 'filesystem.cloud', function ()
+		{
+			return $this->bindings['filesystem']->disk( $this->getCloudDriver() );
+		} );
 	}
 
 	/**
@@ -58,10 +65,10 @@ class FilesystemServiceProvider extends ServiceProvider
 	 */
 	protected function registerManager()
 	{
-		$this->fw->bindings->singleton('filesystem', function ()
-{
-			return new FilesystemManager($this->fw);
-		});
+		$this->bindings->singleton( 'filesystem', function ()
+		{
+			return new FilesystemManager( $this->fw );
+		} );
 	}
 
 	/**
@@ -71,7 +78,7 @@ class FilesystemServiceProvider extends ServiceProvider
 	 */
 	protected function getDefaultDriver()
 	{
-		return $this->fw->bindings['config']['filesystems.default'];
+		return $this->bindings['config']['filesystems.default'];
 	}
 
 	/**
@@ -81,6 +88,6 @@ class FilesystemServiceProvider extends ServiceProvider
 	 */
 	protected function getCloudDriver()
 	{
-		return $this->fw->bindings['config']['filesystems.cloud'];
+		return $this->bindings['config']['filesystems.cloud'];
 	}
 }

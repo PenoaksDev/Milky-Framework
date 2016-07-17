@@ -2,8 +2,8 @@
 
 namespace Penoaks\Cache;
 
-use Penoaks\Support\ServiceProvider;
 use Penoaks\Cache\Console\ClearCommand;
+use Penoaks\Barebones\ServiceProvider;
 
 class CacheServiceProvider extends ServiceProvider
 {
@@ -21,20 +21,20 @@ class CacheServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->fw->bindings->singleton('cache', function ($fw)
-{
-			return new CacheManager($fw);
-		});
+		$this->bindings->singleton( 'cache', function ( $bindings )
+		{
+			return new CacheManager( $bindings );
+		} );
 
-		$this->fw->bindings->singleton('cache.store', function ($fw)
-{
-			return $fw->bindings['cache']->driver();
-		});
+		$this->bindings->singleton( 'cache.store', function ( $bindings )
+		{
+			return $bindings['cache']->driver();
+		} );
 
-		$this->fw->bindings->singleton('memcached.connector', function ()
-{
+		$this->bindings->singleton( 'memcached.connector', function ()
+		{
 			return new MemcachedConnector;
-		});
+		} );
 
 		$this->registerCommands();
 	}
@@ -46,12 +46,12 @@ class CacheServiceProvider extends ServiceProvider
 	 */
 	public function registerCommands()
 	{
-		$this->fw->bindings->singleton('command.cache.clear', function ($fw)
-{
-			return new ClearCommand($fw->bindings['cache']);
-		});
+		$this->bindings->singleton( 'command.cache.clear', function ( $bindings )
+		{
+			return new ClearCommand( $bindings['cache'] );
+		} );
 
-		$this->commands('command.cache.clear');
+		$this->commands( 'command.cache.clear' );
 	}
 
 	/**
@@ -62,7 +62,10 @@ class CacheServiceProvider extends ServiceProvider
 	public function provides()
 	{
 		return [
-			'cache', 'cache.store', 'memcached.connector', 'command.cache.clear',
+			'cache',
+			'cache.store',
+			'memcached.connector',
+			'command.cache.clear',
 		];
 	}
 }

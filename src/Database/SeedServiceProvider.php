@@ -1,10 +1,17 @@
 <?php
-
 namespace Penoaks\Database;
 
-use Penoaks\Support\ServiceProvider;
+use Penoaks\Barebones\ServiceProvider;
 use Penoaks\Database\Console\Seeds\SeedCommand;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class SeedServiceProvider extends ServiceProvider
 {
 	/**
@@ -21,14 +28,14 @@ class SeedServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->fw->bindings->singleton('seeder', function ()
-{
+		/*$this->bindings->singleton( 'seeder', function ()
+		{
 			return new Seeder;
-		});
+		} );*/
 
 		$this->registerSeedCommand();
 
-		$this->commands('command.seed');
+		$this->commands( 'command.seed' );
 	}
 
 	/**
@@ -38,10 +45,10 @@ class SeedServiceProvider extends ServiceProvider
 	 */
 	protected function registerSeedCommand()
 	{
-		$this->fw->bindings->singleton('command.seed', function ($fw)
-{
-			return new SeedCommand($fw->bindings['db']);
-		});
+		$this->bindings->singleton( 'command.seed', function ( $fw )
+		{
+			return new SeedCommand( $fw->bindings['db'] );
+		} );
 	}
 
 	/**

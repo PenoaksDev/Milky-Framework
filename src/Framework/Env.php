@@ -2,14 +2,18 @@
 namespace Penoaks\Framework;
 
 use Closure;
+use ArrayAccess;
 use Penoaks\Bindings\Bindings;
 use Penoaks\Events\EnvMissingEvent;
 use Penoaks\Support\Arr;
 use Penoaks\Support\Str;
 
-class Env implements \ArrayAccess
+class Env implements ArrayAccess
 {
-	use \Penoaks\Traits\StaticAccess;
+	/**
+	 * @var Env
+	 */
+	private static $selfInstance;
 
 	/**
 	 * Holds environment variables
@@ -29,19 +33,19 @@ class Env implements \ArrayAccess
 		$this->variables = $params;
 	}
 
+	public static function  i()
+	{
+		return static::$selfInstance;
+	}
+
 	public function set( $params, $value = null )
 	{
-		if ( static::wasStatic() )
-			static::__callStatic( __METHOD__, func_get_args() );
-		else
-		{
 			if ( is_array( $params ) )
 				$this->variables = array_merge_recursive( $this->variables, $params );
 			else if ( is_null( $value ) )
 				unset( $this->variables[$params] );
 			else
 				$this->variables[$params] = $value;
-		}
 	}
 
 	/**
@@ -104,13 +108,8 @@ class Env implements \ArrayAccess
 	 */
 	public function detect( Closure $callback, $consoleArgs = null )
 	{
-		if ( static::wasStatic() )
-			return static::__callStatic( __METHOD__, func_get_args() );
-
 		if ( $consoleArgs )
-		{
 			return $this->detectConsoleEnvironment( $callback, $consoleArgs );
-		}
 
 		return $this->detectWebEnvironment( $callback );
 	}
@@ -123,9 +122,6 @@ class Env implements \ArrayAccess
 	 */
 	protected function detectWebEnvironment( Closure $callback )
 	{
-		if ( static::wasStatic() )
-			return static::__callStatic( __METHOD__, func_get_args() );
-
 		return call_user_func( $callback );
 	}
 
@@ -138,9 +134,6 @@ class Env implements \ArrayAccess
 	 */
 	protected function detectConsoleEnvironment( Closure $callback, array $args )
 	{
-		if ( static::wasStatic() )
-			return static::__callStatic( __METHOD__, func_get_args() );
-
 		// First we will check if an environment argument was passed via console arguments
 		// and if it was that automatically overrides as the environment. Otherwise, we
 		// will check the environment as a "web" request like a typical HTTP request.
@@ -160,9 +153,6 @@ class Env implements \ArrayAccess
 	 */
 	protected function getEnvironmentArgument( array $args )
 	{
-		if ( static::wasStatic() )
-			return static::__callStatic( __METHOD__, func_get_args() );
-
 		return Arr::first( $args, function ( $k, $v )
 		{
 			return Str::startsWith( $v, '--env' );

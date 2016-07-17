@@ -1,21 +1,27 @@
 <?php
-
 namespace Penoaks\Queue;
 
-use IlluminateQueueClosure;
-use Penoaks\Support\ServiceProvider;
-use Penoaks\Queue\Console\WorkCommand;
+use Penoaks\Barebones\ServiceProvider;
+use Penoaks\Queue\Connectors\BeanstalkdConnector;
+use Penoaks\Queue\Connectors\DatabaseConnector;
+use Penoaks\Queue\Connectors\NullConnector;
+use Penoaks\Queue\Connectors\RedisConnector;
+use Penoaks\Queue\Connectors\SqsConnector;
+use Penoaks\Queue\Connectors\SyncConnector;
 use Penoaks\Queue\Console\ListenCommand;
 use Penoaks\Queue\Console\RestartCommand;
-use Penoaks\Queue\Connectors\SqsConnector;
-use Penoaks\Queue\Connectors\NullConnector;
-use Penoaks\Queue\Connectors\SyncConnector;
-use Penoaks\Queue\Connectors\RedisConnector;
-use Penoaks\Queue\Failed\NullFailedJobProvider;
-use Penoaks\Queue\Connectors\DatabaseConnector;
-use Penoaks\Queue\Connectors\BeanstalkdConnector;
+use Penoaks\Queue\Console\WorkCommand;
 use Penoaks\Queue\Failed\DatabaseFailedJobProvider;
+use Penoaks\Queue\Failed\NullFailedJobProvider;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class QueueServiceProvider extends ServiceProvider
 {
 	/**
@@ -50,22 +56,22 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerManager()
 	{
-		$this->fw->bindings->singleton('queue', function ($fw)
-{
+		$this->bindings->singleton( 'queue', function ( $bindings )
+		{
 			// Once we have an instance of the queue manager, we will register the various
 			// resolvers for the queue connectors. These connectors are responsible for
 			// creating the classes that accept queue configs and instantiate queues.
-			$manager = new QueueManager($fw);
+			$manager = new QueueManager( $bindings );
 
-			$this->registerConnectors($manager);
+			$this->registerConnectors( $manager );
 
 			return $manager;
-		});
+		} );
 
-		$this->fw->bindings->singleton('queue.connection', function ($fw)
-{
-			return $fw->bindings['queue']->connection();
-		});
+		$this->bindings->singleton( 'queue.connection', function ( $bindings )
+		{
+			return $bindings['queue']->connection();
+		} );
 	}
 
 	/**
@@ -79,10 +85,10 @@ class QueueServiceProvider extends ServiceProvider
 
 		$this->registerRestartCommand();
 
-		$this->fw->bindings->singleton('queue.worker', function ($fw)
-{
-			return new Worker($fw->bindings['queue'], $fw->bindings['queue.failer'], $fw->bindings['events']);
-		});
+		$this->bindings->singleton( 'queue.worker', function ( $bindings )
+		{
+			return new Worker( $bindings['queue'], $bindings['queue.failer'], $bindings['events'] );
+		} );
 	}
 
 	/**
@@ -92,12 +98,12 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerWorkCommand()
 	{
-		$this->fw->bindings->singleton('command.queue.work', function ($fw)
-{
-			return new WorkCommand($fw->bindings['queue.worker']);
-		});
+		$this->bindings->singleton( 'command.queue.work', function ( $bindings )
+		{
+			return new WorkCommand( $bindings['queue.worker'] );
+		} );
 
-		$this->commands('command.queue.work');
+		$this->commands( 'command.queue.work' );
 	}
 
 	/**
@@ -109,10 +115,10 @@ class QueueServiceProvider extends ServiceProvider
 	{
 		$this->registerListenCommand();
 
-		$this->fw->bindings->singleton('queue.listener', function ($fw)
-{
-			return new Listener($fw->basePath());
-		});
+		$this->bindings->singleton( 'queue.listener', function ( $bindings )
+		{
+			return new Listener( $bindings->basePath() );
+		} );
 	}
 
 	/**
@@ -122,12 +128,12 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerListenCommand()
 	{
-		$this->fw->bindings->singleton('command.queue.listen', function ($fw)
-{
-			return new ListenCommand($fw->bindings['queue.listener']);
-		});
+		$this->bindings->singleton( 'command.queue.listen', function ( $bindings )
+		{
+			return new ListenCommand( $bindings['queue.listener'] );
+		} );
 
-		$this->commands('command.queue.listen');
+		$this->commands( 'command.queue.listen' );
 	}
 
 	/**
@@ -137,112 +143,112 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	public function registerRestartCommand()
 	{
-		$this->fw->bindings->singleton('command.queue.restart', function ()
-{
+		$this->bindings->singleton( 'command.queue.restart', function ()
+		{
 			return new RestartCommand;
-		});
+		} );
 
-		$this->commands('command.queue.restart');
+		$this->commands( 'command.queue.restart' );
 	}
 
 	/**
 	 * Register the connectors on the queue manager.
 	 *
-	 * @param  \Penoaks\Queue\QueueManager  $manager
+	 * @param  \Penoaks\Queue\QueueManager $manager
 	 * @return void
 	 */
-	public function registerConnectors($manager)
+	public function registerConnectors( $manager )
 	{
-		foreach (['Null', 'Sync', 'Database', 'Beanstalkd', 'Redis', 'Sqs'] as $connector)
-{
-			$this->{"register{$connector}Connector"}($manager);
+		foreach ( ['Null', 'Sync', 'Database', 'Beanstalkd', 'Redis', 'Sqs'] as $connector )
+		{
+			$this->{"register{$connector}Connector"}( $manager );
 		}
 	}
 
 	/**
 	 * Register the Null queue connector.
 	 *
-	 * @param  \Penoaks\Queue\QueueManager  $manager
+	 * @param  \Penoaks\Queue\QueueManager $manager
 	 * @return void
 	 */
-	protected function registerNullConnector($manager)
+	protected function registerNullConnector( $manager )
 	{
-		$manager->addConnector('null', function ()
-{
+		$manager->addConnector( 'null', function ()
+		{
 			return new NullConnector;
-		});
+		} );
 	}
 
 	/**
 	 * Register the Sync queue connector.
 	 *
-	 * @param  \Penoaks\Queue\QueueManager  $manager
+	 * @param  \Penoaks\Queue\QueueManager $manager
 	 * @return void
 	 */
-	protected function registerSyncConnector($manager)
+	protected function registerSyncConnector( $manager )
 	{
-		$manager->addConnector('sync', function ()
-{
+		$manager->addConnector( 'sync', function ()
+		{
 			return new SyncConnector;
-		});
+		} );
 	}
 
 	/**
 	 * Register the Beanstalkd queue connector.
 	 *
-	 * @param  \Penoaks\Queue\QueueManager  $manager
+	 * @param  \Penoaks\Queue\QueueManager $manager
 	 * @return void
 	 */
-	protected function registerBeanstalkdConnector($manager)
+	protected function registerBeanstalkdConnector( $manager )
 	{
-		$manager->addConnector('beanstalkd', function ()
-{
+		$manager->addConnector( 'beanstalkd', function ()
+		{
 			return new BeanstalkdConnector;
-		});
+		} );
 	}
 
 	/**
 	 * Register the database queue connector.
 	 *
-	 * @param  \Penoaks\Queue\QueueManager  $manager
+	 * @param  \Penoaks\Queue\QueueManager $manager
 	 * @return void
 	 */
-	protected function registerDatabaseConnector($manager)
+	protected function registerDatabaseConnector( $manager )
 	{
-		$manager->addConnector('database', function ()
-{
-			return new DatabaseConnector($this->fw->bindings['db']);
-		});
+		$manager->addConnector( 'database', function ()
+		{
+			return new DatabaseConnector( $this->bindings['db'] );
+		} );
 	}
 
 	/**
 	 * Register the Redis queue connector.
 	 *
-	 * @param  \Penoaks\Queue\QueueManager  $manager
+	 * @param  \Penoaks\Queue\QueueManager $manager
 	 * @return void
 	 */
-	protected function registerRedisConnector($manager)
+	protected function registerRedisConnector( $manager )
 	{
-		$fw = $this->fw;
+		$bindings = $this->fw;
 
-		$manager->addConnector('redis', function () use ($fw)
-{
-			return new RedisConnector($fw->bindings['redis']);
-		});
+		$manager->addConnector( 'redis', function () use ( $bindings )
+		{
+			return new RedisConnector( $bindings['redis'] );
+		} );
 	}
 
 	/**
 	 * Register the Amazon SQS queue connector.
 	 *
-	 * @param  \Penoaks\Queue\QueueManager  $manager
+	 * @param  \Penoaks\Queue\QueueManager $manager
 	 * @return void
 	 */
-	protected function registerSqsConnector($manager)
+	protected function registerSqsConnector( $manager )
 	{
-		$manager->addConnector('sqs', function ()
-{
+		$manager->addConnector( 'sqs', function ()
+		{
 			return new SqsConnector;
-		});
+		} );
 	}
 
 	/**
@@ -252,19 +258,19 @@ class QueueServiceProvider extends ServiceProvider
 	 */
 	protected function registerFailedJobServices()
 	{
-		$this->fw->bindings->singleton('queue.failer', function ($fw)
-{
-			$config = $fw->bindings['config']['queue.failed'];
+		$this->bindings->singleton( 'queue.failer', function ( $bindings )
+		{
+			$config = $bindings['config']['queue.failed'];
 
-			if (isset($config['table']))
-{
-				return new DatabaseFailedJobProvider($fw->bindings['db'], $config['database'], $config['table']);
+			if ( isset( $config['table'] ) )
+			{
+				return new DatabaseFailedJobProvider( $bindings['db'], $config['database'], $config['table'] );
 			}
-else
-{
+			else
+			{
 				return new NullFailedJobProvider;
 			}
-		});
+		} );
 	}
 
 	/**
@@ -274,10 +280,10 @@ else
 	 */
 	protected function registerQueueClosure()
 	{
-		$this->fw->bindings->singleton('IlluminateQueueClosure', function ($fw)
-{
-			return new IlluminateQueueClosure($fw->bindings['encrypter']);
-		});
+		$this->bindings->singleton( 'IlluminateQueueClosure', function ( $bindings )
+		{
+			return new IlluminateQueueClosure( $bindings['encrypter'] );
+		} );
 	}
 
 	/**
@@ -288,9 +294,14 @@ else
 	public function provides()
 	{
 		return [
-			'queue', 'queue.worker', 'queue.listener', 'queue.failer',
-			'command.queue.work', 'command.queue.listen',
-			'command.queue.restart', 'queue.connection',
+			'queue',
+			'queue.worker',
+			'queue.listener',
+			'queue.failer',
+			'command.queue.work',
+			'command.queue.listen',
+			'command.queue.restart',
+			'queue.connection',
 		];
 	}
 }

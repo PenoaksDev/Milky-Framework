@@ -1,10 +1,16 @@
 <?php
-
 namespace Penoaks\Database;
 
 use Penoaks\Console\Command;
-use Penoaks\Framework;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 abstract class Seeder
 {
 	/**
@@ -31,41 +37,41 @@ abstract class Seeder
 	/**
 	 * Seed the given connection from the given path.
 	 *
-	 * @param  string  $class
+	 * @param  string $class
 	 * @return void
 	 */
-	public function call($class)
+	public function call( $class )
 	{
-		$this->resolve($class)->run();
+		$this->resolve( $class )->run();
 
-		if (isset($this->command))
-{
-			$this->command->getOutput()->writeln("<info>Seeded:</info> $class");
+		if ( isset( $this->command ) )
+		{
+			$this->command->getOutput()->writeln( "<info>Seeded:</info> $class" );
 		}
 	}
 
 	/**
 	 * Resolve an instance of the given seeder class.
 	 *
-	 * @param  string  $class
+	 * @param  string $class
 	 * @return \Penoaks\Database\Seeder
 	 */
-	protected function resolve($class)
+	protected function resolve( $class )
 	{
-		if (isset($this->bindings))
-{
-			$instance = $this->bindings->make($class);
+		if ( isset( $this->bindings ) )
+		{
+			$instance = $this->bindings->make( $class );
 
-			$instance->setBindings($this->bindings);
+			$instance->setBindings( $this->bindings );
 		}
-else
-{
+		else
+		{
 			$instance = new $class;
 		}
 
-		if (isset($this->command))
-{
-			$instance->setCommand($this->command);
+		if ( isset( $this->command ) )
+		{
+			$instance->setCommand( $this->command );
 		}
 
 		return $instance;
@@ -74,10 +80,10 @@ else
 	/**
 	 * Set the IoC bindings instance.
 	 *
-	 * @param  \Penoaks\Framework  $bindings
+	 * @param  \Penoaks\Framework $bindings
 	 * @return $this
 	 */
-	public function setBindings(Bindings $bindings)
+	public function setBindings( Bindings $bindings )
 	{
 		$this->bindings = $bindings;
 
@@ -87,10 +93,10 @@ else
 	/**
 	 * Set the console command instance.
 	 *
-	 * @param  \Penoaks\Console\Command  $command
+	 * @param  \Penoaks\Console\Command $command
 	 * @return $this
 	 */
-	public function setCommand(Command $command)
+	public function setCommand( Command $command )
 	{
 		$this->command = $command;
 

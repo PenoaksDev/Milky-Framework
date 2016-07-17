@@ -5,7 +5,7 @@ namespace Penoaks\Queue\Failed;
 class NullFailedJobProvider implements FailedJobProviderInterface
 {
 	/**
-	 * Log a failed job into storage.
+	 * Logging a failed job into storage.
 	 *
 	 * @param  string  $connection
 	 * @param  string  $queue

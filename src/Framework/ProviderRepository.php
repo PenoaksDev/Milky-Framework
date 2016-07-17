@@ -1,5 +1,16 @@
 <?php
-namespace Foundation;
+namespace Penoaks\Framework;
+
+use Penoaks\Barebones\BaseArray;
+use Penoaks\Barebones\ServiceProvider;
+use Penoaks\Bindings\Bindings;
+use Penoaks\Events\Runlevel;
+use Penoaks\Events\ServiceProviderAddEvent;
+use Penoaks\Facades\Bindings as B;
+use Penoaks\Facades\Events;
+use Penoaks\Framework;
+use Penoaks\Framework as ApplicationContract;
+use Psy\Exception\RuntimeException;
 
 /**
  * The MIT License (MIT)
@@ -9,48 +20,14 @@ namespace Foundation;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-
-use Penoaks\Barebones\ServiceProvider;
-use Penoaks\Filesystem\Filesystem;
-use Penoaks\Framework as ApplicationContract;
-
-class ProviderRepository
+class ProviderRepository extends BaseArray
 {
 	/**
-	 * The application implementation.
+	 * Was the providers already booted?
 	 *
-	 * @var Framework
+	 * @var bool
 	 */
-	protected $fw;
-
-	/**
-	 * The filesystem instance.
-	 *
-	 * @var Filesystem
-	 */
-	protected $files;
-
-	/**
-	 * The path to the manifest file.
-	 *
-	 * @var string
-	 */
-	protected $manifestPath;
-
-	/**
-	 * Create a new service repository instance.
-	 *
-	 * @param  \Penoaks\Framework $fw
-	 * @param  \Penoaks\Filesystem\Filesystem $files
-	 * @param  string $manifestPath
-	 * @return void
-	 */
-	public function __construct( Framework $fw, Filesystem $files, $manifestPath )
-	{
-		$this->fw = $fw;
-		$this->files = $files;
-		$this->manifestPath = $manifestPath;
-	}
+	private $isBooted = false;
 
 	/**
 	 * Register the application service providers.
@@ -193,6 +170,7 @@ class ProviderRepository
 				return array_merge( ['when' => []], $manifest );
 			}
 		}
+
 		return null;
 	}
 
@@ -218,5 +196,82 @@ class ProviderRepository
 	protected function freshManifest( array $providers )
 	{
 		return ['providers' => $providers, 'eager' => [], 'deferred' => []];
+	}
+
+	/**
+	 * Internal method for calling events
+	 *
+	 * @param $method
+	 * @param $key
+	 * @param null $value
+	 */
+	protected function onCall( $method, $key, &$value = null )
+	{
+		if ( $method == 'addAll' )
+			$values = &$value;
+		else if ( $method == 'add' )
+			$values = [$key => &$value];
+		else
+			return false;
+
+		array_walk( $values, function ( &$value, &$key )
+		{
+			if ( is_string( $value ) )
+			{
+				$key = $value;
+				$value = Bindings::i()->make( $value );
+			}
+			else if ( $value instanceof ServiceProvider )
+				$key = get_class( $value );
+			else
+				throw new RuntimeException( "Provides must be a string or an instance of " . ServiceProvider::class );
+
+			array_walk( $this->arr, function ( $value, $arrKey ) use ( $key )
+			{
+				if ( $arrKey instanceof $key )
+					throw new RuntimeException( "Service Provider " . $key . " is already registered." );
+			} );
+
+			/* Make instance of service provider available in the bindings, if it provides an alias key */
+			if ( property_exists( $value, 'alias' ) )
+				Bindings::i()->instance( $value->alias, $value );
+
+			if ( method_exists( $value, 'register' ) )
+				Bindings::i()->call( [$value, 'register'] );
+
+			// If the application has already booted, we will call this boot method on
+			// the provider class so it has an opportunity to do its boot logic and
+			// will be ready for any usage by the developer's application logic.
+			if ( $this->isBooted )
+				if ( method_exists( $value, 'boot' ) )
+					Bindings::i()->call( [$value, 'boot'] );
+
+			Events::fire( new ServiceProviderAddEvent( $value ) );
+
+			Events::listenEvents( $value );
+
+			$value = new ProviderWrapper( $value );
+			$value->loaded = true;
+
+			$this->arr[$key] = $value;
+		} );
+
+		return true; // Returning true cancels the add
+	}
+
+	public function bootProviders()
+	{
+		if ( !Framework::i()->isRunlevel( Runlevel::BOOT ) )
+			return;
+
+		$this->isBooted = true;
+
+		array_walk( $this->arr, function ( $value, $key )
+		{
+			if ( !is_object( $value ) )
+				throw new RuntimeException( "There was a problem, the provider is not an object." );
+			if ( method_exists( $value, 'boot' ) )
+				B::call( [$value, 'boot'] );
+		} );
 	}
 }

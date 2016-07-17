@@ -1,19 +1,26 @@
 <?php
-
 namespace Penoaks\Database;
 
-use Penoaks\Support\ServiceProvider;
-use Penoaks\Database\Migrations\Migrator;
-use Penoaks\Database\Migrations\MigrationCreator;
-use Penoaks\Database\Console\Migrations\ResetCommand;
-use Penoaks\Database\Console\Migrations\StatusCommand;
+use Penoaks\Barebones\ServiceProvider;
 use Penoaks\Database\Console\Migrations\InstallCommand;
 use Penoaks\Database\Console\Migrations\MigrateCommand;
-use Penoaks\Database\Console\Migrations\RefreshCommand;
-use Penoaks\Database\Console\Migrations\RollbackCommand;
 use Penoaks\Database\Console\Migrations\MigrateMakeCommand;
+use Penoaks\Database\Console\Migrations\RefreshCommand;
+use Penoaks\Database\Console\Migrations\ResetCommand;
+use Penoaks\Database\Console\Migrations\RollbackCommand;
+use Penoaks\Database\Console\Migrations\StatusCommand;
 use Penoaks\Database\Migrations\DatabaseMigrationRepository;
+use Penoaks\Database\Migrations\MigrationCreator;
+use Penoaks\Database\Migrations\Migrator;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class MigrationServiceProvider extends ServiceProvider
 {
 	/**
@@ -49,12 +56,12 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerRepository()
 	{
-		$this->fw->bindings->singleton('migration.repository', function ($fw)
-{
-			$table = $fw->bindings['config']['database.migrations'];
+		$this->bindings->singleton( 'migration.repository', function ( $bindings )
+		{
+			$table = $bindings['config']['database.migrations'];
 
-			return new DatabaseMigrationRepository($fw->bindings['db'], $table);
-		});
+			return new DatabaseMigrationRepository( $bindings['db'], $table );
+		} );
 	}
 
 	/**
@@ -67,12 +74,12 @@ class MigrationServiceProvider extends ServiceProvider
 		// The migrator is responsible for actually running and rollback the migration
 		// files in the application. We'll pass in our database connection resolver
 		// so the migrator can resolve any of these connections when it needs to.
-		$this->fw->bindings->singleton('migrator', function ($fw)
-{
-			$repository = $fw->bindings['migration.repository'];
+		$this->bindings->singleton( 'migrator', function ( $bindings )
+		{
+			$repository = $bindings['migration.repository'];
 
-			return new Migrator($repository, $fw->bindings['db'], $fw->bindings['files']);
-		});
+			return new Migrator( $repository, $bindings['db'], $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -82,10 +89,10 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerCreator()
 	{
-		$this->fw->bindings->singleton('migration.creator', function ($fw)
-{
-			return new MigrationCreator($fw->bindings['files']);
-		});
+		$this->bindings->singleton( 'migration.creator', function ( $bindings )
+		{
+			return new MigrationCreator( $bindings['files'] );
+		} );
 	}
 
 	/**
@@ -100,20 +107,15 @@ class MigrationServiceProvider extends ServiceProvider
 		// We'll simply spin through the list of commands that are migration related
 		// and register each one of them with an application bindings. They will
 		// be resolved in the Artisan start file and registered on the console.
-		foreach ($commands as $command)
-{
-			$this->{'register'.$command.'Command'}();
+		foreach ( $commands as $command )
+		{
+			$this->{'register' . $command . 'Command'}();
 		}
 
 		// Once the commands are registered in the application IoC bindings we will
 		// register them with the Artisan start event so that these are available
 		// when the Artisan application actually starts up and is getting used.
-		$this->commands(
-			'command.migrate', 'command.migrate.make',
-			'command.migrate.install', 'command.migrate.rollback',
-			'command.migrate.reset', 'command.migrate.refresh',
-			'command.migrate.status'
-		);
+		$this->commands( 'command.migrate', 'command.migrate.make', 'command.migrate.install', 'command.migrate.rollback', 'command.migrate.reset', 'command.migrate.refresh', 'command.migrate.status' );
 	}
 
 	/**
@@ -123,10 +125,10 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerMigrateCommand()
 	{
-		$this->fw->bindings->singleton('command.migrate', function ($fw)
-{
-			return new MigrateCommand($fw->bindings['migrator']);
-		});
+		$this->bindings->singleton( 'command.migrate', function ( $bindings )
+		{
+			return new MigrateCommand( $bindings['migrator'] );
+		} );
 	}
 
 	/**
@@ -136,10 +138,10 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerRollbackCommand()
 	{
-		$this->fw->bindings->singleton('command.migrate.rollback', function ($fw)
-{
-			return new RollbackCommand($fw->bindings['migrator']);
-		});
+		$this->bindings->singleton( 'command.migrate.rollback', function ( $bindings )
+		{
+			return new RollbackCommand( $bindings['migrator'] );
+		} );
 	}
 
 	/**
@@ -149,10 +151,10 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerResetCommand()
 	{
-		$this->fw->bindings->singleton('command.migrate.reset', function ($fw)
-{
-			return new ResetCommand($fw->bindings['migrator']);
-		});
+		$this->bindings->singleton( 'command.migrate.reset', function ( $bindings )
+		{
+			return new ResetCommand( $bindings['migrator'] );
+		} );
 	}
 
 	/**
@@ -162,10 +164,10 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerRefreshCommand()
 	{
-		$this->fw->bindings->singleton('command.migrate.refresh', function ()
-{
+		$this->bindings->singleton( 'command.migrate.refresh', function ()
+		{
 			return new RefreshCommand;
-		});
+		} );
 	}
 
 	/**
@@ -175,17 +177,17 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerMakeCommand()
 	{
-		$this->fw->bindings->singleton('command.migrate.make', function ($fw)
-{
+		$this->bindings->singleton( 'command.migrate.make', function ( $bindings )
+		{
 			// Once we have the migration creator registered, we will create the command
 			// and inject the creator. The creator is responsible for the actual file
 			// creation of the migrations, and may be extended by these developers.
-			$creator = $fw->bindings['migration.creator'];
+			$creator = $bindings['migration.creator'];
 
-			$composer = $fw->bindings['composer'];
+			$composer = $bindings['composer'];
 
-			return new MigrateMakeCommand($creator, $composer);
-		});
+			return new MigrateMakeCommand( $creator, $composer );
+		} );
 	}
 
 	/**
@@ -195,10 +197,10 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerStatusCommand()
 	{
-		$this->fw->bindings->singleton('command.migrate.status', function ($fw)
-{
-			return new StatusCommand($fw->bindings['migrator']);
-		});
+		$this->bindings->singleton( 'command.migrate.status', function ( $bindings )
+		{
+			return new StatusCommand( $bindings['migrator'] );
+		} );
 	}
 
 	/**
@@ -208,10 +210,10 @@ class MigrationServiceProvider extends ServiceProvider
 	 */
 	protected function registerInstallCommand()
 	{
-		$this->fw->bindings->singleton('command.migrate.install', function ($fw)
-{
-			return new InstallCommand($fw->bindings['migration.repository']);
-		});
+		$this->bindings->singleton( 'command.migrate.install', function ( $bindings )
+		{
+			return new InstallCommand( $bindings['migration.repository'] );
+		} );
 	}
 
 	/**
@@ -222,10 +224,15 @@ class MigrationServiceProvider extends ServiceProvider
 	public function provides()
 	{
 		return [
-			'migrator', 'migration.repository', 'command.migrate',
-			'command.migrate.rollback', 'command.migrate.reset',
-			'command.migrate.refresh', 'command.migrate.install',
-			'command.migrate.status', 'migration.creator',
+			'migrator',
+			'migration.repository',
+			'command.migrate',
+			'command.migrate.rollback',
+			'command.migrate.reset',
+			'command.migrate.refresh',
+			'command.migrate.install',
+			'command.migrate.status',
+			'migration.creator',
 			'command.migrate.make',
 		];
 	}

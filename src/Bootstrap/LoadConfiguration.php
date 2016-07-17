@@ -2,8 +2,7 @@
 namespace Penoaks\Bootstrap;
 
 use Penoaks\Barebones\Bootstrap;
-use Penoaks\Config\Repository;
-use Penoaks\Contracts\Config\Repository as RepositoryContract;
+use Penoaks\Config\Config;
 use Penoaks\Framework;
 use Penoaks\Framework\Env;
 use Symfony\Component\Finder\Finder;
@@ -14,10 +13,9 @@ class LoadConfiguration implements Bootstrap
 	/**
 	 * Bootstrap the given application.
 	 *
-	 * @param  \Penoaks\Framework $fw
-	 * @return void
+	 * @param  Framework $fw
 	 */
-	public function bootstrap( Framework $fw )
+	public function boot( Framework $fw )
 	{
 		$items = [];
 
@@ -30,15 +28,13 @@ class LoadConfiguration implements Bootstrap
 			$loadedFromCache = true;
 		}
 
-		$fw->bindings->instance( 'config', $config = new Repository( $items ) );
+		$fw->bindings->instance( 'config', $config = new Config( $items ) );
 
 		// Next we will spin through all of the configuration files in the configuration
 		// directory and load each one into the repository. This will make all of the
 		// options available to the developer for use in various parts of this fw.
 		if ( !isset( $loadedFromCache ) )
-		{
 			$this->loadConfigurationFiles( $fw, $config );
-		}
 
 		$fw->detectEnvironment( function () use ( $config )
 		{
@@ -53,11 +49,10 @@ class LoadConfiguration implements Bootstrap
 	/**
 	 * Load the configuration items from all of the files.
 	 *
-	 * @param  \Penoaks\Framework $fw
-	 * @param  \Penoaks\Contracts\Config\Repository $repository
-	 * @return void
+	 * @param  Framework $fw
+	 * @param  Config $config
 	 */
-	protected function loadConfigurationFiles( Framework $fw, RepositoryContract $repository )
+	protected function loadConfigurationFiles( Framework $fw, Config $config )
 	{
 		$configPath = realpath( Env::get( 'path.config' ) );
 		foreach ( Finder::create()->files()->in( $configPath ) as $file )
@@ -67,15 +62,13 @@ class LoadConfiguration implements Bootstrap
 			try
 			{
 				if ( ends_with( $file->getFilename(), '.yaml' ) )
-					$repository->set( $nesting . basename( $file->getRealPath(), '.yaml' ), Yaml::parse( file_get_contents( $file ) ) );
+					$config->set( $nesting . basename( $file->getRealPath(), '.yaml' ), Yaml::parse( file_get_contents( $file ) ) );
 
 				if ( ends_with( $file->getFilename(), '.json' ) )
-					$repository->set( $nesting . basename( $file->getRealPath(), '.json' ), json_decode( file_get_contents( $file ) ) );
+					$config->set( $nesting . basename( $file->getRealPath(), '.json' ), json_decode( file_get_contents( $file ) ) );
 
 				if ( ends_with( $file->getFilename(), '.php' ) && is_array( $array = include_once( $file->getRealPath() ) ) )
-				{
-					$repository->set( $nesting . basename( $file->getRealPath(), '.php' ), $array );
-				}
+					$config->set( $nesting . basename( $file->getRealPath(), '.php' ), $array );
 			}
 			catch ( \Throwable $e )
 			{
@@ -88,7 +81,7 @@ class LoadConfiguration implements Bootstrap
 	/**
 	 * Get the configuration file nesting path.
 	 *
-	 * @param  \Symfony\Component\Finder\SplFileInfo $file
+	 * @param  SplFileInfo $file
 	 * @param  string $configPath
 	 * @return string
 	 */
@@ -97,9 +90,7 @@ class LoadConfiguration implements Bootstrap
 		$directory = dirname( $file->getRealPath() );
 
 		if ( $tree = trim( str_replace( $configPath, '', $directory ), DIRECTORY_SEPARATOR ) )
-		{
 			$tree = str_replace( DIRECTORY_SEPARATOR, '.', $tree ) . '.';
-		}
 
 		return $tree;
 	}

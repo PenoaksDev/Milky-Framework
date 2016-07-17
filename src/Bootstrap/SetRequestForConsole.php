@@ -14,7 +14,7 @@ class SetRequestForConsole implements Bootstrap
 	 * @param  \Penoaks\Framework $fw
 	 * @return void
 	 */
-	public function bootstrap( Bindings $bindings )
+	public function boot( Bindings $bindings )
 	{
 		$url = $bindings->make( 'config' )->get( 'app.url', 'http://localhost' );
 

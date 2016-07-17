@@ -28,16 +28,16 @@ class AliasLoader
 	/**
 	 * The singleton instance of the loader.
 	 *
-	 * @var \Penoaks\AliasLoader
+	 * @var AliasLoader
 	 */
 	protected static $instance;
 
 	/**
 	 * Create a new AliasLoader instance.
 	 *
-	 * @param  array  $aliases
+	 * @param  array $aliases
 	 */
-	private function __construct($aliases)
+	private function __construct( $aliases )
 	{
 		$this->aliases = $aliases;
 	}
@@ -45,19 +45,19 @@ class AliasLoader
 	/**
 	 * Get or create the singleton alias loader instance.
 	 *
-	 * @param  array  $aliases
+	 * @param  array $aliases
 	 * @return AliasLoader
 	 */
-	public static function getInstance(array $aliases = [])
+	public static function getInstance( array $aliases = [] )
 	{
-		if (is_null(static::$instance))
-{
-			return static::$instance = new static($aliases);
+		if ( is_null( static::$instance ) )
+		{
+			return static::$instance = new static( $aliases );
 		}
 
-		$aliases = array_merge(static::$instance->getAliases(), $aliases);
+		$aliases = array_merge( static::$instance->getAliases(), $aliases );
 
-		static::$instance->setAliases($aliases);
+		static::$instance->setAliases( $aliases );
 
 		return static::$instance;
 	}
@@ -65,25 +65,25 @@ class AliasLoader
 	/**
 	 * Load a class alias if it is registered.
 	 *
-	 * @param  string  $alias
+	 * @param  string $alias
 	 * @return bool|null
 	 */
-	public function load($alias)
+	public function load( $alias )
 	{
-		if (isset($this->aliases[$alias]))
-{
-			return class_alias($this->aliases[$alias], $alias);
-		}
+		if ( isset( $this->aliases[$alias] ) )
+			return class_alias( $this->aliases[$alias], $alias );
+
+		return null;
 	}
 
 	/**
 	 * Add an alias to the loader.
 	 *
-	 * @param  string  $class
-	 * @param  string  $alias
+	 * @param  string $class
+	 * @param  string $alias
 	 * @return void
 	 */
-	public function alias($class, $alias)
+	public function alias( $class, $alias )
 	{
 		$this->aliases[$class] = $alias;
 	}
@@ -95,8 +95,8 @@ class AliasLoader
 	 */
 	public function register()
 	{
-		if (! $this->registered)
-{
+		if ( !$this->registered )
+		{
 			$this->prependToLoaderStack();
 
 			$this->registered = true;
@@ -110,7 +110,7 @@ class AliasLoader
 	 */
 	protected function prependToLoaderStack()
 	{
-		spl_autoload_register([$this, 'load'], true, true);
+		spl_autoload_register( [$this, 'load'], true, true );
 	}
 
 	/**
@@ -126,10 +126,10 @@ class AliasLoader
 	/**
 	 * Set the registered aliases.
 	 *
-	 * @param  array  $aliases
+	 * @param  array $aliases
 	 * @return void
 	 */
-	public function setAliases(array $aliases)
+	public function setAliases( array $aliases )
 	{
 		$this->aliases = $aliases;
 	}
@@ -147,10 +147,10 @@ class AliasLoader
 	/**
 	 * Set the "registered" state of the loader.
 	 *
-	 * @param  bool  $value
+	 * @param  bool $value
 	 * @return void
 	 */
-	public function setRegistered($value)
+	public function setRegistered( $value )
 	{
 		$this->registered = $value;
 	}
@@ -158,10 +158,10 @@ class AliasLoader
 	/**
 	 * Set the value of the singleton alias loader.
 	 *
-	 * @param  \Penoaks\AliasLoader  $loader
+	 * @param  AliasLoader $loader
 	 * @return void
 	 */
-	public static function setInstance($loader)
+	public static function setInstance( $loader )
 	{
 		static::$instance = $loader;
 	}

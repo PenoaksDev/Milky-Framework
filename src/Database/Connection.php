@@ -818,7 +818,7 @@ elseif ($this->transactions > 1 && $this->queryGrammar->supportsSavepoints())
 	}
 
 	/**
-	 * Log a query in the connection's query log.
+	 * Logging a query in the connection's query log.
 	 *
 	 * @param  string  $query
 	 * @param  array   $bindings

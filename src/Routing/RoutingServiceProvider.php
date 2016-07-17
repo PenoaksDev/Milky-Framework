@@ -1,7 +1,6 @@
 <?php
 namespace Penoaks\Routing;
 
-use Penoaks\Framework;
 use Penoaks\Barebones\ServiceProvider;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 use Zend\Diactoros\Response as PsrResponse;
@@ -35,9 +34,9 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerRouter()
 	{
-		$this->fw->bindings['router'] = $this->fw->bindings->share( function ( $fw )
+		$this->bindings['router'] = $this->bindings->share( function ( $bindings )
 		{
-			return new Router( $fw->bindings['events'], $fw );
+			return new Router( $bindings['events'], $bindings );
 		} );
 	}
 
@@ -48,28 +47,28 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerUrlGenerator()
 	{
-		$this->fw->bindings['url'] = $this->fw->bindings->share( function ( $fw )
+		$this->bindings['url'] = $this->bindings->share( function ( $bindings )
 		{
-			$routes = $fw->bindings['router']->getRoutes();
+			$routes = $bindings['router']->getRoutes();
 
 			// The URL generator needs the route collection that exists on the router.
 			// Keep in mind this is an object, so we're passing by references here
 			// and all the registered routes will be available to the generator.
-			$fw->bindings->instance( 'routes', $routes );
+			$bindings->instance( 'routes', $routes );
 
-			$url = new UrlGenerator( $routes, $fw->rebinding( 'request', $this->requestRebinder() ) );
+			$url = new UrlGenerator( $routes, $bindings->rebinding( 'request', $this->requestRebinder() ) );
 
 			$url->setSessionResolver( function ()
 			{
-				return $this->fw->bindings['session'];
+				return $this->bindings['session'];
 			} );
 
 			// If the route collection is "rebound", for example, when the routes stay
 			// cached for the application, we will need to rebind the routes on the
 			// URL generator instance so it has the latest version of the routes.
-			$fw->rebinding( 'routes', function ( $fw, $routes )
+			$bindings->rebinding( 'routes', function ( $bindings, $routes )
 			{
-				$fw->bindings['url']->setRoutes( $routes );
+				$bindings['url']->setRoutes( $routes );
 			} );
 
 			return $url;
@@ -83,9 +82,9 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function requestRebinder()
 	{
-		return function ( $fw, $request )
+		return function ( $bindings, $request )
 		{
-			$fw->bindings['url']->setRequest( $request );
+			$bindings['url']->setRequest( $request );
 		};
 	}
 
@@ -96,16 +95,16 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerRedirector()
 	{
-		$this->fw->bindings['redirect'] = $this->fw->bindings->share( function ( $fw )
+		$this->bindings['redirect'] = $this->bindings->share( function ( $bindings )
 		{
-			$redirector = new Redirector( $fw->bindings['url'] );
+			$redirector = new Redirector( $bindings['url'] );
 
 			// If the session is set on the application instance, we'll inject it into
 			// the redirector instance. This allows the redirect responses to allow
 			// for the quite convenient "with" methods that flash to the session.
-			if ( isset( $fw->bindings['session.store'] ) )
+			if ( isset( $bindings['session.store'] ) )
 			{
-				$redirector->setSession( $fw->bindings['session.store'] );
+				$redirector->setSession( $bindings['session.store'] );
 			}
 
 			return $redirector;
@@ -119,9 +118,9 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerPsrRequest()
 	{
-		$this->fw->bindings->bind( 'Psr\Http\Message\ServerRequestInterface', function ( $fw )
+		$this->bindings->bind( 'Psr\Http\Message\ServerRequestInterface', function ( $bindings )
 		{
-			return ( new DiactorosFactory )->createRequest( $fw->make( 'request' ) );
+			return ( new DiactorosFactory )->createRequest( $bindings->make( 'request' ) );
 		} );
 	}
 
@@ -132,7 +131,7 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerPsrResponse()
 	{
-		$this->fw->bindings->bind( 'Psr\Http\Message\ResponseInterface', function ( $fw )
+		$this->bindings->bind( 'Psr\Http\Message\ResponseInterface', function ( $bindings )
 		{
 			return new PsrResponse();
 		} );
@@ -145,9 +144,9 @@ class RoutingServiceProvider extends ServiceProvider
 	 */
 	protected function registerResponseFactory()
 	{
-		$this->fw->bindings->singleton( 'Penoaks\Contracts\Routing\ResponseFactory', function ( $fw )
+		$this->bindings->singleton( 'Penoaks\Contracts\Routing\ResponseFactory', function ( $bindings )
 		{
-			return new ResponseFactory( $fw->bindings['Penoaks\Contracts\View\Factory'], $fw->bindings['redirect'] );
+			return new ResponseFactory( $bindings['Penoaks\Contracts\View\Factory'], $bindings['redirect'] );
 		} );
 	}
 }

@@ -82,7 +82,7 @@ class QueueManager implements FactoryContract, MonitorContract
 	 */
 	public function looping($callback)
 	{
-		$this->fw->bindings['events']->listen('illuminate.queue.looping', $callback);
+		$this->fw->bindings['events']->listen('framework.queue.looping', $callback);
 	}
 
 	/**
