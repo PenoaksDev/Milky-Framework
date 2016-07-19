@@ -3,7 +3,7 @@
 namespace Penoaks\Cookie\Middleware;
 
 use Closure;
-use Penoaks\Contracts\Cookie\QueueingFactory as CookieJar;
+use Illuminate\Contracts\Cookie\QueueingFactory as CookieJar;
 
 class AddQueuedCookiesToResponse
 {
@@ -17,10 +17,10 @@ class AddQueuedCookiesToResponse
 	/**
 	 * Create a new CookieQueue instance.
 	 *
-	 * @param  \Penoaks\Contracts\Cookie\QueueingFactory  $cookies
+	 * @param  \Penoaks\Contracts\Cookie\QueueingFactory $cookies
 	 * @return void
 	 */
-	public function __construct(CookieJar $cookies)
+	public function __construct( CookieJar $cookies )
 	{
 		$this->cookies = $cookies;
 	}
@@ -28,18 +28,16 @@ class AddQueuedCookiesToResponse
 	/**
 	 * Handle an incoming request.
 	 *
-	 * @param  \Penoaks\Http\Request  $request
-	 * @param  \Closure  $next
+	 * @param  \Penoaks\Http\Request $request
+	 * @param  \Closure $next
 	 * @return mixed
 	 */
-	public function handle($request, Closure $next)
+	public function handle( $request, Closure $next )
 	{
-		$response = $next($request);
+		$response = $next( $request );
 
-		foreach ($this->cookies->getQueuedCookies() as $cookie)
-{
-			$response->headers->setCookie($cookie);
-		}
+		foreach ( $this->cookies->getQueuedCookies() as $cookie )
+			$response->headers->setCookie( $cookie );
 
 		return $response;
 	}

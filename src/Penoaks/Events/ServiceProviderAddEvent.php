@@ -1,6 +1,8 @@
 <?php
 namespace Penoaks\Events;
 
+use Illuminate\Support\ServiceProvider;
+
 /**
  * The MIT License (MIT)
  * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
@@ -9,10 +11,6 @@ namespace Penoaks\Events;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-
-use Penoaks\Barebones\Event;
-use Penoaks\Barebones\ServiceProvider;
-
 class ServiceProviderAddEvent implements Event
 {
 	/**

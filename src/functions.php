@@ -18,10 +18,79 @@ use Penoaks\Support\Debug\Dumper;
 use Penoaks\Support\HtmlString;
 use Penoaks\Support\Str;
 
+define( 'FRAMEWORK_START', microtime( true ) );
+
 define( '__', DIRECTORY_SEPARATOR );
 define( '__FW__', __DIR__ );
 define( "yes", true );
 define( "no", false );
+
+/* Force the display of errors */
+ini_set( 'display_errors', 'On' );
+
+/* Prevent the display of E_NOTICE and E_STRICT */
+error_reporting( E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED );
+
+/**
+ * Super simple exception handler, should never be seen if framework is operating normally
+ */
+set_exception_handler( function ( Throwable $e )
+{
+	echo( "<h1 style='margin-bottom: 0;'>Uncaught Exception</h1><br />\n" );
+	echo( "<b>" . ( new ReflectionClass( $e ) )->getShortName() . ": " . $e->getMessage() . "</b><br />\n" );
+	echo( "<p>at " . $e->getFile() . " on line " . $e->getLine() . "</p>\n" );
+	echo( "<pre>" . $e->getTraceAsString() . "</pre>" );
+	die();
+} );
+
+/*
+ * Creates class aliases for missing classes, intended for loose prototyping.
+ * TODO Logging developer warnings when these are used
+ * TODO Implement a strict mode for production environments.
+ */
+spl_autoload_register( function ( $class )
+{
+	$namespace = explode( '\\', $class );
+	$className = array_pop( $namespace );
+	if ( class_exists( $className ) ) // Check if we can alias the class to a root class
+	{
+		developerWarning( $className );
+
+		$reflection = new ReflectionClass( $className );
+		if ( $reflection->isUserDefined() )
+		{
+			class_alias( $className, $class );
+		}
+		else if ( !$reflection->isFinal() )
+		{
+			// class_alias() is not allowed to alias non-user defined PHP classes, so instead we artificially extend them.
+			$ns = implode( '\\', $namespace );
+			eval( "namespace $ns; class $className extends \\$className {}" );
+		}
+		else
+		{
+			die( "Class [" . $class . "] was found but we were unable to alias or extend because it's non-user defined and final." );
+		}
+	}
+	else if ( class_exists( "Penoaks\\Support\\" . $className ) ) // Check if we can alias the class to our Support classes
+		if ( class_alias( "Penoaks\\Support\\" . $className, $class ) )
+			if ( class_exists( 'Logging' ) )
+				Log::debug( "Set class alias [" . $class . "] to [Penoaks\\Support\\" . $className . "]" );
+} );
+
+// TODO Retify!
+function developerWarning( $class = null )
+{
+	if ( \Penoaks\Facades\Config::get( 'app.env' ) == 'production' )
+		throw new RuntimeException( "Lazy class loading is prohibited in production environments." );
+	else if ( class_exists( 'Logging' ) )
+		Log::warning( "Class " . $class . " is being lazy loaded at file " . \Penoaks\Support\Func::lastHop() );
+}
+
+function fw()
+{
+	return Bindings::get( 'fw' );
+}
 
 if ( !function_exists( 'append_config' ) )
 {
@@ -1273,16 +1342,12 @@ if ( !function_exists( 'config' ) )
 	function config( $key = null, $default = null )
 	{
 		if ( is_null( $key ) )
-		{
-			return bindings( 'config' );
-		}
+			return Bindings::get( 'config' );
 
 		if ( is_array( $key ) )
-		{
-			return bindings( 'config' )->set( $key );
-		}
+			return \Penoaks\Facades\Config::set( $key );
 
-		return bindings( 'config' )->get( $key, $default );
+		return \Penoaks\Facades\Config::get( $key, $default );
 	}
 }
 
@@ -1294,9 +1359,9 @@ if ( !function_exists( 'config_path' ) )
 	 * @param  string $path
 	 * @return string
 	 */
-	function config_path( $path = '' )
+	function config_path( $path = null )
 	{
-		return bindings()->make( 'path.config' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return fw()->buildPath( $path, 'config' );
 	}
 }
 

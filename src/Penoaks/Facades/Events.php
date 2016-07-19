@@ -19,11 +19,11 @@ class Events extends BaseFacade
 
 	public static function fire( $event, $payload = [], $halt = false )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	public static function listenEvents( $listener, $priority = 0 )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 }

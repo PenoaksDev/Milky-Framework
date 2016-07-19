@@ -1,7 +1,7 @@
 <?php
 namespace Penoaks\Barebones;
 
-use Penoaks\Support\Arr;
+use Illuminate\Support\Arr;
 
 /**
  * The MIT License (MIT)
@@ -45,6 +45,16 @@ abstract class BaseArray implements \ArrayAccess
 			if ( $this->onCall( 'add', $key, $value ) !== true )
 				Arr::set( $this->arr, $key, $value );
 		}
+	}
+
+	/**
+	 * Returns the array values
+	 *
+	 * @return array
+	 */
+	public function values()
+	{
+		return $this->arr;
 	}
 
 	/**

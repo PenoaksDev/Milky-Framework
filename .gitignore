@@ -10,3 +10,5 @@ error_log
 #Ignore Vim swap files
 .swp
 .swo
+
+composer.lock

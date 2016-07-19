@@ -1,107 +1,81 @@
 <?php
 namespace Penoaks;
 
-use Closure;
-use Composer\Autoload\ClassLoader;
-use Penoaks\Barebones\Bootstrap;
-use Penoaks\Barebones\ExceptionHandler;
-use Penoaks\Barebones\Kernel;
+use Error;
+use ErrorException;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Encryption\McryptEncrypter;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Pipeline;
+use Illuminate\Routing\Router;
+use Illuminate\Routing\UrlGenerator;
+use Illuminate\Support\Composer;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Str;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Penoaks\Barebones\DynamicArray;
 use Penoaks\Bindings\Bindings;
 use Penoaks\Bootstrap\ConfigureLogging;
-use Penoaks\Bootstrap\HandleExceptions;
 use Penoaks\Bootstrap\LoadConfiguration;
-use Penoaks\Config\Config;
-use Penoaks\Events\BootstrapPostEvent;
-use Penoaks\Events\BootstrapPreEvent;
+use Penoaks\Cookie\CookieJar;
 use Penoaks\Events\Dispatcher;
-use Penoaks\Events\EnvMissingEvent;
-use Penoaks\Events\LocaleChangedEvent;
-use Penoaks\Events\Runlevel;
-use Penoaks\Framework\AliasLoader;
-use Penoaks\Framework\Env;
-use Penoaks\Framework\Exceptions\Handler;
-use Penoaks\Framework\ProviderRepository;
-use Penoaks\Http\Request;
-use Penoaks\Routing\Router;
-use Penoaks\Routing\RoutingServiceProvider;
-use Penoaks\Support\DynamicArray;
-use Penoaks\Support\Str;
-use RuntimeException;
-use Symfony\Component\Debug\Exception\FlattenException;
-use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Penoaks\Facades\Config;
+use Penoaks\Facades\Request as RequestFacade;
+use Penoaks\Providers\ProviderRepository;
+use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Debug\Exception\FatalErrorException;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Zend\Diactoros\Response as PsrResponse;
+
 
 /**
- * @Product: Penoaks Framework
- * @Version 6.0.0 (Code Revival)
- * @Last Updated: July 2016
- * @PHP Version: 5.5.9 or Newer
- *
- * @Author: Penoaks Publishing Co.
- * @E-Mail: development@penoaks.com
- * @Website: http://penoaks.com
- *
  * The MIT License (MIT)
- * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ * Copyright 2016 HolyWorlds Publishing Co. <development@penoaks.org>
  *
  * This Source Code is subject to the terms of the MIT License.
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class Framework implements HttpKernelInterface
+class Framework
 {
 	/**
-	 * Stores a static instance of this framework
+	 * Indicates if the class aliases have been registered.
 	 *
-	 * @var $this
+	 * @var bool
 	 */
-	protected static $framework;
+	protected static $aliasesRegistered = false;
 
 	/**
-	 * Stores the environment class
+	 * The base path of the application installation.
 	 *
-	 * @var Env
+	 * @var string
 	 */
-	public $env;
+	protected $basePath;
 
 	/**
-	 * Stores the framework runlevel
-	 *
-	 * @var Runlevel
+	 * @var Framework
 	 */
-	public $runlevel;
-
-	/**
-	 * Stores the Config instance.
-	 *
-	 * @var Config
-	 */
-	public $config;
-
-	/**
-	 * Stores the framework kernel.
-	 *
-	 * @var Kernel
-	 */
-	public $kernel;
+	public static $selfInstance;
 
 	/**
 	 * Stores the Service Bindings instance.
 	 *
-	 * @var \Penoaks\Bindings\Bindings
+	 * @var Bindings
 	 */
 	public $bindings;
 
 	/**
-	 * Stores the Events Dispatcher instance
-	 *
-	 * @var Dispatcher
+	 * @var array
 	 */
-	public $events;
+	private $middleware = [];
 
 	/**
 	 * Holds the registered list of commands
@@ -118,32 +92,25 @@ class Framework implements HttpKernelInterface
 	public $providers;
 
 	/**
-	 * The array of booting callbacks.
+	 * All of the loaded configuration files.
 	 *
 	 * @var array
 	 */
-	protected $bootingCallbacks = [];
+	protected $loadedConfigurations = [];
 
 	/**
-	 * The array of booted callbacks.
+	 * The loaded service providers.
 	 *
 	 * @var array
 	 */
-	protected $bootedCallbacks = [];
+	protected $loadedProviders = [];
 
 	/**
-	 * The array of terminating callbacks.
+	 * The service binding methods that have been executed.
 	 *
 	 * @var array
 	 */
-	protected $terminatingCallbacks = [];
-
-	/**
-	 * The deferred services and their providers.
-	 *
-	 * @var array
-	 */
-	protected $deferredServices = [];
+	protected $ranServiceBinders = [];
 
 	/**
 	 * A custom callback used to configure Monolog.
@@ -153,449 +120,153 @@ class Framework implements HttpKernelInterface
 	protected $monologConfigurator;
 
 	/**
-	 * The environment file to load during bootstrapping.
-	 *
-	 * @var string
-	 */
-	protected $environmentFile = '.env';
-
-	/**
 	 * The application namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = null;
+	protected $namespace;
 
 	/**
-	 * Returns the current instance of this framework class
-	 *
-	 * @return $this
+	 * @var array
 	 */
-	public static function i()
-	{
-		return static::$framework;
-	}
+	protected $bootedCallbacks = [];
 
 	/**
-	 * Create a new Penoaks application instance.
+	 * Create a new Lumen application instance.
 	 *
-	 * @param array $params Overrides both internal and project environment variables
-	 * @param array $paths
-	 * @param ClassLoader $loader The Composer AutoLoader used for auto loading classes
+	 * @param  string|null $basePath
+	 * @return void
 	 */
-	public function __construct( ClassLoader $loader, array $params = [], array $paths = [] )
+	public function __construct( $loader, $basePath = null )
 	{
-		if ( !is_null( static::$framework ) )
-			throw new RuntimeException( "The Framework has already been started" );
-		static::$framework = $this;
-
-		foreach ( ['base', 'src', 'config', 'cache', 'vendor', 'storage'] as $key )
-			if ( !array_key_exists( $key, $paths ) )
-				throw new RuntimeException( "The " . $key . " path is not set. Paths base, src, config, and vendor are required." );
-
 		$this->commands = new DynamicArray();
 		$this->providers = new ProviderRepository();
 		$this->bindings = new Bindings( $this );
 
-		$bindings = &$this->bindings;
-		$bindings->instance( 'fw', $this, [Framework::class] );
-		$bindings->instance( 'loader', $loader, [ClassLoader::class] );
-		$bindings->instance( 'bindings', $bindings, [Bindings::class] );
+		$this->basePath = $basePath;
 
-		/* Init the ENV Instance */
-		$env = new Env( $params );
+		$this->registerBinders();
 
-		/* Save ENV instance */
-		$bindings->instance( 'env', $env, [Env::class] );
-		$this->env = &$env;
+		( new LoadConfiguration() )->boot( $this );
+		( new ConfigureLogging() )->boot( $this );
 
-		/* Store default path values in ENV */
-		$env->set( ['path' => $paths] );
+		$this->bootstrapContainer();
+		$this->registerErrorHandling();
 
-		$aliases = [
-			'auth' => ['Penoaks\Auth\AuthManager', 'Penoaks\Contracts\Auth\Factory'],
-			'auth.driver' => ['Penoaks\Contracts\Auth\Guard'],
-			'blade.compiler' => ['Penoaks\View\Compilers\BladeCompiler'],
-			'cache' => ['Penoaks\Cache\CacheManager', 'Penoaks\Contracts\Cache\Factory'],
-			'cache.store' => ['Penoaks\Cache\Repository', 'Penoaks\Contracts\Cache\Repository'],
-			'config' => ['Penoaks\Config\Repository', 'Penoaks\Contracts\Config\Repository'],
-			'cookie' => [
-				'Penoaks\Cookie\CookieJar',
-				'Penoaks\Contracts\Cookie\Factory',
-				'Penoaks\Contracts\Cookie\QueueingFactory'
-			],
-			'encrypter' => ['Penoaks\Encryption\Encrypter', 'Penoaks\Contracts\Encryption\Encrypter'],
-			'db' => ['Penoaks\Database\DatabaseManager'],
-			'db.connection' => ['Penoaks\Database\Connection', 'Penoaks\Database\ConnectionInterface'],
-			'events' => ['Penoaks\Events\Dispatcher', 'Penoaks\Contracts\Events\Dispatcher'],
-			'files' => ['Penoaks\Filesystem\Filesystem'],
-			'filesystem' => ['Penoaks\Filesystem\FilesystemManager', 'Penoaks\Contracts\Filesystem\Factory'],
-			'filesystem.disk' => ['Penoaks\Contracts\Filesystem\Filesystem'],
-			'filesystem.cloud' => ['Penoaks\Contracts\Filesystem\Cloud'],
-			'hash' => ['Penoaks\Contracts\Hashing\Hasher'],
-			'translator' => ['Penoaks\Translation\Translator', 'Symfony\Component\Translation\TranslatorInterface'],
-			'log' => [\Penoaks\Logging\Log::class, \Psr\Log\LoggerInterface::class],
-			'mailer' => [
-				'Penoaks\Mail\Mailer',
-				'Penoaks\Contracts\Mail\Mailer',
-				'Penoaks\Contracts\Mail\MailQueue'
-			],
-			'auth.password' => [
-				'Penoaks\Auth\Passwords\PasswordBrokerManager',
-				'Penoaks\Contracts\Auth\PasswordBrokerFactory'
-			],
-			'auth.password.broker' => [
-				'Penoaks\Auth\Passwords\PasswordBroker',
-				'Penoaks\Contracts\Auth\PasswordBroker'
-			],
-			'queue' => [
-				'Penoaks\Queue\QueueManager',
-				'Penoaks\Contracts\Queue\Factory',
-				'Penoaks\Contracts\Queue\Monitor'
-			],
-			'queue.connection' => ['Penoaks\Contracts\Queue\Queue'],
-			'queue.failer' => ['Penoaks\Queue\Failed\FailedJobProviderInterface'],
-			'redirect' => ['Penoaks\Routing\Redirector'],
-			'redis' => ['Penoaks\Redis\Database', 'Penoaks\Contracts\Redis\Database'],
-			'request' => [\Penoaks\Http\Request::class, \Symfony\Component\HttpFoundation\Request::class],
-			'session' => [\Penoaks\Session\SessionManager::class],
-			'session.store' => [
-				'Penoaks\Session\Store',
-				'Symfony\Component\HttpFoundation\Session\SessionInterface'
-			],
-			'url' => ['Penoaks\Routing\UrlGenerator', 'Penoaks\Contracts\Routing\UrlGenerator'],
-			'validator' => ['Penoaks\Validation\Factory', 'Penoaks\Contracts\Validation\Factory'],
-			'view' => ['Penoaks\View\Factory', 'Penoaks\Contracts\View\Factory'],
-		];
+		$this->bindings->instance( 'loader', $loader );
+		$this->bindings->make( 'db' );
+	}
 
-		foreach ( $aliases as $key => $alias )
-			$bindings->alias( $key, $alias );
+	public function addMiddleware( array $middleware )
+	{
+		$this->middleware = array_merge( $this->middleware, $middleware );
+	}
 
-		/* TODO Detect namespace */
-		$loader->set( "Shared\\", $env->get( 'path.src' ) );
+	/**
+	 * @param string $key
+	 * @param array $middleware
+	 */
+	public function addMiddlewareGroup( $key, array $middleware )
+	{
+		$this->router()->middlewareGroup( $key, $middleware );
+	}
 
-		$loader->set( "Illuminate\\", __DIR__ . "/../../framework-laravel-compat/src" ); // TEMP
+	/**
+	 * @param string $key
+	 * @param array $middleware
+	 */
+	public function addRouteMiddleware( $key, array $middleware )
+	{
+		$this->router()->middleware( $key, $middleware );
+	}
 
-		$this->runlevel = new Runlevel();
+	protected function registerBinders()
+	{
+		$b = &$this->bindings;
 
-		/* Init the Events Dispatcher */
-		$events = ( new Dispatcher( $bindings ) )->setQueueResolver( function () use ( $bindings )
-		{
-			return $bindings->make( 'Penoaks\Contracts\Queue\Factory' );
-		} );
+		$b->addBinder( 'registerAuthBindings', [
+			'auth',
+			'auth.driver',
+			'Illuminate\Contracts\Auth\Guard',
+			'Illuminate\Contracts\Auth\Access\Gate'
+		], [$this, 'registerAuthBindings'] );
+		$b->addBinder( 'registerBroadcastingBindings', ['Illuminate\Contracts\Broadcasting\Broadcaster'], [
+			$this,
+			'registerBroadcastingBindings'
+		] );
+		$b->addBinder( 'registerBusBindings', ['Illuminate\Contracts\Bus\Dispatcher'], [$this, 'registerBusBindings'] );
+		$b->addBinder( 'registerCacheBindings', [
+			'cache',
+			'cache.store',
+			'Illuminate\Contracts\Cache\Factory',
+			'Illuminate\Contracts\Cache\Repository'
+		], [$this, 'registerCacheBindings'] );
+		$b->addBinder( 'registerComposerBindings', ['composer'], [$this, 'registerComposerBindings'] );
+		$b->addBinder( 'registerDatabaseBindings', ['db', 'Illuminate\Database\Eloquent\Factory'], [
+			$this,
+			'registerDatabaseBindings'
+		] );
+		$b->addBinder( 'registerEncrypterBindings', ['encrypter', 'Illuminate\Contracts\Encryption\Encrypter'], [
+			$this,
+			'registerEncrypterBindings'
+		] );
+		$b->addBinder( 'registerEventBindings', ['events', 'Illuminate\Contracts\Events\Dispatcher'], [
+			$this,
+			'registerEventBindings'
+		] );
+		$b->addBinder( 'registerFilesBindings', ['files'], [$this, 'registerFilesBindings'] );
+		$b->addBinder( 'registerHashBindings', ['hash', 'Illuminate\Contracts\Hashing\Hasher'], [
+			$this,
+			'registerHashBindings'
+		] );
+		$b->addBinder( 'registerQueueBindings', [
+			'queue',
+			'queue.connection',
+			'Illuminate\Contracts\Queue\Factory',
+			'Illuminate\Contracts\Queue\Queue'
+		], [$this, 'registerQueueBindings'] );
+		$b->addBinder( 'registerRequestBindings', ['request', 'Illuminate\Http\Request'], [
+			$this,
+			'registerRequestBindings'
+		] );
+		$b->addBinder( 'registerPsrRequestBindings', ['Psr\Http\Message\ServerRequestInterface'], [
+			$this,
+			'registerPsrRequestBindings'
+		] );
+		$b->addBinder( 'registerPsrResponseBindings', ['Psr\Http\Message\ResponseInterface'], [
+			$this,
+			'registerPsrResponseBindings'
+		] );
+		$b->addBinder( 'registerTranslationBindings', ['translator'], [$this, 'registerTranslationBindings'] );
+		$b->addBinder( 'registerValidatorBindings', ['validator', 'Illuminate\Contracts\Validation\Factory'], [
+			$this,
+			'registerValidatorBindings'
+		] );
+		$b->addBinder( 'registerViewBindings', ['view', 'Illuminate\Contracts\View\Factory'], [
+			$this,
+			'registerViewBindings'
+		] );
+		$b->addBinder( 'registerCookieBindings', ['cookie', 'Illuminate\Contracts\Cookie\QueueingFactory'], [
+			$this,
+			'registerCookieBindings'
+		] );
+		$b->addBinder( 'registerSessionBindings', ['session', 'session.store'], [$this, 'registerSessionBindings'] );
+		$b->addBinder( 'registerRouteBindings', ['router', 'url'], [$this, 'registerRouteBindings'] );
+	}
 
-		/* Save Events Dispatcher Instance */
-		$bindings->instance( 'events', $events );
-		$this->events = &$events;
-
-		/* Register Framework Events */
-		$events->listenEvents( $this );
-
-		/* Init Routing */
-		$this->providers->add( new RoutingServiceProvider( $bindings ) );
-
-		/* Fires the LOADING runlevel event */
-		$events->fire( $this->runlevel, [$this] );
-
-		/* Setup default index, normally overridden */
-		// Router::get( '/', ViewSkel::view( 'Penoaks\View\Default' ) );
-
-		/* Init the Http Router */
-		$bindings->singleton( 'router', $env->get( 'router', Router::class ), [\Penoaks\Contracts\Routing\Registrar::class] );
-
-		/* Init the Framework Kernel */
-		$bindings->singleton( 'kernel', $env->get( 'kernel', KernelImpl::class ), [Kernel::class] );
-		$this->kernel = $this->bindings->make( 'kernel' );
-
-		/* Init exception handler */
-		$bindings->singleton( 'exceptions', $env->get( 'exceptions', Handler::class ), [ExceptionHandler::class] );
-
-		/* Fire INIT Runlevel Event */
-		$events->fire( $this->runlevel->set( Runlevel::INIT ) );
-
-		$this->bootstrap( new LoadConfiguration() );
-		$this->bootstrap( new ConfigureLogging() );
-		$this->bootstrap( new HandleExceptions() );
-
-		/* Fire BOOT Runlevel Event */
-		$events->fire( $this->runlevel->set( Runlevel::BOOT ) );
-
-		$this->commands->on( 'add', function ()
-		{
-
-		} );
-
-		// Call the implemented boot method.
-		if ( method_exists( $this->kernel, 'boot' ) )
-			$bindings->call( [$this->kernel, 'boot'] );
-
-		// Once the application has booted we will also fire some "booted" callbacks
-		// for any listeners that need to do work after this initial booting gets
-		// finished. This is useful when ordering the boot-up processes we run.
-		$this->fireAppCallbacks( $this->bootingCallbacks );
-
+	/**
+	 * Boot the application's service providers.
+	 *
+	 * @return void
+	 */
+	public function boot()
+	{
 		$this->providers->bootProviders();
 
-		/* Fire DONE Runlevel Event */
-		$events->fire( $this->runlevel->set( Runlevel::DONE ) );
-
-		$this->fireAppCallbacks( $this->bootedCallbacks );
+		foreach ( $this->bootedCallbacks as $callback )
+			call_user_func( $callback, $this );
 	}
 
-	public function loadAliases( array $aliases )
-	{
-		AliasLoader::getInstance( $aliases )->register();
-	}
-
-	public function onEnvMissingEvent( EnvMissingEvent $event )
-	{
-		$keys = $event->keys;
-		if ( count( $keys ) == 2 && $keys[0] == 'path' ) // e.g., path.logs
-			$event->setDefault( Env::get( 'path.base' ) . __ . $keys[1] );
-	}
-
-	/**
-	 * Returns the current runlevel instance of the framework
-	 *
-	 * @return Runlevel
-	 */
-	public function runlevel()
-	{
-		return $this->runlevel;
-	}
-
-	/**
-	 * Checks the current runlevel
-	 *
-	 * @param mixed $level
-	 * @return bool
-	 */
-	public function isRunlevel( $level )
-	{
-		return $this->runlevel->get() == $level || strtolower( Runlevel::asString( $this->runlevel->get() ) ) == strtolower( $level );
-	}
-
-	/**
-	 * Get the version number of the application.
-	 *
-	 * @return string
-	 */
-	public function version()
-	{
-		return "Penoaks Framework (6.0.0)";
-	}
-
-	/**
-	 * Get or check the current application environment.
-	 *
-	 * @param  mixed
-	 * @return string|bool
-	 */
-	public function environment()
-	{
-		if ( func_num_args() > 0 )
-		{
-			$patterns = is_array( func_get_arg( 0 ) ) ? func_get_arg( 0 ) : func_get_args();
-
-			foreach ( $patterns as $pattern )
-			{
-				if ( Str::is( $pattern, $this->bindings['env'] ) )
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		return $this->bindings['env'];
-	}
-
-	/**
-	 * Determine if application is in local environment.
-	 *
-	 * @return bool
-	 */
-	public function isLocal()
-	{
-		return $this->bindings['env'] == 'local';
-	}
-
-	/**
-	 * Detect the application's current environment.
-	 *
-	 * @param  \Closure $callback
-	 * @return string
-	 */
-	public function detectEnvironment( Closure $callback )
-	{
-		$args = isset( $_SERVER['argv'] ) ? $_SERVER['argv'] : null;
-
-		return $this->bindings['env'] = $this->env->detect( $callback, $args );
-	}
-
-	/**
-	 * Determine if we are running in the console.
-	 *
-	 * @return bool
-	 */
-	public function runningInConsole()
-	{
-		return php_sapi_name() == 'cli';
-	}
-
-	/**
-	 * Determine if we are running unit tests.
-	 *
-	 * @return bool
-	 */
-	public function runningUnitTests()
-	{
-		return $this->bindings['env'] == 'testing';
-	}
-
-	/**
-	 * Run the given array of bootstrap classes.
-	 *
-	 * @param \Penoaks\Barebones\Bootstrap|array $bootstrappers
-	 * @return void
-	 */
-	public function bootstrap( $bootstrap )
-	{
-		if ( is_array( $bootstrap ) )
-		{
-			foreach ( $bootstrap as $b )
-				$this->bootstrap( $b );
-
-			return;
-		}
-
-		$event = new BootstrapPreEvent( $bootstrap );
-		$this->bindings['events']->fire( $event, [$this] );
-		if ( !$event->isCancelled() )
-		{
-			if ( !$bootstrap instanceof Bootstrap )
-				$bootstrap = $this->bindings->make( $bootstrap );
-
-			if ( method_exists( $bootstrap, 'boot' ) )
-				$this->bindings->call( [$bootstrap, 'boot'], [$this] );
-
-			$this->bindings['events']->fire( new BootstrapPostEvent( $bootstrap ), [$this] );
-		}
-	}
-
-	/**
-	 * Load and boot all of the remaining deferred providers.
-	 *
-	 * @return void
-	 */
-	public function loadDeferredProviders()
-	{
-		// We will simply spin through each of the deferred providers and register each
-		// one and boot them if the application has booted. This should make each of
-		// the remaining services available to this application for immediate use.
-		foreach ( $this->deferredServices as $service => $provider )
-		{
-			$this->loadDeferredProvider( $service, $provider );
-		}
-
-		$this->deferredServices = [];
-	}
-
-	public function loadDeferredProvider( $service, $provider = null )
-	{
-		if ( is_null( $provider ) )
-		{
-			if ( !isset( $this->deferredServices[$service] ) )
-			{
-				return;
-			}
-
-			$provider = $this->deferredServices[$service];
-		}
-
-		// If the service provider has not already been loaded and registered we can
-		// register it with the application and remove the service from this list
-		// of deferred services, since it will already be loaded on subsequent.
-		if ( !isset( $this->loadedProviders[$provider] ) )
-		{
-			// Once the provider that provides the deferred service has been registered we
-			// will remove it from our local list of the deferred services with related
-			// providers so that this container does not try to resolve it out again.
-			if ( $service )
-			{
-				unset( $this->deferredServices[$service] );
-			}
-
-			$this->provider( $instance = new $provider( $this ) );
-
-			if ( !$this->booted )
-			{
-				$this->booting( function () use ( $instance )
-				{
-					$this->bootProvider( $instance );
-				} );
-			}
-
-		}
-
-	}
-
-	/**
-	 * Resolve the given type from the bindings.
-	 * Normally called from the Bindings class
-	 *
-	 * @param  string $abstract
-	 */
-	public function make( $abstract )
-	{
-		if ( $this->bound( $abstract ) )
-			$this->loadDeferredProvider( $abstract );
-	}
-
-	/**
-	 * Determine if the given abstract type has been bound.
-	 * Normally called from Bindings class.
-	 *
-	 * @param  string $abstract
-	 * @return bool
-	 */
-	public function bound( $abstract )
-	{
-		return isset( $this->deferredServices[$abstract] );
-	}
-
-	/**
-	 * Flush the bindings of all bindings and resolved instances.
-	 * Normally called from the Bindings class.
-	 *
-	 * @return void
-	 */
-	public function flush()
-	{
-		$this->loadedProviders = [];
-	}
-
-	/**
-	 * Determine if the application has booted.
-	 *
-	 * @return bool
-	 */
-	public function isBooted()
-	{
-		return $this->isRunlevel( Runlevel::DONE );
-	}
-
-	/**
-	 * Register a new boot listener.
-	 *
-	 * @param  mixed $callback
-	 * @return void
-	 */
-	public function booting( $callback )
-	{
-		$this->bootingCallbacks[] = $callback;
-	}
 
 	/**
 	 * Register a new "booted" listener.
@@ -606,43 +277,153 @@ class Framework implements HttpKernelInterface
 	public function booted( $callback )
 	{
 		$this->bootedCallbacks[] = $callback;
-
-		if ( $this->isBooted() )
-		{
-			$this->fireAppCallbacks( [$callback] );
-		}
 	}
 
 	/**
-	 * Call the booting callbacks for the application.
+	 * @param Request $request
 	 *
-	 * @param  array $callbacks
+	 * @return Response
+	 */
+	public function handleHttp()
+	{
+		$request = Request::createFromBase( $this->bindings->make( 'request' ) );
+
+		try
+		{
+			$request->enableHttpMethodParameterOverride();
+
+			$this->bindings->instance( 'request', $request );
+			Facade::clearResolvedInstance( 'request' );
+			RequestFacade::__reset();
+
+			$response = ( new Pipeline( $this->bindings ) )->send( $request )->through( $this->middleware )->then( function ( $request )
+			{
+				$this->bindings->instance( 'request', $request );
+
+				return $this->router()->dispatch( $request );
+			} );
+		}
+		catch ( \Exception $e )
+		{
+			return $this->sendExceptionToHandler( $e );
+		}
+		catch ( \Throwable $e )
+		{
+			return $this->sendExceptionToHandler( $e );
+		}
+
+		$this->bindings['events']->fire( 'kernel.handled', [$request, $response] );
+
+		$this->bindings->instance( 'response', $response );
+
+		return $response;
+	}
+
+	/**
+	 * Call the terminate method on any terminable middleware.
+	 *
+	 * @param  Request $request
+	 * @param  Response $response
 	 * @return void
 	 */
-	protected function fireAppCallbacks( array $callbacks )
+	public function terminate( $request = null, $response = null )
 	{
-		foreach ( $callbacks as $callback )
+		if ( is_null( $request ) )
+			$request = $this->request();
+		if ( is_null( $response ) )
+			$response = $this->response();
+
+		$finalMiddleware = /*$this->shouldSkipMiddleware() ? [] : */
+			array_merge( $this->gatherRouteMiddlewares( $request ), $this->middleware );
+		foreach ( $finalMiddleware as $middleware )
 		{
-			call_user_func( $callback, $this );
+			list( $name, $parameters ) = $this->parseMiddleware( $middleware );
+			$instance = $this->bindings->make( $name );
+			if ( method_exists( $instance, 'terminate' ) )
+				$instance->terminate( $request, $response );
 		}
+
+		/*foreach ($this->terminatingCallbacks as $terminating)
+			$this->call($terminating); */
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @return Request
 	 */
-	public function handle( SymfonyRequest $request, $type = self::MASTER_REQUEST, $catch = true )
+	public function request()
 	{
-		return $this->bindings['Penoaks\Contracts\Http\Kernel']->handle( Request::createFromBase( $request ) );
+		return $this->bindings->make( 'request' );
 	}
 
 	/**
-	 * Determine if middleware has been disabled for the application.
+	 * @return Response
+	 */
+	public function response()
+	{
+		return $this->bindings->make( 'response' );
+	}
+
+	/**
+	 * Gather the route middleware for the given request.
 	 *
-	 * @return bool
+	 * @param  \Illuminate\Http\Request $request
+	 * @return array
 	 */
-	public function shouldSkipMiddleware()
+	protected function gatherRouteMiddlewares( $request )
 	{
-		return $this->bound( 'middleware.disable' ) && $this->make( 'middleware.disable' ) === true;
+		if ( $route = $request->route() )
+			return $this->router()->gatherRouteMiddlewares( $route );
+
+		return [];
+	}
+
+	/**
+	 * Get router instance
+	 *
+	 * @return Router
+	 */
+	public function router()
+	{
+		return $this->bindings['router'];
+	}
+
+	/**
+	 * Parse a middleware string to get the name and parameters.
+	 *
+	 * @param  string $middleware
+	 * @return array
+	 */
+	protected function parseMiddleware( $middleware )
+	{
+		list( $name, $parameters ) = array_pad( explode( ':', $middleware, 2 ), 2, [] );
+		if ( is_string( $parameters ) )
+			$parameters = explode( ',', $parameters );
+
+		return [$name, $parameters];
+	}
+
+	/**
+	 * Bootstrap the application container.
+	 *
+	 * @return void
+	 */
+	protected function bootstrapContainer()
+	{
+		static::$selfInstance = $this;
+
+		$this->bindings->instance( 'path', $this->path() );
+
+		$this->registerContainerAliases();
+	}
+
+	/**
+	 * Get the version number of the application.
+	 *
+	 * @return string
+	 */
+	public function version()
+	{
+		return 'Lumen (5.2.7) (Laravel Components 5.2.*)';
 	}
 
 	/**
@@ -652,106 +433,237 @@ class Framework implements HttpKernelInterface
 	 */
 	public function isDownForMaintenance()
 	{
-		return $this->env->get( 'maintenance', false );
+		return false;
 	}
 
 	/**
-	 * Throw an HttpException with the given data.
+	 * Get or check the current application environment.
 	 *
-	 * @param  int $code
-	 * @param  string $message
-	 * @param  array $headers
-	 * @return void
-	 *
-	 * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+	 * @param  mixed
+	 * @return string
 	 */
-	public function abort( $code, $message = '', array $headers = [] )
+	public function environment()
 	{
-		if ( $code == 404 )
+		$env = Config::get( 'app.env', 'production' );
+
+		if ( func_num_args() > 0 )
 		{
-			throw new NotFoundHttpException( $message );
+			$patterns = is_array( func_get_arg( 0 ) ) ? func_get_arg( 0 ) : func_get_args();
+
+			foreach ( $patterns as $pattern )
+				if ( Str::is( $pattern, $env ) )
+					return true;
+
+			return false;
 		}
 
-		throw new HttpException( $code, $message, null, $headers );
+		return $env;
 	}
 
 	/**
-	 * Register a terminating callback with the application.
-	 *
-	 * @param  \Closure $callback
-	 * @return $this
-	 */
-	public function terminating( Closure $callback )
-	{
-		$this->terminatingCallbacks[] = $callback;
-
-		return $this;
-	}
-
-	/**
-	 * Terminate the application.
+	 * Register container bindings for the application.
 	 *
 	 * @return void
 	 */
-	public function terminate()
+	public function registerAuthBindings()
 	{
-		foreach ( $this->terminatingCallbacks as $terminating )
+		$this->bindings->singleton( 'auth', function ()
 		{
-			$this->bindings->call( $terminating );
-		}
+			return $this->loadComponent( 'auth', 'Illuminate\Auth\AuthServiceProvider', 'auth' );
+		} );
+
+		$this->bindings->singleton( 'auth.driver', function ()
+		{
+			return $this->loadComponent( 'auth', 'Illuminate\Auth\AuthServiceProvider', 'auth.driver' );
+		} );
+
+		$this->bindings->singleton( 'Illuminate\Contracts\Auth\Access\Gate', function ()
+		{
+			return $this->loadComponent( 'auth', 'Illuminate\Auth\AuthServiceProvider', 'Illuminate\Contracts\Auth\Access\Gate' );
+		} );
 	}
 
 	/**
-	 * Get the service providers that have been loaded.
+	 * Register container bindings for the application.
 	 *
-	 * @return array
-	 */
-	public function getLoadedProviders()
-	{
-		return $this->loadedProviders;
-	}
-
-	/**
-	 * Get the application's deferred services.
-	 *
-	 * @return array
-	 */
-	public function getDeferredServices()
-	{
-		return $this->deferredServices;
-	}
-
-	/**
-	 * Set the application's deferred services.
-	 *
-	 * @param  array $services
 	 * @return void
 	 */
-	public function setDeferredServices( array $services )
+	public function registerBroadcastingBindings()
 	{
-		$this->deferredServices = $services;
+		$this->bindings->singleton( 'Illuminate\Contracts\Broadcasting\Broadcaster', function ()
+		{
+			$this->configure( 'broadcasting' );
+
+			$this->providers->add( 'Illuminate\Broadcasting\BroadcastServiceProvider' );
+
+			return $this->bindings->make( 'Illuminate\Contracts\Broadcasting\Broadcaster' );
+		} );
 	}
 
 	/**
-	 * Add an array of services to the application's deferred services.
+	 * Register container bindings for the application.
 	 *
-	 * @param  array $services
 	 * @return void
 	 */
-	public function addDeferredServices( array $services )
+	public function registerBusBindings()
 	{
-		$this->deferredServices = array_merge( $this->deferredServices, $services );
+		$this->bindings->singleton( 'Illuminate\Contracts\Bus\Dispatcher', function ()
+		{
+			$this->providers->add( 'Illuminate\Bus\BusServiceProvider' );
+
+			return $this->bindings->make( 'Illuminate\Contracts\Bus\Dispatcher' );
+		} );
 	}
 
 	/**
-	 * Determine if the given service is a deferred service.
+	 * Register container bindings for the application.
 	 *
-	 * @param  string $service
-	 * @return bool
+	 * @return void
 	 */
-	public function isDeferredService( $service )
+	public function registerCacheBindings()
 	{
-		return isset( $this->deferredServices[$service] );
+		$this->bindings->singleton( 'cache', function ()
+		{
+			return $this->loadComponent( 'cache', 'Illuminate\Cache\CacheServiceProvider' );
+		} );
+		$this->bindings->singleton( 'cache.store', function ()
+		{
+			return $this->loadComponent( 'cache', 'Illuminate\Cache\CacheServiceProvider', 'cache.store' );
+		} );
+	}
+
+	/**
+	 * Register container bindings for the application.
+	 *
+	 * @return void
+	 */
+	public function registerComposerBindings()
+	{
+		$this->bindings->singleton( 'composer', function ( $fw )
+		{
+			return new Composer( $fw->bindings->make( 'files' ), $this->basePath() );
+		} );
+	}
+
+	/**
+	 * Register session bindings for the application
+	 */
+	public function registerSessionBindings()
+	{
+		$this->providers->add( 'Illuminate\Session\SessionServiceProvider' );
+	}
+
+	/**
+	 * Register cookie bindings for the application
+	 */
+	public function registerCookieBindings()
+	{
+		$this->bindings->singleton( 'cookie', function ( $bindings )
+		{
+			$config = $bindings['config']['session'];
+
+			return ( new CookieJar )->setDefaultPathAndDomain( $config['path'], $config['domain'], $config['secure'] );
+		} );
+	}
+
+	/**
+	 * Register container bindings for the application.
+	 */
+	public function registerDatabaseBindings()
+	{
+		$this->bindings->singleton( 'db', function ()
+		{
+			return $this->loadComponent( 'database', [
+				'Illuminate\Database\DatabaseServiceProvider',
+				'Illuminate\Pagination\PaginationServiceProvider',
+			], 'db' );
+		} );
+	}
+
+	/**
+	 * Register container bindings for the application.
+	 *
+	 * @return void
+	 */
+	public function registerEncrypterBindings()
+	{
+		$this->bindings->singleton( 'encrypter', function ()
+		{
+			$config = $this->bindings->make( 'config' )->get( 'app' );
+
+			if ( Str::startsWith( $key = $config['key'], 'base64:' ) )
+				$key = base64_decode( substr( $key, 7 ) );
+
+			return $this->getEncrypterForKeyAndCipher( $key, $config['cipher'] );
+		} );
+	}
+
+	/**
+	 * Get the proper encrypter instance for the given key and cipher.
+	 *
+	 * @param  string $key
+	 * @param  string $cipher
+	 * @return mixed
+	 *
+	 * @throws \RuntimeException
+	 */
+	protected function getEncrypterForKeyAndCipher( $key, $cipher )
+	{
+		if ( Encrypter::supported( $key, $cipher ) )
+			return new Encrypter( $key, $cipher );
+		elseif ( McryptEncrypter::supported( $key, $cipher ) )
+			return new McryptEncrypter( $key, $cipher );
+		else
+			throw new \RuntimeException( 'No supported encrypter found. The cipher and / or key length are invalid.' );
+	}
+
+	/**
+	 * Register container bindings for the application.
+	 *
+	 * @return void
+	 */
+	public function registerEventBindings()
+	{
+		$this->bindings->singleton( 'events', function ()
+		{
+			$this->bindings->singleton( 'events', function ( $bindings )
+			{
+				return ( new Dispatcher( $bindings ) )->setQueueResolver( function () use ( $bindings )
+				{
+					return $bindings->make( 'Illuminate\Contracts\Queue\Factory' );
+				} );
+			} );
+
+			return $this->bindings->make( 'events' );
+		} );
+	}
+
+	/**
+	 * Register container bindings for the application.
+	 *
+	 * @return void
+	 */
+	public function registerFilesBindings()
+	{
+		$this->bindings->singleton( 'files', function ()
+		{
+			return new Filesystem;
+		} );
+	}
+
+	/**
+	 * Register container bindings for the application.
+	 *
+	 * @return void
+	 */
+	public function registerHashBindings()
+	{
+		$this->bindings->singleton( 'hash', function ()
+		{
+			$this->providers->add( 'Illuminate\Hashing\HashServiceProvider' );
+
+			return $this->bindings->make( 'hash' );
+		} );
 	}
 
 	/**
@@ -788,302 +700,603 @@ class Framework implements HttpKernelInterface
 	}
 
 	/**
-	 * Get the current application locale.
+	 * Register container bindings for the application.
+	 *
+	 * @return void
+	 */
+	public function registerQueueBindings()
+	{
+		$this->bindings->singleton( 'queue', function ()
+		{
+			return $this->loadComponent( 'queue', 'Illuminate\Queue\QueueServiceProvider', 'queue' );
+		} );
+		$this->bindings->singleton( 'queue.connection', function ()
+		{
+			return $this->loadComponent( 'queue', 'Illuminate\Queue\QueueServiceProvider', 'queue.connection' );
+		} );
+	}
+
+	/**
+	 * Get the Monolog handler for the application.
+	 *
+	 * @return \Monolog\Handler\AbstractHandler
+	 */
+	protected function getMonologHandler()
+	{
+		return ( new StreamHandler( $this->buildPath( 'logs/fw.log', 'storage' ), Logger::DEBUG ) )->setFormatter( new LineFormatter( null, null, true, true ) );
+	}
+
+	/**
+	 * Register container bindings for the application.
+	 *
+	 * @return void
+	 */
+	public function registerRequestBindings()
+	{
+		$this->bindings->singleton( 'request', function ()
+		{
+			return $this->prepareRequest( Request::capture() );
+		} );
+	}
+
+	/**
+	 * Prepare the given request instance for use with the application.
+	 *
+	 * @param   \Illuminate\Http\Request $request
+	 * @return \Illuminate\Http\Request
+	 */
+	protected function prepareRequest( Request $request )
+	{
+		$request->setUserResolver( function ()
+		{
+			return $this->bindings->make( 'auth' )->user();
+		} )->setRouteResolver( function ()
+		{
+			return $this->currentRoute;
+		} );
+
+		return $request;
+	}
+
+	/**
+	 * Register container bindings for the PSR-7 request implementation.
+	 *
+	 * @return void
+	 */
+	public function registerPsrRequestBindings()
+	{
+		$this->bindings->singleton( 'Psr\Http\Message\ServerRequestInterface', function ()
+		{
+			return ( new DiactorosFactory )->createRequest( $this->bindings->make( 'request' ) );
+		} );
+	}
+
+	/**
+	 * Register container bindings for the PSR-7 response implementation.
+	 *
+	 * @return void
+	 */
+	public function registerPsrResponseBindings()
+	{
+		$this->bindings->singleton( 'Psr\Http\Message\ResponseInterface', function ()
+		{
+			return new PsrResponse();
+		} );
+	}
+
+	/**
+	 * Register container bindings for the application.
+	 *
+	 * @return void
+	 */
+	public function registerTranslationBindings()
+	{
+		$this->bindings->singleton( 'translator', function ()
+		{
+			$this->configure( 'src' );
+
+			$this->bindings->instance( 'path.lang', $this->getLanguagePath() );
+
+			$this->providers->add( 'Illuminate\Translation\TranslationServiceProvider' );
+
+			return $this->bindings->make( 'translator' );
+		} );
+	}
+
+	/**
+	 * Get the path to the application's language files.
 	 *
 	 * @return string
 	 */
-	public function getLocale()
+	protected function getLanguagePath()
 	{
-		return $this->bindings['config']->get( 'app.locale' );
+		if ( is_dir( $langPath = $this->basePath() . '/resources/lang' ) )
+		{
+			return $langPath;
+		}
+		else
+		{
+			return __DIR__ . '/../resources/lang';
+		}
 	}
 
 	/**
-	 * Set the current application locale.
+	 * Register container bindings for the application.
 	 *
-	 * @param  string $locale
 	 * @return void
 	 */
-	public function setLocale( $locale )
+	public function registerRouteBindings( Request $request )
 	{
-		$oldLocale = $this->config->get( 'app.locale', 'en' );
+		$router = new Router( $this->bindings->get( 'events' ), $this->bindings );
 
-		$this->config->set( 'app.locale', $locale );
-
-		$this->bindings['translator']->setLocale( $locale );
-
-		$this->bindings['events']->fire( new LocaleChangedEvent( $oldLocale, $locale ) );
+		$this->bindings->instance( 'router', $router );
+		$this->bindings->instance( 'url', new UrlGenerator( $router->getRoutes(), $request ) );
 	}
 
 	/**
-	 * Determine if application locale is the given locale.
+	 * Register container bindings for the application.
 	 *
-	 * @param  string $locale
+	 * @return void
+	 */
+	public function registerValidatorBindings()
+	{
+		$this->bindings->singleton( 'validator', function ()
+		{
+			$this->providers->add( 'Illuminate\Validation\ValidationServiceProvider' );
+
+			return $this->bindings->make( 'validator' );
+		} );
+	}
+
+	/**
+	 * Register container bindings for the application.
+	 *
+	 * @return void
+	 */
+	public function registerViewBindings()
+	{
+		$this->bindings->singleton( 'view', function ()
+		{
+			return $this->loadComponent( 'view', 'Illuminate\View\ViewServiceProvider' );
+		} );
+	}
+
+	/**
+	 * Configure and load the given component and provider.
+	 *
+	 * @param  string $config
+	 * @param  array|string $providers
+	 * @param  string|null $return
+	 * @return mixed
+	 */
+	public function loadComponent( $config, $providers, $return = null )
+	{
+		$this->configure( $config );
+
+		foreach ( (array) $providers as $provider )
+			$this->providers->add( $provider );
+
+		return $this->bindings->make( $return ?: $config );
+	}
+
+	/**
+	 * Load a configuration file into the application.
+	 *
+	 * @param  string $name
+	 * @return void
+	 */
+	public function configure( $name )
+	{
+		if ( isset( $this->loadedConfigurations[$name] ) )
+		{
+			return;
+		}
+
+		$this->loadedConfigurations[$name] = true;
+
+		$path = $this->getConfigurationPath( $name );
+
+		if ( $path )
+		{
+			$this->bindings->make( 'config' )->set( $name, require $path );
+		}
+	}
+
+	/**
+	 * Get the path to the given configuration file.
+	 *
+	 * If no name is provided, then we'll return the path to the config folder.
+	 *
+	 * @param  string|null $name
+	 * @return string
+	 */
+	public function getConfigurationPath( $name = null )
+	{
+		if ( !$name )
+		{
+			$appConfigDir = $this->basePath( 'config' ) . '/';
+
+			if ( file_exists( $appConfigDir ) )
+			{
+				return $appConfigDir;
+			}
+			elseif ( file_exists( $path = __DIR__ . '/../config/' ) )
+			{
+				return $path;
+			}
+		}
+		else
+		{
+			$appConfigPath = $this->basePath( 'config' ) . '/' . $name . '.php';
+
+			if ( file_exists( $appConfigPath ) )
+			{
+				return $appConfigPath;
+			}
+			elseif ( file_exists( $path = __DIR__ . '/../config/' . $name . '.php' ) )
+			{
+				return $path;
+			}
+		}
+	}
+
+	/**
+	 * Register the facades for the application.
+	 *
+	 * @return void
+	 */
+	public function withFacades()
+	{
+		/** @noinspection PhpParamsInspection */
+		Facade::setFacadeApplication( $this->bindings );
+
+		if ( !static::$aliasesRegistered )
+		{
+			static::$aliasesRegistered = true;
+
+			/**
+			 * Penoaks Framework Facades
+			 */
+			class_alias( 'Penoaks\Facades\Bindings', 'Bindings' );
+			class_alias( 'Penoaks\Facades\Config', 'Config' );
+			class_alias( 'Penoaks\Facades\Events', 'Events' );
+			class_alias( 'Penoaks\Facades\Log', 'Log' );
+			class_alias( 'Penoaks\Facades\Request', 'Request' );
+
+			/**
+			 * Laravel Facades
+			 */
+			class_alias( Blade::class, 'Blade' );
+
+			/*
+			class_alias( 'Penoaks\Facades\Auth', 'Auth' );
+			class_alias( 'Penoaks\Facades\Cache', 'Cache' );
+			class_alias( 'Penoaks\Facades\DB', 'DB' );
+			class_alias( 'Penoaks\Facades\Event', 'Event' );
+			class_alias( 'Penoaks\Facades\Gate', 'Gate' );
+			class_alias( 'Penoaks\Facades\Log', 'Log' );
+			class_alias( 'Penoaks\Facades\Queue', 'Queue' );
+			class_alias( 'Penoaks\Facades\Schema', 'Schema' );
+			class_alias( 'Penoaks\Facades\URL', 'URL' );
+			class_alias( 'Penoaks\Facades\Validator', 'Validator' );
+			*/
+		}
+	}
+
+	/**
+	 * Get the path to the application "src" directory.
+	 *
+	 * @return string
+	 */
+	public function path()
+	{
+		return $this->basePath . DIRECTORY_SEPARATOR . 'src';
+	}
+
+	/**
+	 * Get the base path for the application.
+	 *
+	 * @param  string|null $path
+	 * @return string
+	 */
+	public function basePath( $path = null )
+	{
+		if ( isset( $this->basePath ) )
+			return $this->basePath . ( $path ? '/' . $path : $path );
+
+		if ( $this->runningInConsole() )
+			$this->basePath = getcwd();
+		else
+			$this->basePath = realpath( getcwd() . '/../' );
+
+		return $this->basePath( $path );
+	}
+
+	/**
+	 * Get the database path for the application.
+	 *
+	 * @return string
+	 */
+	public function databasePath()
+	{
+		return $this->basePath() . '/database';
+	}
+
+	/**
+	 * Get the storage path for the application.
+	 *
+	 * @param  string|null $path
+	 * @return string
+	 */
+	public function storagePath( $path = null )
+	{
+		return $this->buildPath( $path, 'storage' );
+	}
+
+	/**
+	 * Determine if the application is running in the console.
+	 *
 	 * @return bool
 	 */
-	public function isLocale( $locale )
+	public function runningInConsole()
 	{
-		return $this->getLocale() == $locale;
+		return php_sapi_name() == 'cli';
 	}
 
 	/**
-	 * Get the application namespace.
+	 * Determine if we are running unit tests.
 	 *
-	 * @return string
-	 *
-	 * @throws \RuntimeException
+	 * @return bool
 	 */
-	public function getNamespace()
+	public function runningUnitTests()
 	{
-		if ( is_null( $this->namespace ) )
-		{
-			$ns = explode( '\\', $this->bindings['config']['main.httpKernel'] );
-
-			if ( count( $ns ) > 0 )
-			{
-				$ns = array_slice( $ns, 0, count( $ns ) - 1 );
-			}
-
-			$this->namespace = implode( '\\', $ns );
-		}
-
-		return $this->namespace;
+		return $this->environment() == 'testing';
 	}
 
 	/**
-	 * Render the exception to a response.
+	 * Prepare the application to execute a console command.
 	 *
-	 * @param  \Penoaks\Http\Request $request
-	 * @param  \Exception $e
-	 * @return \Symfony\Component\HttpFoundation\Response
-	 */
-	public function renderException( $request, $e )
-	{
-		try
-		{
-			return $this->bindings[ExceptionHandler::class]->render( $request, $e );
-		}
-		catch ( \Exception $ee )
-		{
-			$e = FlattenException::create( $e );
-			$handler = new SymfonyExceptionHandler( true );
-			$content = $handler->getContent( $e );
-
-			$decorated = <<<EOF
-<!DOCTYPE html>
-<html xmlns=\"http://www.w3.org/1999/xhtml\">
-	<head>
-		<meta name="robots" content="noindex,nofollow" />
-		<meta charset=\"utf-8\">
-		<title>Penoaks Framework Exception</title>
-		<!-- Stylesheets -->
-		<link rel=\"stylesheet\" type=\"text/css\" href=\"http://fonts.googleapis.com/css?family=Prosto+One\" />
-		<!-- Scripts -->
-		<script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
-		<style type="text/css">
-		/*<![CDATA[*/
-		html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent;margin:0;padding:0;}
-		body{line-height:1;}
-		ol,ul{list-style:none;}
-		blockquote,q{quotes:none;}
-		blockquote:before,blockquote:after,q:before,q:after{content:none;}
-		:focus{outline:0;}
-		ins{text-decoration:none;}
-		del{text-decoration:line-through;}
-		table{border-collapse:collapse;border-spacing:0;}
-		
-		body {
-			font: normal 9pt Sans;
-			color: #000;
-			background: #ddd;
-		}
-		
-		h1 {
-			font: normal 18pt Sans;
-			color: #f00;
-			margin-bottom: .5em;
-		}
-		
-		h2 {
-			font: normal 14pt Sans;
-			color: #800000;
-			margin-bottom: .5em;
-		}
-		
-		h3 {
-			font: bold 11pt Sans;
-		}
-		
-		pre {
-			font: normal 11pt Menlo, Consolas, "Lucida Console", Monospace;
-		}
-		
-		pre span.error {
-			display: block;
-			background: #fce3e3;
-		}
-		
-		pre span.ln {
-			color: #999;
-			padding-right: 0.5em;
-			margin-left: -46px;
-		}
-		
-		pre span.error-ln {
-			font-weight: bold;
-		}
-		
-		.code pre {
-			background-color: #ffe;
-			line-height: 125%;
-			margin: 0.5em 0 0.5em 46px;
-			padding: 0.5em;
-			border: 1px solid #eee;
-			border-left: 1px solid #ccc;
-			white-space: pre-wrap;
-		}
-		
-		.container {
-			width: 1200px;
-			margin: 0 auto;
-			padding: 32px;
-			background-color: #fff;
-		}
-		
-		.version {
-			color: gray;
-			font-size: 8pt;
-			border-top: 1px solid #aaa;
-			padding-top: 1em;
-			margin-bottom: 1em;
-		}
-		
-		.message {
-			color: #000;
-			padding: 1em;
-			font-size: 11pt;
-			background: #f3f3f3;
-			-webkit-border-radius: 10px;
-			-moz-border-radius: 10px;
-			border-radius: 10px;
-			margin-bottom: 1em;
-			line-height: 160%;
-			white-space: pre-wrap;
-		}
-		
-		.source {
-			margin-bottom: 1em;
-		}
-		
-		.source .file {
-			margin-bottom: 1em;
-		}
-		
-		.traces {
-			margin: 2em 0;
-		}
-		
-		.trace {
-			margin: 0.5em 0;
-			padding: 0.5em;
-		}
-		
-		.trace.groovy {
-			border: 1px dashed #6398aa;
-		}
-		
-		.trace.app {
-			border: 1px dashed #c00;
-		}
-		
-		.trace .number {
-			text-align: right;
-			width: 2em;
-			padding: 0.5em;
-		}
-		
-		.trace .content {
-			padding: 0.5em;
-		}
-		
-		.trace .plus,
-		.trace .minus {
-			display:inline;
-			vertical-align:middle;
-			text-align:center;
-			border:1px solid #000;
-			color:#000;
-			font-size:10px;
-			line-height:10px;
-			margin:0;
-			padding:0 1px;
-			width:10px;
-			height:10px;
-		}
-		
-		.trace.collapsed .minus,
-		.trace.expanded .plus,
-		.trace.collapsed pre {
-			display: none;
-		}
-		
-		.trace-file {
-			cursor: pointer;
-			padding: 0.2em;
-		}
-		
-		.trace-file:hover {
-			background: #F3A4CF;
-		}
-		/*]]>*/
-		</style>
-	</head>
-	<body>
-		<div class="container">
-		$content
-		</div>
-		
-		<script type="text/javascript">
-		/*<![CDATA[*/
-		var traceReg = new RegExp("(^|\\s)trace-file(\\s|\$)");
-		var collapsedReg = new RegExp("(^|\\s)collapsed(\\s|\$)");
-		
-		var e = document.getElementsByTagName("div");
-		for(var j=0,len=e.length;j<len;j++){
-			if(traceReg.test(e[j].className)){
-				e[j].onclick = function(){
-					var trace = this.parentNode.parentNode;
-					if(collapsedReg.test(trace.className))
-						trace.className = trace.className.replace("collapsed", "expanded");
-					else
-						trace.className = trace.className.replace("expanded", "collapsed");
-				}
-			}
-		}
-		/*]]>*/
-		</script>
-	</body>
-</html>
-EOF;
-
-			return SymfonyResponse::create( $decorated, $e->getStatusCode(), $e->getHeaders() );
-		}
-	}
-
-	/**
-	 * Report the exception to the exception handler.
-	 *
-	 * @param  \Exception $e
 	 * @return void
 	 */
-	public function reportException( $e )
+	public function prepareForConsoleCommand()
 	{
-		try
+		$this->withFacades();
+
+		$this->bindings->make( 'cache' );
+		$this->bindings->make( 'queue' );
+
+		$this->configure( 'database' );
+
+		$this->providers->add( 'Illuminate\Database\MigrationServiceProvider' );
+		$this->providers->add( 'Illuminate\Database\SeedServiceProvider' );
+		$this->providers->add( 'Illuminate\Queue\ConsoleServiceProvider' );
+	}
+
+	/**
+	 * Register the core container aliases.
+	 *
+	 * @return void
+	 */
+	public function registerContainerAliases()
+	{
+		$aliases = [
+			'fw' => [
+				'Penoaks\Framework',
+				'Illuminate\Foundation\Application',
+				'Illuminate\Contracts\Foundation\Application'
+			],
+			'bindings' => ['app', 'src', 'Illuminate\Container\Container', 'Illuminate\Contracts\Container\Container'],
+			'auth' => ['Illuminate\Auth\AuthManager', 'Illuminate\Contracts\Auth\Factory'],
+			'auth.driver' => ['Illuminate\Contracts\Auth\Guard'],
+			'blade.compiler' => ['Illuminate\View\Compilers\BladeCompiler'],
+			'cache' => ['Illuminate\Cache\CacheManager', 'Illuminate\Contracts\Cache\Factory'],
+			'cache.store' => ['Illuminate\Cache\Repository', 'Illuminate\Contracts\Cache\Repository'],
+			'config' => ['Illuminate\Config\Repository', 'Illuminate\Contracts\Config\Repository'],
+			'cookie' => [
+				'Illuminate\Cookie\CookieJar',
+				'Illuminate\Contracts\Cookie\Factory',
+				'Illuminate\Contracts\Cookie\QueueingFactory'
+			],
+			'encrypter' => ['Illuminate\Encryption\Encrypter', 'Illuminate\Contracts\Encryption\Encrypter'],
+			'db' => ['Illuminate\Database\DatabaseManager', 'Illuminate\Database\ConnectionResolverInterface'],
+			'db.connection' => ['Illuminate\Database\Connection', 'Illuminate\Database\ConnectionInterface'], //
+			'events' => ['Illuminate\Events\Dispatcher', 'Illuminate\Contracts\Events\Dispatcher'],
+			'files' => ['Illuminate\Filesystem\Filesystem'],
+			'filesystem' => ['Illuminate\Filesystem\FilesystemManager', 'Illuminate\Contracts\Filesystem\Factory'],
+			'filesystem.disk' => ['Illuminate\Contracts\Filesystem\Filesystem'],
+			'filesystem.cloud' => ['Illuminate\Contracts\Filesystem\Cloud'],
+			'hash' => ['Illuminate\Contracts\Hashing\Hasher'],
+			'translator' => ['Illuminate\Translation\Translator', 'Symfony\Component\Translation\TranslatorInterface'],
+			'log' => ['Illuminate\Log\Writer', 'Illuminate\Contracts\Logging\Log', 'Psr\Log\LoggerInterface'],
+			'mailer' => [
+				'Illuminate\Mail\Mailer',
+				'Illuminate\Contracts\Mail\Mailer',
+				'Illuminate\Contracts\Mail\MailQueue'
+			],
+			'auth.password' => [
+				'Illuminate\Auth\Passwords\PasswordBrokerManager',
+				'Illuminate\Contracts\Auth\PasswordBrokerFactory'
+			],
+			'auth.password.broker' => [
+				'Illuminate\Auth\Passwords\PasswordBroker',
+				'Illuminate\Contracts\Auth\PasswordBroker'
+			],
+			'queue' => [
+				'Illuminate\Queue\QueueManager',
+				'Illuminate\Contracts\Queue\Factory',
+				'Illuminate\Contracts\Queue\Monitor'
+			],
+			'queue.connection' => ['Illuminate\Contracts\Queue\Queue'],
+			'queue.failer' => ['Illuminate\Queue\Failed\FailedJobProviderInterface'],
+			'redirect' => ['Illuminate\Routing\Redirector'],
+			'redis' => ['Illuminate\Redis\Database', 'Illuminate\Contracts\Redis\Database'],
+			'request' => ['Illuminate\Http\Request', 'Symfony\Component\HttpFoundation\Request'],
+			'router' => ['Illuminate\Routing\Router', 'Illuminate\Contracts\Routing\Registrar'],
+			'session' => ['Illuminate\Session\SessionManager'],
+			'session.store' => [
+				'Illuminate\Session\Store',
+				'Symfony\Component\HttpFoundation\Session\SessionInterface'
+			],
+			'url' => ['Illuminate\Routing\UrlGenerator', 'Illuminate\Contracts\Routing\UrlGenerator'],
+			'validator' => ['Illuminate\Validation\Factory', 'Illuminate\Contracts\Validation\Factory'],
+			'view' => ['Illuminate\View\Factory', 'Illuminate\Contracts\View\Factory'],
+		];
+
+		foreach ( $aliases as $key => $alias )
+			$this->bindings->alias( $key, $alias );
+	}
+
+	/**
+	 * Throw an HttpException with the given data.
+	 *
+	 * @param  int $code
+	 * @param  string $message
+	 * @param  array $headers
+	 * @return void
+	 *
+	 * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+	 */
+	public function abort( $code, $message = '', array $headers = [] )
+	{
+		if ( $code == 404 )
+			throw new NotFoundHttpException( $message );
+
+		throw new HttpException( $code, $message, null, $headers );
+	}
+
+	/**
+	 * Set the error handling for the application.
+	 *
+	 * @return void
+	 */
+	public function registerErrorHandling()
+	{
+		error_reporting( -1 );
+
+		set_error_handler( function ( $level, $message, $file = '', $line = 0 )
 		{
-			$this->bindings[ExceptionHandler::class]->report( $e );
+			if ( error_reporting() & $level )
+				throw new ErrorException( $message, 0, $level, $file, $line );
+		} );
+
+		set_exception_handler( function ( $e )
+		{
+			$this->handleUncaughtException( $e );
+		} );
+
+		register_shutdown_function( function ()
+		{
+			$this->handleShutdown();
+		} );
+	}
+
+	/**
+	 * Handle the application shutdown routine.
+	 *
+	 * @return void
+	 */
+	protected function handleShutdown()
+	{
+		if ( !is_null( $error = error_get_last() ) && $this->isFatalError( $error['type'] ) )
+			$this->handleUncaughtException( new FatalErrorException( $error['message'], $error['type'], 0, $error['file'], $error['line'] ) );
+	}
+
+	/**
+	 * Determine if the error type is fatal.
+	 *
+	 * @param  int $type
+	 * @return bool
+	 */
+	protected function isFatalError( $type )
+	{
+		$errorCodes = [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE];
+
+		if ( defined( 'FATAL_ERROR' ) )
+			$errorCodes[] = FATAL_ERROR;
+
+		return in_array( $type, $errorCodes );
+	}
+
+	/**
+	 * Send the exception to the handler and return the response.
+	 *
+	 * @param  \Throwable $e
+	 * @return Response
+	 */
+	protected function sendExceptionToHandler( $e )
+	{
+		$handler = $this->resolveExceptionHandler();
+
+		if ( $e instanceof Error )
+			$e = new FatalThrowableError( $e );
+
+		$handler->report( $e );
+
+		return $handler->render( $this->bindings->make( 'request' ), $e );
+	}
+
+	/**
+	 * Handle an uncaught exception instance.
+	 *
+	 * @param  \Throwable $e
+	 * @return void
+	 */
+	protected function handleUncaughtException( $e )
+	{
+		$handler = $this->resolveExceptionHandler();
+
+		if ( $e instanceof Error )
+			$e = new FatalThrowableError( $e );
+
+		$handler->report( $e );
+
+		if ( $this->runningInConsole() )
+			$handler->renderForConsole( new ConsoleOutput, $e );
+		else
+			$handler->render( $this->bindings->make( 'request' ), $e )->send();
+	}
+
+	/**
+	 * Get the exception handler from the container.
+	 *
+	 * @return mixed
+	 */
+	protected function resolveExceptionHandler()
+	{
+		if ( $this->bindings->bound( 'Illuminate\Contracts\Debug\ExceptionHandler' ) )
+			return $this->bindings->make( 'Illuminate\Contracts\Debug\ExceptionHandler' );
+		else
+			return $this->bindings->make( 'Laravel\Lumen\Exceptions\Handler' );
+	}
+
+	public function buildPath( $slug, $location = null )
+	{
+		if ( is_null( $location ) )
+		{
+			$location = $slug;
+			$slug = null;
 		}
-		catch ( \Exception $e )
+
+		if ( !is_null( $slug ) )
+			$slug = '/' . $slug;
+
+		// TODO Load paths from config
+
+		switch ( $location )
 		{
-			// Ignore Reporting Failures!
+			case "src":
+				return $this->basePath . '/src' . $slug;
+			case "database":
+				return $this->basePath . '/fw' . $slug;
+			case "logs":
+				return $this->basePath . '/fw/logs' . $slug;
+			case "storage":
+			case "fw":
+				return $this->basePath . '/fw' . $slug;
+			case "public":
+			case "base":
+			default: // base
+				return $this->basePath . $slug;
 		}
 	}
 }

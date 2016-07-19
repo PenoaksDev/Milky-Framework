@@ -1,7 +1,8 @@
 <?php
-namespace Penoaks\Support;
+namespace Penoaks;
 
-use Calendar;
+use Illuminate\Support\Collection;
+use MaddHatter\LaravelFullcalendar\Facades\Calendar;
 
 /*
  * The MIT License (MIT)

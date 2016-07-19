@@ -1,6 +1,6 @@
 # Penoaks Framework
 
-[![StyleCI](https://styleci.io/repos/7548986/shield?style=flat)](https://styleci.io/repos/7548986)
+[![StyleCI](https://styleci.io/repos/6464365/shield?style=flat)](https://styleci.io/repos/6464365)
 [![Build Status](https://travis-ci.org/penoaks/framework.svg)](https://travis-ci.org/penoaks/framework)
 [![Total Downloads](https://poser.pugx.org/penoaks/framework/d/total.svg)](https://packagist.org/packages/penoaks/framework)
 [![Latest Stable Version](https://poser.pugx.org/penoaks/framework/v/stable.svg)](https://packagist.org/packages/penoaks/framework)

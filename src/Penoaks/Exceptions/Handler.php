@@ -3,13 +3,15 @@
 namespace Penoaks\Exceptions;
 
 use Exception;
+use Illuminate\Http\Response;
 use Penoaks\Auth\Access\AuthorizationException;
 use Penoaks\Auth\AuthenticationException;
 use Penoaks\Database\Eloquent\ModelNotFoundException;
+use Penoaks\Facades\Bindings;
+use Penoaks\Facades\Config;
+use Penoaks\Func;
 use Penoaks\Http\Exception\HttpResponseException;
-use Penoaks\Http\Response;
 use Penoaks\Validation\ValidationException;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
@@ -20,29 +22,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class Handler
 {
 	/**
-	 * The log implementation.
-	 *
-	 * @var \Psr\Log\LoggerInterface
-	 */
-	protected $log;
-
-	/**
 	 * A list of the exception types that should not be reported.
 	 *
 	 * @var array
 	 */
 	protected $dontReport = [];
-
-	/**
-	 * Create a new exception handler instance.
-	 *
-	 * @param  \Psr\Log\LoggerInterface $log
-	 * @return void
-	 */
-	public function __construct( LoggerInterface $log )
-	{
-		$this->log = $log;
-	}
 
 	/**
 	 * Report or log an exception.
@@ -52,10 +36,21 @@ class Handler
 	 */
 	public function report( Exception $e )
 	{
-		if ( $this->shouldReport( $e ) )
+		if ( $this->shouldntReport( $e ) )
+			return;
+
+		// echo "<br><pre>" . Func::stacktrace( $e->getTrace() ) . "</pre><br>";
+
+		try
 		{
-			$this->log->error( $e );
+			$logger = Bindings::make( 'log' );
 		}
+		catch ( Exception $ex )
+		{
+			throw $e; // throw the original exception
+		}
+
+		$logger->error( $e );
 	}
 
 	/**
@@ -135,7 +130,7 @@ class Handler
 	 *
 	 * @param  \Symfony\Component\HttpFoundation\Response $response
 	 * @param  \Exception $e
-	 * @return \Penoaks\Http\Response
+	 * @return Response
 	 */
 	protected function toHttpResponse( $response, Exception $e )
 	{
@@ -186,7 +181,7 @@ class Handler
 	{
 		$e = FlattenException::create( $e );
 
-		$handler = new SymfonyExceptionHandler( config( 'app.debug' ) );
+		$handler = new SymfonyExceptionHandler( Config::get( 'app.debug' ) );
 
 		$decorated = $this->decorate( $handler->getContent( $e ), $handler->getStylesheet( $e ) );
 

@@ -1,12 +1,12 @@
 <?php
 namespace Penoaks\Bootstrap;
 
+use Illuminate\Config\Repository;
 use Penoaks\Barebones\Bootstrap;
-use Penoaks\Config\Config;
 use Penoaks\Framework;
-use Penoaks\Framework\Env;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\Yaml\Yaml;
 
 class LoadConfiguration implements Bootstrap
 {
@@ -22,13 +22,13 @@ class LoadConfiguration implements Bootstrap
 		// First we will see if we have a cache configuration file. If we do, we'll load
 		// the configuration items from that file so that it is very quick. Otherwise
 		// we will need to spin through every configuration file and load them all.
-		if ( file_exists( $cached = Env::get( 'path.cache' ) . __ . 'config.php' ) )
+		if ( file_exists( $cached = $fw->buildPath( 'config.php', 'cache' ) ) )
 		{
 			$items = require $cached;
 			$loadedFromCache = true;
 		}
 
-		$fw->bindings->instance( 'config', $config = new Config( $items ) );
+		$fw->bindings->instance( 'config', $config = new Repository( $items ) );
 
 		// Next we will spin through all of the configuration files in the configuration
 		// directory and load each one into the repository. This will make all of the
@@ -36,12 +36,7 @@ class LoadConfiguration implements Bootstrap
 		if ( !isset( $loadedFromCache ) )
 			$this->loadConfigurationFiles( $fw, $config );
 
-		$fw->detectEnvironment( function () use ( $config )
-		{
-			return $config->get( 'app.env', 'production' );
-		} );
-
-		date_default_timezone_set( $config['app.timezone'] );
+		date_default_timezone_set( $config->get( 'app.timezone', 'UTC' ) );
 
 		mb_internal_encoding( 'UTF-8' );
 	}
@@ -50,11 +45,11 @@ class LoadConfiguration implements Bootstrap
 	 * Load the configuration items from all of the files.
 	 *
 	 * @param  Framework $fw
-	 * @param  Config $config
+	 * @param  Repository $config
 	 */
-	protected function loadConfigurationFiles( Framework $fw, Config $config )
+	protected function loadConfigurationFiles( Framework $fw, Repository $config )
 	{
-		$configPath = realpath( Env::get( 'path.config' ) );
+		$configPath = $fw->buildPath( 'config', 'fw' );
 		foreach ( Finder::create()->files()->in( $configPath ) as $file )
 		{
 			$nesting = $this->getConfigurationNesting( $file, $configPath );

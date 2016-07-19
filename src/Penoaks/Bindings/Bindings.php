@@ -3,8 +3,9 @@ namespace Penoaks\Bindings;
 
 use ArrayAccess;
 use Closure;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use InvalidArgumentException;
-use Penoaks\Contracts\Lang\BindingResolutionException;
 use Penoaks\Framework;
 use Psy\Exception\RuntimeException;
 use ReflectionClass;
@@ -20,12 +21,17 @@ use ReflectionParameter;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class Bindings implements ArrayAccess
+class Bindings extends Container implements ArrayAccess
 {
 	/**
-	 * @var Bindings
+	 * @var array
 	 */
-	private static $selfInstance;
+	private $serviceBinders = [];
+
+	/**
+	 * @var array
+	 */
+	private $ranBinders = [];
 
 	/**
 	 * Stores an instance of the Framework.
@@ -127,7 +133,7 @@ class Bindings implements ArrayAccess
 
 	public function __construct( Framework $framework )
 	{
-		static::$selfInstance = $this;
+		static::$instance = $this;
 		static::$framework = $framework;
 
 		$this->instance( 'bindings', $this );
@@ -155,9 +161,6 @@ class Bindings implements ArrayAccess
 	 */
 	public function bound( $abstract )
 	{
-		if ( static::$framework->bound( $abstract ) )
-			return true;
-
 		$abstract = $this->normalize( $abstract );
 
 		return isset( $this->bindings[$abstract] ) || isset( $this->instances[$abstract] ) || $this->isAlias( $abstract );
@@ -368,9 +371,7 @@ class Bindings implements ArrayAccess
 		$this->instances[$abstract] = $instance;
 
 		if ( $bound )
-		{
 			$this->rebound( $abstract );
-		}
 
 		return $instance;
 	}
@@ -631,6 +632,48 @@ class Bindings implements ArrayAccess
 	}
 
 	/**
+	 * Add a deferred service binder
+	 * Callable is called once the a trigger is requested
+	 *
+	 * @param $key
+	 * @param array $triggers
+	 * @param callable $callable
+	 */
+	public function addBinder( $key, array $triggers, callable $callable )
+	{
+		// TODO Update binders
+		if ( $b = $this->getBinder( $key, $triggers ) )
+			throw new \RuntimeException( "The key [" . $key . "] and/or triggers [" . implode( ", ", $triggers ) . "] have already been added." );
+
+		$this->serviceBinders[$key] = [ 'key' => $key, 'triggers' => $triggers, 'callable' => $callable, 'hasRan' => false ];
+	}
+
+	/**
+	 * Finds a deferred service binder
+	 *
+	 * @param string $key
+	 * @param array $triggers
+	 *
+	 * @return mixed|null
+	 */
+	public function getBinder( $key, array $triggers = [] )
+	{
+		if ( array_key_exists( $key, $this->serviceBinders ) )
+			return $this->serviceBinders[$key];
+
+		foreach( $this->serviceBinders as $b )
+		{
+			if ( in_array( $key, $b['triggers'] ) )
+				return $b;
+			foreach ( $triggers as $t )
+				if ( in_array( $t, $b['triggers'] ) )
+					return $b;
+		}
+
+		return null;
+	}
+
+	/**
 	 * Resolve the given type from the bindings.
 	 *
 	 * @param  string $abstract
@@ -644,7 +687,14 @@ class Bindings implements ArrayAccess
 		{
 			$abstract = $this->getAlias( $this->normalize( $abstract ) );
 
-			static::$framework->make( $abstract );
+			if ( $b = $this->getBinder( $abstract ) )
+			{
+				if ( $b['hasRan'] == false )
+				{
+					$this->serviceBinders[$b['key']]['hasRan'] = true;
+					$this->call( $b['callable'] );
+				}
+			}
 
 			// If an instance of the type is currently being managed as a singleton we'll
 			// just return an existing instance instead of instantiating new instances
@@ -1250,11 +1300,14 @@ class Bindings implements ArrayAccess
 	 */
 	public static function get( $key )
 	{
-		return static::$selfInstance->make( $key );
+		return static::i()->make( $key );
 	}
 
+	/**
+	 * @return Container
+	 */
 	public static function i()
 	{
-		return static::$selfInstance;
+		return static::$instance;
 	}
 }

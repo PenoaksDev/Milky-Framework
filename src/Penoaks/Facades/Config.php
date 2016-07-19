@@ -15,4 +15,34 @@ class Config extends BaseFacade
 	{
 		return 'config';
 	}
+
+	public static function has( $key )
+	{
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+	}
+
+	public static function get( $key, $default = null )
+	{
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+	}
+
+	public static function set( $key, $value = null )
+	{
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+	}
+
+	public static function prepend( $key, $value )
+	{
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+	}
+
+	public static function push( $key, $value )
+	{
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+	}
+
+	public static function all()
+	{
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+	}
 }

@@ -2,10 +2,8 @@
 namespace Penoaks\Events;
 
 use Exception;
+use Illuminate\Contracts\Events\Dispatcher as DispatcherContract;
 use Penoaks\Bindings\Bindings;
-use Penoaks\Contracts\Broadcasting\ShouldBroadcast;
-use Penoaks\Contracts\Broadcasting\ShouldBroadcastNow;
-use Penoaks\Framework;
 use Penoaks\Support\Str;
 use ReflectionClass;
 
@@ -17,7 +15,7 @@ use ReflectionClass;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class Dispatcher
+class Dispatcher implements DispatcherContract
 {
 	/**
 	 * The IoC bindings instance.
@@ -573,6 +571,7 @@ class Dispatcher
 	public function setQueueResolver( callable $resolver )
 	{
 		$this->queueResolver = $resolver;
+
 		return $this;
 	}
 }

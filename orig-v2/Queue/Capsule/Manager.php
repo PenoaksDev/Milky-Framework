@@ -3,7 +3,6 @@
 namespace Penoaks\Queue\Capsule;
 
 use Penoaks\Queue\QueueManager;
-use Penoaks\Framework;
 use Penoaks\Queue\QueueServiceProvider;
 use Penoaks\Support\Traits\CapsuleManagerTrait;
 

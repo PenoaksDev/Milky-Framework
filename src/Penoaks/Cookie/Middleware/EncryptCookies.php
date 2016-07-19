@@ -3,11 +3,11 @@
 namespace Penoaks\Cookie\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Penoaks\Contracts\Encryption\DecryptException;
-use Penoaks\Contracts\Encryption\Encrypter as EncrypterContract;
 
 class EncryptCookies
 {
@@ -28,10 +28,10 @@ class EncryptCookies
 	/**
 	 * Create a new CookieGuard instance.
 	 *
-	 * @param  \Penoaks\Contracts\Encryption\Encrypter  $encrypter
+	 * @param  \Penoaks\Contracts\Encryption\Encrypter $encrypter
 	 * @return void
 	 */
-	public function __construct(EncrypterContract $encrypter)
+	public function __construct( EncrypterContract $encrypter )
 	{
 		$this->encrypter = $encrypter;
 	}
@@ -42,44 +42,45 @@ class EncryptCookies
 	 * @param string|array $cookieName
 	 * @return void
 	 */
-	public function disableFor($cookieName)
+	public function disableFor( $cookieName )
 	{
-		$this->except = array_merge($this->except, (array) $cookieName);
+		$this->except = array_merge( $this->except, (array) $cookieName );
 	}
 
 	/**
 	 * Handle an incoming request.
 	 *
-	 * @param  \Penoaks\Http\Request  $request
-	 * @param  \Closure  $next
+	 * @param  \Penoaks\Http\Request $request
+	 * @param  \Closure $next
 	 * @return mixed
 	 */
-	public function handle($request, Closure $next)
+	public function handle( $request, Closure $next )
 	{
-		return $this->encrypt($next($this->decrypt($request)));
+		return $this->encrypt( $next( $this->decrypt( $request ) ) );
 	}
 
 	/**
 	 * Decrypt the cookies on the request.
 	 *
-	 * @param  \Symfony\Component\HttpFoundation\Request  $request
+	 * @param  \Symfony\Component\HttpFoundation\Request $request
 	 * @return \Symfony\Component\HttpFoundation\Request
 	 */
-	protected function decrypt(Request $request)
+	protected function decrypt( Request $request )
 	{
-		foreach ($request->cookies as $key => $c)
-{
-			if ($this->isDisabled($key))
-{
+		foreach ( $request->cookies as $key => $c )
+		{
+			if ( $this->isDisabled( $key ) )
+			{
 				continue;
 			}
 
 			try
-{
-				$request->cookies->set($key, $this->decryptCookie($c));
-			} catch (DecryptException $e)
-{
-				$request->cookies->set($key, null);
+			{
+				$request->cookies->set( $key, $this->decryptCookie( $c ) );
+			}
+			catch ( DecryptException $e )
+			{
+				$request->cookies->set( $key, null );
 			}
 		}
 
@@ -89,31 +90,29 @@ class EncryptCookies
 	/**
 	 * Decrypt the given cookie and return the value.
 	 *
-	 * @param  string|array  $cookie
+	 * @param  string|array $cookie
 	 * @return string|array
 	 */
-	protected function decryptCookie($cookie)
+	protected function decryptCookie( $cookie )
 	{
-		return is_array($cookie)
-						? $this->decryptArray($cookie)
-						: $this->encrypter->decrypt($cookie);
+		return is_array( $cookie ) ? $this->decryptArray( $cookie ) : $this->encrypter->decrypt( $cookie );
 	}
 
 	/**
 	 * Decrypt an array based cookie.
 	 *
-	 * @param  array  $cookie
+	 * @param  array $cookie
 	 * @return array
 	 */
-	protected function decryptArray(array $cookie)
+	protected function decryptArray( array $cookie )
 	{
 		$decrypted = [];
 
-		foreach ($cookie as $key => $value)
-{
-			if (is_string($value))
-{
-				$decrypted[$key] = $this->encrypter->decrypt($value);
+		foreach ( $cookie as $key => $value )
+		{
+			if ( is_string( $value ) )
+			{
+				$decrypted[$key] = $this->encrypter->decrypt( $value );
 			}
 		}
 
@@ -123,21 +122,19 @@ class EncryptCookies
 	/**
 	 * Encrypt the cookies on an outgoing response.
 	 *
-	 * @param  \Symfony\Component\HttpFoundation\Response  $response
+	 * @param  \Symfony\Component\HttpFoundation\Response $response
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
-	protected function encrypt(Response $response)
+	protected function encrypt( Response $response )
 	{
-		foreach ($response->headers->getCookies() as $cookie)
-{
-			if ($this->isDisabled($cookie->getName()))
-{
+		foreach ( $response->headers->getCookies() as $cookie )
+		{
+			if ( $this->isDisabled( $cookie->getName() ) )
+			{
 				continue;
 			}
 
-			$response->headers->setCookie($this->duplicate(
-				$cookie, $this->encrypter->encrypt($cookie->getValue())
-			));
+			$response->headers->setCookie( $this->duplicate( $cookie, $this->encrypter->encrypt( $cookie->getValue() ) ) );
 		}
 
 		return $response;
@@ -146,16 +143,13 @@ class EncryptCookies
 	/**
 	 * Duplicate a cookie with a new value.
 	 *
-	 * @param  \Symfony\Component\HttpFoundation\Cookie  $c
-	 * @param  mixed  $value
+	 * @param  \Symfony\Component\HttpFoundation\Cookie $c
+	 * @param  mixed $value
 	 * @return \Symfony\Component\HttpFoundation\Cookie
 	 */
-	protected function duplicate(Cookie $c, $value)
+	protected function duplicate( Cookie $c, $value )
 	{
-		return new Cookie(
-			$c->getName(), $value, $c->getExpiresTime(), $c->getPath(),
-			$c->getDomain(), $c->isSecure(), $c->isHttpOnly()
-		);
+		return new Cookie( $c->getName(), $value, $c->getExpiresTime(), $c->getPath(), $c->getDomain(), $c->isSecure(), $c->isHttpOnly() );
 	}
 
 	/**
@@ -164,8 +158,8 @@ class EncryptCookies
 	 * @param  string $name
 	 * @return bool
 	 */
-	public function isDisabled($name)
+	public function isDisabled( $name )
 	{
-		return in_array($name, $this->except);
+		return in_array( $name, $this->except );
 	}
 }

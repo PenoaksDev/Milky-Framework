@@ -1,5 +1,5 @@
 <?php
-namespace Penoaks\Support;
+namespace Penoaks;
 
 class Func
 {
@@ -24,9 +24,10 @@ class Func
 		return str_slug( str_replace( '&amp;', 'and', $string ), '-' );
 	}
 
-	public static function stacktrace()
+	public static function stacktrace( $stack = null )
 	{
-		$stack = debug_backtrace();
+		if ( is_null( $stack ) )
+			$stack = debug_backtrace();
 		$output = '';
 
 		$stackLen = count( $stack );

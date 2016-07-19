@@ -1,5 +1,5 @@
 <?php
-namespace Penoaks\Support;
+namespace Penoaks\Barebones;
 
 use Penoaks\Barebones\BaseArray;
 use Penoaks\Bindings\Bindings;

@@ -3,9 +3,8 @@ namespace Penoaks\Bootstrap;
 
 use Monolog\Logger as Monolog;
 use Penoaks\Barebones\Bootstrap;
-use Penoaks\Config\Config;
+use Penoaks\Facades\Config;
 use Penoaks\Framework;
-use Penoaks\Framework\Env;
 use Penoaks\Logging\Log;
 
 /**
@@ -33,7 +32,7 @@ class ConfigureLogging implements Bootstrap
 		if ( $fw->hasMonologConfigurator() )
 			call_user_func( $fw->getMonologConfigurator(), $log->getMonolog() );
 		else
-			$this->configureHandlers( Config::get('app.log'), $log );
+			$this->configureHandlers( $fw, Config::get('app.log'), $log );
 	}
 
 	/**
@@ -54,19 +53,19 @@ class ConfigureLogging implements Bootstrap
 	 * @param  string $handler
 	 * @param  Log $log
 	 */
-	protected function configureHandlers( $handler, Log $log )
+	protected function configureHandlers( Framework $fw, $handler, Log $log )
 	{
 		switch ( strtolower( $handler ) )
 		{
 			case "single":
 			{
-				$log->useFiles( Env::get( 'path.storage' ) . __ . 'logs/default.log', Config::get( 'app.log_level', 'debug' ) );
+				$log->useFiles( $fw->buildPath( 'logs/fw.log', 'storage' ), Config::get( 'app.log_level', 'debug' ) );
 				break;
 			}
 			case "daily":
 			{
 				$maxFiles = Config::get( 'app.log_max_files' );
-				$log->useDailyFiles( Env::get( 'path.storage' ) . __ . 'logs/default.log', is_null( $maxFiles ) ? 5 : $maxFiles, Config::get( 'app.log_level', 'debug' ) );
+				$log->useDailyFiles( $fw->buildPath( 'logs/fw.log', 'storage' ), is_null( $maxFiles ) ? 5 : $maxFiles, Config::get( 'app.log_level', 'debug' ) );
 				break;
 			}
 			case "syslog":

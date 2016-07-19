@@ -1,11 +1,11 @@
 <?php
 namespace Penoaks\Providers;
 
-use Penoaks\Routing\Router;
-use Penoaks\Barebones\ServiceProvider;
-use Penoaks\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Routing\Router;
+use Penoaks\Facades\Bindings;
 
-class RouteServiceProvider extends ServiceProvider
+abstract class RouteServiceProvider extends ServiceProvider
 {
 	/**
 	 * The controller namespace for the application.
@@ -17,27 +17,24 @@ class RouteServiceProvider extends ServiceProvider
 	/**
 	 * Bootstrap any application services.
 	 *
-	 * @param  \Penoaks\Routing\Router $router
+	 * @param  Router $router
 	 * @return void
 	 */
-	public function boot( Router $router )
+	public function boot()
 	{
+		$router = Bindings::make( 'router' );
+
 		$this->setRootControllerNamespace();
 
-		if ( $this->fw->routesAreCached() )
-		{
-			$this->loadCachedRoutes();
-		}
-		else
-		{
-			$this->loadRoutes();
+		$this->map( $router );
 
-			$this->fw->booted( function () use ( $router )
-			{
-				$router->getRoutes()->refreshNameLookups();
-			} );
-		}
+		$this->app->booted( function () use ( $router )
+		{
+			$router->getRoutes()->refreshNameLookups();
+		} );
 	}
+
+	abstract public function map( Router &$r );
 
 	/**
 	 * Set the root controller namespace for the application.
@@ -47,34 +44,9 @@ class RouteServiceProvider extends ServiceProvider
 	protected function setRootControllerNamespace()
 	{
 		if ( is_null( $this->namespace ) )
-		{
 			return;
-		}
 
-		$this->fw->bindings[UrlGenerator::class]->setRootControllerNamespace( $this->namespace );
-	}
-
-	/**
-	 * Load the cached routes for the application.
-	 *
-	 * @return void
-	 */
-	protected function loadCachedRoutes()
-	{
-		$this->fw->booted( function ()
-		{
-			require $this->fw->getCachedRoutesPath();
-		} );
-	}
-
-	/**
-	 * Load the application routes.
-	 *
-	 * @return void
-	 */
-	protected function loadRoutes()
-	{
-		$this->fw->call( [$this, 'map'] );
+		Bindings::get( UrlGenerator::class )->setRootControllerNamespace( $this->namespace );
 	}
 
 	/**
@@ -85,12 +57,10 @@ class RouteServiceProvider extends ServiceProvider
 	 */
 	protected function loadRoutesFrom( $path )
 	{
-		$router = $this->fw->make( Router::class );
+		$router = Bindings::make( Router::class );
 
 		if ( is_null( $this->namespace ) )
-		{
 			return require $path;
-		}
 
 		$router->group( ['namespace' => $this->namespace], function ( Router $router ) use ( $path )
 		{
@@ -117,6 +87,6 @@ class RouteServiceProvider extends ServiceProvider
 	 */
 	public function __call( $method, $parameters )
 	{
-		return call_user_func_array( [$this->fw->make( Router::class ), $method], $parameters );
+		return call_user_func_array( [Bindings::get( 'router' ), $method], $parameters );
 	}
 }

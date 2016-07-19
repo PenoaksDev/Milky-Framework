@@ -1,15 +1,11 @@
 <?php
-namespace Penoaks\Framework;
+namespace Penoaks\Providers;
 
+use Illuminate\Support\ServiceProvider;
 use Penoaks\Barebones\BaseArray;
-use Penoaks\Barebones\ServiceProvider;
 use Penoaks\Bindings\Bindings;
-use Penoaks\Events\Runlevel;
 use Penoaks\Events\ServiceProviderAddEvent;
-use Penoaks\Facades\Bindings as B;
 use Penoaks\Facades\Events;
-use Penoaks\Framework;
-use Penoaks\Framework as ApplicationContract;
 use Psy\Exception\RuntimeException;
 
 /**
@@ -28,6 +24,16 @@ class ProviderRepository extends BaseArray
 	 * @var bool
 	 */
 	private $isBooted = false;
+
+	/**
+	 * @var array
+	 */
+	private $loadedProviders = array();
+
+	/**
+	 * @var array
+	 */
+	private $bootedProviders = array();
 
 	/**
 	 * Register the application service providers.
@@ -243,17 +249,18 @@ class ProviderRepository extends BaseArray
 			// the provider class so it has an opportunity to do its boot logic and
 			// will be ready for any usage by the developer's application logic.
 			if ( $this->isBooted )
+			{
 				if ( method_exists( $value, 'boot' ) )
 					Bindings::i()->call( [$value, 'boot'] );
+				$this->bootedProviders[] = $key;
+			}
 
 			Events::fire( new ServiceProviderAddEvent( $value ) );
 
 			Events::listenEvents( $value );
 
-			$value = new ProviderWrapper( $value );
-			$value->loaded = true;
-
 			$this->arr[$key] = $value;
+			$this->loadedProviders[] = $key;
 		} );
 
 		return true; // Returning true cancels the add
@@ -261,17 +268,18 @@ class ProviderRepository extends BaseArray
 
 	public function bootProviders()
 	{
-		if ( !Framework::i()->isRunlevel( Runlevel::BOOT ) )
-			return;
-
+		if ( $this->isBooted )
+			throw new \RuntimeException( "Service Providers have already been booted" );
 		$this->isBooted = true;
 
-		array_walk( $this->arr, function ( $value, $key )
+		$providers = $this->arr;
+		array_walk( $providers, function ( $value, $key )
 		{
 			if ( !is_object( $value ) )
 				throw new RuntimeException( "There was a problem, the provider is not an object." );
+			$this->bootedProviders[] = $key;
 			if ( method_exists( $value, 'boot' ) )
-				B::call( [$value, 'boot'] );
+				Bindings::i()->call( [$value, 'boot'] );
 		} );
 	}
 }

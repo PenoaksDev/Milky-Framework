@@ -1,7 +1,5 @@
 <?php
-namespace Penoaks\Framework;
-
-use Penoaks\Barebones\ServiceProvider;
+namespace Penoaks\Events;
 
 /**
  * The MIT License (MIT)
@@ -11,20 +9,8 @@ use Penoaks\Barebones\ServiceProvider;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class ProviderWrapper
+
+interface Event
 {
-	/**
-	 * @var ServiceProvider
-	 */
-	public $provider;
 
-	/**
-	 * @var bool
-	 */
-	public $loaded = false;
-
-	public function __construct( $provider )
-	{
-		$this->provider = $provider;
-	}
 }

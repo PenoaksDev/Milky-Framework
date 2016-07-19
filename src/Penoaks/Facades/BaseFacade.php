@@ -98,7 +98,7 @@ abstract class BaseFacade
 
 		try
 		{
-			Bindings::i()->call( [
+			return Bindings::i()->call( [
 				$self->scaffold,
 				$method
 			], $args );

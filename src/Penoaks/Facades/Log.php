@@ -24,7 +24,7 @@ class Log extends BaseFacade
 	 */
 	public static function emergency( $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -35,7 +35,7 @@ class Log extends BaseFacade
 	 */
 	public static function alert( $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -46,7 +46,7 @@ class Log extends BaseFacade
 	 */
 	public static function critical( $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -57,7 +57,7 @@ class Log extends BaseFacade
 	 */
 	public static function error( $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -68,7 +68,7 @@ class Log extends BaseFacade
 	 */
 	public static function warning( $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -79,7 +79,7 @@ class Log extends BaseFacade
 	 */
 	public static function notice( $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -90,7 +90,7 @@ class Log extends BaseFacade
 	 */
 	public static function info( $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -101,7 +101,7 @@ class Log extends BaseFacade
 	 */
 	public static function debug( $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -113,7 +113,7 @@ class Log extends BaseFacade
 	 */
 	public static function log( $level, $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -125,7 +125,7 @@ class Log extends BaseFacade
 	 */
 	public static function write( $level, $message, array $context = [] )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
 	/**
@@ -137,6 +137,6 @@ class Log extends BaseFacade
 	 */
 	protected static function writeLog( $level, $message, $context )
 	{
-		static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 }
