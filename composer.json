@@ -1,15 +1,15 @@
 {
-  "name": "penoaks/framework",
-  "description": "The Penoaks Framework",
+  "name": "PenoaksDev/Milky",
+  "description": "The Milky Framework",
   "keywords": [
     "framework",
-    "penoaks"
+    "milky"
   ],
   "license": "MIT",
   "homepage": "https://github.com/PenoaksDev",
   "support": {
-    "issues": "https://github.com/PenoaksDev/Framework/issues",
-    "source": "https://github.com/PenoaksDev/Framework"
+    "issues": "https://github.com/PenoaksDev/Milky/issues",
+    "source": "https://github.com/PenoaksDev/Milky"
   },
   "authors": [
     {
@@ -95,10 +95,11 @@
   },
   "autoload": {
     "files": [
+      "src/loader.php",
       "src/functions.php"
     ],
     "psr-4": {
-      "Penoaks\\": "src/Penoaks/"
+      "Milky\\": "src/Milky/"
     }
   },
   "type": "framework",

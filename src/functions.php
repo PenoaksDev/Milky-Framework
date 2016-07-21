@@ -1,22 +1,23 @@
 <?php
 
-use Penoaks\Bindings\Bindings;
-use Penoaks\Contracts\Auth\Access\Gate;
-use Penoaks\Contracts\Auth\Factory as AuthFactory;
-use Penoaks\Contracts\Bus\Dispatcher;
-use Penoaks\Contracts\Cookie\Factory as CookieFactory;
-use Penoaks\Contracts\Routing\ResponseFactory;
-use Penoaks\Contracts\Routing\UrlGenerator;
-use Penoaks\Contracts\Support\Htmlable;
-use Penoaks\Contracts\Validation\Factory as ValidationFactory;
-use Penoaks\Contracts\View\Factory as ViewFactory;
-use Penoaks\Database\Eloquent\Factory as EloquentFactory;
-use Penoaks\Framework\Env;
-use Penoaks\Support\Arr;
-use Penoaks\Support\Collection;
-use Penoaks\Support\Debug\Dumper;
-use Penoaks\Support\HtmlString;
-use Penoaks\Support\Str;
+use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Contracts\Auth\Factory as AuthFactory;
+use Illuminate\Contracts\Bus\Dispatcher;
+use Illuminate\Contracts\Cookie\Factory as CookieFactory;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\Validation\Factory as ValidationFactory;
+use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Database\Eloquent\Factory as EloquentFactory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Debug\Dumper;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
+use Penoaks\Facades\Bindings;
+use Milky\Facades\Config;
+use Milky\Facades\Log;
 
 define( 'FRAMEWORK_START', microtime( true ) );
 
@@ -72,8 +73,8 @@ spl_autoload_register( function ( $class )
 			die( "Class [" . $class . "] was found but we were unable to alias or extend because it's non-user defined and final." );
 		}
 	}
-	else if ( class_exists( "Penoaks\\Support\\" . $className ) ) // Check if we can alias the class to our Support classes
-		if ( class_alias( "Penoaks\\Support\\" . $className, $class ) )
+	else if ( class_exists( "Penoaks\\" . $className ) )
+		if ( class_alias( "Penoaks\\" . $className, $class ) )
 			if ( class_exists( 'Logging' ) )
 				Log::debug( "Set class alias [" . $class . "] to [Penoaks\\Support\\" . $className . "]" );
 } );
@@ -81,15 +82,15 @@ spl_autoload_register( function ( $class )
 // TODO Retify!
 function developerWarning( $class = null )
 {
-	if ( \Penoaks\Facades\Config::get( 'app.env' ) == 'production' )
+	if ( Config::get( 'app.env' ) == 'production' )
 		throw new RuntimeException( "Lazy class loading is prohibited in production environments." );
-	else if ( class_exists( 'Logging' ) )
-		Log::warning( "Class " . $class . " is being lazy loaded at file " . \Penoaks\Support\Func::lastHop() );
+	else
+		Log::warning( "Class " . $class . " is being lazy loaded at file " . \Penoaks\Func::lastHop() );
 }
 
-function fw()
+function preg_grep_keys( $pattern, $input, $flags = 0 )
 {
-	return Bindings::get( 'fw' );
+	return array_intersect_key( $input, array_flip( preg_grep( $pattern, array_keys( $input ), $flags ) ) );
 }
 
 if ( !function_exists( 'append_config' ) )
@@ -542,7 +543,7 @@ if ( !function_exists( 'collect' ) )
 	 * Create a collection from the given value.
 	 *
 	 * @param  mixed $value
-	 * @return \Penoaks\Support\Collection
+	 * @return \Illuminate\Support\Collection
 	 */
 	function collect( $value = null )
 	{
@@ -732,7 +733,7 @@ if ( !function_exists( 'e' ) )
 	/**
 	 * Escape HTML entities in a string.
 	 *
-	 * @param  \Penoaks\Contracts\Support\Htmlable|string $value
+	 * @param  \Illuminate\Contracts\Support\Htmlable|string $value
 	 * @return string
 	 */
 	function e( $value )
@@ -1223,7 +1224,7 @@ if ( !function_exists( 'bindings' ) )
 	 *
 	 * @param  string $make
 	 * @param  array $parameters
-	 * @return mixed|\Penoaks\Framework
+	 * @return mixed|\Illuminate\Framework
 	 */
 	function bindings( $make = null, $parameters = [] )
 	{
@@ -1242,9 +1243,9 @@ if ( !function_exists( 'fw_path' ) )
 	 * @param  string $path
 	 * @return string
 	 */
-	function fw_path( $path = '' )
+	function fw_path( $path = null )
 	{
-		return bindings( 'path' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return fw()->buildPath( $path, 'fw' );
 	}
 }
 
@@ -1269,7 +1270,7 @@ if ( !function_exists( 'auth' ) )
 	 * Get the available auth instance.
 	 *
 	 * @param  string|null $guard
-	 * @return \Penoaks\Contracts\Auth\Factory
+	 * @return \Illuminate\Contracts\Auth\Factory
 	 */
 	function auth( $guard = null )
 	{
@@ -1291,7 +1292,7 @@ if ( !function_exists( 'back' ) )
 	 *
 	 * @param  int $status
 	 * @param  array $headers
-	 * @return \Penoaks\Http\RedirectResponse
+	 * @return \Illuminate\Http\RedirectResponse
 	 */
 	function back( $status = 302, $headers = [] )
 	{
@@ -1307,9 +1308,9 @@ if ( !function_exists( 'base_path' ) )
 	 * @param  string $path
 	 * @return string
 	 */
-	function base_path( $path = '' )
+	function base_path( $path = null )
 	{
-		return bindings()->basePath() . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return fw()->buildPath( $path, 'base' );
 	}
 }
 
@@ -1345,9 +1346,9 @@ if ( !function_exists( 'config' ) )
 			return Bindings::get( 'config' );
 
 		if ( is_array( $key ) )
-			return \Penoaks\Facades\Config::set( $key );
+			return Config::set( $key );
 
-		return \Penoaks\Facades\Config::get( $key, $default );
+		return Config::get( $key, $default );
 	}
 }
 
@@ -1397,7 +1398,7 @@ if ( !function_exists( 'csrf_field' ) )
 	/**
 	 * Generate a CSRF token form field.
 	 *
-	 * @return \Penoaks\Support\HtmlString
+	 * @return \Illuminate\Support\HtmlString
 	 */
 	function csrf_field()
 	{
@@ -1435,9 +1436,9 @@ if ( !function_exists( 'database_path' ) )
 	 * @param  string $path
 	 * @return string
 	 */
-	function database_path( $path = '' )
+	function database_path( $path = null )
 	{
-		return Env::get( 'path.database' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return fw()->buildPath( $path, 'database' );
 	}
 }
 
@@ -1526,26 +1527,34 @@ if ( !function_exists( 'env' ) )
 	 */
 	function env( $key, $default = null )
 	{
-		$value = Env::get( $key, $default );
+		$value = getenv( $key );
+
+		if ( $value === false )
+			return value( $default );
 
 		switch ( strtolower( $value ) )
 		{
 			case 'true':
 			case '(true)':
 				return true;
+
 			case 'false':
 			case '(false)':
 				return false;
+
 			case 'empty':
 			case '(empty)':
 				return '';
+
 			case 'null':
 			case '(null)':
 				return null;
 		}
 
-		if ( strlen( $value ) > 1 && Str::startsWith( $value, '"' ) && Str::endsWith( $value, '"' ) )
+		if ( Str::startsWith( $value, '"' ) && Str::endsWith( $value, '"' ) )
+		{
 			return substr( $value, 1, -1 );
+		}
 
 		return $value;
 	}
@@ -1572,7 +1581,7 @@ if ( !function_exists( 'factory' ) )
 	/**
 	 * Create a model factory builder for a given class, name, and amount.
 	 *
-	 * @return \Penoaks\Database\Eloquent\FactoryBuilder
+	 * @return \Illuminate\Database\Eloquent\FactoryBuilder
 	 */
 	function factory()
 	{
@@ -1605,7 +1614,7 @@ if ( !function_exists( 'info' ) )
 	 */
 	function info( $message, $context = [] )
 	{
-		fw( 'log' )->info( $message, $context );
+		logger()->info( $message, $context );
 	}
 }
 
@@ -1616,16 +1625,14 @@ if ( !function_exists( 'logger' ) )
 	 *
 	 * @param  string $message
 	 * @param  array $context
-	 * @return \Penoaks\Contracts\Logging\Log|null
+	 * @return \Illuminate\Contracts\Logging\Log|null
 	 */
 	function logger( $message = null, array $context = [] )
 	{
 		if ( is_null( $message ) )
-		{
-			return bindings( 'log' );
-		}
+			return fw()->log;
 
-		return bindings( 'log' )->debug( $message, $context );
+		return fw()->log->debug( $message, $context );
 	}
 }
 
@@ -1635,7 +1642,7 @@ if ( !function_exists( 'method_field' ) )
 	 * Generate a form field to spoof the HTTP verb used by forms.
 	 *
 	 * @param  string $method
-	 * @return \Penoaks\Support\HtmlString
+	 * @return \Illuminate\Support\HtmlString
 	 */
 	function method_field( $method )
 	{
@@ -1682,9 +1689,9 @@ if ( !function_exists( 'public_path' ) )
 	 * @param  string $path
 	 * @return string
 	 */
-	function public_path( $path = '' )
+	function public_path( $path = null )
 	{
-		return Env::get( 'path.public', 'public' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return fw()->buildPath( $path, 'public' );
 	}
 }
 
@@ -1697,7 +1704,7 @@ if ( !function_exists( 'redirect' ) )
 	 * @param  int $status
 	 * @param  array $headers
 	 * @param  bool $secure
-	 * @return \Penoaks\Routing\Redirector|\Penoaks\Http\RedirectResponse
+	 * @return \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
 	 */
 	function redirect( $to = null, $status = 302, $headers = [], $secure = null )
 	{
@@ -1717,7 +1724,7 @@ if ( !function_exists( 'request' ) )
 	 *
 	 * @param  string $key
 	 * @param  mixed $default
-	 * @return \Penoaks\Http\Request|string|array
+	 * @return \Illuminate\Http\Request|string|array
 	 */
 	function request( $key = null, $default = null )
 	{
@@ -1738,9 +1745,9 @@ if ( !function_exists( 'resource_path' ) )
 	 * @param  string $path
 	 * @return string
 	 */
-	function resource_path( $path = '' )
+	function resource_path( $path = null )
 	{
-		return Env::get( 'path.base' ) . DIRECTORY_SEPARATOR . 'resources' . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return fw()->buildPath( $path, 'storage' );
 	}
 }
 
@@ -1752,7 +1759,7 @@ if ( !function_exists( 'response' ) )
 	 * @param  string $content
 	 * @param  int $status
 	 * @param  array $headers
-	 * @return \Symfony\Component\HttpFoundation\Response|\Penoaks\Contracts\Routing\ResponseFactory
+	 * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
 	 */
 	function response( $content = '', $status = 200, array $headers = [] )
 	{
@@ -1847,9 +1854,9 @@ if ( !function_exists( 'storage_path' ) )
 	 * @param  string $path
 	 * @return string
 	 */
-	function storage_path( $path = '' )
+	function storage_path( $path = null )
 	{
-		return Env::get( 'path.storage', 'storage' ) . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return fw()->buildPath( $path, 'storage' );
 	}
 }
 
@@ -1901,7 +1908,7 @@ if ( !function_exists( 'url' ) )
 	 * @param  string $path
 	 * @param  mixed $parameters
 	 * @param  bool $secure
-	 * @return Foundation\Contracts\Routing\UrlGenerator|string
+	 * @return UrlGenerator|string
 	 */
 	function url( $path = null, $parameters = [], $secure = null )
 	{
@@ -1923,7 +1930,7 @@ if ( !function_exists( 'validator' ) )
 	 * @param  array $rules
 	 * @param  array $messages
 	 * @param  array $customAttributes
-	 * @return \Penoaks\Contracts\Validation\Validator
+	 * @return \Illuminate\Contracts\Validation\Validator
 	 */
 	function validator( array $data = [], array $rules = [], array $messages = [], array $customAttributes = [] )
 	{
@@ -1946,7 +1953,7 @@ if ( !function_exists( 'view' ) )
 	 * @param  string $view
 	 * @param  array $data
 	 * @param  array $mergeData
-	 * @return \Penoaks\View\View|\Penoaks\Contracts\View\Factory
+	 * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
 	 */
 	function view( $view = null, $data = [], $mergeData = [] )
 	{

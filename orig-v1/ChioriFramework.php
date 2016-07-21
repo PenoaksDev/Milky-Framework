@@ -18,7 +18,7 @@
 	 * This file is the sole core class to the Chiori Framework.
 	 */
 
-	__Require("com.chiorichan.Colors");	
+	__Require("com.chiorichan.Colors");
 	__Require("com.chiorichan.ConfigurationManager");
 	__Require("com.chiorichan.DaemonSender");
 	__Require("com.chiorichan.PluginManager");
