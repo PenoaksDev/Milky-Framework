@@ -504,6 +504,63 @@ class Arr
 	}
 
 	/**
+	 * Set an array item to a given value using "dot" notation.
+	 *
+	 * If no key is given to the method, the next index is used.
+	 *
+	 * Will throw a runtime exception if you attempt to override an array with an object or an objecty with an array.
+	 *
+	 * @param  array $array
+	 * @param  string $key
+	 * @param  mixed $value
+	 *
+	 * @return array
+	 * @throws \RuntimeException
+	 */
+	public static function setWithException( &$array, $key, $value )
+	{
+		if ( is_null( $key ) )
+		{
+			$key = 0;
+			while ( isset( $array[$key] ) )
+			{
+				$key++;
+			}
+		}
+
+		$keyOrig = $key;
+		$keys = explode( '.', $key );
+		$stack = [];
+
+		while ( count( $keys ) > 1 )
+		{
+			$key = array_shift( $keys );
+
+			// If the key doesn't exist at this depth, we will just create an empty array
+			// to hold the next value, allowing us to create the arrays to hold final
+			// values at the correct depth. Then we'll keep digging into the array.
+			if ( !isset( $array[$key] ) )
+				$array[$key] = [];
+
+			$stack[] = $key;
+
+			if ( !is_array( $array[$key] ) )
+				throw new \RuntimeException( "The array path [" . implode( '.', $stack ) . "] is already set as an object, it must be an array or null to append a child array." );
+
+			$array = &$array[$key];
+		}
+
+		$key = array_shift( $keys );
+
+		if ( array_key_exists( $key, $array ) && is_array( $array[$key] ) )
+			throw new \RuntimeException( "The array path [" . $keyOrig . "] is an array, this would override child objects." );
+
+		$array[$key] = $value;
+
+		return $array;
+	}
+
+	/**
 	 * Sort the array using the given callback.
 	 *
 	 * @param  array $array

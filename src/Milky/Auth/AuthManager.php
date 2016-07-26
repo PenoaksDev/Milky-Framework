@@ -1,10 +1,10 @@
 <?php namespace Milky\Auth;
 
 use Closure;
-use Illuminate\Contracts\Auth\Factory as FactoryContract;
 use InvalidArgumentException;
+use Milky\Framework;
 
-class AuthManager implements FactoryContract
+class AuthManager
 {
 	use CreatesUserProviders;
 
@@ -34,7 +34,7 @@ class AuthManager implements FactoryContract
 	/**
 	 * Create a new Auth manager instance.
 	 *
-	 * @return void
+
 	 */
 	public function __construct()
 	{
@@ -83,7 +83,7 @@ class AuthManager implements FactoryContract
 			$driverMethod = 'create' . ucfirst( $config['driver'] ) . 'Driver';
 
 			if ( method_exists( $this, $driverMethod ) )
-				return $this->{$driverMethod( $name, $config )};
+				return $this->{$driverMethod}( $name, $config );
 			else
 				throw new InvalidArgumentException( "Auth guard driver [{$name}] is not defined." );
 		}
@@ -98,7 +98,7 @@ class AuthManager implements FactoryContract
 	 */
 	protected function callCustomCreator( $name, array $config )
 	{
-		return $this->customCreators[$config['driver']]( $this->app, $name, $config );
+		return $this->customCreators[$config['driver']]( $name, $config );
 	}
 
 	/**
@@ -112,25 +112,16 @@ class AuthManager implements FactoryContract
 	{
 		$provider = $this->createUserProvider( $config['provider'] );
 
-		$guard = new SessionGuard( $name, $provider, $this->app['session.store'] );
+		$guard = new SessionGuard( $name, $provider, Framework::get( 'session.store' ) );
 
 		// When using the remember me functionality of the authentication services we
 		// will need to be set the encryption instance of the guard, which allows
 		// secure, encrypted cookie values to get generated for those cookies.
 		if ( method_exists( $guard, 'setCookieJar' ) )
-		{
-			$guard->setCookieJar( $this->app['cookie'] );
-		}
-
-		if ( method_exists( $guard, 'setDispatcher' ) )
-		{
-			$guard->setDispatcher( $this->app['events'] );
-		}
+			$guard->setCookieJar( Framework::get( 'http.factory' )->cookieJar() );
 
 		if ( method_exists( $guard, 'setRequest' ) )
-		{
-			$guard->setRequest( $this->app->refresh( 'request', $guard, 'setRequest' ) );
-		}
+			$guard->setRequest( Framework::get( 'http.factory' )->request() );
 
 		return $guard;
 	}
@@ -147,9 +138,7 @@ class AuthManager implements FactoryContract
 		// The token guard implements a basic API token based guard implementation
 		// that takes an API token field from the request and matches it to the
 		// user in the database or another persistence layer where users are.
-		$guard = new TokenGuard( $this->createUserProvider( $config['provider'] ), $this->app['request'] );
-
-		$this->app->refresh( 'request', $guard, 'setRequest' );
+		$guard = new TokenGuard( $this->createUserProvider( $config['provider'] ), Framework::get( 'request' ) );
 
 		return $guard;
 	}
@@ -162,7 +151,7 @@ class AuthManager implements FactoryContract
 	 */
 	protected function getConfig( $name )
 	{
-		return $this->app['config']["auth.guards.{$name}"];
+		return Framework::config()->get( 'auth.guards.' . $name );
 	}
 
 	/**
@@ -172,14 +161,13 @@ class AuthManager implements FactoryContract
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['auth.defaults.guard'];
+		return Framework::config()->get( 'auth.defaults.guard' );
 	}
 
 	/**
 	 * Set the default guard driver the factory should serve.
 	 *
 	 * @param  string $name
-	 * @return void
 	 */
 	public function shouldUse( $name )
 	{
@@ -195,11 +183,10 @@ class AuthManager implements FactoryContract
 	 * Set the default authentication driver name.
 	 *
 	 * @param  string $name
-	 * @return void
 	 */
 	public function setDefaultDriver( $name )
 	{
-		$this->app['config']['auth.defaults.guard'] = $name;
+		Framework::config()->set( 'auth.defaults.guard', $name );
 	}
 
 	/**
@@ -213,9 +200,7 @@ class AuthManager implements FactoryContract
 	{
 		return $this->extend( $driver, function () use ( $callback )
 		{
-			$guard = new RequestGuard( $callback, $this->app['request'] );
-
-			$this->app->refresh( 'request', $guard, 'setRequest' );
+			$guard = new RequestGuard( $callback, Framework::get( 'request' ) );
 
 			return $guard;
 		} );

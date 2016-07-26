@@ -1,6 +1,6 @@
 <?php namespace Milky\Auth\Events;
 
-use Illuminate\Queue\SerializesModels;
+use Milky\Queue\SerializesModels;
 
 class Logout
 {

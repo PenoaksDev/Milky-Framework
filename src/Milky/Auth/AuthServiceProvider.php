@@ -1,8 +1,8 @@
 <?php namespace Milky\Auth;
 
-use Illuminate\Contracts\Auth\Access\Gate as GateContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Support\ServiceProvider;
+use Milky\Contracts\Auth\Access\Gate as GateContract;
+use Milky\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Milky\Support\ServiceProvider;
 use Milky\Auth\Access\Gate;
 
 class AuthServiceProvider extends ServiceProvider

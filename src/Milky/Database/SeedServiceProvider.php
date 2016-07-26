@@ -1,17 +1,12 @@
 <?php namespace Milky\Database;
 
-use Illuminate\Support\ServiceProvider;
+use Milky\Binding\BindingBuilder;
 use Milky\Database\Console\Seeds\SeedCommand;
+use Milky\Framework;
+use Milky\Providers\ServiceProvider;
 
 class SeedServiceProvider extends ServiceProvider
 {
-	/**
-	 * Indicates if loading of the provider is deferred.
-	 *
-	 * @var bool
-	 */
-	protected $defer = true;
-
 	/**
 	 * Register the service provider.
 	 *
@@ -19,10 +14,7 @@ class SeedServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->singleton( 'seeder', function ()
-		{
-			return new Seeder;
-		} );
+		Framework::set( 'seeder', BindingBuilder::resolveBinding( Seeder::class ) );
 
 		$this->registerSeedCommand();
 
@@ -36,7 +28,7 @@ class SeedServiceProvider extends ServiceProvider
 	 */
 	protected function registerSeedCommand()
 	{
-		$this->app->singleton( 'command.seed', function ( $app )
+		BindingBuilder::addServiceBindingResolver( 'command.seed', function ( $app )
 		{
 			return new SeedCommand( $app['db'] );
 		} );

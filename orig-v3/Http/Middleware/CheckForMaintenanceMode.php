@@ -2,7 +2,7 @@
 namespace Penoaks\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
+use Milky\Http\Request;
 use Penoaks\Framework;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 

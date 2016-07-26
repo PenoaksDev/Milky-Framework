@@ -1,6 +1,6 @@
 <?php namespace Illuminate\Filesystem;
 
-use Illuminate\Support\ServiceProvider;
+use Milky\Support\ServiceProvider;
 
 class FilesystemServiceProvider extends ServiceProvider
 {

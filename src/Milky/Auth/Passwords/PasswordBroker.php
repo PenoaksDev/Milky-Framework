@@ -3,10 +3,10 @@
 use Closure;
 use Milky\Helpers\Arr;
 use UnexpectedValueException;
-use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Contracts\Mail\Mailer as MailerContract;
-use Illuminate\Contracts\Auth\PasswordBroker as PasswordBrokerContract;
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Milky\Contracts\Auth\UserProvider;
+use Milky\Contracts\Mail\Mailer as MailerContract;
+use Milky\Contracts\Auth\PasswordBroker as PasswordBrokerContract;
+use Milky\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 class PasswordBroker implements PasswordBrokerContract
 {

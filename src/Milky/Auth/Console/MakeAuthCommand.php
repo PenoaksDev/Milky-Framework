@@ -1,7 +1,7 @@
 <?php namespace Milky\Auth\Console;
 
-use Illuminate\Console\Command;
-use Illuminate\Console\AppNamespaceDetectorTrait;
+use Milky\Console\Command;
+use Milky\Console\AppNamespaceDetectorTrait;
 
 class MakeAuthCommand extends Command
 {

@@ -1,14 +1,10 @@
 <?php namespace Milky\Database;
 
-
-use Milky\Database\Schema\PostgresBuilder;
 use Doctrine\DBAL\Driver\PDOPgSql\Driver as DoctrineDriver;
-
-use Milky\Database\Query\Processors\PostgresProcessor;
-
 use Milky\Database\Query\Grammars\PostgresGrammar as QueryGrammar;
-
+use Milky\Database\Query\Processors\PostgresProcessor;
 use Milky\Database\Schema\Grammars\PostgresGrammar as SchemaGrammar;
+use Milky\Database\Schema\PostgresBuilder;
 
 class PostgresConnection extends Connection
 {

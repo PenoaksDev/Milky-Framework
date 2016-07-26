@@ -1,5 +1,6 @@
 <?php namespace Milky\Hooks;
 
+use Milky\Binding\BindingBuilder;
 use Milky\Helpers\Arr;
 
 /**
@@ -66,11 +67,23 @@ class HookDispatcher
 	}
 
 	/**
+	 * Fire an event until the first non-null response is returned.
+	 *
+	 * @param  string $trigger
+	 * @param  array $params
+	 * @return mixed
+	 */
+	public function until( $trigger, $params = [] )
+	{
+		return $this->trigger( $trigger, $params, true );
+	}
+
+	/**
 	 * Triggers Hooks
 	 *
-	 * @param $trigger
+	 * @param string $trigger
 	 */
-	public function trigger( $trigger, $params = [] )
+	public function trigger( $trigger, $params = [], $halt = false )
 	{
 		$keys = explode( '.', $trigger );
 		$current = $this->triggers;
@@ -86,17 +99,22 @@ class HookDispatcher
 					if ( array_key_exists( $hook, $this->hooks ) )
 					{
 						$hook = $this->hooks[$hook];
-						$result = call_user_func_array( $hook['callable'], is_array( $params ) ? $params : [$params] );
-						if ( is_array( $result ) )
-							$results = array_merge_recursive( $results, $result );
-						else
-							$results[] = $result;
+						$result = BindingBuilder::call( $hook['callable'], is_array( $params ) ? $params : ['payload' => $params] );
+						if ( !is_null( $result ) )
+						{
+							if ( $halt )
+								return $result;
+							else if ( is_array( $result ) )
+								$results = array_merge_recursive( $results, $result );
+							else
+								$results[] = $result;
+						}
 					}
 				}
 			}
 		}
 
-		return $results;
+		return $halt ? null : $results;
 	}
 
 	private function bakeTriggers()

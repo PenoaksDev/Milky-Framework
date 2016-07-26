@@ -7,8 +7,8 @@ use Illuminate\Encryption\Encrypter;
 use Illuminate\Encryption\McryptEncrypter;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Hashing\HashServiceProvider;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Milky\Http\Request;
+use Milky\Http\Response;
 use Illuminate\Routing\Pipeline;
 use Illuminate\Support\Composer;
 use Illuminate\Support\Facades\Blade;
@@ -231,7 +231,7 @@ class Framework
 			'Illuminate\Contracts\Queue\Factory',
 			'Illuminate\Contracts\Queue\Queue'
 		], [$this, 'registerQueueBindings'] );
-		$b->addBinder( 'registerRequestBindings', ['request', 'Illuminate\Http\Request'], [
+		$b->addBinder( 'registerRequestBindings', ['request', 'Milky\Http\Request'], [
 			$this,
 			'registerRequestBindings'
 		] );
@@ -372,7 +372,7 @@ class Framework
 	/**
 	 * Gather the route middleware for the given request.
 	 *
-	 * @param  \Illuminate\Http\Request $request
+	 * @param  \Milky\Http\Request $request
 	 * @return array
 	 */
 	protected function gatherRouteMiddlewares( $request )
@@ -740,8 +740,8 @@ class Framework
 	/**
 	 * Prepare the given request instance for use with the application.
 	 *
-	 * @param   \Illuminate\Http\Request $request
-	 * @return \Illuminate\Http\Request
+	 * @param   \Milky\Http\Request $request
+	 * @return \Milky\Http\Request
 	 */
 	protected function prepareRequest( Request $request )
 	{
@@ -1141,7 +1141,7 @@ class Framework
 				'Illuminate\Redis\Database',
 				'Illuminate\Contracts\Redis\Database'],
 			'request' => [
-				'Illuminate\Http\Request',
+				'Milky\Http\Request',
 				'Symfony\Component\HttpFoundation\Request'],
 			'router' => [
 				'Milky\Http\Routing\Router',

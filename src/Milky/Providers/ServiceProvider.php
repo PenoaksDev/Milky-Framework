@@ -27,16 +27,6 @@ abstract class ServiceProvider
 	protected static $publishGroups = [];
 
 	/**
-	 * Register the service provider.
-	 */
-	abstract public function register();
-
-	/**
-	 * Boot the service provider
-	 */
-	abstract public function boot();
-
-	/**
 	 * Merge the given configuration with the existing configuration.
 	 *
 	 * @param  string $path

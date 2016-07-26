@@ -1,7 +1,6 @@
 <?php namespace Milky\Database\Schema;
 
 use Closure;
-
 use Milky\Database\Connection;
 
 class Builder
@@ -30,10 +29,10 @@ class Builder
 	/**
 	 * Create a new database Schema manager.
 	 *
-	 * @param  Connection $connection
+	 * @param Connection  $connection
 	 * @return void
 	 */
-	public function __construct( Connection $connection )
+	public function __construct(Connection $connection)
 	{
 		$this->connection = $connection;
 		$this->grammar = $connection->getSchemaGrammar();
@@ -42,47 +41,45 @@ class Builder
 	/**
 	 * Determine if the given table exists.
 	 *
-	 * @param  string $table
+	 * @param  string  $table
 	 * @return bool
 	 */
-	public function hasTable( $table )
+	public function hasTable($table)
 	{
 		$sql = $this->grammar->compileTableExists();
 
-		$table = $this->connection->getTablePrefix() . $table;
+		$table = $this->connection->getTablePrefix().$table;
 
-		return count( $this->connection->select( $sql, [$table] ) ) > 0;
+		return count($this->connection->select($sql, [$table])) > 0;
 	}
 
 	/**
 	 * Determine if the given table has a given column.
 	 *
-	 * @param  string $table
-	 * @param  string $column
+	 * @param  string  $table
+	 * @param  string  $column
 	 * @return bool
 	 */
-	public function hasColumn( $table, $column )
+	public function hasColumn($table, $column)
 	{
-		$column = strtolower( $column );
+		$column = strtolower($column);
 
-		return in_array( $column, array_map( 'strtolower', $this->getColumnListing( $table ) ) );
+		return in_array($column, array_map('strtolower', $this->getColumnListing($table)));
 	}
 
 	/**
 	 * Determine if the given table has given columns.
 	 *
-	 * @param  string $table
-	 * @param  array $columns
+	 * @param  string  $table
+	 * @param  array   $columns
 	 * @return bool
 	 */
-	public function hasColumns( $table, array $columns )
+	public function hasColumns($table, array $columns)
 	{
-		$tableColumns = array_map( 'strtolower', $this->getColumnListing( $table ) );
+		$tableColumns = array_map('strtolower', $this->getColumnListing($table));
 
-		foreach ( $columns as $column )
-		{
-			if ( !in_array( strtolower( $column ), $tableColumns ) )
-			{
+		foreach ($columns as $column) {
+			if (! in_array(strtolower($column), $tableColumns)) {
 				return false;
 			}
 		}
@@ -93,106 +90,106 @@ class Builder
 	/**
 	 * Get the data type for the given column name.
 	 *
-	 * @param  string $table
-	 * @param  string $column
+	 * @param  string  $table
+	 * @param  string  $column
 	 * @return string
 	 */
-	public function getColumnType( $table, $column )
+	public function getColumnType($table, $column)
 	{
-		$table = $this->connection->getTablePrefix() . $table;
+		$table = $this->connection->getTablePrefix().$table;
 
-		return $this->connection->getDoctrineColumn( $table, $column )->getType()->getName();
+		return $this->connection->getDoctrineColumn($table, $column)->getType()->getName();
 	}
 
 	/**
 	 * Get the column listing for a given table.
 	 *
-	 * @param  string $table
+	 * @param  string  $table
 	 * @return array
 	 */
-	public function getColumnListing( $table )
+	public function getColumnListing($table)
 	{
-		$table = $this->connection->getTablePrefix() . $table;
+		$table = $this->connection->getTablePrefix().$table;
 
-		$results = $this->connection->select( $this->grammar->compileColumnExists( $table ) );
+		$results = $this->connection->select($this->grammar->compileColumnExists($table));
 
-		return $this->connection->getPostProcessor()->processColumnListing( $results );
+		return $this->connection->getPostProcessor()->processColumnListing($results);
 	}
 
 	/**
 	 * Modify a table on the schema.
 	 *
-	 * @param  string $table
-	 * @param  \Closure $callback
+	 * @param  string	$table
+	 * @param  \Closure  $callback
 	 * @return Blueprint
 	 */
-	public function table( $table, Closure $callback )
+	public function table($table, Closure $callback)
 	{
-		$this->build( $this->createBlueprint( $table, $callback ) );
+		$this->build($this->createBlueprint($table, $callback));
 	}
 
 	/**
 	 * Create a new table on the schema.
 	 *
-	 * @param  string $table
-	 * @param  \Closure $callback
+	 * @param  string	$table
+	 * @param  \Closure  $callback
 	 * @return Blueprint
 	 */
-	public function create( $table, Closure $callback )
+	public function create($table, Closure $callback)
 	{
-		$blueprint = $this->createBlueprint( $table );
+		$blueprint = $this->createBlueprint($table);
 
 		$blueprint->create();
 
-		$callback( $blueprint );
+		$callback($blueprint);
 
-		$this->build( $blueprint );
+		$this->build($blueprint);
 	}
 
 	/**
 	 * Drop a table from the schema.
 	 *
-	 * @param  string $table
+	 * @param  string  $table
 	 * @return Blueprint
 	 */
-	public function drop( $table )
+	public function drop($table)
 	{
-		$blueprint = $this->createBlueprint( $table );
+		$blueprint = $this->createBlueprint($table);
 
 		$blueprint->drop();
 
-		$this->build( $blueprint );
+		$this->build($blueprint);
 	}
 
 	/**
 	 * Drop a table from the schema if it exists.
 	 *
-	 * @param  string $table
+	 * @param  string  $table
 	 * @return Blueprint
 	 */
-	public function dropIfExists( $table )
+	public function dropIfExists($table)
 	{
-		$blueprint = $this->createBlueprint( $table );
+		$blueprint = $this->createBlueprint($table);
 
 		$blueprint->dropIfExists();
 
-		$this->build( $blueprint );
+		$this->build($blueprint);
 	}
 
 	/**
 	 * Rename a table on the schema.
 	 *
-	 * @param  string $from
-	 * @param  string $to
+	 * @param  string  $from
+	 * @param  string  $to
 	 * @return Blueprint
 	 */
-	public function rename( $from, $to )
+	public function rename($from, $to)
 	{
-		$blueprint = $this->createBlueprint( $from );
+		$blueprint = $this->createBlueprint($from);
 
-		$blueprint->rename( $to );
+		$blueprint->rename($to);
 
-		$this->build( $blueprint );
+		$this->build($blueprint);
 	}
 
 	/**
@@ -202,7 +199,9 @@ class Builder
 	 */
 	public function enableForeignKeyConstraints()
 	{
-		return $this->connection->statement( $this->grammar->compileEnableForeignKeyConstraints() );
+		return $this->connection->statement(
+			$this->grammar->compileEnableForeignKeyConstraints()
+		);
 	}
 
 	/**
@@ -212,35 +211,36 @@ class Builder
 	 */
 	public function disableForeignKeyConstraints()
 	{
-		return $this->connection->statement( $this->grammar->compileDisableForeignKeyConstraints() );
+		return $this->connection->statement(
+			$this->grammar->compileDisableForeignKeyConstraints()
+		);
 	}
 
 	/**
 	 * Execute the blueprint to build / modify the table.
 	 *
-	 * @param  Blueprint $blueprint
+	 * @param Blueprint  $blueprint
 	 * @return void
 	 */
-	protected function build( Blueprint $blueprint )
+	protected function build(Blueprint $blueprint)
 	{
-		$blueprint->build( $this->connection, $this->grammar );
+		$blueprint->build($this->connection, $this->grammar);
 	}
 
 	/**
 	 * Create a new command set with a Closure.
 	 *
-	 * @param  string $table
-	 * @param  \Closure|null $callback
+	 * @param  string  $table
+	 * @param  \Closure|null  $callback
 	 * @return Blueprint
 	 */
-	protected function createBlueprint( $table, Closure $callback = null )
+	protected function createBlueprint($table, Closure $callback = null)
 	{
-		if ( isset( $this->resolver ) )
-		{
-			return call_user_func( $this->resolver, $table, $callback );
+		if (isset($this->resolver)) {
+			return call_user_func($this->resolver, $table, $callback);
 		}
 
-		return new Blueprint( $table, $callback );
+		return new Blueprint($table, $callback);
 	}
 
 	/**
@@ -256,10 +256,10 @@ class Builder
 	/**
 	 * Set the database connection instance.
 	 *
-	 * @param  Connection $connection
+	 * @param Connection  $connection
 	 * @return $this
 	 */
-	public function setConnection( Connection $connection )
+	public function setConnection(Connection $connection)
 	{
 		$this->connection = $connection;
 
@@ -269,10 +269,10 @@ class Builder
 	/**
 	 * Set the Schema Blueprint resolver callback.
 	 *
-	 * @param  \Closure $resolver
+	 * @param  \Closure  $resolver
 	 * @return void
 	 */
-	public function blueprintResolver( Closure $resolver )
+	public function blueprintResolver(Closure $resolver)
 	{
 		$this->resolver = $resolver;
 	}

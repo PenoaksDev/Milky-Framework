@@ -1,6 +1,6 @@
 <?php namespace Milky\Cache\Console;
 
-use Illuminate\Console\Command;
+use Milky\Console\Command;
 use Milky\Cache\CacheManager;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;

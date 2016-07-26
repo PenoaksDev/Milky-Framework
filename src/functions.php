@@ -1,23 +1,20 @@
 <?php
 
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Contracts\Auth\Factory as AuthFactory;
-use Illuminate\Contracts\Bus\Dispatcher;
-use Illuminate\Contracts\Cookie\Factory as CookieFactory;
-use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Contracts\Validation\Factory as ValidationFactory;
-use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Database\Eloquent\Factory as EloquentFactory;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Debug\Dumper;
-use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
-use Penoaks\Facades\Bindings;
+use Milky\Auth\Access\Gate;
+use Milky\Database\Eloquent\Factory as EloquentFactory;
 use Milky\Facades\Config;
 use Milky\Facades\Log;
+use Milky\Framework;
+use Milky\Helpers\Arr;
+use Milky\Helpers\Dumper;
+use Milky\Helpers\Func;
+use Milky\Helpers\Str;
+use Milky\Http\Response;
+use Milky\Impl\Collection;
+use Milky\Impl\Htmlable;
+use Milky\Impl\HtmlString;
+use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 define( 'FRAMEWORK_START', microtime( true ) );
 
@@ -66,7 +63,7 @@ spl_autoload_register( function ( $class )
 		{
 			// class_alias() is not allowed to alias non-user defined PHP classes, so instead we artificially extend them.
 			$ns = implode( '\\', $namespace );
-			eval( "namespace $ns; class $className extends \\$className {}" );
+			eval( "namespace $ns; class $className extends $className {}" );
 		}
 		else
 		{
@@ -85,7 +82,7 @@ function developerWarning( $class = null )
 	if ( Config::get( 'app.env' ) == 'production' )
 		throw new RuntimeException( "Lazy class loading is prohibited in production environments." );
 	else
-		Log::warning( "Class " . $class . " is being lazy loaded at file " . \Penoaks\Func::lastHop() );
+		Log::warning( "Class " . $class . " is being lazy loaded at file " . Func::lastHop() );
 }
 
 function preg_grep_keys( $pattern, $input, $flags = 0 )
@@ -543,7 +540,7 @@ if ( !function_exists( 'collect' ) )
 	 * Create a collection from the given value.
 	 *
 	 * @param  mixed $value
-	 * @return \Illuminate\Support\Collection
+	 * @return Collection
 	 */
 	function collect( $value = null )
 	{
@@ -733,7 +730,7 @@ if ( !function_exists( 'e' ) )
 	/**
 	 * Escape HTML entities in a string.
 	 *
-	 * @param  \Illuminate\Contracts\Support\Htmlable|string $value
+	 * @param  Htmlable|string $value
 	 * @return string
 	 */
 	function e( $value )
@@ -836,9 +833,9 @@ if ( !function_exists( 'preg_replace_sub' ) )
 		return preg_replace_callback( $pattern, function ( $match ) use ( &$replacements )
 		{
 			foreach ( $replacements as $key => $value )
-			{
 				return array_shift( $replacements );
-			}
+
+			return '';
 		}, $subject );
 	}
 }
@@ -1146,12 +1143,15 @@ if ( !function_exists( 'abort' ) )
 	 * @param  string $message
 	 * @param  array $headers
 	 *
-	 * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-	 * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+	 * @throws HttpException
+	 * @throws NotFoundHttpException
 	 */
 	function abort( $code, $message = '', array $headers = [] )
 	{
-		fw()->abort( $code, $message, $headers );
+		if ( $code == 404 )
+			throw new NotFoundHttpException( $message );
+
+		throw new HttpException( $code, $message, null, $headers );
 	}
 }
 
@@ -1166,8 +1166,8 @@ if ( !function_exists( 'abort_if' ) )
 	 * @param  array $headers
 	 * @return void
 	 *
-	 * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-	 * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+	 * @throws HttpException
+	 * @throws NotFoundHttpException
 	 */
 	function abort_if( $boolean, $code, $message = '', array $headers = [] )
 	{
@@ -1189,8 +1189,8 @@ if ( !function_exists( 'abort_unless' ) )
 	 * @param  array $headers
 	 * @return void
 	 *
-	 * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-	 * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+	 * @throws HttpException
+	 * @throws NotFoundHttpException
 	 */
 	function abort_unless( $boolean, $code, $message = '', array $headers = [] )
 	{
@@ -1213,25 +1213,7 @@ if ( !function_exists( 'action' ) )
 	 */
 	function action( $name, $parameters = [], $absolute = true )
 	{
-		return bindings( 'url' )->action( $name, $parameters, $absolute );
-	}
-}
-
-if ( !function_exists( 'bindings' ) )
-{
-	/**
-	 * Get the available bindings instance.
-	 *
-	 * @param  string $make
-	 * @param  array $parameters
-	 * @return mixed|\Illuminate\Framework
-	 */
-	function bindings( $make = null, $parameters = [] )
-	{
-		if ( is_null( $make ) )
-			return Bindings::i();
-
-		return Bindings::i()->make( $make, $parameters );
+		return Framework::get( 'url' )->action( $name, $parameters, $absolute );
 	}
 }
 
@@ -1260,7 +1242,7 @@ if ( !function_exists( 'asset' ) )
 	 */
 	function asset( $path, $secure = null )
 	{
-		return bindings( 'url' )->asset( $path, $secure );
+		return Framework::get( 'url' )->asset( $path, $secure );
 	}
 }
 
@@ -1270,17 +1252,17 @@ if ( !function_exists( 'auth' ) )
 	 * Get the available auth instance.
 	 *
 	 * @param  string|null $guard
-	 * @return \Illuminate\Contracts\Auth\Factory
+	 * @return \Milky\Auth\AuthManager
 	 */
 	function auth( $guard = null )
 	{
 		if ( is_null( $guard ) )
 		{
-			return bindings( AuthFactory::class );
+			return Framework::get( 'auth.mgr' );
 		}
 		else
 		{
-			return bindings( AuthFactory::class )->guard( $guard );
+			return Framework::get( 'auth.mgr' )->guard( $guard );
 		}
 	}
 }
@@ -1292,11 +1274,11 @@ if ( !function_exists( 'back' ) )
 	 *
 	 * @param  int $status
 	 * @param  array $headers
-	 * @return \Illuminate\Http\RedirectResponse
+	 * @return RedirectResponse
 	 */
 	function back( $status = 302, $headers = [] )
 	{
-		return bindings( 'redirect' )->back( $status, $headers );
+		return Framework::get( 'redirect' )->back( $status, $headers );
 	}
 }
 
@@ -1325,7 +1307,7 @@ if ( !function_exists( 'bcrypt' ) )
 	 */
 	function bcrypt( $value, $options = [] )
 	{
-		return bindings( 'hash' )->make( $value, $options );
+		return Framework::get( 'hash' )->make( $value, $options );
 	}
 }
 
@@ -1343,7 +1325,7 @@ if ( !function_exists( 'config' ) )
 	function config( $key = null, $default = null )
 	{
 		if ( is_null( $key ) )
-			return Bindings::get( 'config' );
+			return Framework::get( 'config' );
 
 		if ( is_array( $key ) )
 			return Config::set( $key );
@@ -1378,16 +1360,13 @@ if ( !function_exists( 'cookie' ) )
 	 * @param  string $domain
 	 * @param  bool $secure
 	 * @param  bool $httpOnly
-	 * @return \Symfony\Component\HttpFoundation\Cookie
+	 * @return Cookie
 	 */
 	function cookie( $name = null, $value = null, $minutes = 0, $path = null, $domain = null, $secure = false, $httpOnly = true )
 	{
-		$cookie = bindings( CookieFactory::class );
-
+		$cookie = Framework::get( 'http.factory' )->cookies;
 		if ( is_null( $name ) )
-		{
 			return $cookie;
-		}
 
 		return $cookie->make( $name, $value, $minutes, $path, $domain, $secure, $httpOnly );
 	}
@@ -1398,7 +1377,7 @@ if ( !function_exists( 'csrf_field' ) )
 	/**
 	 * Generate a CSRF token form field.
 	 *
-	 * @return \Illuminate\Support\HtmlString
+	 * @return HtmlString
 	 */
 	function csrf_field()
 	{
@@ -1417,7 +1396,7 @@ if ( !function_exists( 'csrf_token' ) )
 	 */
 	function csrf_token()
 	{
-		$session = bindings( 'session' );
+		$session = Framework::get( 'session' );
 
 		if ( isset( $session ) )
 		{
@@ -1452,7 +1431,7 @@ if ( !function_exists( 'decrypt' ) )
 	 */
 	function decrypt( $value )
 	{
-		return bindings( 'encrypter' )->decrypt( $value );
+		return Framework::get( 'encrypter' )->decrypt( $value );
 	}
 }
 
@@ -1466,7 +1445,7 @@ if ( !function_exists( 'dispatch' ) )
 	 */
 	function dispatch( $job )
 	{
-		return bindings( Dispatcher::class )->dispatch( $job );
+		return Framework::get( Dispatcher::class )->dispatch( $job );
 	}
 }
 
@@ -1512,7 +1491,7 @@ if ( !function_exists( 'encrypt' ) )
 	 */
 	function encrypt( $value )
 	{
-		return bindings( 'encrypter' )->encrypt( $value );
+		return Framework::get( 'encrypter' )->encrypt( $value );
 	}
 }
 
@@ -1572,7 +1551,7 @@ if ( !function_exists( 'event' ) )
 	 */
 	function event( $event, $payload = [], $halt = false )
 	{
-		return bindings( 'events' )->fire( $event, $payload, $halt );
+		return Framework::get( 'events' )->fire( $event, $payload, $halt );
 	}
 }
 
@@ -1581,11 +1560,11 @@ if ( !function_exists( 'factory' ) )
 	/**
 	 * Create a model factory builder for a given class, name, and amount.
 	 *
-	 * @return \Illuminate\Database\Eloquent\FactoryBuilder
+	 * @return FactoryBuilder
 	 */
 	function factory()
 	{
-		$factory = bindings( EloquentFactory::class );
+		$factory = Framework::get( EloquentFactory::class );
 
 		$arguments = func_get_args();
 
@@ -1625,7 +1604,7 @@ if ( !function_exists( 'logger' ) )
 	 *
 	 * @param  string $message
 	 * @param  array $context
-	 * @return \Illuminate\Contracts\Logging\Log|null
+	 * @return Log|null
 	 */
 	function logger( $message = null, array $context = [] )
 	{
@@ -1642,7 +1621,7 @@ if ( !function_exists( 'method_field' ) )
 	 * Generate a form field to spoof the HTTP verb used by forms.
 	 *
 	 * @param  string $method
-	 * @return \Illuminate\Support\HtmlString
+	 * @return HtmlString
 	 */
 	function method_field( $method )
 	{
@@ -1661,7 +1640,7 @@ if ( !function_exists( 'old' ) )
 	 */
 	function old( $key = null, $default = null )
 	{
-		return bindings( 'request' )->old( $key, $default );
+		return Framework::get( 'request' )->old( $key, $default );
 	}
 }
 
@@ -1677,7 +1656,7 @@ if ( !function_exists( 'policy' ) )
 	 */
 	function policy( $class )
 	{
-		return bindings( Gate::class )->getPolicyFor( $class );
+		return Framework::get( Gate::class )->getPolicyFor( $class );
 	}
 }
 
@@ -1704,16 +1683,16 @@ if ( !function_exists( 'redirect' ) )
 	 * @param  int $status
 	 * @param  array $headers
 	 * @param  bool $secure
-	 * @return \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+	 * @return RedirectResponse
 	 */
 	function redirect( $to = null, $status = 302, $headers = [], $secure = null )
 	{
 		if ( is_null( $to ) )
 		{
-			return bindings( 'redirect' );
+			return Framework::get( 'redirect' );
 		}
 
-		return bindings( 'redirect' )->to( $to, $status, $headers, $secure );
+		return Framework::get( 'redirect' )->to( $to, $status, $headers, $secure );
 	}
 }
 
@@ -1724,16 +1703,16 @@ if ( !function_exists( 'request' ) )
 	 *
 	 * @param  string $key
 	 * @param  mixed $default
-	 * @return \Illuminate\Http\Request|string|array
+	 * @return Request|string|array
 	 */
 	function request( $key = null, $default = null )
 	{
 		if ( is_null( $key ) )
 		{
-			return bindings( 'request' );
+			return Framework::get( 'request' );
 		}
 
-		return bindings( 'request' )->input( $key, $default );
+		return Framework::get( 'request' )->input( $key, $default );
 	}
 }
 
@@ -1751,29 +1730,6 @@ if ( !function_exists( 'resource_path' ) )
 	}
 }
 
-if ( !function_exists( 'response' ) )
-{
-	/**
-	 * Return a new response from the application.
-	 *
-	 * @param  string $content
-	 * @param  int $status
-	 * @param  array $headers
-	 * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
-	 */
-	function response( $content = '', $status = 200, array $headers = [] )
-	{
-		$factory = bindings( ResponseFactory::class );
-
-		if ( func_num_args() === 0 )
-		{
-			return $factory;
-		}
-
-		return $factory->make( $content, $status, $headers );
-	}
-}
-
 if ( !function_exists( 'route' ) )
 {
 	/**
@@ -1786,7 +1742,7 @@ if ( !function_exists( 'route' ) )
 	 */
 	function route( $name, $parameters = [], $absolute = true )
 	{
-		return bindings( 'url' )->route( $name, $parameters, $absolute );
+		return Framework::get( 'url' )->route( $name, $parameters, $absolute );
 	}
 }
 
@@ -1834,15 +1790,15 @@ if ( !function_exists( 'session' ) )
 	{
 		if ( is_null( $key ) )
 		{
-			return bindings( 'session' );
+			return Framework::get( 'session' );
 		}
 
 		if ( is_array( $key ) )
 		{
-			return bindings( 'session' )->put( $key );
+			return Framework::get( 'session' )->put( $key );
 		}
 
-		return bindings( 'session' )->get( $key, $default );
+		return Framework::get( 'session' )->get( $key, $default );
 	}
 }
 
@@ -1869,16 +1825,16 @@ if ( !function_exists( 'trans' ) )
 	 * @param  array $parameters
 	 * @param  string $domain
 	 * @param  string $locale
-	 * @return \Symfony\Component\Translation\TranslatorInterface|string
+	 * @return TranslatorInterface|string
 	 */
 	function trans( $id = null, $parameters = [], $domain = 'messages', $locale = null )
 	{
 		if ( is_null( $id ) )
 		{
-			return bindings( 'translator' );
+			return Framework::get( 'translator' );
 		}
 
-		return bindings( 'translator' )->trans( $id, $parameters, $domain, $locale );
+		return Framework::get( 'translator' )->trans( $id, $parameters, $domain, $locale );
 	}
 }
 
@@ -1896,7 +1852,7 @@ if ( !function_exists( 'trans_choice' ) )
 	 */
 	function trans_choice( $id, $number, array $parameters = [], $domain = 'messages', $locale = null )
 	{
-		return bindings( 'translator' )->transChoice( $id, $number, $parameters, $domain, $locale );
+		return Framework::get( 'translator' )->transChoice( $id, $number, $parameters, $domain, $locale );
 	}
 }
 
@@ -1914,10 +1870,10 @@ if ( !function_exists( 'url' ) )
 	{
 		if ( is_null( $path ) )
 		{
-			return bindings( UrlGenerator::class );
+			return Framework::get( UrlGenerator::class );
 		}
 
-		return bindings( UrlGenerator::class )->to( $path, $parameters, $secure );
+		return Framework::get( UrlGenerator::class )->to( $path, $parameters, $secure );
 	}
 }
 
@@ -1930,11 +1886,11 @@ if ( !function_exists( 'validator' ) )
 	 * @param  array $rules
 	 * @param  array $messages
 	 * @param  array $customAttributes
-	 * @return \Illuminate\Contracts\Validation\Validator
+	 * @return Validator
 	 */
 	function validator( array $data = [], array $rules = [], array $messages = [], array $customAttributes = [] )
 	{
-		$factory = bindings( ValidationFactory::class );
+		$factory = Framework::get( ValidationFactory::class );
 
 		if ( func_num_args() === 0 )
 		{
@@ -1942,26 +1898,5 @@ if ( !function_exists( 'validator' ) )
 		}
 
 		return $factory->make( $data, $rules, $messages, $customAttributes );
-	}
-}
-
-if ( !function_exists( 'view' ) )
-{
-	/**
-	 * Get the evaluated view contents for the given view.
-	 *
-	 * @param  string $view
-	 * @param  array $data
-	 * @param  array $mergeData
-	 * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
-	 */
-	function view( $view = null, $data = [], $mergeData = [] )
-	{
-		$factory = bindings( ViewFactory::class );
-
-		if ( func_num_args() === 0 )
-			return $factory;
-
-		return $factory->make( $view, $data, $mergeData );
 	}
 }

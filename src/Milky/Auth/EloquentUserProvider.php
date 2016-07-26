@@ -1,9 +1,9 @@
 <?php namespace Milky\Auth;
 
+use Milky\Auth\Authenticatable as UserContract;
+use Milky\Database\Eloquent\Model;
+use Milky\Hashing\BcryptHasher as Hasher;
 use Milky\Helpers\Str;
-use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Contracts\Hashing\Hasher as HasherContract;
-use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 
 class EloquentUserProvider implements UserProvider
 {
@@ -28,7 +28,7 @@ class EloquentUserProvider implements UserProvider
 	 * @param  string $model
 	 * @return void
 	 */
-	public function __construct( HasherContract $hasher, $model )
+	public function __construct( Hasher $hasher, $model )
 	{
 		$this->model = $model;
 		$this->hasher = $hasher;
@@ -144,7 +144,7 @@ class EloquentUserProvider implements UserProvider
 	 * @param  Hasher $hasher
 	 * @return $this
 	 */
-	public function setHasher( HasherContract $hasher )
+	public function setHasher( Hasher $hasher )
 	{
 		$this->hasher = $hasher;
 

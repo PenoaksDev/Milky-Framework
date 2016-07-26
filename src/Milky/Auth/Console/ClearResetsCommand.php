@@ -1,6 +1,6 @@
 <?php namespace Milky\Auth\Console;
 
-use Illuminate\Console\Command;
+use Milky\Console\Command;
 
 class ClearResetsCommand extends Command
 {

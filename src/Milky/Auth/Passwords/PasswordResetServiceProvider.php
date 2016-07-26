@@ -1,6 +1,6 @@
 <?php namespace Milky\Auth\Passwords;
 
-use Illuminate\Support\ServiceProvider;
+use Milky\Support\ServiceProvider;
 
 class PasswordResetServiceProvider extends ServiceProvider
 {

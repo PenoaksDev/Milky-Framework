@@ -5,17 +5,17 @@ class PostgresBuilder extends Builder
 	/**
 	 * Determine if the given table exists.
 	 *
-	 * @param  string $table
+	 * @param  string  $table
 	 * @return bool
 	 */
-	public function hasTable( $table )
+	public function hasTable($table)
 	{
 		$sql = $this->grammar->compileTableExists();
 
-		$schema = $this->connection->getConfig( 'schema' );
+		$schema = $this->connection->getConfig('schema');
 
-		$table = $this->connection->getTablePrefix() . $table;
+		$table = $this->connection->getTablePrefix().$table;
 
-		return count( $this->connection->select( $sql, [$schema, $table] ) ) > 0;
+		return count($this->connection->select($sql, [$schema, $table])) > 0;
 	}
 }

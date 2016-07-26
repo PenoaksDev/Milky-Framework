@@ -1,6 +1,7 @@
-<?php namespace Milky;
+<?php namespace Milky\Binding;
 
-use Milky\Exceptions\FrameworkException;
+use Milky\Exceptions\BindingException;
+use Milky\Framework;
 use Milky\Helpers\Arr;
 
 /**
@@ -70,8 +71,30 @@ trait Globals
 		static::set( $key, $value );
 	}
 
+	public static function available( $key )
+	{
+		return array_key_exists( $key, static::$aliases ) || Arr::exists( static::$globals, $key );
+	}
+
+	/**
+	 * Gets globals by their final class
+	 *
+	 * @param string $class
+	 * @return array
+	 */
+	public static function getByClass( $class )
+	{
+		$results = [];
+		foreach ( static::$globals as $k => $v )
+			if ( $v instanceof $class )
+				$results[$k] = $v;
+		return $results;
+	}
+
 	public static function get( $key )
 	{
+		static::fw()->hooks->trigger( 'binding.get', $key );
+
 		if ( array_key_exists( $key, static::$aliases ) )
 			$key = static::$aliases[$key];
 
@@ -79,18 +102,20 @@ trait Globals
 
 		if ( is_null( $value ) )
 		{
-			static::fw()->hooks->trigger( 'binding.failed', $key );
+			Framework::hooks()->trigger( 'binding.failed', ['binding' => $key] );
 
 			$value = Arr::get( static::$globals, $key );
 			if ( is_null( $value ) )
-				throw new FrameworkException( "There is no binding available for key [" . $key . "]" );
+				throw new BindingException( "There is no binding available for key [" . $key . "]" );
 		}
 
+		if ( $value instanceof \Closure )
+			return BindingBuilder::call( $value );
 		return $value;
 	}
 
 	public static function set( $key, $value )
 	{
-		Arr::set( static::$globals, $key, $value );
+		Arr::setWithException( static::$globals, $key, $value );
 	}
 }

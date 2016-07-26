@@ -1,5 +1,6 @@
 <?php namespace Milky\Http\Session;
 
+use Milky\Database\Connection;
 use Milky\Framework;
 use Milky\Impl\Manager;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NullSessionHandler;

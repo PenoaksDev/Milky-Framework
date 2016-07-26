@@ -2,5 +2,5 @@
 
 class TransactionBeginning extends ConnectionEvent
 {
-    //
-
+	//
+}

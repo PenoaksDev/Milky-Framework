@@ -1,5 +1,6 @@
 <?php namespace Milky\Facades;
 
+use Milky\Binding\BindingBuilder;
 use Milky\Framework;
 
 /**
@@ -13,7 +14,7 @@ use Milky\Framework;
 abstract class BaseFacade
 {
 	/**
-	 * @var \stdClass
+	 * @var mixed
 	 */
 	protected $scaffold;
 
@@ -100,10 +101,18 @@ abstract class BaseFacade
 
 		try
 		{
-			return call_user_func_array( [$self->scaffold, $method], $args );
+			// return call_user_func_array( [$self->scaffold, $method], $args );
+
+			/**
+			 * We use reflections to invoke the method so we can exclusively catch the ReflectionException if something goes wrong.
+			 */
+			$reflection = new \ReflectionMethod( get_class( $self->scaffold ), $method );
+			return $reflection->invokeArgs( $self->scaffold, $args );
 		}
-		catch ( \Exception $e )
+		catch ( \ReflectionException $e )
 		{
+			if ( method_exists( $self->scaffold, '__call' ) )
+				return $self->scaffold->__call( $method, $args );
 			throw new \RuntimeException( "Failed to call dynamic method [" . $method . "] from scaffold class [" . get_class( $self->scaffold ) . "], does it exist?" );
 		}
 	}

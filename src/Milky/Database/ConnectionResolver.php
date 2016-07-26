@@ -19,27 +19,25 @@ class ConnectionResolver implements ConnectionResolverInterface
 	/**
 	 * Create a new connection resolver instance.
 	 *
-	 * @param  array $connections
+	 * @param  array  $connections
 	 * @return void
 	 */
-	public function __construct( array $connections = [] )
+	public function __construct(array $connections = [])
 	{
-		foreach ( $connections as $name => $connection )
-		{
-			$this->addConnection( $name, $connection );
+		foreach ($connections as $name => $connection) {
+			$this->addConnection($name, $connection);
 		}
 	}
 
 	/**
 	 * Get a database connection instance.
 	 *
-	 * @param  string $name
+	 * @param  string  $name
 	 * @return ConnectionInterface
 	 */
-	public function connection( $name = null )
+	public function connection($name = null)
 	{
-		if ( is_null( $name ) )
-		{
+		if (is_null($name)) {
 			$name = $this->getDefaultConnection();
 		}
 
@@ -49,11 +47,11 @@ class ConnectionResolver implements ConnectionResolverInterface
 	/**
 	 * Add a connection to the resolver.
 	 *
-	 * @param  string $name
-	 * @param  ConnectionInterface $connection
+	 * @param  string  $name
+	 * @param ConnectionInterface  $connection
 	 * @return void
 	 */
-	public function addConnection( $name, ConnectionInterface $connection )
+	public function addConnection($name, ConnectionInterface $connection)
 	{
 		$this->connections[$name] = $connection;
 	}
@@ -61,12 +59,12 @@ class ConnectionResolver implements ConnectionResolverInterface
 	/**
 	 * Check if a connection has been registered.
 	 *
-	 * @param  string $name
+	 * @param  string  $name
 	 * @return bool
 	 */
-	public function hasConnection( $name )
+	public function hasConnection($name)
 	{
-		return isset( $this->connections[$name] );
+		return isset($this->connections[$name]);
 	}
 
 	/**
@@ -82,10 +80,10 @@ class ConnectionResolver implements ConnectionResolverInterface
 	/**
 	 * Set the default connection name.
 	 *
-	 * @param  string $name
+	 * @param  string  $name
 	 * @return void
 	 */
-	public function setDefaultConnection( $name )
+	public function setDefaultConnection($name)
 	{
 		$this->default = $name;
 	}

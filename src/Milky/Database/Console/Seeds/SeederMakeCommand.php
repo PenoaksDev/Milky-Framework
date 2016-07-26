@@ -1,94 +1,94 @@
 <?php namespace Milky\Database\Console\Seeds;
 
-use Illuminate\Support\Composer;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Console\GeneratorCommand;
+use Milky\Impl\Composer;
+use Milky\Filesystem\Filesystem;
+use Milky\Console\GeneratorCommand;
 
 class SeederMakeCommand extends GeneratorCommand
 {
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $name = 'make:seeder';
+	/**
+	 * The console command name.
+	 *
+	 * @var string
+	 */
+	protected $name = 'make:seeder';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a new seeder class';
+	/**
+	 * The console command description.
+	 *
+	 * @var string
+	 */
+	protected $description = 'Create a new seeder class';
 
-    /**
-     * The type of class being generated.
-     *
-     * @var string
-     */
-    protected $type = 'Seeder';
+	/**
+	 * The type of class being generated.
+	 *
+	 * @var string
+	 */
+	protected $type = 'Seeder';
 
-    /**
-     * The Composer instance.
-     *
-     * @var Composer
-     */
-    protected $composer;
+	/**
+	 * The Composer instance.
+	 *
+	 * @var Composer
+	 */
+	protected $composer;
 
-    /**
-     * Create a new command instance.
-     *
-     * @param  Filesystem  $files
-     * @param  Composer  $composer
-     * @return void
-     */
-    public function __construct(Filesystem $files, Composer $composer)
-    {
-        parent::__construct($files);
+	/**
+	 * Create a new command instance.
+	 *
+	 * @param Filesystem  $files
+	 * @param Composer  $composer
+	 * @return void
+	 */
+	public function __construct(Filesystem $files, Composer $composer)
+	{
+		parent::__construct($files);
 
-        $this->composer = $composer;
+		$this->composer = $composer;
 	}
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
-    public function fire()
-    {
-        parent::fire();
+	/**
+	 * Execute the console command.
+	 *
+	 * @return void
+	 */
+	public function fire()
+	{
+		parent::fire();
 
-        $this->composer->dumpAutoloads();
+		$this->composer->dumpAutoloads();
 	}
 
-    /**
-     * Get the stub file for the generator.
-     *
-     * @return string
-     */
-    protected function getStub()
-    {
-        return __DIR__.'/stubs/seeder.stub';
+	/**
+	 * Get the stub file for the generator.
+	 *
+	 * @return string
+	 */
+	protected function getStub()
+	{
+		return __DIR__.'/stubs/seeder.stub';
 	}
 
-    /**
-     * Get the destination class path.
-     *
-     * @param  string  $name
-     * @return string
-     */
-    protected function getPath($name)
-    {
-        return $this->laravel->databasePath().'/seeds/'.$name.'.php';
+	/**
+	 * Get the destination class path.
+	 *
+	 * @param  string  $name
+	 * @return string
+	 */
+	protected function getPath($name)
+	{
+		return $this->laravel->databasePath().'/seeds/'.$name.'.php';
 	}
 
-    /**
-     * Parse the name and format according to the root namespace.
-     *
-     * @param  string  $name
-     * @return string
-     */
-    protected function parseName($name)
-    {
-        return $name;
+	/**
+	 * Parse the name and format according to the root namespace.
+	 *
+	 * @param  string  $name
+	 * @return string
+	 */
+	protected function parseName($name)
+	{
+		return $name;
 	}
-
+}

@@ -2,8 +2,8 @@
 
 use Carbon\Carbon;
 use Milky\Helpers\Str;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Milky\Database\ConnectionInterface;
+use Milky\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 class DatabaseTokenRepository implements TokenRepositoryInterface
 {

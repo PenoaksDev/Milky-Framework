@@ -17,7 +17,6 @@ trait HandlesAuthorization
 	 * Throws an unauthorized exception.
 	 *
 	 * @param  string $message
-	 * @return void
 	 *
 	 * @throws AuthorizationException
 	 */

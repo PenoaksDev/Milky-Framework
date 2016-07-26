@@ -8,14 +8,14 @@ trait DetectsLostConnections
 	/**
 	 * Determine if the given exception was caused by a lost connection.
 	 *
-	 * @param  \Exception $e
+	 * @param  \Exception  $e
 	 * @return bool
 	 */
-	protected function causedByLostConnection( Exception $e )
+	protected function causedByLostConnection(Exception $e)
 	{
 		$message = $e->getMessage();
 
-		return Str::contains( $message, [
+		return Str::contains($message, [
 			'server has gone away',
 			'no connection to the server',
 			'Lost connection',
@@ -27,6 +27,6 @@ trait DetectsLostConnections
 			'Deadlock found when trying to get lock',
 			'Error writing data to the connection',
 			'Resource deadlock avoided',
-		] );
+		]);
 	}
 }

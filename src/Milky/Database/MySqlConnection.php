@@ -1,13 +1,9 @@
 <?php namespace Milky\Database;
 
-
 use Milky\Database\Schema\MySqlBuilder;
-
 use Milky\Database\Query\Processors\MySqlProcessor;
 use Doctrine\DBAL\Driver\PDOMySql\Driver as DoctrineDriver;
-
 use Milky\Database\Query\Grammars\MySqlGrammar as QueryGrammar;
-
 use Milky\Database\Schema\Grammars\MySqlGrammar as SchemaGrammar;
 
 class MySqlConnection extends Connection
@@ -19,12 +15,11 @@ class MySqlConnection extends Connection
 	 */
 	public function getSchemaBuilder()
 	{
-		if ( is_null( $this->schemaGrammar ) )
-		{
+		if (is_null($this->schemaGrammar)) {
 			$this->useDefaultSchemaGrammar();
 		}
 
-		return new MySqlBuilder( $this );
+		return new MySqlBuilder($this);
 	}
 
 	/**
@@ -34,7 +29,7 @@ class MySqlConnection extends Connection
 	 */
 	protected function getDefaultQueryGrammar()
 	{
-		return $this->withTablePrefix( new QueryGrammar );
+		return $this->withTablePrefix(new QueryGrammar);
 	}
 
 	/**
@@ -44,7 +39,7 @@ class MySqlConnection extends Connection
 	 */
 	protected function getDefaultSchemaGrammar()
 	{
-		return $this->withTablePrefix( new SchemaGrammar );
+		return $this->withTablePrefix(new SchemaGrammar);
 	}
 
 	/**

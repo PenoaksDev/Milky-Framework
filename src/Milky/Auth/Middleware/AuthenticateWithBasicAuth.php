@@ -1,24 +1,25 @@
 <?php namespace Milky\Auth\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Auth\Factory as AuthFactory;
+use Milky\Auth\AuthManager;
+use Milky\Http\Request;
 
 class AuthenticateWithBasicAuth
 {
 	/**
-	 * The guard factory instance.
+	 * The guard AuthManager instance.
 	 *
-	 * @var Factory
+	 * @var AuthManager
 	 */
 	protected $auth;
 
 	/**
 	 * Create a new middleware instance.
 	 *
-	 * @param  Factory $auth
+	 * @param  AuthManager $auth
 	 * @return void
 	 */
-	public function __construct( AuthFactory $auth )
+	public function __construct( AuthManager $auth )
 	{
 		$this->auth = $auth;
 	}

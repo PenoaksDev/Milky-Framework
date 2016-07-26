@@ -2,5 +2,5 @@
 
 class TransactionCommitted extends ConnectionEvent
 {
-    //
-
+	//
+}

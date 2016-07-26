@@ -1,8 +1,8 @@
 <?php namespace Milky\Cache\Console;
 
-use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Composer;
+use Milky\Console\Command;
+use Milky\Filesystem\Filesystem;
+use Milky\Support\Composer;
 
 class CacheTableCommand extends Command
 {

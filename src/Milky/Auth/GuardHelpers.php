@@ -1,7 +1,5 @@
 <?php namespace Milky\Auth;
 
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-
 /**
  * These methods are typically the same across all guards.
  */
@@ -77,7 +75,7 @@ trait GuardHelpers
 	 * @param  Authenticatable $user
 	 * @return $this
 	 */
-	public function setUser( AuthenticatableContract $user )
+	public function setUser( Authenticatable $user )
 	{
 		$this->user = $user;
 

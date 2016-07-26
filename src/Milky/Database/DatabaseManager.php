@@ -1,21 +1,14 @@
 <?php namespace Milky\Database;
 
-use PDO;
+use InvalidArgumentException;
+use Milky\Database\Connectors\ConnectionFactory;
+use Milky\Framework;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
-use InvalidArgumentException;
-
-use Milky\Database\Connectors\ConnectionFactory;
+use PDO;
 
 class DatabaseManager implements ConnectionResolverInterface
 {
-	/**
-	 * The application instance.
-	 *
-	 * @var Application
-	 */
-	protected $app;
-
 	/**
 	 * The database connection factory instance.
 	 *
@@ -40,13 +33,11 @@ class DatabaseManager implements ConnectionResolverInterface
 	/**
 	 * Create a new database manager instance.
 	 *
-	 * @param  Application $app
-	 * @param  ConnectionFactory $factory
+	 * @param ConnectionFactory $factory
 	 * @return void
 	 */
-	public function __construct( $app, ConnectionFactory $factory )
+	public function __construct( ConnectionFactory $factory )
 	{
-		$this->app = $app;
 		$this->factory = $factory;
 	}
 
@@ -180,17 +171,12 @@ class DatabaseManager implements ConnectionResolverInterface
 	/**
 	 * Prepare the database connection instance.
 	 *
-	 * @param  Connection $connection
+	 * @param Connection $connection
 	 * @return Connection
 	 */
 	protected function prepare( Connection $connection )
 	{
-		$connection->setFetchMode( $this->app['config']['database.fetch'] );
-
-		if ( $this->app->bound( 'events' ) )
-		{
-			$connection->setEventDispatcher( $this->app['events'] );
-		}
+		$connection->setFetchMode( Framework::config()['database.fetch'] );
 
 		// Here we'll set a reconnector callback. This reconnector can be any callable
 		// so we will set a Closure to reconnect from this manager with the name of
@@ -206,7 +192,7 @@ class DatabaseManager implements ConnectionResolverInterface
 	/**
 	 * Prepare the read write mode for database connection instance.
 	 *
-	 * @param  Connection $connection
+	 * @param Connection $connection
 	 * @param  string $type
 	 * @return Connection
 	 */
@@ -239,12 +225,10 @@ class DatabaseManager implements ConnectionResolverInterface
 		// To get the database connection configuration, we will just pull each of the
 		// connection configurations and get the configurations for the given name.
 		// If the configuration doesn't exist, we'll throw an exception and bail.
-		$connections = $this->app['config']['database.connections'];
+		$connections = Framework::config()->get( 'database.connections' );
 
 		if ( is_null( $config = Arr::get( $connections, $name ) ) )
-		{
 			throw new InvalidArgumentException( "Database [$name] not configured." );
-		}
 
 		return $config;
 	}
@@ -256,7 +240,7 @@ class DatabaseManager implements ConnectionResolverInterface
 	 */
 	public function getDefaultConnection()
 	{
-		return $this->app['config']['database.default'];
+		return Framework::config()['database.default'];
 	}
 
 	/**
@@ -267,7 +251,7 @@ class DatabaseManager implements ConnectionResolverInterface
 	 */
 	public function setDefaultConnection( $name )
 	{
-		$this->app['config']['database.default'] = $name;
+		Framework::config()['database.default'] = $name;
 	}
 
 	/**

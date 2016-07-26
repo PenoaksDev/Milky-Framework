@@ -1,19 +1,16 @@
 <?php namespace Milky;
 
-use Milky\Cache\CacheManager;
-use Milky\Cache\Console\ClearCommand;
-use Milky\Cache\MemcachedConnector;
+use Milky\Binding\BindingBuilder;
+use Milky\Binding\Globals;
 use Milky\Config\Configuration;
 use Milky\Config\ConfigurationBuilder;
-use Milky\Encryption\Encrypter;
 use Milky\Exceptions\FrameworkException;
+use Milky\Exceptions\Handler;
 use Milky\Facades\Log;
-use Milky\Filesystem\Filesystem;
-use Milky\Hashing\BcryptHasher;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Hooks\HookDispatcher;
-use Milky\Http\Session\SessionManager;
+use Milky\Http\Factory;
 use Milky\Logging\LogBuilder;
 use Milky\Logging\Logger;
 use Milky\Providers\ProviderRepository;
@@ -84,6 +81,11 @@ class Framework implements \ArrayAccess
 	public $basePath;
 
 	/**
+	 * @var Handler
+	 */
+	private $handler = null;
+
+	/**
 	 * @var array
 	 */
 	private $paths = [];
@@ -108,20 +110,18 @@ class Framework implements \ArrayAccess
 
 		$this->hooks = new HookDispatcher();
 
-		$this->hooks->addHook( ['log'], function ()
-		{
-			echo "Hook 1";
-		} );
-
 		$this->paths = [
-			'src' => ['src'],
-			'config' => ['__fw', 'config'],
-			'cache' => ['__fw', 'cache'],
-			'database' => ['__fw', 'database'],
-			'logs' => ['__fw', 'logs'],
-			'lang' => ['__src', 'lang'],
-			'fw' => ['fw'],
 			'public' => ['__base'],
+			'fw' => ['__base', 'fw'],
+			'src' => ['__fw', 'src'],
+			'lang' => ['__fw', 'lang'],
+			'views' => ['__fw', 'views'],
+			'config' => ['__fw', 'config'],
+			'database' => ['__fw', 'database'],
+			'storage' => ['__fw', 'storage'],
+			'sessions' => ['__storage', 'sessions'],
+			'cache' => ['__storage', 'cache'],
+			'logs' => ['__storage', 'logs'],
 		];
 
 		$this->config = ConfigurationBuilder::build( $this );
@@ -139,7 +139,7 @@ class Framework implements \ArrayAccess
 
 		$this->registerBindingAlias();
 
-		$this->hooks->addHook( 'binding.failed', [$this, 'findServiceBinding'] );
+		new BindingBuilder( $this );
 
 		$this->hooks->trigger( 'fw.loaded', $this );
 		$this->log->info( "Milky Framework Loaded" );
@@ -148,82 +148,14 @@ class Framework implements \ArrayAccess
 	public function registerBindingAlias()
 	{
 		$this->addAlias( ['Milky\Encryption\Encrypter'], 'encrypter' );
-	}
-
-	public function findServiceBinding( $binding )
-	{
-		switch ( $binding )
-		{
-			case 'encrypter':
-			{
-				$config = $this->config->get( 'app' );
-
-				if ( Str::startsWith( $key = $config['key'], 'base64:' ) )
-					$key = base64_decode( substr( $key, 7 ) );
-
-				static::set( 'encrypter', $this->getEncrypterForKeyAndCipher( $key, $config['cipher'] ) );
-				break;
-			}
-			case 'session':
-			{
-				static::set( 'session', new SessionManager( $this ) );
-				break;
-			}
-			case 'session.store':
-			{
-				// First, we will create the session manager which is responsible for the
-				// creation of the various session drivers when they are needed by the
-				// application instance, and will resolve them on a lazy load basis.
-				static::set( 'session.store', static::get( 'session' )->driver() );
-				break;
-			}
-			case 'hash':
-				static::set( 'hash', new BcryptHasher );
-				break;
-			case 'files':
-			{
-				static::set( 'files', new Filesystem() );
-				break;
-			}
-			case 'cache':
-			{
-				static::set( 'cache', new CacheManager() );
-				break;
-			}
-			case 'cache.store':
-			{
-				static::set( 'cache.store', static::get( 'cache' )->driver() );
-				break;
-			}
-			case 'memcached.connector':
-			{
-				static::set( 'memcached.connector', new MemcachedConnector() );
-				break;
-			}
-			case 'command.cache.clear':
-			{
-				static::set( 'command.cache.clear', new ClearCommand( static::get( 'cache' ) ) );
-				// $this->console->addCommand( 'command.cache.clear' );
-				break;
-			}
-		}
-	}
-
-	/**
-	 * Get the proper encrypter instance for the given key and cipher.
-	 *
-	 * @param  string $key
-	 * @param  string $cipher
-	 * @return mixed
-	 *
-	 * @throws \RuntimeException
-	 */
-	protected function getEncrypterForKeyAndCipher( $key, $cipher )
-	{
-		if ( Encrypter::supported( $key, $cipher ) )
-			return new Encrypter( $key, $cipher );
-		else
-			throw new FrameworkException( 'No supported encrypter found. The cipher and / or key length are invalid.' );
+		$this->addAlias( ['Milky\Http\View\Factory', 'view'], 'view.factory' );
+		$this->addAlias( ['Milky\Auth\AuthManager', 'auth'], 'auth.mgr' );
+		$this->addAlias( ['Milky\Database\DatabaseManager', 'db'], 'db.mgr' );
+		$this->addAlias( ['Milky\Cache\CacheManager', 'cache'], 'cache.mgr' );
+		$this->addAlias( ['Milky\Http\Session\SessionManager', 'session'], 'session.mgr' );
+		$this->addAlias( ['Milky\Bus\Dispatcher'], 'dispatcher' );
+		$this->addAlias( ['Milky\Queue\QueueManager', 'queue'], 'queue.mgr' );
+		$this->addAlias( ['Milky\Http\Routing\UrlGenerator', 'UrlGenerator'], 'url' );
 	}
 
 	/**
@@ -232,6 +164,43 @@ class Framework implements \ArrayAccess
 	public static function fw()
 	{
 		return static::$globals['fw'];
+	}
+
+	/**
+	 * @return HookDispatcher
+	 */
+	public static function hooks()
+	{
+		return static::fw()->hooks;
+	}
+
+	/**
+	 * @return Logger
+	 */
+	public static function log()
+	{
+		return static::fw()->log;
+	}
+
+	/**
+	 * Set internal exception handler
+	 *
+	 * @param Handler $handler
+	 */
+	public function setExceptionHandler( Handler $handler )
+	{
+		$this->handler = $handler;
+	}
+
+	/**
+	 * @return Handler
+	 */
+	public static function exceptionHandler()
+	{
+		$fw = static::fw();
+		if ( is_null( $fw->handler ) )
+			$fw->handler = new Handler();
+		return $fw->handler;
 	}
 
 	/**
@@ -262,9 +231,13 @@ class Framework implements \ArrayAccess
 		return $this->isBooted;
 	}
 
-	public function newHttpFactory()
+	public function newHttpFactory( $request = null )
 	{
-		return new Http\Factory( $this );
+		$factory = new Http\Factory( $this, $request );
+		static::set( 'http.factory', $factory );
+		$this->hooks->trigger( 'http.factory.create', compact('factory') );
+
+		return $factory;
 	}
 
 	public function getProduct()
@@ -319,7 +292,7 @@ class Framework implements \ArrayAccess
 
 			return $this->buildPath( $slugs );
 		}
-		else
+		else if ( !Str::startsWith( $slugs[0], '/' ) )
 			$slugs = Arr::prepend( $slugs, $this->basePath );
 
 		return implode( DIRECTORY_SEPARATOR, $slugs );
@@ -356,6 +329,11 @@ class Framework implements \ArrayAccess
 	public function getMonologConfigurator()
 	{
 		return $this->monologConfigurator;
+	}
+
+	public static function config()
+	{
+		return static::fw()->config;
 	}
 
 	/**

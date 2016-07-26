@@ -1,8 +1,8 @@
 <?php namespace Milky\Http\Session;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Contracts\Container\Container;
+use Milky\Contracts\Auth\Guard;
+use Milky\Contracts\Container\Container;
 
 use Milky\Database\ConnectionInterface;
 use SessionHandlerInterface;

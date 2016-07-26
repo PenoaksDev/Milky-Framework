@@ -1,7 +1,7 @@
 <?php namespace Milky\Auth;
 
-use Illuminate\Contracts\Auth\UserProvider;
 use InvalidArgumentException;
+use Milky\Framework;
 
 trait CreatesUserProviders
 {
@@ -22,12 +22,10 @@ trait CreatesUserProviders
 	 */
 	public function createUserProvider( $provider )
 	{
-		$config = $this->app['config']['auth.providers.' . $provider];
+		$config = Framework::config()->get( 'auth.providers.' . $provider );
 
 		if ( isset( $this->customProviderCreators[$config['driver']] ) )
-		{
-			return call_user_func( $this->customProviderCreators[$config['driver']], $this->app, $config );
-		}
+			return call_user_func( $this->customProviderCreators[$config['driver']], $config );
 
 		switch ( $config['driver'] )
 		{
@@ -48,9 +46,9 @@ trait CreatesUserProviders
 	 */
 	protected function createDatabaseProvider( $config )
 	{
-		$connection = $this->app['db']->connection();
+		$connection = Framework::get( 'db' )->connection();
 
-		return new DatabaseUserProvider( $connection, $this->app['hash'], $config['table'] );
+		return new DatabaseUserProvider( $connection, Framework::get('hash'), $config['table'] );
 	}
 
 	/**
@@ -61,6 +59,6 @@ trait CreatesUserProviders
 	 */
 	protected function createEloquentProvider( $config )
 	{
-		return new EloquentUserProvider( $this->app['hash'], $config['model'] );
+		return new EloquentUserProvider( Framework::get('hash'), $config['model'] );
 	}
 }

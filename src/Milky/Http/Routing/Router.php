@@ -1,15 +1,14 @@
 <?php namespace Milky\Http\Routing;
 
 use Closure;
-use Illuminate\Contracts\Routing\Registrar as RegistrarContract;
-
+use Milky\Binding\BindingBuilder;
 use Milky\Database\Eloquent\Model;
-use Illuminate\Http\Response;
-use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Collection;
+use Milky\Framework;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Http\Request;
+use Milky\Http\Response;
+use Milky\Impl\Collection;
 use Milky\Pipeline\Pipeline;
 use Milky\Traits\Macroable;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
@@ -25,16 +24,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class Router implements RegistrarContract
+class Router
 {
 	use Macroable;
-
-	/**
-	 * The event dispatcher instance.
-	 *
-	 * @var Dispatcher
-	 */
-	protected $events;
 
 	/**
 	 * The route collection instance.
@@ -101,13 +93,9 @@ class Router implements RegistrarContract
 
 	/**
 	 * Create a new Router instance.
-	 *
-	 * @param  Dispatcher $events
-	 * @param  Container $container
 	 */
-	public function __construct( $events )
+	public function __construct()
 	{
-		$this->events = $events;
 		$this->routes = new RouteCollection;
 
 		$this->bind( '_missing', function ( $v )
@@ -888,7 +876,7 @@ class Router implements RegistrarContract
 	 */
 	public function matched( $callback )
 	{
-		$this->events->listen( RouteMatched::class, $callback );
+		Framework::hooks()->addHook( 'router.route.matched', $callback );
 	}
 
 	/**
@@ -981,27 +969,21 @@ class Router implements RegistrarContract
 		$this->bind( $key, function ( $value ) use ( $class, $callback )
 		{
 			if ( is_null( $value ) )
-			{
-				return;
-			}
+				return null;
 
 			// For model binders, we will attempt to retrieve the models using the first
 			// method on the model instance. If we cannot retrieve the models we'll
 			// throw a not found exception otherwise we will return the instance.
-			$instance = $this->bindings->make( $class );
+			$instance = BindingBuilder::resolveBinding( $class );
 
 			if ( $model = $instance->where( $instance->getRouteKeyName(), $value )->first() )
-			{
 				return $model;
-			}
 
 			// If a callback was supplied to the method we will call that to determine
 			// what we should do when the model is not found. This just gives these
 			// developer a little greater flexibility to decide what will happen.
 			if ( $callback instanceof Closure )
-			{
 				return call_user_func( $callback, $value );
-			}
 
 			throw new NotFoundHttpException;
 		} );
@@ -1040,7 +1022,7 @@ class Router implements RegistrarContract
 
 			$method = count( $segments ) == 2 ? $segments[1] : 'bind';
 
-			$callable = [$this->bindings->make( $segments[0] ), $method];
+			$callable = [BindingBuilder::resolveBinding( $segments[0] ), $method];
 
 			return call_user_func( $callable, $value, $route );
 		};
@@ -1080,13 +1062,9 @@ class Router implements RegistrarContract
 	public function prepareResponse( $request, $response )
 	{
 		if ( $response instanceof PsrResponseInterface )
-		{
 			$response = ( new HttpFoundationFactory )->createResponse( $response );
-		}
 		elseif ( !$response instanceof SymfonyResponse )
-		{
 			$response = new Response( $response );
-		}
 
 		return $response->prepare( $request );
 	}
@@ -1202,9 +1180,7 @@ class Router implements RegistrarContract
 	public function currentRouteAction()
 	{
 		if ( !$this->current() )
-		{
-			return;
-		}
+			return null;
 
 		$action = $this->current()->getAction();
 
@@ -1220,12 +1196,8 @@ class Router implements RegistrarContract
 	public function uses()
 	{
 		foreach ( func_get_args() as $pattern )
-		{
 			if ( Str::is( $pattern, $this->currentRouteAction() ) )
-			{
 				return true;
-			}
-		}
 
 		return false;
 	}
@@ -1269,9 +1241,7 @@ class Router implements RegistrarContract
 	public function setRoutes( RouteCollection $routes )
 	{
 		foreach ( $routes as $route )
-		{
-			$route->setRouter( $this )->setContainer( $this->bindings );
-		}
+			$route->setRouter( $this );
 
 		$this->routes = $routes;
 	}

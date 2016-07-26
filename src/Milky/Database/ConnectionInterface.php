@@ -1,129 +1,133 @@
 <?php namespace Milky\Database;
 
 use Closure;
+use Milky\Database\Query\Builder;
 
 interface ConnectionInterface
 {
 	/**
 	 * Begin a fluent query against a database table.
 	 *
-	 * @param  string $table
+	 * @param  string  $table
 	 * @return Builder
 	 */
-	public function table( $table );
+	public function table($table);
 
 	/**
 	 * Get a new raw query expression.
 	 *
-	 * @param  mixed $value
+	 * @param  mixed  $value
 	 * @return Expression
 	 */
-	public function raw( $value );
+	public function raw($value);
 
 	/**
 	 * Run a select statement and return a single result.
 	 *
-	 * @param  string $query
-	 * @param  array $bindings
+	 * @param  string  $query
+	 * @param  array   $bindings
 	 * @return mixed
 	 */
-	public function selectOne( $query, $bindings = [] );
+	public function selectOne($query, $bindings = []);
 
 	/**
 	 * Run a select statement against the database.
 	 *
-	 * @param  string $query
-	 * @param  array $bindings
+	 * @param  string  $query
+	 * @param  array   $bindings
 	 * @return array
 	 */
-	public function select( $query, $bindings = [] );
+	public function select($query, $bindings = []);
 
 	/**
 	 * Run an insert statement against the database.
 	 *
-	 * @param  string $query
-	 * @param  array $bindings
+	 * @param  string  $query
+	 * @param  array   $bindings
 	 * @return bool
 	 */
-	public function insert( $query, $bindings = [] );
+	public function insert($query, $bindings = []);
 
 	/**
 	 * Run an update statement against the database.
 	 *
-	 * @param  string $query
-	 * @param  array $bindings
+	 * @param  string  $query
+	 * @param  array   $bindings
 	 * @return int
 	 */
-	public function update( $query, $bindings = [] );
+	public function update($query, $bindings = []);
 
 	/**
 	 * Run a delete statement against the database.
 	 *
-	 * @param  string $query
-	 * @param  array $bindings
+	 * @param  string  $query
+	 * @param  array   $bindings
 	 * @return int
 	 */
-	public function delete( $query, $bindings = [] );
+	public function delete($query, $bindings = []);
 
 	/**
 	 * Execute an SQL statement and return the boolean result.
 	 *
-	 * @param  string $query
-	 * @param  array $bindings
+	 * @param  string  $query
+	 * @param  array   $bindings
 	 * @return bool
 	 */
-	public function statement( $query, $bindings = [] );
+	public function statement($query, $bindings = []);
 
 	/**
 	 * Run an SQL statement and get the number of rows affected.
 	 *
-	 * @param  string $query
-	 * @param  array $bindings
+	 * @param  string  $query
+	 * @param  array   $bindings
 	 * @return int
 	 */
-	public function affectingStatement( $query, $bindings = [] );
+	public function affectingStatement($query, $bindings = []);
 
 	/**
 	 * Run a raw, unprepared query against the PDO connection.
 	 *
-	 * @param  string $query
+	 * @param  string  $query
 	 * @return bool
 	 */
-	public function unprepared( $query );
+	public function unprepared($query);
 
 	/**
 	 * Prepare the query bindings for execution.
 	 *
-	 * @param  array $bindings
+	 * @param  array  $bindings
 	 * @return array
 	 */
-	public function prepareBindings( array $bindings );
+	public function prepareBindings(array $bindings);
 
 	/**
 	 * Execute a Closure within a transaction.
 	 *
-	 * @param  \Closure $callback
+	 * @param  \Closure  $callback
 	 * @return mixed
 	 *
 	 * @throws \Throwable
 	 */
-	public function transaction( Closure $callback );
+	public function transaction(Closure $callback);
 
 	/**
 	 * Start a new database transaction.
 	 *
+	 * @return void
 	 */
 	public function beginTransaction();
 
 	/**
 	 * Commit the active database transaction.
 	 *
+	 * @return void
 	 */
 	public function commit();
 
 	/**
 	 * Rollback the active database transaction.
 	 *
+	 * @return void
 	 */
 	public function rollBack();
 
@@ -137,8 +141,8 @@ interface ConnectionInterface
 	/**
 	 * Execute the given callback in "dry run" mode.
 	 *
-	 * @param  \Closure $callback
+	 * @param  \Closure  $callback
 	 * @return array
 	 */
-	public function pretend( Closure $callback );
+	public function pretend(Closure $callback);
 }

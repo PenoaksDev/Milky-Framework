@@ -2,5 +2,5 @@
 
 class TransactionRolledBack extends ConnectionEvent
 {
-    //
-
+	//
+}

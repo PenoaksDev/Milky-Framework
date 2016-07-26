@@ -2,364 +2,384 @@
 
 use LogicException;
 use Milky\Helpers\Arr;
-use Illuminate\Contracts\Queue\QueueableCollection;
-use Illuminate\Support\Collection as BaseCollection;
+use Milky\Impl\Collection as BaseCollection;
+use Milky\Queue\Impl\QueueableCollection;
 
 class Collection extends BaseCollection implements QueueableCollection
 {
-    /**
-     * Find a model in the collection by key.
-     *
-     * @param  mixed  $key
-     * @param  mixed  $default
-     * @return Model
-     */
-    public function find($key, $default = null)
-    {
-        if ($key instanceof Model) {
-            $key = $key->getKey();
-    	}
+	/**
+	 * Find a model in the collection by key.
+	 *
+	 * @param  mixed $key
+	 * @param  mixed $default
+	 * @return Model
+	 */
+	public function find( $key, $default = null )
+	{
+		if ( $key instanceof Model )
+		{
+			$key = $key->getKey();
+		}
 
-        return Arr::first($this->items, function ($itemKey, $model) use ($key) {
-            return $model->getKey() == $key;
-        , $default);
+		return Arr::first( $this->items, function ( $itemKey, $model ) use ( $key )
+		{
+			return $model->getKey() == $key;
+		}, $default );
 	}
 
-    /**
-     * Load a set of relationships onto the collection.
-     *
-     * @param  mixed  $relations
-     * @return $this
-     */
-    public function load($relations)
-    {
-        if (count($this->items) > 0) {
-            if (is_string($relations)) {
-                $relations = func_get_args();
-        	}
+	/**
+	 * Load a set of relationships onto the collection.
+	 *
+	 * @param  mixed $relations
+	 * @return $this
+	 */
+	public function load( $relations )
+	{
+		if ( count( $this->items ) > 0 )
+		{
+			if ( is_string( $relations ) )
+			{
+				$relations = func_get_args();
+			}
 
-            $query = $this->first()->newQuery()->with($relations);
+			$query = $this->first()->newQuery()->with( $relations );
 
-            $this->items = $query->eagerLoadRelations($this->items);
-    	}
+			$this->items = $query->eagerLoadRelations( $this->items );
+		}
 
-        return $this;
+		return $this;
 	}
 
-    /**
-     * Add an item to the collection.
-     *
-     * @param  mixed  $item
-     * @return $this
-     */
-    public function add($item)
-    {
-        $this->items[] = $item;
+	/**
+	 * Add an item to the collection.
+	 *
+	 * @param  mixed $item
+	 * @return $this
+	 */
+	public function add( $item )
+	{
+		$this->items[] = $item;
 
-        return $this;
+		return $this;
 	}
 
-    /**
-     * Determine if a key exists in the collection.
-     *
-     * @param  mixed  $key
-     * @param  mixed  $value
-     * @return bool
-     */
-    public function contains($key, $value = null)
-    {
-        if (func_num_args() == 2) {
-            return parent::contains($key, $value);
-    	}
+	/**
+	 * Determine if a key exists in the collection.
+	 *
+	 * @param  mixed $key
+	 * @param  mixed $value
+	 * @return bool
+	 */
+	public function contains( $key, $value = null )
+	{
+		if ( func_num_args() == 2 )
+		{
+			return parent::contains( $key, $value );
+		}
 
-        if ($this->useAsCallable($key)) {
-            return parent::contains($key);
-    	}
+		if ( $this->useAsCallable( $key ) )
+		{
+			return parent::contains( $key );
+		}
 
-        $key = $key instanceof Model ? $key->getKey() : $key;
+		$key = $key instanceof Model ? $key->getKey() : $key;
 
-        return parent::contains(function ($k, $m) use ($key) {
-            return $m->getKey() == $key;
-		});
+		return parent::contains( function ( $k, $m ) use ( $key )
+		{
+			return $m->getKey() == $key;
+		} );
 	}
 
-    /**
-     * Get the array of primary keys.
-     *
-     * @return array
-     */
-    public function modelKeys()
-    {
-        return array_map(function ($m) {
-            return $m->getKey();
-        , $this->items);
+	/**
+	 * Get the array of primary keys.
+	 *
+	 * @return array
+	 */
+	public function modelKeys()
+	{
+		return array_map( function ( $m )
+		{
+			return $m->getKey();
+		}, $this->items );
 	}
 
-    /**
-     * Merge the collection with the given items.
-     *
-     * @param  \ArrayAccess|array  $items
-     * @return static
-     */
-    public function merge($items)
-    {
-        $dictionary = $this->getDictionary();
+	/**
+	 * Merge the collection with the given items.
+	 *
+	 * @param  \ArrayAccess|array $items
+	 * @return static
+	 */
+	public function merge( $items )
+	{
+		$dictionary = $this->getDictionary();
 
-        foreach ($items as $item) {
-            $dictionary[$item->getKey()] = $item;
-    	}
+		foreach ( $items as $item )
+		{
+			$dictionary[$item->getKey()] = $item;
+		}
 
-        return new static(array_values($dictionary));
+		return new static( array_values( $dictionary ) );
 	}
 
-    /**
-     * Diff the collection with the given items.
-     *
-     * @param  \ArrayAccess|array  $items
-     * @return static
-     */
-    public function diff($items)
-    {
-        $diff = new static;
+	/**
+	 * Diff the collection with the given items.
+	 *
+	 * @param  \ArrayAccess|array $items
+	 * @return static
+	 */
+	public function diff( $items )
+	{
+		$diff = new static;
 
-        $dictionary = $this->getDictionary($items);
+		$dictionary = $this->getDictionary( $items );
 
-        foreach ($this->items as $item) {
-            if (! isset($dictionary[$item->getKey()])) {
-                $diff->add($item);
-        	}
-    	}
+		foreach ( $this->items as $item )
+		{
+			if ( !isset( $dictionary[$item->getKey()] ) )
+			{
+				$diff->add( $item );
+			}
+		}
 
-        return $diff;
+		return $diff;
 	}
 
-    /**
-     * Intersect the collection with the given items.
-     *
-     * @param  \ArrayAccess|array  $items
-     * @return static
-     */
-    public function intersect($items)
-    {
-        $intersect = new static;
+	/**
+	 * Intersect the collection with the given items.
+	 *
+	 * @param  \ArrayAccess|array $items
+	 * @return static
+	 */
+	public function intersect( $items )
+	{
+		$intersect = new static;
 
-        $dictionary = $this->getDictionary($items);
+		$dictionary = $this->getDictionary( $items );
 
-        foreach ($this->items as $item) {
-            if (isset($dictionary[$item->getKey()])) {
-                $intersect->add($item);
-        	}
-    	}
+		foreach ( $this->items as $item )
+		{
+			if ( isset( $dictionary[$item->getKey()] ) )
+			{
+				$intersect->add( $item );
+			}
+		}
 
-        return $intersect;
+		return $intersect;
 	}
 
-    /**
-     * Return only unique items from the collection.
-     *
-     * @param  string|callable|null  $key
-     * @return static
-     */
-    public function unique($key = null)
-    {
-        if (! is_null($key)) {
-            return parent::unique($key);
-    	}
+	/**
+	 * Return only unique items from the collection.
+	 *
+	 * @param  string|callable|null $key
+	 * @return static
+	 */
+	public function unique( $key = null )
+	{
+		if ( !is_null( $key ) )
+		{
+			return parent::unique( $key );
+		}
 
-        return new static(array_values($this->getDictionary()));
+		return new static( array_values( $this->getDictionary() ) );
 	}
 
-    /**
-     * Returns only the models from the collection with the specified keys.
-     *
-     * @param  mixed  $keys
-     * @return static
-     */
-    public function only($keys)
-    {
-        $dictionary = Arr::only($this->getDictionary(), $keys);
+	/**
+	 * Returns only the models from the collection with the specified keys.
+	 *
+	 * @param  mixed $keys
+	 * @return static
+	 */
+	public function only( $keys )
+	{
+		$dictionary = Arr::only( $this->getDictionary(), $keys );
 
-        return new static(array_values($dictionary));
+		return new static( array_values( $dictionary ) );
 	}
 
-    /**
-     * Returns all models in the collection except the models with specified keys.
-     *
-     * @param  mixed  $keys
-     * @return static
-     */
-    public function except($keys)
-    {
-        $dictionary = Arr::except($this->getDictionary(), $keys);
+	/**
+	 * Returns all models in the collection except the models with specified keys.
+	 *
+	 * @param  mixed $keys
+	 * @return static
+	 */
+	public function except( $keys )
+	{
+		$dictionary = Arr::except( $this->getDictionary(), $keys );
 
-        return new static(array_values($dictionary));
+		return new static( array_values( $dictionary ) );
 	}
 
-    /**
-     * Make the given, typically visible, attributes hidden across the entire collection.
-     *
-     * @param  array|string  $attributes
-     * @return $this
-     */
-    public function makeHidden($attributes)
-    {
-        return $this->each(function ($model) use ($attributes) {
-            $model->addHidden($attributes);
-		});
+	/**
+	 * Make the given, typically visible, attributes hidden across the entire collection.
+	 *
+	 * @param  array|string $attributes
+	 * @return $this
+	 */
+	public function makeHidden( $attributes )
+	{
+		return $this->each( function ( $model ) use ( $attributes )
+		{
+			$model->addHidden( $attributes );
+		} );
 	}
 
-    /**
-     * Make the given, typically hidden, attributes visible across the entire collection.
-     *
-     * @param  array|string  $attributes
-     * @return $this
-     */
-    public function makeVisible($attributes)
-    {
-        return $this->each(function ($model) use ($attributes) {
-            $model->makeVisible($attributes);
-		});
+	/**
+	 * Make the given, typically hidden, attributes visible across the entire collection.
+	 *
+	 * @param  array|string $attributes
+	 * @return $this
+	 */
+	public function makeVisible( $attributes )
+	{
+		return $this->each( function ( $model ) use ( $attributes )
+		{
+			$model->makeVisible( $attributes );
+		} );
 	}
 
-    /**
-     * Make the given, typically hidden, attributes visible across the entire collection.
-     *
-     * @param  array|string  $attributes
-     * @return $this
-     *
-     * @deprecated since version 5.2. Use the "makeVisible" method directly.
-     */
-    public function withHidden($attributes)
-    {
-        return $this->makeVisible($attributes);
+	/**
+	 * Make the given, typically hidden, attributes visible across the entire collection.
+	 *
+	 * @param  array|string $attributes
+	 * @return $this
+	 *
+	 * @deprecated since version 5.2. Use the "makeVisible" method directly.
+	 */
+	public function withHidden( $attributes )
+	{
+		return $this->makeVisible( $attributes );
 	}
 
-    /**
-     * Get a dictionary keyed by primary keys.
-     *
-     * @param  \ArrayAccess|array|null  $items
-     * @return array
-     */
-    public function getDictionary($items = null)
-    {
-        $items = is_null($items) ? $this->items : $items;
+	/**
+	 * Get a dictionary keyed by primary keys.
+	 *
+	 * @param  \ArrayAccess|array|null $items
+	 * @return array
+	 */
+	public function getDictionary( $items = null )
+	{
+		$items = is_null( $items ) ? $this->items : $items;
 
-        $dictionary = [];
+		$dictionary = [];
 
-        foreach ($items as $value) {
-            $dictionary[$value->getKey()] = $value;
-    	}
+		foreach ( $items as $value )
+		{
+			$dictionary[$value->getKey()] = $value;
+		}
 
-        return $dictionary;
+		return $dictionary;
 	}
 
-    /**
-     * The following methods are intercepted to always return base collections.
-     */
+	/**
+	 * The following methods are intercepted to always return base collections.
+	 */
 
-    /**
-     * Get an array with the values of a given key.
-     *
-     * @param  string  $value
-     * @param  string|null  $key
-     * @return Collection
-     */
-    public function pluck($value, $key = null)
-    {
-        return $this->toBase()->pluck($value, $key);
+	/**
+	 * Get an array with the values of a given key.
+	 *
+	 * @param  string $value
+	 * @param  string|null $key
+	 * @return BaseCollection
+	 */
+	public function pluck( $value, $key = null )
+	{
+		return $this->toBase()->pluck( $value, $key );
 	}
 
-    /**
-     * Get the keys of the collection items.
-     *
-     * @return Collection
-     */
-    public function keys()
-    {
-        return $this->toBase()->keys();
+	/**
+	 * Get the keys of the collection items.
+	 *
+	 * @return BaseCollection
+	 */
+	public function keys()
+	{
+		return $this->toBase()->keys();
 	}
 
-    /**
-     * Zip the collection together with one or more arrays.
-     *
-     * @param  mixed ...$items
-     * @return Collection
-     */
-    public function zip($items)
-    {
-        return call_user_func_array([$this->toBase(), 'zip'], func_get_args());
+	/**
+	 * Zip the collection together with one or more arrays.
+	 *
+	 * @param  mixed ...$items
+	 * @return Collection
+	 */
+	public function zip( $items )
+	{
+		return call_user_func_array( [$this->toBase(), 'zip'], func_get_args() );
 	}
 
-    /**
-     * Collapse the collection of items into a single array.
-     *
-     * @return Collection
-     */
-    public function collapse()
-    {
-        return $this->toBase()->collapse();
+	/**
+	 * Collapse the collection of items into a single array.
+	 *
+	 * @return BaseCollection
+	 */
+	public function collapse()
+	{
+		return $this->toBase()->collapse();
 	}
 
-    /**
-     * Get a flattened array of the items in the collection.
-     *
-     * @param  int  $depth
-     * @return Collection
-     */
-    public function flatten($depth = INF)
-    {
-        return $this->toBase()->flatten($depth);
+	/**
+	 * Get a flattened array of the items in the collection.
+	 *
+	 * @param  int $depth
+	 * @return BaseCollection
+	 */
+	public function flatten( $depth = INF )
+	{
+		return $this->toBase()->flatten( $depth );
 	}
 
-    /**
-     * Flip the items in the collection.
-     *
-     * @return Collection
-     */
-    public function flip()
-    {
-        return $this->toBase()->flip();
+	/**
+	 * Flip the items in the collection.
+	 *
+	 * @return BaseCollection
+	 */
+	public function flip()
+	{
+		return $this->toBase()->flip();
 	}
 
-    /**
-     * Get the type of the entities being queued.
-     *
-     * @return string|null
-     */
-    public function getQueueableClass()
-    {
-        if ($this->count() === 0) {
-            return;
-    	}
+	/**
+	 * Get the type of the entities being queued.
+	 *
+	 * @return string|null
+	 */
+	public function getQueueableClass()
+	{
+		if ( $this->count() === 0 )
+		{
+			return null;
+		}
 
-        $class = get_class($this->first());
+		$class = get_class( $this->first() );
 
-        $this->each(function ($model) use ($class) {
-            if (get_class($model) !== $class) {
-                throw new LogicException('Queueing collections with multiple model types is not supported.');
-        	}
-		});
+		$this->each( function ( $model ) use ( $class )
+		{
+			if ( get_class( $model ) !== $class )
+			{
+				throw new LogicException( 'Queueing collections with multiple model types is not supported.' );
+			}
+		} );
 
-        return $class;
+		return $class;
 	}
 
-    /**
-     * Get the identifiers for all of the entities.
-     *
-     * @return array
-     */
-    public function getQueueableIds()
-    {
-        return $this->modelKeys();
+	/**
+	 * Get the identifiers for all of the entities.
+	 *
+	 * @return array
+	 */
+	public function getQueueableIds()
+	{
+		return $this->modelKeys();
 	}
 
-    /**
-     * Get a base Support collection instance from this collection.
-     *
-     * @return Collection
-     */
-    public function toBase()
-    {
-        return new BaseCollection($this->items);
+	/**
+	 * Get a base Support collection instance from this collection.
+	 *
+	 * @return BaseCollection
+	 */
+	public function toBase()
+	{
+		return new BaseCollection( $this->items );
 	}
-
+}

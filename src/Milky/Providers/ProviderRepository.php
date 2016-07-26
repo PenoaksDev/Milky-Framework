@@ -1,5 +1,6 @@
 <?php namespace Milky\Providers;
 
+use Milky\Binding\BindingBuilder;
 use Milky\Exceptions\ProviderException;
 use Milky\Facades\Log;
 use Milky\Framework;
@@ -68,38 +69,36 @@ class ProviderRepository implements \ArrayAccess
 			throw new RuntimeException( "Provides must be an instance of string or " . ServiceProvider::class );
 
 		foreach ( $this->loadedProviders as $k => $v )
-		{
 			if ( $v == $provider || $v instanceof $provider || $k == $key )
 				throw new ProviderException( "Service Provider with class [" . get_class( $provider ) . "] or key [" . $key . "] is already registered." );
 
-			$this->loadedProviders[$key] = $provider;
+		$this->loadedProviders[$key] = $provider;
 
-			if ( property_exists( $provider, 'aliases' ) )
-			{
-				/** @noinspection PhpUndefinedFieldInspection */
-				$aliases = $provider->aliases;
-				if ( is_array( $aliases ) )
-					foreach ( $aliases as $alias )
-						$this->aliases[$alias] = $key;
-				else
-					$this->aliases[$aliases] = $key;
-			}
+		if ( property_exists( $provider, 'aliases' ) )
+		{
+			/** @noinspection PhpUndefinedFieldInspection */
+			$aliases = $provider->aliases;
+			if ( is_array( $aliases ) )
+				foreach ( $aliases as $alias )
+					$this->aliases[$alias] = $key;
+			else
+				$this->aliases[$aliases] = $key;
+		}
 
-			if ( method_exists( $provider, 'register' ) )
-				call_user_func( [$provider, 'register'] );
+		if ( method_exists( $provider, 'register' ) )
+			call_user_func( [$provider, 'register'] );
 
-			Framework::fw()->hooks->trigger( 'provider.register', [$provider] );
-			Log::info( "Registered Service Provider [" . get_class( $provider ) . "]" );
+		Framework::fw()->hooks->trigger( 'provider.register', [$provider] );
+		Log::info( "Registered Service Provider [" . get_class( $provider ) . "]" );
 
-			if ( $this->isBooted )
-			{
-				$this->bootedProviders[] = $key;
-				if ( method_exists( $provider, 'boot' ) )
-					call_user_func( [$provider, 'boot'] );
+		if ( $this->isBooted )
+		{
+			$this->bootedProviders[] = $key;
+			if ( method_exists( $provider, 'boot' ) )
+				call_user_func( [$provider, 'boot'] );
 
-				Framework::fw()->hooks->trigger( 'provider.boot', [$provider] );
-				Log::info( "Booted Service Provider [" . get_class( $provider ) . "]" );
-			}
+			Framework::fw()->hooks->trigger( 'provider.boot', [$provider] );
+			Log::info( "Booted Service Provider [" . get_class( $provider ) . "]" );
 		}
 	}
 
@@ -141,7 +140,7 @@ class ProviderRepository implements \ArrayAccess
 		{
 			$this->bootedProviders[] = $key;
 			if ( method_exists( $provider, 'boot' ) )
-				call_user_func( [$provider, 'boot'] );
+				BindingBuilder::call( [$provider, 'boot'] );
 
 			Framework::fw()->hooks->trigger( 'provider.boot', [$provider] );
 			Log::info( "Booted Service Provider [" . get_class( $provider ) . "]" );

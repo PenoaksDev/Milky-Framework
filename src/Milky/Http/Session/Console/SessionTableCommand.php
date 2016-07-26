@@ -1,7 +1,7 @@
 <?php namespace Milky\Http\Session\Console;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Composer;
+use Milky\Console\Command;
+use Milky\Support\Composer;
 use Milky\Filesystem\Filesystem;
 
 class SessionTableCommand extends Command

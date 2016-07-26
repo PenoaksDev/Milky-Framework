@@ -1,7 +1,6 @@
 <?php namespace Milky\Database\Schema\Grammars;
 
-use Illuminate\Support\Fluent;
-
+use Milky\Impl\Fluent;
 use Milky\Database\Schema\Blueprint;
 
 class SqlServerGrammar extends Grammar
@@ -33,60 +32,60 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Compile the query to determine the list of columns.
 	 *
-	 * @param  string $table
+	 * @param  string  $table
 	 * @return string
 	 */
-	public function compileColumnExists( $table )
+	public function compileColumnExists($table)
 	{
 		return "select col.name from sys.columns as col
-                join sys.objects as obj on col.object_id = obj.object_id
-                where obj.type = 'U' and obj.name = '$table'";
+				join sys.objects as obj on col.object_id = obj.object_id
+				where obj.type = 'U' and obj.name = '$table'";
 	}
 
 	/**
 	 * Compile a create table command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileCreate( Blueprint $blueprint, Fluent $command )
+	public function compileCreate(Blueprint $blueprint, Fluent $command)
 	{
-		$columns = implode( ', ', $this->getColumns( $blueprint ) );
+		$columns = implode(', ', $this->getColumns($blueprint));
 
-		return 'create table ' . $this->wrapTable( $blueprint ) . " ($columns)";
+		return 'create table '.$this->wrapTable($blueprint)." ($columns)";
 	}
 
 	/**
 	 * Compile a column addition table command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileAdd( Blueprint $blueprint, Fluent $command )
+	public function compileAdd(Blueprint $blueprint, Fluent $command)
 	{
-		$table = $this->wrapTable( $blueprint );
+		$table = $this->wrapTable($blueprint);
 
-		$columns = $this->getColumns( $blueprint );
+		$columns = $this->getColumns($blueprint);
 
-		return 'alter table ' . $table . ' add ' . implode( ', ', $columns );
+		return 'alter table '.$table.' add '.implode(', ', $columns);
 	}
 
 	/**
 	 * Compile a primary key command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compilePrimary( Blueprint $blueprint, Fluent $command )
+	public function compilePrimary(Blueprint $blueprint, Fluent $command)
 	{
-		$columns = $this->columnize( $command->columns );
+		$columns = $this->columnize($command->columns);
 
-		$table = $this->wrapTable( $blueprint );
+		$table = $this->wrapTable($blueprint);
 
-		$index = $this->wrap( $command->index );
+		$index = $this->wrap($command->index);
 
 		return "alter table {$table} add constraint {$index} primary key ({$columns})";
 	}
@@ -94,17 +93,17 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Compile a unique key command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileUnique( Blueprint $blueprint, Fluent $command )
+	public function compileUnique(Blueprint $blueprint, Fluent $command)
 	{
-		$columns = $this->columnize( $command->columns );
+		$columns = $this->columnize($command->columns);
 
-		$table = $this->wrapTable( $blueprint );
+		$table = $this->wrapTable($blueprint);
 
-		$index = $this->wrap( $command->index );
+		$index = $this->wrap($command->index);
 
 		return "create unique index {$index} on {$table} ({$columns})";
 	}
@@ -112,17 +111,17 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Compile a plain index key command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileIndex( Blueprint $blueprint, Fluent $command )
+	public function compileIndex(Blueprint $blueprint, Fluent $command)
 	{
-		$columns = $this->columnize( $command->columns );
+		$columns = $this->columnize($command->columns);
 
-		$table = $this->wrapTable( $blueprint );
+		$table = $this->wrapTable($blueprint);
 
-		$index = $this->wrap( $command->index );
+		$index = $this->wrap($command->index);
 
 		return "create index {$index} on {$table} ({$columns})";
 	}
@@ -130,55 +129,55 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Compile a drop table command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileDrop( Blueprint $blueprint, Fluent $command )
+	public function compileDrop(Blueprint $blueprint, Fluent $command)
 	{
-		return 'drop table ' . $this->wrapTable( $blueprint );
+		return 'drop table '.$this->wrapTable($blueprint);
 	}
 
 	/**
 	 * Compile a drop table (if exists) command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileDropIfExists( Blueprint $blueprint, Fluent $command )
+	public function compileDropIfExists(Blueprint $blueprint, Fluent $command)
 	{
-		return 'if exists (select * from INFORMATION_SCHEMA.TABLES where TABLE_NAME = \'' . $blueprint->getTable() . '\') drop table [' . $blueprint->getTable() . ']';
+		return 'if exists (select * from INFORMATION_SCHEMA.TABLES where TABLE_NAME = \''.$blueprint->getTable().'\') drop table ['.$blueprint->getTable().']';
 	}
 
 	/**
 	 * Compile a drop column command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileDropColumn( Blueprint $blueprint, Fluent $command )
+	public function compileDropColumn(Blueprint $blueprint, Fluent $command)
 	{
-		$columns = $this->wrapArray( $command->columns );
+		$columns = $this->wrapArray($command->columns);
 
-		$table = $this->wrapTable( $blueprint );
+		$table = $this->wrapTable($blueprint);
 
-		return 'alter table ' . $table . ' drop column ' . implode( ', ', $columns );
+		return 'alter table '.$table.' drop column '.implode(', ', $columns);
 	}
 
 	/**
 	 * Compile a drop primary key command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileDropPrimary( Blueprint $blueprint, Fluent $command )
+	public function compileDropPrimary(Blueprint $blueprint, Fluent $command)
 	{
-		$table = $this->wrapTable( $blueprint );
+		$table = $this->wrapTable($blueprint);
 
-		$index = $this->wrap( $command->index );
+		$index = $this->wrap($command->index);
 
 		return "alter table {$table} drop constraint {$index}";
 	}
@@ -186,15 +185,15 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Compile a drop unique key command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileDropUnique( Blueprint $blueprint, Fluent $command )
+	public function compileDropUnique(Blueprint $blueprint, Fluent $command)
 	{
-		$table = $this->wrapTable( $blueprint );
+		$table = $this->wrapTable($blueprint);
 
-		$index = $this->wrap( $command->index );
+		$index = $this->wrap($command->index);
 
 		return "drop index {$index} on {$table}";
 	}
@@ -202,15 +201,15 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Compile a drop index command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileDropIndex( Blueprint $blueprint, Fluent $command )
+	public function compileDropIndex(Blueprint $blueprint, Fluent $command)
 	{
-		$table = $this->wrapTable( $blueprint );
+		$table = $this->wrapTable($blueprint);
 
-		$index = $this->wrap( $command->index );
+		$index = $this->wrap($command->index);
 
 		return "drop index {$index} on {$table}";
 	}
@@ -218,15 +217,15 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Compile a drop foreign key command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileDropForeign( Blueprint $blueprint, Fluent $command )
+	public function compileDropForeign(Blueprint $blueprint, Fluent $command)
 	{
-		$table = $this->wrapTable( $blueprint );
+		$table = $this->wrapTable($blueprint);
 
-		$index = $this->wrap( $command->index );
+		$index = $this->wrap($command->index);
 
 		return "alter table {$table} drop constraint {$index}";
 	}
@@ -234,15 +233,15 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Compile a rename table command.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $command
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $command
 	 * @return string
 	 */
-	public function compileRename( Blueprint $blueprint, Fluent $command )
+	public function compileRename(Blueprint $blueprint, Fluent $command)
 	{
-		$from = $this->wrapTable( $blueprint );
+		$from = $this->wrapTable($blueprint);
 
-		return "sp_rename {$from}, " . $this->wrapTable( $command->to );
+		return "sp_rename {$from}, ".$this->wrapTable($command->to);
 	}
 
 	/**
@@ -268,10 +267,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a char type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeChar( Fluent $column )
+	protected function typeChar(Fluent $column)
 	{
 		return "nchar({$column->length})";
 	}
@@ -279,10 +278,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a string type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeString( Fluent $column )
+	protected function typeString(Fluent $column)
 	{
 		return "nvarchar({$column->length})";
 	}
@@ -290,10 +289,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a text type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeText( Fluent $column )
+	protected function typeText(Fluent $column)
 	{
 		return 'nvarchar(max)';
 	}
@@ -301,10 +300,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a medium text type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeMediumText( Fluent $column )
+	protected function typeMediumText(Fluent $column)
 	{
 		return 'nvarchar(max)';
 	}
@@ -312,10 +311,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a long text type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeLongText( Fluent $column )
+	protected function typeLongText(Fluent $column)
 	{
 		return 'nvarchar(max)';
 	}
@@ -323,10 +322,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a integer type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeInteger( Fluent $column )
+	protected function typeInteger(Fluent $column)
 	{
 		return 'int';
 	}
@@ -334,10 +333,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a big integer type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeBigInteger( Fluent $column )
+	protected function typeBigInteger(Fluent $column)
 	{
 		return 'bigint';
 	}
@@ -345,10 +344,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a medium integer type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeMediumInteger( Fluent $column )
+	protected function typeMediumInteger(Fluent $column)
 	{
 		return 'int';
 	}
@@ -356,10 +355,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a tiny integer type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeTinyInteger( Fluent $column )
+	protected function typeTinyInteger(Fluent $column)
 	{
 		return 'tinyint';
 	}
@@ -367,10 +366,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a small integer type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeSmallInteger( Fluent $column )
+	protected function typeSmallInteger(Fluent $column)
 	{
 		return 'smallint';
 	}
@@ -378,10 +377,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a float type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeFloat( Fluent $column )
+	protected function typeFloat(Fluent $column)
 	{
 		return 'float';
 	}
@@ -389,10 +388,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a double type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeDouble( Fluent $column )
+	protected function typeDouble(Fluent $column)
 	{
 		return 'float';
 	}
@@ -400,10 +399,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a decimal type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeDecimal( Fluent $column )
+	protected function typeDecimal(Fluent $column)
 	{
 		return "decimal({$column->total}, {$column->places})";
 	}
@@ -411,10 +410,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a boolean type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeBoolean( Fluent $column )
+	protected function typeBoolean(Fluent $column)
 	{
 		return 'bit';
 	}
@@ -422,10 +421,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for an enum type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeEnum( Fluent $column )
+	protected function typeEnum(Fluent $column)
 	{
 		return 'nvarchar(255)';
 	}
@@ -433,10 +432,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a json type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeJson( Fluent $column )
+	protected function typeJson(Fluent $column)
 	{
 		return 'nvarchar(max)';
 	}
@@ -444,10 +443,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a jsonb type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeJsonb( Fluent $column )
+	protected function typeJsonb(Fluent $column)
 	{
 		return 'nvarchar(max)';
 	}
@@ -455,10 +454,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a date type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeDate( Fluent $column )
+	protected function typeDate(Fluent $column)
 	{
 		return 'date';
 	}
@@ -466,10 +465,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a date-time type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeDateTime( Fluent $column )
+	protected function typeDateTime(Fluent $column)
 	{
 		return 'datetime';
 	}
@@ -477,10 +476,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a date-time type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeDateTimeTz( Fluent $column )
+	protected function typeDateTimeTz(Fluent $column)
 	{
 		return 'datetimeoffset(0)';
 	}
@@ -488,10 +487,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a time type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeTime( Fluent $column )
+	protected function typeTime(Fluent $column)
 	{
 		return 'time';
 	}
@@ -499,10 +498,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a time type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeTimeTz( Fluent $column )
+	protected function typeTimeTz(Fluent $column)
 	{
 		return 'time';
 	}
@@ -510,13 +509,12 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a timestamp type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeTimestamp( Fluent $column )
+	protected function typeTimestamp(Fluent $column)
 	{
-		if ( $column->useCurrent )
-		{
+		if ($column->useCurrent) {
 			return 'datetime default CURRENT_TIMESTAMP';
 		}
 
@@ -528,13 +526,12 @@ class SqlServerGrammar extends Grammar
 	 *
 	 * @link https://msdn.microsoft.com/en-us/library/bb630289(v=sql.120).aspx
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeTimestampTz( Fluent $column )
+	protected function typeTimestampTz(Fluent $column)
 	{
-		if ( $column->useCurrent )
-		{
+		if ($column->useCurrent) {
 			return 'datetimeoffset(0) default CURRENT_TIMESTAMP';
 		}
 
@@ -544,10 +541,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a binary type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeBinary( Fluent $column )
+	protected function typeBinary(Fluent $column)
 	{
 		return 'varbinary(max)';
 	}
@@ -555,10 +552,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a uuid type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeUuid( Fluent $column )
+	protected function typeUuid(Fluent $column)
 	{
 		return 'uniqueidentifier';
 	}
@@ -566,10 +563,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for an IP address type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeIpAddress( Fluent $column )
+	protected function typeIpAddress(Fluent $column)
 	{
 		return 'nvarchar(45)';
 	}
@@ -577,10 +574,10 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Create the column definition for a MAC address type.
 	 *
-	 * @param  Fluent $column
+	 * @param Fluent  $column
 	 * @return string
 	 */
-	protected function typeMacAddress( Fluent $column )
+	protected function typeMacAddress(Fluent $column)
 	{
 		return 'nvarchar(17)';
 	}
@@ -588,11 +585,11 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Get the SQL for a nullable column modifier.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $column
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $column
 	 * @return string|null
 	 */
-	protected function modifyNullable( Blueprint $blueprint, Fluent $column )
+	protected function modifyNullable(Blueprint $blueprint, Fluent $column)
 	{
 		return $column->nullable ? ' null' : ' not null';
 	}
@@ -600,29 +597,27 @@ class SqlServerGrammar extends Grammar
 	/**
 	 * Get the SQL for a default column modifier.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $column
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $column
 	 * @return string|null
 	 */
-	protected function modifyDefault( Blueprint $blueprint, Fluent $column )
+	protected function modifyDefault(Blueprint $blueprint, Fluent $column)
 	{
-		if ( !is_null( $column->default ) )
-		{
-			return ' default ' . $this->getDefaultValue( $column->default );
+		if (! is_null($column->default)) {
+			return ' default '.$this->getDefaultValue($column->default);
 		}
 	}
 
 	/**
 	 * Get the SQL for an auto-increment column modifier.
 	 *
-	 * @param  Blueprint $blueprint
-	 * @param  Fluent $column
+	 * @param Blueprint  $blueprint
+	 * @param Fluent  $column
 	 * @return string|null
 	 */
-	protected function modifyIncrement( Blueprint $blueprint, Fluent $column )
+	protected function modifyIncrement(Blueprint $blueprint, Fluent $column)
 	{
-		if ( in_array( $column->type, $this->serials ) && $column->autoIncrement )
-		{
+		if (in_array($column->type, $this->serials) && $column->autoIncrement) {
 			return ' identity primary key';
 		}
 	}

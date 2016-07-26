@@ -1,6 +1,8 @@
 <?php namespace Milky\Auth\Access;
 
 use InvalidArgumentException;
+use Milky\Auth\Authenticatable;
+use Milky\Binding\BindingBuilder;
 use Milky\Helpers\Str;
 
 class Gate
@@ -50,12 +52,10 @@ class Gate
 	 * @param  array $policies
 	 * @param  array $beforeCallbacks
 	 * @param  array $afterCallbacks
-	 * @return void
 	 */
 	public function __construct( callable $userResolver, array $abilities = [], array $policies = [], array $beforeCallbacks = [], array $afterCallbacks = [] )
 	{
 		$this->policies = $policies;
-		$this->container = $container;
 		$this->abilities = $abilities;
 		$this->userResolver = $userResolver;
 		$this->afterCallbacks = $afterCallbacks;
@@ -266,12 +266,10 @@ class Gate
 		$arguments = array_merge( [$user, $ability], [$arguments] );
 
 		foreach ( $this->beforeCallbacks as $before )
-		{
 			if ( !is_null( $result = call_user_func_array( $before, $arguments ) ) )
-			{
 				return $result;
-			}
-		}
+
+		return null;
 	}
 
 	/**
@@ -400,7 +398,7 @@ class Gate
 	 */
 	public function resolvePolicy( $class )
 	{
-		return $this->container->make( $class );
+		return BindingBuilder::resolveBinding( $class );
 	}
 
 	/**
@@ -416,7 +414,7 @@ class Gate
 			return $user;
 		};
 
-		return new static( $this->container, $callback, $this->abilities, $this->policies, $this->beforeCallbacks, $this->afterCallbacks );
+		return new static( $callback, $this->abilities, $this->policies, $this->beforeCallbacks, $this->afterCallbacks );
 	}
 
 	/**

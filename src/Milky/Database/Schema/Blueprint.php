@@ -1,9 +1,9 @@
 <?php namespace Milky\Database\Schema;
 
 use Closure;
-use Illuminate\Support\Fluent;
 use Milky\Database\Connection;
 use Milky\Database\Schema\Grammars\Grammar;
+use Milky\Impl\Fluent;
 
 class Blueprint
 {
@@ -72,8 +72,8 @@ class Blueprint
 	/**
 	 * Execute the blueprint against the database.
 	 *
-	 * @param  Connection $connection
-	 * @param  Grammar $grammar
+	 * @param Connection $connection
+	 * @param Grammar $grammar
 	 * @return void
 	 */
 	public function build( Connection $connection, Grammar $grammar )
@@ -87,8 +87,8 @@ class Blueprint
 	/**
 	 * Get the raw SQL statements for the blueprint.
 	 *
-	 * @param  Connection $connection
-	 * @param  Grammar $grammar
+	 * @param Connection $connection
+	 * @param Grammar $grammar
 	 * @return array
 	 */
 	public function toSql( Connection $connection, Grammar $grammar )
@@ -153,6 +153,7 @@ class Blueprint
 				if ( $column->$index === true )
 				{
 					$this->$index( $column->name );
+
 					continue 2;
 				}
 

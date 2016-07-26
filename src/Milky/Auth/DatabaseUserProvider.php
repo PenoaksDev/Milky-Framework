@@ -1,9 +1,8 @@
 <?php namespace Milky\Auth;
 
-use Illuminate\Contracts\Auth\Authenticatable as UserContract;
-use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Contracts\Hashing\Hasher as HasherContract;
-use Illuminate\Database\ConnectionInterface;
+use Milky\Auth\Authenticatable as UserContract;
+use Milky\Hashing\BcryptHasher as Hasher;
+use Milky\Database\ConnectionInterface;
 use Milky\Helpers\Str;
 
 class DatabaseUserProvider implements UserProvider
@@ -37,7 +36,7 @@ class DatabaseUserProvider implements UserProvider
 	 * @param  string $table
 	 * @return void
 	 */
-	public function __construct( ConnectionInterface $conn, HasherContract $hasher, $table )
+	public function __construct( ConnectionInterface $conn, Hasher $hasher, $table )
 	{
 		$this->conn = $conn;
 		$this->table = $table;
@@ -121,9 +120,8 @@ class DatabaseUserProvider implements UserProvider
 	protected function getGenericUser( $user )
 	{
 		if ( $user !== null )
-		{
 			return new GenericUser( (array) $user );
-		}
+		return null;
 	}
 
 	/**

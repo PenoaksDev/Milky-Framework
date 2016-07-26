@@ -1,6 +1,6 @@
 <?php namespace Milky\Auth\Events;
 
-use Illuminate\Http\Request;
+use Milky\Http\Request;
 
 class Lockout
 {

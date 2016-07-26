@@ -1,6 +1,6 @@
 <?php namespace Milky\Cache;
 
-use Illuminate\Redis\Database as Redis;
+use Milky\Redis\Database as Redis;
 
 class RedisStore extends TaggableStore implements Store
 {

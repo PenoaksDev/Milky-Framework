@@ -1,11 +1,8 @@
 <?php namespace Milky\Database;
 
-
 use Milky\Database\Query\Processors\SQLiteProcessor;
 use Doctrine\DBAL\Driver\PDOSqlite\Driver as DoctrineDriver;
-
 use Milky\Database\Query\Grammars\SQLiteGrammar as QueryGrammar;
-
 use Milky\Database\Schema\Grammars\SQLiteGrammar as SchemaGrammar;
 
 class SQLiteConnection extends Connection
@@ -17,7 +14,7 @@ class SQLiteConnection extends Connection
 	 */
 	protected function getDefaultQueryGrammar()
 	{
-		return $this->withTablePrefix( new QueryGrammar );
+		return $this->withTablePrefix(new QueryGrammar);
 	}
 
 	/**
@@ -27,7 +24,7 @@ class SQLiteConnection extends Connection
 	 */
 	protected function getDefaultSchemaGrammar()
 	{
-		return $this->withTablePrefix( new SchemaGrammar );
+		return $this->withTablePrefix(new SchemaGrammar);
 	}
 
 	/**

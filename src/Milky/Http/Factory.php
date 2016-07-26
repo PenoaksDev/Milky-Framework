@@ -3,9 +3,14 @@
 use Milky\Framework;
 use Milky\Http\Cookies\CookieJar;
 use Milky\Http\Middleware\EncryptCookies;
+use Milky\Http\Routing\Redirector;
+use Milky\Http\Routing\ResponseFactory;
 use Milky\Http\Routing\Router;
+use Milky\Http\Routing\UrlGenerator;
 use Milky\Http\Session\Middleware\StartSession;
 use Milky\Pipeline\Pipeline;
+use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+use Zend\Diactoros\Response as PsrResponse;
 
 /**
  * The MIT License (MIT)
@@ -33,18 +38,94 @@ class Factory
 	private $cookies;
 
 	/**
+	 * @var Request
+	 */
+	private $request;
+
+	/**
+	 * @var UrlGenerator
+	 */
+	private $url;
+
+	/**
+	 * @var Response
+	 */
+	private $response = null;
+
+	/**
 	 * @var array
 	 */
 	private $middleware = [];
 
-	public function __construct( Framework $fw )
+	public function __construct( Framework $fw, Request $request = null )
 	{
-		$this->fw = $fw;
+		if ( !$request )
+			$request = Request::capture();
 
-		$this->router = new Router( null );
+		$this->request = $request;
+		Framework::set( 'http.request', $request );
+
+		$this->fw = $fw;
 
 		$config = $fw->config['config']['session'];
 		$this->cookies = ( new CookieJar() )->setDefaultPathAndDomain( $config['path'], $config['domain'], $config['secure'] );
+
+		$r = new Router();
+
+		$routes = $r->getRoutes();
+
+		$url = new UrlGenerator( $routes, $request );
+
+		$url->setSessionResolver( function ()
+		{
+			return Framework::get( 'session' );
+		} );
+
+		$redirector = new Redirector( $url );
+
+		if ( Framework::available( 'session.store' ) )
+			$redirector->setSession( Framework::get( 'session.store' ) );
+
+		Framework::set( 'router', function ()
+		{
+			return $this->router();
+		} );
+
+		Framework::set( 'url', function ()
+		{
+			return $this->url();
+		} );
+
+		$this->router = $r;
+		$this->url = $url;
+
+		Framework::set( 'redirect', $redirector );
+
+		Framework::set( 'Psr\Http\Message\ServerRequestInterface', ( new DiactorosFactory() )->createRequest( $request ) );
+
+		Framework::set( 'Psr\Http\Message\ResponseInterface', new PsrResponse() );
+
+		Framework::set( 'http.factory', new ResponseFactory( Framework::get( 'view.factory' ), $redirector ) );
+
+
+	}
+
+	/**
+	 * Set the root controller namespace.
+	 *
+	 * @param  string $namespace
+	 * @return $this
+	 */
+	public function setRootControllerNamespace( $namespace )
+	{
+		$this->url->setRootControllerNamespace( $namespace );
+
+		return $this;
+	}
+
+	public function url()
+	{
+		return $this->url;
 	}
 
 	public function router()
@@ -52,25 +133,50 @@ class Factory
 		return $this->router;
 	}
 
-	public function routeRequest( $request = null )
+	public function cookieJar()
 	{
-		if ( !$request )
-			$request = Request::capture();
+		return $this->cookies;
+	}
 
+	public function routeRequest()
+	{
 		$this->addMiddleware( [
 			new EncryptCookies( Framework::get( 'encrypter' ) ),
-			new StartSession( Framework::get( 'session' ) ),
+			new StartSession( Framework::get( 'session.mgr' ) ),
 		] );
 
-		$response = ( new Pipeline() )->withExceptionHandler( function ( $passable, $e )
+		$this->router->getRoutes()->refreshNameLookups();
+
+		$this->response = ( new Pipeline() )->withExceptionHandler( function ( $request, $e )
 		{
-			throw $e; // TEMP
-		} )->send( $request )->through( $this->middleware )->then( function ( $request )
+			$handler = Framework::exceptionHandler();
+
+			$handler->report( $e );
+			return $handler->render( $request, $e );
+		} )->send( $this->request )->through( $this->middleware )->then( function ( $request )
 		{
 			return $this->router->dispatch( $request );
 		} );
 
-		return $response;
+		Framework::set( 'http.response', $this->response );
+
+		return $this->response;
+	}
+
+	/**
+	 * @return Request
+	 */
+	public function request()
+	{
+		return $this->request;
+	}
+
+	/**
+	 * @return Response
+	 */
+	public function response()
+	{
+		return $this->response;
 	}
 
 	/**

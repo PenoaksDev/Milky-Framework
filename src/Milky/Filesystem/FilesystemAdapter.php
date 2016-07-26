@@ -1,9 +1,9 @@
 <?php namespace Illuminate\Filesystem;
 
-use Illuminate\Contracts\Filesystem\Cloud as CloudFilesystemContract;
-use Illuminate\Contracts\Filesystem\FileNotFoundException as ContractFileNotFoundException;
-use Illuminate\Contracts\Filesystem\Filesystem as FilesystemContract;
-use Illuminate\Support\Collection;
+use Milky\Contracts\Filesystem\Cloud as CloudFilesystemContract;
+use Milky\Contracts\Filesystem\FileNotFoundException as ContractFileNotFoundException;
+use Milky\Contracts\Filesystem\Filesystem as FilesystemContract;
+use Milky\Support\Collection;
 use InvalidArgumentException;
 use League\Flysystem\Adapter\Local as LocalAdapter;
 use League\Flysystem\AdapterInterface;

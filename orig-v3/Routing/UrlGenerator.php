@@ -3,7 +3,7 @@ namespace Penoaks\Routing;
 
 use Illuminate\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
 use Illuminate\Contracts\Routing\UrlRoutable;
-use Illuminate\Http\Request;
+use Milky\Http\Request;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -32,7 +32,7 @@ class UrlGenerator implements UrlGeneratorContract
 	/**
 	 * The request instance.
 	 *
-	 * @var \Illuminate\Http\Request
+	 * @var \Milky\Http\Request
 	 */
 	protected $request;
 
@@ -702,7 +702,7 @@ class UrlGenerator implements UrlGeneratorContract
 	/**
 	 * Get the request instance.
 	 *
-	 * @return \Illuminate\Http\Request
+	 * @return \Milky\Http\Request
 	 */
 	public function getRequest()
 	{
@@ -712,7 +712,7 @@ class UrlGenerator implements UrlGeneratorContract
 	/**
 	 * Set the current request instance.
 	 *
-	 * @param  \Illuminate\Http\Request $request
+	 * @param  \Milky\Http\Request $request
 	 * @return void
 	 */
 	public function setRequest( Request $request )

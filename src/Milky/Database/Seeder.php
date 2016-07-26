@@ -1,17 +1,10 @@
 <?php namespace Milky\Database;
 
-use Illuminate\Console\Command;
-use Illuminate\Container\Container;
+use Milky\Console\Command;
+use Milky\Binding\BindingBuilder;
 
 abstract class Seeder
 {
-	/**
-	 * The container instance.
-	 *
-	 * @var Container
-	 */
-	protected $container;
-
 	/**
 	 * The console command instance.
 	 *
@@ -37,9 +30,7 @@ abstract class Seeder
 		$this->resolve( $class )->run();
 
 		if ( isset( $this->command ) )
-		{
 			$this->command->getOutput()->writeln( "<info>Seeded:</info> $class" );
-		}
 	}
 
 	/**
@@ -50,42 +41,18 @@ abstract class Seeder
 	 */
 	protected function resolve( $class )
 	{
-		if ( isset( $this->container ) )
-		{
-			$instance = $this->container->make( $class );
-
-			$instance->setContainer( $this->container );
-		}
-		else
-		{
-			$instance = new $class;
-		}
+		$instance = BindingBuilder::resolveBinding( $class );
 
 		if ( isset( $this->command ) )
-		{
 			$instance->setCommand( $this->command );
-		}
 
 		return $instance;
 	}
 
 	/**
-	 * Set the IoC container instance.
-	 *
-	 * @param  Container $container
-	 * @return $this
-	 */
-	public function setContainer( Container $container )
-	{
-		$this->container = $container;
-
-		return $this;
-	}
-
-	/**
 	 * Set the console command instance.
 	 *
-	 * @param  Command $command
+	 * @param Command $command
 	 * @return $this
 	 */
 	public function setCommand( Command $command )

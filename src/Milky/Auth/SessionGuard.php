@@ -1,16 +1,15 @@
 <?php namespace Milky\Auth;
 
-use RuntimeException;
+use Milky\Auth\Authenticatable as AuthenticatableContract;
+use Milky\Framework;
 use Milky\Helpers\Str;
-use Illuminate\Http\Response;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Contracts\Auth\StatefulGuard;
+use Milky\Http\Cookies\CookieJar;
+use Milky\Http\Response;
+use Milky\Http\Session\Store;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
-use Illuminate\Contracts\Auth\SupportsBasicAuth;
-use Illuminate\Contracts\Cookie\QueueingFactory as CookieJar;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
 class SessionGuard implements StatefulGuard, SupportsBasicAuth
 {
@@ -42,14 +41,14 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	/**
 	 * The session used by the guard.
 	 *
-	 * @var SessionInterface
+	 * @var Store
 	 */
 	protected $session;
 
 	/**
 	 * The Illuminate cookie creator service.
 	 *
-	 * @var QueueingFactory
+	 * @var CookieJar
 	 */
 	protected $cookie;
 
@@ -59,13 +58,6 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	 * @var Request
 	 */
 	protected $request;
-
-	/**
-	 * The event dispatcher instance.
-	 *
-	 * @var Dispatcher
-	 */
-	protected $events;
 
 	/**
 	 * Indicates if the logout method has been called.
@@ -106,9 +98,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	public function user()
 	{
 		if ( $this->loggedOut )
-		{
-			return;
-		}
+			return null;
 
 		// If we've already retrieved the user for the current request we can just
 		// return it back immediately. We do not want to fetch the user data on
@@ -158,9 +148,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	public function id()
 	{
 		if ( $this->loggedOut )
-		{
-			return;
-		}
+			return null;
 
 		$id = $this->session->get( $this->getName() );
 
@@ -190,6 +178,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 
 			return $user;
 		}
+		return null;
 	}
 
 	/**
@@ -210,9 +199,8 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	protected function getRecallerId()
 	{
 		if ( $this->validRecaller( $recaller = $this->getRecaller() ) )
-		{
 			return head( explode( '|', $recaller ) );
-		}
+		return null;
 	}
 
 	/**
@@ -224,9 +212,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	protected function validRecaller( $recaller )
 	{
 		if ( !is_string( $recaller ) || !Str::contains( $recaller, '|' ) )
-		{
 			return false;
-		}
 
 		$segments = explode( '|', $recaller );
 
@@ -272,17 +258,13 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	public function basic( $field = 'email', $extraConditions = [] )
 	{
 		if ( $this->check() )
-		{
-			return;
-		}
+			return null;
 
 		// If a username is set on the HTTP basic request, we will return out without
 		// interrupting the request lifecycle. Otherwise, we'll need to generate a
 		// request indicating that the given credentials were invalid for login.
 		if ( $this->attemptBasic( $this->getRequest(), $field, $extraConditions ) )
-		{
-			return;
-		}
+			return null;
 
 		return $this->getBasicResponse();
 	}
@@ -299,9 +281,8 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 		$credentials = $this->getBasicCredentials( $this->getRequest(), $field );
 
 		if ( !$this->once( array_merge( $credentials, $extraConditions ) ) )
-		{
 			return $this->getBasicResponse();
-		}
+		return null;
 	}
 
 	/**
@@ -423,10 +404,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	 */
 	protected function fireFailedEvent( $user, array $credentials )
 	{
-		if ( isset( $this->events ) )
-		{
-			$this->events->fire( new Events\Failed( $user, $credentials ) );
-		}
+		Framework::hooks()->trigger( 'session.failed', compact( 'user', 'credentials' ) );
 	}
 
 	/**
@@ -437,10 +415,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	 */
 	public function attempting( $callback )
 	{
-		if ( isset( $this->events ) )
-		{
-			$this->events->listen( Events\Attempting::class, $callback );
-		}
+		Framework::hooks()->trigger( 'session.attempting', compact( 'callback' ) );
 	}
 
 	/**
@@ -481,10 +456,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	 */
 	protected function fireLoginEvent( $user, $remember = false )
 	{
-		if ( isset( $this->events ) )
-		{
-			$this->events->fire( new Events\Login( $user, $remember ) );
-		}
+		Framework::hooks()->trigger( 'session.login', compact( 'user', 'remember' ) );
 	}
 
 	/**
@@ -580,14 +552,9 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 		$this->clearUserDataFromStorage();
 
 		if ( !is_null( $this->user ) )
-		{
 			$this->refreshRememberToken( $user );
-		}
 
-		if ( isset( $this->events ) )
-		{
-			$this->events->fire( new Events\Logout( $user ) );
-		}
+		Framework::hooks()->trigger( 'session.logout', compact( 'user' ) );
 
 		// Once we have fired the logout event we will clear the users out of memory
 		// so they are no longer available as the user is no longer considered as
@@ -644,7 +611,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	/**
 	 * Get the cookie creator instance used by the guard.
 	 *
-	 * @return QueueingFactory
+	 * @return CookieJar
 	 *
 	 * @throws \RuntimeException
 	 */
@@ -661,33 +628,12 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	/**
 	 * Set the cookie creator instance used by the guard.
 	 *
-	 * @param  QueueingFactory $cookie
+	 * @param  CookieJar $cookie
 	 * @return void
 	 */
 	public function setCookieJar( CookieJar $cookie )
 	{
 		$this->cookie = $cookie;
-	}
-
-	/**
-	 * Get the event dispatcher instance.
-	 *
-	 * @return Dispatcher
-	 */
-	public function getDispatcher()
-	{
-		return $this->events;
-	}
-
-	/**
-	 * Set the event dispatcher instance.
-	 *
-	 * @param  Dispatcher $events
-	 * @return void
-	 */
-	public function setDispatcher( Dispatcher $events )
-	{
-		$this->events = $events;
 	}
 
 	/**

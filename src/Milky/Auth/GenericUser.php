@@ -1,6 +1,6 @@
 <?php namespace Milky\Auth;
 
-use Illuminate\Contracts\Auth\Authenticatable as UserContract;
+use Milky\Contracts\Auth\Authenticatable as UserContract;
 
 class GenericUser implements UserContract
 {

@@ -1,6 +1,6 @@
 <?php namespace Milky\Auth\Passwords;
 
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Milky\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 interface TokenRepositoryInterface
 {
