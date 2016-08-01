@@ -14,42 +14,13 @@ return [
 	*/
 
 	'defaults' => [
-		'guard' => 'web',
-		'passwords' => 'users',
+		'auth' => 'eloquent',
+		'driver' => 'session',
 	],
 
 	/*
 	|--------------------------------------------------------------------------
-	| Authentication Guards
-	|--------------------------------------------------------------------------
-	|
-	| Next, you may define every authentication guard for your application.
-	| Of course, a great default configuration has been defined for you
-	| here which uses session storage and the Eloquent user provider.
-	|
-	| All authentication drivers have a user provider. This defines how the
-	| users are actually retrieved out of your database or other storage
-	| mechanisms used by this application to persist your user's data.
-	|
-	| Supported: "session", "token"
-	|
-	*/
-
-	'guards' => [
-		'web' => [
-			'driver' => 'session',
-			'provider' => 'users',
-		],
-
-		'api' => [
-			'driver' => 'token',
-			'provider' => 'users',
-		],
-	],
-
-	/*
-	|--------------------------------------------------------------------------
-	| User Providers
+	| Account Auths
 	|--------------------------------------------------------------------------
 	|
 	| All authentication drivers have a user provider. This defines how the
@@ -64,9 +35,10 @@ return [
 	|
 	*/
 
-	'providers' => [
-		'users' => [
-			'driver' => 'custom'
+	'auths' => [
+		'eloquent' => [
+			'usrModel' => \App\Models\User::class,
+			'grpModel' => \App\Models\Group::class,
 		],
 	],
 

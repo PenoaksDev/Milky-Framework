@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 |
 */
 
-$fw = require __DIR__ . '/fw/loader.php';
+$fw = require __DIR__ . '/loader.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -28,8 +28,6 @@ $fw = require __DIR__ . '/fw/loader.php';
 |
 */
 
-$kernel = $fw->make(
-    'Illuminate\Contracts\Console\Kernel'
-);
+$kernel = $fw->make( 'Illuminate\Contracts\Console\Kernel' );
 
-exit($kernel->handle(new ArgvInput, new ConsoleOutput));
+exit( ( new \Milky\Console() )->handle( new ArgvInput, new ConsoleOutput ) );
