@@ -1,6 +1,4 @@
-<?php
-
-namespace Illuminate\Bus;
+<?php namespace Illuminate\Bus;
 
 use Illuminate\Support\ServiceProvider;
 

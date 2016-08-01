@@ -3,7 +3,7 @@
 use Milky\Encryption\Encrypter;
 use Milky\Queue\Jobs\Job;
 
-class IlluminateQueueClosure
+class QueueClosure
 {
 	/**
 	 * The encrypter instance.

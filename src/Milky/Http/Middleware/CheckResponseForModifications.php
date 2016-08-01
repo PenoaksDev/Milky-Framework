@@ -1,6 +1,4 @@
-<?php
-
-namespace Milky\Http\Middleware;
+<?php namespace Milky\Http\Middleware;
 
 use Closure;
 use Symfony\Component\HttpFoundation\Response;

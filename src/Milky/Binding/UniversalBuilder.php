@@ -1,10 +1,17 @@
 <?php namespace Milky\Binding;
 
+use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Cache\CacheManager;
 use Milky\Cache\Console\ClearCommand;
+use Milky\Console\CommandServiceResolver;
+use Milky\Database\DatabaseServiceResolver;
 use Milky\Exceptions\BindingException;
+use Milky\Exceptions\ExceptionsServiceResolver;
+use Milky\Exceptions\ResolverException;
 use Milky\Framework;
-use Milky\Http\View\Factory;
-use Milky\Queue\QueueServiceProvider;
+use Milky\Helpers\Arr;
+use Milky\Http\View\ViewServiceResolver;
+use Milky\Queue\QueueServiceResolver;
 
 /**
  * The MIT License (MIT)
@@ -14,13 +21,8 @@ use Milky\Queue\QueueServiceProvider;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class BindingBuilder
+class UniversalBuilder
 {
-	/**
-	 * @var array
-	 */
-	private static $serviceBindingResolvers = [];
-
 	/**
 	 * BindingBuilder constructor.
 	 *
@@ -28,126 +30,99 @@ class BindingBuilder
 	 */
 	public function __construct( Framework $fw )
 	{
-		$fw->hooks->addHook( 'binding.failed', [$this, 'findServiceBinding'] );
+		static::registerResolver( new CommandServiceResolver() );
 
-		static::addServiceBindingResolver( 'command.cache.clear', function () use ( $fw )
-		{
-			return new ClearCommand( $fw['cache'] );
-			// $this->console->addCommand( 'command.cache.clear' );
-		} );
+		static::registerResolver( new DatabaseServiceResolver() );
 
-		static::addServiceBindingResolver( ['view.engine.resolver', 'blade.compiler', 'view.finder', 'blade', 'view.factory'], function () use ( $fw )
-		{
-			Factory::build();
-		} );
+		static::getResolver( 'command' )->cacheClear = new ClearCommand( CacheManager::i() );
 
-		static::addServiceBindingResolver( [
-			'queue.mgr',
-			'queue.connection',
-			'queue.listener',
-			'queue.failer',
-			'queue.worker'
-		], function () use ( $fw )
-		{
-			$fw->providers->register( new QueueServiceProvider() );
-		} );
+		static::registerResolver( new QueueServiceResolver() );
+
+		static::registerResolver( new ViewServiceResolver() );
+
+		static::registerResolver( new ExceptionsServiceResolver() );
 	}
 
 	/**
-	 * Finds missing service bindings for use in the Framework.
-	 * Because how they are handled, virtually all bindings are used on a per request basis.
-	 *
-	 * @param string $binding
+	 * @var ServiceResolver[]
 	 */
-	public function findServiceBinding( $binding )
-	{
-		if ( !is_string( $binding ) )
-			throw new \RuntimeException( "Missing binding must be a string" );
-
-		if ( array_key_exists( $binding, static::$serviceBindingResolvers ) )
-		{
-			$result = BindingBuilder::call( static::$serviceBindingResolvers[$binding] );
-			if ( !is_null( $result ) && !Framework::available( $binding ) )
-				Framework::set( $binding, $result );
-		}
-	}
+	protected static $resolvers = [];
 
 	/**
-	 * Adds a new service binding resolver, called when a binding is not found.
-	 * The return value of the callable will be set to the binding if not already set.
-	 *
-	 * @param string|array $bindings
-	 * @param callable $callable
+	 * @param ServiceResolver $resolver
+	 * @param string $key
 	 */
-	public static function addServiceBindingResolver( $bindings, callable $callable )
+	public static function registerResolver( ServiceResolver $resolver, $key = null )
 	{
-		foreach ( is_array( $bindings ) ? $bindings : [$bindings] as $binding )
-			static::$serviceBindingResolvers[$binding] = $callable;
+		$key = $key ?: $resolver->key();
+		Arr::set( static::$resolvers, $key, $resolver );
 	}
 
 	/**
-	 * Attempts to resolve a binding from a class name, key, or alias.
-	 *
-	 * @param $abstract
-	 *
-	 * @return Object
-	 * @throws BindingException
+	 * @param $name
+	 * @return ServiceResolver
 	 */
-	public static function resolveBinding( $abstract, array $parameters = [] )
+	public static function getResolver( $name )
 	{
-		$binding = $abstract;
-		if ( Framework::available( $abstract ) || array_key_exists( $binding, static::$serviceBindingResolvers ) )
-			$binding = Framework::get( $abstract );
-
-		if ( $binding instanceof $abstract )
-			return $binding;
-
-		if ( !is_null( $obj = Framework::getByClass( $binding ) ) )
-			return $obj;
-
-		if ( is_callable( $binding ) )
-			return static::call( $binding, $parameters );
-
-		try
-		{
-			return static::buildBinding( $binding, $parameters );
-		}
-		catch ( BindingException $e )
-		{
-			return $binding;
-		}
+		return Arr::get( static::$resolvers, $name );
 	}
 
 	/**
-	 * Attempts to construct a binding from a class name
+	 * Attempts to locate a class within the registered resolvers.
+	 * Optionally will build the class on failure.
 	 *
-	 * @param $binding
+	 * @param string $class
+	 * @param bool $buildOnFailure
+	 * @param array $parameters
+	 * @return null|object
+	 */
+	public static function resolveClass( $class, $buildOnFailure = false, $parameters = [] )
+	{
+		if ( !is_string( $class ) )
+			throw new ResolverException( "Class must be a string" );
+
+		foreach ( static::$resolvers as $resolver )
+		{
+			if ( false !== ( $result = $resolver->resolveClass( $class ) ) )
+				return $result;
+		}
+
+		if ( $buildOnFailure )
+			return static::buildClass( $class, $parameters );
+
+		return null;
+	}
+
+	/**
+	 * Attempts to construct a class
+	 *
+	 * @param string $class
 	 * @param array $parameters
 	 *
 	 * @return object
 	 * @throws BindingException
 	 */
-	public static function buildBinding( $binding, array $parameters = [] )
+	public static function buildClass( $class, array $parameters = [] )
 	{
-		if ( !is_string( $binding ) )
-			return $binding;
+		if ( !is_string( $class ) )
+			throw new BindingException( "Class must be a string" );
 
 		try
 		{
-			$reflector = new \ReflectionClass( $binding );
+			$reflector = new \ReflectionClass( $class );
 
 			// If the type is not instantiable, the developer is attempting to resolve
 			// an abstract type such as an Interface of Abstract Class and there is
 			// no binding registered for the abstractions so we need to bail out.
 			if ( !$reflector->isInstantiable() )
-				throw new BindingException( "Target [$binding] is not instantiable." );
+				throw new BindingException( "Target [$class] is not instantiable." );
 
 			$constructor = $reflector->getConstructor();
 
 			// If there are no constructors, that means there are no dependencies then
 			// we can just resolve the instances of the objects right away.
 			if ( is_null( $constructor ) )
-				return new $binding;
+				return new $class;
 
 			$dependencies = $constructor->getParameters();
 
@@ -156,14 +131,27 @@ class BindingBuilder
 			// new instance of this class, injecting the created dependencies in.
 			$parameters = static::keyParametersByArgument( $dependencies, $parameters );
 
-			$instances = static::getDependencies( $dependencies, $parameters, $binding );
+			$instances = static::getDependencies( $dependencies, $parameters, $class );
 
 			return $reflector->newInstanceArgs( $instances );
 		}
 		catch ( \ReflectionException $e )
 		{
-			throw new BindingException( "Failed to build [" . ( $binding instanceof \Closure ? static::getCallReflector( $binding )->getName() : $binding ) . "]: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() );
+			throw new BindingException( "Failed to build [$class]: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() );
 		}
+	}
+
+	public static function resolve( $key )
+	{
+		if ( strpos( $key, '\\' ) !== false )
+			return static::resolveClass( $key );
+
+		$key = explode( '.', $key );
+
+		if ( $resolver = static::getResolver( $key[0] ) )
+			return $resolver->resolve( $key[0], implode( '.', array_slice( $key, 1 ) ) );
+
+		return null;
 	}
 
 	/**
@@ -204,7 +192,7 @@ class BindingBuilder
 			if ( is_null( $method ) )
 				throw new \InvalidArgumentException( 'Method not provided.' );
 
-			$callback = [static::resolveBinding( $segments[0] ), $method];
+			$callback = [static::resolve( $segments[0] ), $method];
 		}
 
 		$dependencies = static::getMethodDependencies( $callback, $parameters );
@@ -248,7 +236,7 @@ class BindingBuilder
 	/**
 	 * Resolve all of the dependencies from the ReflectionParameters.
 	 *
-	 * @param  array $parameters
+	 * @param  \ReflectionParameter[] $parameters
 	 * @param  array $primitives
 	 * @param  string $classAndMethod
 	 *
@@ -273,10 +261,10 @@ class BindingBuilder
 				if ( array_key_exists( $parameter->name, $primitives ) )
 					$dependencies[] = $primitives[$parameter->name];
 				else if ( is_null( $parameter->getClass() ) )
-					$dependencies[] = static::resolveBinding( $parameter->name );
+					$dependencies[] = static::resolve( $parameter->name );
 				else
 				{
-					$depend = static::resolveBinding( $parameter->getClass()->name );
+					$depend = static::resolveClass( $parameter->getClass()->name );
 					if ( is_array( $depend ) )
 					{
 						if ( array_key_exists( $parameter->name, $depend ) )

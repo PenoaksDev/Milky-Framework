@@ -1,9 +1,9 @@
 <?php namespace Milky\Queue\Console;
 
-use Milky\Queue\Listener;
 use Milky\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
+use Milky\Queue\Listener;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 class ListenCommand extends Command
 {
@@ -24,17 +24,17 @@ class ListenCommand extends Command
 	/**
 	 * The queue listener instance.
 	 *
-	 * @var \Listener
+	 * @var Listener
 	 */
 	protected $listener;
 
 	/**
 	 * Create a new queue listen command.
 	 *
-	 * @param  \Illuminate\Queue\Listener  $listener
+	 * @param  Listener $listener
 	 * @return void
 	 */
-	public function __construct(Listener $listener)
+	public function __construct( Listener $listener )
 	{
 		parent::__construct();
 
@@ -50,42 +50,41 @@ class ListenCommand extends Command
 	{
 		$this->setListenerOptions();
 
-		$delay = $this->input->getOption('delay');
+		$delay = $this->input->getOption( 'delay' );
 
 		// The memory limit is the amount of memory we will allow the script to occupy
 		// before killing it and letting a process manager restart it for us, which
 		// is to protect us against any memory leaks that will be in the scripts.
-		$memory = $this->input->getOption('memory');
+		$memory = $this->input->getOption( 'memory' );
 
-		$connection = $this->input->getArgument('connection');
+		$connection = $this->input->getArgument( 'connection' );
 
-		$timeout = $this->input->getOption('timeout');
+		$timeout = $this->input->getOption( 'timeout' );
 
 		// We need to get the right queue for the connection which is set in the queue
 		// configuration file for the application. We will pull it based on the set
 		// connection being run for the queue operation currently being executed.
-		$queue = $this->getQueue($connection);
+		$queue = $this->getQueue( $connection );
 
-		$this->listener->listen(
-			$connection, $queue, $delay, $memory, $timeout
-		);
+		$this->listener->listen( $connection, $queue, $delay, $memory, $timeout );
 	}
 
 	/**
 	 * Get the name of the queue connection to listen on.
 	 *
-	 * @param  string  $connection
+	 * @param  string $connection
 	 * @return string
 	 */
-	protected function getQueue($connection)
+	protected function getQueue( $connection )
 	{
-		if (is_null($connection)) {
+		if ( is_null( $connection ) )
+		{
 			$connection = $this->laravel['config']['queue.default'];
 		}
 
-		$queue = $this->laravel['config']->get("queue.connections.{$connection}.queue", 'default');
+		$queue = $this->laravel['config']->get( "queue.connections.{$connection}.queue", 'default' );
 
-		return $this->input->getOption('queue') ?: $queue;
+		return $this->input->getOption( 'queue' ) ?: $queue;
 	}
 
 	/**
@@ -95,15 +94,16 @@ class ListenCommand extends Command
 	 */
 	protected function setListenerOptions()
 	{
-		$this->listener->setEnvironment($this->laravel->environment());
+		$this->listener->setEnvironment( $this->laravel->environment() );
 
-		$this->listener->setSleep($this->option('sleep'));
+		$this->listener->setSleep( $this->option( 'sleep' ) );
 
-		$this->listener->setMaxTries($this->option('tries'));
+		$this->listener->setMaxTries( $this->option( 'tries' ) );
 
-		$this->listener->setOutputHandler(function ($type, $line) {
-			$this->output->write($line);
-		});
+		$this->listener->setOutputHandler( function ( $type, $line )
+		{
+			$this->output->write( $line );
+		} );
 	}
 
 	/**
@@ -136,7 +136,13 @@ class ListenCommand extends Command
 
 			['sleep', null, InputOption::VALUE_OPTIONAL, 'Seconds to wait before checking queue for jobs', 3],
 
-			['tries', null, InputOption::VALUE_OPTIONAL, 'Number of times to attempt a job before logging it failed', 0],
+			[
+				'tries',
+				null,
+				InputOption::VALUE_OPTIONAL,
+				'Number of times to attempt a job before logging it failed',
+				0
+			],
 		];
 	}
 }

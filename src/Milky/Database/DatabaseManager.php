@@ -1,20 +1,15 @@
 <?php namespace Milky\Database;
 
 use InvalidArgumentException;
-use Milky\Binding\BindingBuilder;
+use Milky\Binding\UniversalBuilder;
 use Milky\Database\Connectors\ConnectionFactory;
-use Milky\Database\Eloquent\Model;
-use Milky\Database\Eloquent\QueueEntityResolver;
+use Milky\Facades\Config;
 use Milky\Framework;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
-use Milky\Queue\Impl\EntityResolver;
-use Milky\Services\ServiceFactory;
-use Milky\Services\ServiceInstance;
-use Milky\Services\ServiceManager;
 use PDO;
 
-class DatabaseManager extends ServiceFactory implements ConnectionResolverInterface
+class DatabaseManager implements ConnectionResolverInterface
 {
 	/**
 	 * The database connection factory instance.
@@ -37,25 +32,21 @@ class DatabaseManager extends ServiceFactory implements ConnectionResolverInterf
 	 */
 	protected $extensions = [];
 
-	public static function build()
+	/**
+	 * @return $this
+	 */
+	public static function i()
 	{
-		Model::clearBootedModels();
-		$db = new DatabaseManager( new ConnectionFactory() );
-		Model::setConnectionResolver( $db );
-
-		return $db;
+		return UniversalBuilder::resolve( 'db.mgr' );
 	}
 
 	/**
 	 * Create a new database manager instance.
 	 *
 	 * @param ConnectionFactory $factory
-	 * @return void
 	 */
 	public function __construct( ConnectionFactory $factory )
 	{
-		parent::__construct();
-
 		$this->factory = $factory;
 	}
 
@@ -199,7 +190,7 @@ class DatabaseManager extends ServiceFactory implements ConnectionResolverInterf
 	 */
 	protected function prepare( Connection $connection )
 	{
-		$connection->setFetchMode( Framework::config()['database.fetch'] );
+		$connection->setFetchMode( Config::get( 'database.fetch' ) );
 
 		// Here we'll set a reconnector callback. This reconnector can be any callable
 		// so we will set a Closure to reconnect from this manager with the name of

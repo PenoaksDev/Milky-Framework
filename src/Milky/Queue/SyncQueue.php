@@ -1,43 +1,48 @@
 <?php namespace Milky\Queue;
 
 use Exception;
-use Throwable;
+use Milky\Facades\Hooks;
+use Milky\Queue\Jobs\Job;
 use Milky\Queue\Jobs\SyncJob;
-use Milky\Contracts\Queue\Job;
-use Milky\Contracts\Queue\Queue as QueueContract;
+use Throwable;
 
-class SyncQueue extends Queue implements QueueContract
+class SyncQueue extends Queue
 {
 	/**
 	 * Push a new job onto the queue.
 	 *
-	 * @param  string  $job
-	 * @param  mixed   $data
-	 * @param  string  $queue
+	 * @param  string $job
+	 * @param  mixed $data
+	 * @param  string $queue
 	 * @return mixed
 	 *
 	 * @throws Throwable
 	 */
-	public function push($job, $data = '', $queue = null)
+	public function push( $job, $data = '', $queue = null )
 	{
-		$queueJob = $this->resolveJob($this->createPayload($job, $data, $queue));
+		$queueJob = $this->resolveJob( $this->createPayload( $job, $data, $queue ) );
 
-		try {
-			$this->raiseBeforeJobEvent($queueJob);
+		try
+		{
+			$this->raiseBeforeJobEvent( $queueJob );
 
 			$queueJob->fire();
 
-			$this->raiseAfterJobEvent($queueJob);
-		} catch (Exception $e) {
-			$this->raiseExceptionOccurredJobEvent($queueJob, $e);
+			$this->raiseAfterJobEvent( $queueJob );
+		}
+		catch ( Exception $e )
+		{
+			$this->raiseExceptionOccurredJobEvent( $queueJob, $e );
 
-			$this->handleFailedJob($queueJob);
+			$this->handleFailedJob( $queueJob );
 
 			throw $e;
-		} catch (Throwable $e) {
-			$this->raiseExceptionOccurredJobEvent($queueJob, $e);
+		}
+		catch ( Throwable $e )
+		{
+			$this->raiseExceptionOccurredJobEvent( $queueJob, $e );
 
-			$this->handleFailedJob($queueJob);
+			$this->handleFailedJob( $queueJob );
 
 			throw $e;
 		}
@@ -48,12 +53,12 @@ class SyncQueue extends Queue implements QueueContract
 	/**
 	 * Push a raw payload onto the queue.
 	 *
-	 * @param  string  $payload
-	 * @param  string  $queue
-	 * @param  array   $options
+	 * @param  string $payload
+	 * @param  string $queue
+	 * @param  array $options
 	 * @return mixed
 	 */
-	public function pushRaw($payload, $queue = null, array $options = [])
+	public function pushRaw( $payload, $queue = null, array $options = [] )
 	{
 		//
 	}
@@ -61,24 +66,24 @@ class SyncQueue extends Queue implements QueueContract
 	/**
 	 * Push a new job onto the queue after a delay.
 	 *
-	 * @param  \DateTime|int  $delay
-	 * @param  string  $job
-	 * @param  mixed   $data
-	 * @param  string  $queue
+	 * @param  \DateTime|int $delay
+	 * @param  string $job
+	 * @param  mixed $data
+	 * @param  string $queue
 	 * @return mixed
 	 */
-	public function later($delay, $job, $data = '', $queue = null)
+	public function later( $delay, $job, $data = '', $queue = null )
 	{
-		return $this->push($job, $data, $queue);
+		return $this->push( $job, $data, $queue );
 	}
 
 	/**
 	 * Pop the next job off of the queue.
 	 *
-	 * @param  string  $queue
+	 * @param  string $queue
 	 * @return Job|null
 	 */
-	public function pop($queue = null)
+	public function pop( $queue = null )
 	{
 		//
 	}
@@ -86,85 +91,77 @@ class SyncQueue extends Queue implements QueueContract
 	/**
 	 * Resolve a Sync job instance.
 	 *
-	 * @param  string  $payload
+	 * @param  string $payload
 	 * @return SyncJob
 	 */
-	protected function resolveJob($payload)
+	protected function resolveJob( $payload )
 	{
-		return new SyncJob($this->container, $payload);
+		return new SyncJob( $payload );
 	}
 
 	/**
 	 * Raise the before queue job event.
 	 *
-	 * @param  \Illuminate\Contracts\Queue\Job  $job
+	 * @param  Job $job
 	 * @return void
 	 */
-	protected function raiseBeforeJobEvent(Job $job)
+	protected function raiseBeforeJobEvent( Job $job )
 	{
-		$data = json_decode($job->getRawBody(), true);
+		$data = json_decode( $job->getRawBody(), true );
 
-		if ($this->container->bound('events')) {
-			$this->container['events']->fire(new Events\JobProcessing('sync', $job, $data));
-		}
+		Hooks::trigger( 'queue.job.processing', compact( 'job', 'data' ) );
 	}
 
 	/**
 	 * Raise the after queue job event.
 	 *
-	 * @param  \Illuminate\Contracts\Queue\Job  $job
+	 * @param  Job $job
 	 * @return void
 	 */
-	protected function raiseAfterJobEvent(Job $job)
+	protected function raiseAfterJobEvent( Job $job )
 	{
-		$data = json_decode($job->getRawBody(), true);
+		$data = json_decode( $job->getRawBody(), true );
 
-		if ($this->container->bound('events')) {
-			$this->container['events']->fire(new Events\JobProcessed('sync', $job, $data));
-		}
+		Hooks::trigger( 'queue.sync', compact( 'job', 'data' ) );
 	}
 
 	/**
 	 * Raise the exception occurred queue job event.
 	 *
-	 * @param  \Illuminate\Contracts\Queue\Job  $job
-	 * @param  \Throwable  $exception
+	 * @param  Job $job
+	 * @param  \Throwable $exception
 	 * @return void
 	 */
-	protected function raiseExceptionOccurredJobEvent(Job $job, $exception)
+	protected function raiseExceptionOccurredJobEvent( Job $job, $exception )
 	{
-		$data = json_decode($job->getRawBody(), true);
+		$data = json_decode( $job->getRawBody(), true );
 
-		if ($this->container->bound('events')) {
-			$this->container['events']->fire(new Events\JobExceptionOccurred('sync', $job, $data, $exception));
-		}
+		Hooks::trigger( 'queue.job.exception', compact( 'job', 'data', 'exception' ) );
 	}
 
 	/**
 	 * Handle the failed job.
 	 *
-	 * @param  \Illuminate\Contracts\Queue\Job  $job
+	 * @param  Job $job
 	 * @return array
 	 */
-	protected function handleFailedJob(Job $job)
+	protected function handleFailedJob( Job $job )
 	{
 		$job->failed();
 
-		$this->raiseFailedJobEvent($job);
+		$this->raiseFailedJobEvent( $job );
 	}
 
 	/**
 	 * Raise the failed queue job event.
 	 *
-	 * @param  \Illuminate\Contracts\Queue\Job  $job
+	 * @param  Job $job
 	 * @return void
 	 */
-	protected function raiseFailedJobEvent(Job $job)
+	protected function raiseFailedJobEvent( Job $job )
 	{
-		$data = json_decode($job->getRawBody(), true);
+		$data = json_decode( $job->getRawBody(), true );
 
-		if ($this->container->bound('events')) {
-			$this->container['events']->fire(new Events\JobFailed('sync', $job, $data));
-		}
+		Hooks::trigger( 'queue.job.failed', compact( 'job', 'data' ) );
 	}
 }

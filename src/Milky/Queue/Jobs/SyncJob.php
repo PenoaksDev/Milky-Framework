@@ -1,9 +1,6 @@
 <?php namespace Milky\Queue\Jobs;
 
-use Milky\Container\Container;
-use Milky\Contracts\Queue\Job as JobContract;
-
-class SyncJob extends Job implements JobContract
+class SyncJob extends Job
 {
 	/**
 	 * The class name of the job.
@@ -22,14 +19,12 @@ class SyncJob extends Job implements JobContract
 	/**
 	 * Create a new job instance.
 	 *
-	 * @param  \Illuminate\Container\Container  $container
-	 * @param  string  $payload
+	 * @param  string $payload
 	 * @return void
 	 */
-	public function __construct(Container $container, $payload)
+	public function __construct( $payload )
 	{
 		$this->payload = $payload;
-		$this->container = $container;
 	}
 
 	/**
@@ -39,7 +34,7 @@ class SyncJob extends Job implements JobContract
 	 */
 	public function fire()
 	{
-		$this->resolveAndFire(json_decode($this->payload, true));
+		$this->resolveAndFire( json_decode( $this->payload, true ) );
 	}
 
 	/**
@@ -55,12 +50,12 @@ class SyncJob extends Job implements JobContract
 	/**
 	 * Release the job back into the queue.
 	 *
-	 * @param  int   $delay
+	 * @param  int $delay
 	 * @return void
 	 */
-	public function release($delay = 0)
+	public function release( $delay = 0 )
 	{
-		parent::release($delay);
+		parent::release( $delay );
 	}
 
 	/**

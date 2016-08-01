@@ -2,13 +2,14 @@
 
 use Carbon\Carbon;
 use Milky\Database\ConnectionResolverInterface;
+use Milky\Database\Query\Builder;
 
 class DatabaseFailedJobProvider implements FailedJobProviderInterface
 {
 	/**
 	 * The connection resolver implementation.
 	 *
-	 * @var \ConnectionResolverInterface
+	 * @var ConnectionResolverInterface
 	 */
 	protected $resolver;
 
@@ -29,12 +30,12 @@ class DatabaseFailedJobProvider implements FailedJobProviderInterface
 	/**
 	 * Create a new database failed job provider.
 	 *
-	 * @param  \Illuminate\Database\ConnectionResolverInterface  $resolver
-	 * @param  string  $database
-	 * @param  string  $table
+	 * @param  ConnectionResolverInterface $resolver
+	 * @param  string $database
+	 * @param  string $table
 	 * @return void
 	 */
-	public function __construct(ConnectionResolverInterface $resolver, $database, $table)
+	public function __construct( ConnectionResolverInterface $resolver, $database, $table )
 	{
 		$this->table = $table;
 		$this->resolver = $resolver;
@@ -44,16 +45,16 @@ class DatabaseFailedJobProvider implements FailedJobProviderInterface
 	/**
 	 * Log a failed job into storage.
 	 *
-	 * @param  string  $connection
-	 * @param  string  $queue
-	 * @param  string  $payload
+	 * @param  string $connection
+	 * @param  string $queue
+	 * @param  string $payload
 	 * @return int|null
 	 */
-	public function log($connection, $queue, $payload)
+	public function log( $connection, $queue, $payload )
 	{
 		$failed_at = Carbon::now();
 
-		return $this->getTable()->insertGetId(compact('connection', 'queue', 'payload', 'failed_at'));
+		return $this->getTable()->insertGetId( compact( 'connection', 'queue', 'payload', 'failed_at' ) );
 	}
 
 	/**
@@ -63,29 +64,29 @@ class DatabaseFailedJobProvider implements FailedJobProviderInterface
 	 */
 	public function all()
 	{
-		return $this->getTable()->orderBy('id', 'desc')->get();
+		return $this->getTable()->orderBy( 'id', 'desc' )->get();
 	}
 
 	/**
 	 * Get a single failed job.
 	 *
-	 * @param  mixed  $id
+	 * @param  mixed $id
 	 * @return array
 	 */
-	public function find($id)
+	public function find( $id )
 	{
-		return $this->getTable()->find($id);
+		return $this->getTable()->find( $id );
 	}
 
 	/**
 	 * Delete a single failed job from storage.
 	 *
-	 * @param  mixed  $id
+	 * @param  mixed $id
 	 * @return bool
 	 */
-	public function forget($id)
+	public function forget( $id )
 	{
-		return $this->getTable()->where('id', $id)->delete() > 0;
+		return $this->getTable()->where( 'id', $id )->delete() > 0;
 	}
 
 	/**
@@ -105,6 +106,6 @@ class DatabaseFailedJobProvider implements FailedJobProviderInterface
 	 */
 	protected function getTable()
 	{
-		return $this->resolver->connection($this->database)->table($this->table);
+		return $this->resolver->connection( $this->database )->table( $this->table );
 	}
 }

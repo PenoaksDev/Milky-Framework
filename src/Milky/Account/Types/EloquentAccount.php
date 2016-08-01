@@ -1,5 +1,4 @@
-<?php
-namespace Milky\Account\Types;
+<?php namespace Milky\Account\Types;
 
 use Milky\Database\Eloquent\Builder;
 use Milky\Database\Eloquent\Model;

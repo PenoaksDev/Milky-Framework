@@ -1,5 +1,6 @@
 <?php namespace Milky\Http;
 
+use Milky\Facades\Hooks;
 use Milky\Framework;
 use Milky\Http\Cookies\CookieJar;
 use Milky\Http\Middleware\EncryptCookies;
@@ -71,6 +72,8 @@ class Factory extends ServiceFactory
 	public function __construct( Framework $fw, Request $request = null )
 	{
 		parent::__construct();
+
+		Hooks::trigger( 'http.factory.create', ['factory' => $this] );
 
 		if ( !$request )
 			$request = Request::capture();

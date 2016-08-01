@@ -1,45 +1,42 @@
 <?php namespace Milky\Exceptions\Validation;
 
-use Milky\Helpers\MessageBag;
-use Milky\Impl\MessageProvider;
+use Milky\Http\Response;
+use Milky\Validation\Validator;
 
-class ValidationException extends \RuntimeException
+class ValidationException extends \Exception
 {
 	/**
-	 * The message provider implementation.
+	 * The validator instance.
 	 *
-	 * @var MessageProvider
+	 * @var Validator
 	 */
-	protected $provider;
-
+	public $validator;
 	/**
-	 * Create a new validation exception instance.
+	 * The recommended response to send to the client.
 	 *
-	 * @param  MessageProvider $provider
+	 * @var Response|null
+	 */
+	public $response;
+	/**
+	 * Create a new exception instance.
+	 *
+	 * @param  Validator  $validator
+	 * @param  Response  $response
 	 * @return void
 	 */
-	public function __construct( MessageProvider $provider )
+	public function __construct($validator, $response = null)
 	{
-		$this->provider = $provider;
+		parent::__construct('The given data failed to pass validation.');
+		$this->response = $response;
+		$this->validator = $validator;
 	}
-
 	/**
-	 * Get the validation error message provider.
+	 * Get the underlying response instance.
 	 *
-	 * @return MessageBag
+	 * @return Response
 	 */
-	public function errors()
+	public function getResponse()
 	{
-		return $this->provider->getMessageBag();
-	}
-
-	/**
-	 * Get the validation error message provider.
-	 *
-	 * @return MessageProvider
-	 */
-	public function getMessageProvider()
-	{
-		return $this->provider;
+		return $this->response;
 	}
 }

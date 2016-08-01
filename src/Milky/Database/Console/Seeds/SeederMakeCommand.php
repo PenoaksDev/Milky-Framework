@@ -1,8 +1,9 @@
 <?php namespace Milky\Database\Console\Seeds;
 
-use Milky\Impl\Composer;
-use Milky\Filesystem\Filesystem;
 use Milky\Console\GeneratorCommand;
+use Milky\Filesystem\Filesystem;
+use Milky\Framework;
+use Milky\Helpers\Composer;
 
 class SeederMakeCommand extends GeneratorCommand
 {
@@ -37,13 +38,13 @@ class SeederMakeCommand extends GeneratorCommand
 	/**
 	 * Create a new command instance.
 	 *
-	 * @param Filesystem  $files
-	 * @param Composer  $composer
+	 * @param Filesystem $files
+	 * @param Composer $composer
 	 * @return void
 	 */
-	public function __construct(Filesystem $files, Composer $composer)
+	public function __construct( Filesystem $files, Composer $composer )
 	{
-		parent::__construct($files);
+		parent::__construct( $files );
 
 		$this->composer = $composer;
 	}
@@ -67,27 +68,27 @@ class SeederMakeCommand extends GeneratorCommand
 	 */
 	protected function getStub()
 	{
-		return __DIR__.'/stubs/seeder.stub';
+		return __DIR__ . '/stubs/seeder.stub.php';
 	}
 
 	/**
 	 * Get the destination class path.
 	 *
-	 * @param  string  $name
+	 * @param  string $name
 	 * @return string
 	 */
-	protected function getPath($name)
+	protected function getPath( $name )
 	{
-		return $this->laravel->databasePath().'/seeds/'.$name.'.php';
+		return Framework::fw()->buildPath( '__database', 'seeds', $name . ".php" );
 	}
 
 	/**
 	 * Parse the name and format according to the root namespace.
 	 *
-	 * @param  string  $name
+	 * @param  string $name
 	 * @return string
 	 */
-	protected function parseName($name)
+	protected function parseName( $name )
 	{
 		return $name;
 	}

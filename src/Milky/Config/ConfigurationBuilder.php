@@ -14,7 +14,7 @@ use Symfony\Component\Yaml\Yaml;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class ConfigurationBuilder implements Builder
+class ConfigurationBuilder
 {
 	/**
 	 * @param Framework $fw

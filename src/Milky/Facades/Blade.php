@@ -1,8 +1,6 @@
-<?php
-namespace Milky\Facades;
+<?php namespace Milky\Facades;
 
-use Milky\Framework;
-use Milky\Http\View\Compilers\BladeCompiler;
+use Milky\Binding\UniversalBuilder;
 
 /**
  * The MIT License (MIT)
@@ -16,6 +14,6 @@ class Blade extends BaseFacade
 {
 	protected function __getResolver()
 	{
-		return Framework::get( 'blade.compiler' );
+		return UniversalBuilder::resolve( 'view.blade.compiler' );
 	}
 }

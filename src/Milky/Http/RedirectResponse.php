@@ -50,7 +50,7 @@ class RedirectResponse extends BaseRedirectResponse
 	 * Add multiple cookies to the response.
 	 *
 	 * @param  array $cookies
-	 * @return $this
+	 * @return RedirectResponse
 	 */
 	public function withCookies( array $cookies )
 	{
@@ -66,7 +66,7 @@ class RedirectResponse extends BaseRedirectResponse
 	 * Flash an array of input to the session.
 	 *
 	 * @param  array $input
-	 * @return $this
+	 * @return RedirectResponse
 	 */
 	public function withInput( array $input = null )
 	{
@@ -105,7 +105,7 @@ class RedirectResponse extends BaseRedirectResponse
 	 * Flash an array of input to the session.
 	 *
 	 * @param  mixed  string
-	 * @return $this
+	 * @return RedirectResponse
 	 */
 	public function onlyInput()
 	{
@@ -128,7 +128,7 @@ class RedirectResponse extends BaseRedirectResponse
 	 *
 	 * @param  MessageProvider|array|string $provider
 	 * @param  string $key
-	 * @return $this
+	 * @return RedirectResponse
 	 */
 	public function withErrors( $provider, $key = 'default' )
 	{
@@ -202,7 +202,7 @@ class RedirectResponse extends BaseRedirectResponse
 	 *
 	 * @param  string $method
 	 * @param  array $parameters
-	 * @return $this
+	 * @return RedirectResponse
 	 *
 	 * @throws \BadMethodCallException
 	 */

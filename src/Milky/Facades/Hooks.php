@@ -1,5 +1,7 @@
 <?php namespace Milky\Facades;
 
+use Milky\Framework;
+
 /**
  * The MIT License (MIT)
  * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
@@ -12,7 +14,7 @@ class Hooks extends BaseFacade
 {
 	protected function __getResolver()
 	{
-		return 'hooks';
+		return Framework::hooks();
 	}
 
 	/**
@@ -24,7 +26,7 @@ class Hooks extends BaseFacade
 	 */
 	public static function addHook( array $triggers, callable $callable, $key = null )
 	{
-		static::__do( __FUNCTION__, compact( $triggers, $callable, $key ) );
+		static::__do( __FUNCTION__, compact( 'triggers', 'callable', 'key' ) );
 	}
 
 	/**
@@ -34,7 +36,7 @@ class Hooks extends BaseFacade
 	 */
 	public static function removeHooks( $key )
 	{
-		static::__do( __FUNCTION__, compact( $key ) );
+		static::__do( __FUNCTION__, compact( 'key' ) );
 	}
 
 	/**
@@ -44,6 +46,6 @@ class Hooks extends BaseFacade
 	 */
 	public static function trigger( $trigger, $params = [] )
 	{
-		static::__do( __FUNCTION__, compact( $trigger, $params ) );
+		static::__do( __FUNCTION__, compact( 'trigger', 'params' ) );
 	}
 }

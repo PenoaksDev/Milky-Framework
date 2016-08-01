@@ -1,5 +1,4 @@
-<?php
-namespace Milky\Http\Session\Drivers;
+<?php namespace Milky\Http\Session\Drivers;
 
 /**
  * The MIT License (MIT)

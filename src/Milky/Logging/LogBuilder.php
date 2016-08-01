@@ -14,7 +14,7 @@ use Monolog\Logger as Monolog;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class LogBuilder implements Builder
+class LogBuilder
 {
 	/**
 	 * Bootstrap the given application.

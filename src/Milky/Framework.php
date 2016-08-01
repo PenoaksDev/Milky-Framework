@@ -4,12 +4,12 @@ use Faker\Factory as FakerFactory;
 use Faker\Generator as FakerGenerator;
 use Milky\Binding\BindingBuilder;
 use Milky\Binding\Globals;
+use Milky\Binding\UniversalBuilder;
 use Milky\Bus\Dispatcher;
 use Milky\Cache\CacheManager;
 use Milky\Cache\MemcachedConnector;
 use Milky\Config\Configuration;
 use Milky\Config\ConfigurationBuilder;
-use Milky\Database\DatabaseManager;
 use Milky\Database\Eloquent\Factory as EloquentFactory;
 use Milky\Database\Eloquent\QueueEntityResolver;
 use Milky\Encryption\Encrypter;
@@ -156,7 +156,7 @@ class Framework implements \ArrayAccess
 
 		$this->registerBindings();
 
-		new BindingBuilder( $this );
+		new UniversalBuilder( $this );
 
 		$this->hooks->trigger( 'fw.loaded', $this );
 		$this->log->info( "Milky Framework Loaded" );
@@ -227,21 +227,6 @@ class Framework implements \ArrayAccess
 			return Translator::i()->getLoader();
 		};
 
-		$fw['db.mgr'] = function ()
-		{
-			return DatabaseManager::i();
-		};
-
-		$fw['db.factory'] = function ()
-		{
-			return DatabaseManager::i()->factory();
-		};
-
-		$fw['db.connection'] = function ()
-		{
-			return DatabaseManager::i()->connection();
-		};
-
 		$fw[FakerGenerator::class] = function ()
 		{
 			return FakerFactory::create();
@@ -249,7 +234,7 @@ class Framework implements \ArrayAccess
 
 		$fw[EloquentFactory::class] = function ()
 		{
-			$faker = BindingBuilder::resolveBinding( FakerGenerator::class );
+			$faker = UniversalBuilder::resolveClass( FakerGenerator::class );
 
 			return EloquentFactory::construct( $faker, $this->buildPath( '__database', 'factories' ) );
 		};
@@ -344,13 +329,14 @@ class Framework implements \ArrayAccess
 		return $this->isBooted;
 	}
 
+	public function newConsoleFactory()
+	{
+		return new Console\Factory( $this );
+	}
+
 	public function newHttpFactory( $request = null )
 	{
-		$factory = new Http\Factory( $this, $request );
-		static::set( 'http.factory', $factory );
-		$this->hooks->trigger( 'http.factory.create', compact( 'factory' ) );
-
-		return $factory;
+		return new Http\Factory( $this, $request );
 	}
 
 	public function getProduct()
@@ -481,5 +467,26 @@ class Framework implements \ArrayAccess
 		}
 
 		return $env;
+	}
+
+	/**
+	 * Get the application namespace.
+	 *
+	 * @return string
+	 *
+	 * @throws \RuntimeException
+	 */
+	public function getNamespace()
+	{
+		if ( !is_null( $this->namespace ) )
+			return $this->namespace;
+
+		$composer = json_decode( file_get_contents( $this->buildPath( '__fw', 'composer.json' ) ), true );
+		foreach ( (array) data_get( $composer, 'autoload.psr-4' ) as $namespace => $path )
+			foreach ( (array) $path as $pathChoice )
+				if ( realpath( $this->buildPath( '__fw' ) ) == realpath( $this->buildPath( '__base' ) . '/' . $pathChoice ) )
+					return $this->namespace = $namespace;
+
+		throw new \RuntimeException( 'Unable to detect application namespace.' );
 	}
 }

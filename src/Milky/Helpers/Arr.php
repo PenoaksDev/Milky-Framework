@@ -581,21 +581,13 @@ class Arr
 	public static function sortRecursive( $array )
 	{
 		foreach ( $array as &$value )
-		{
 			if ( is_array( $value ) )
-			{
 				$value = static::sortRecursive( $value );
-			}
-		}
 
 		if ( static::isAssoc( $array ) )
-		{
 			ksort( $array );
-		}
 		else
-		{
 			sort( $array );
-		}
 
 		return $array;
 	}
@@ -612,12 +604,8 @@ class Arr
 		$filtered = [];
 
 		foreach ( $array as $key => $value )
-		{
 			if ( call_user_func( $callback, $key, $value ) )
-			{
 				$filtered[$key] = $value;
-			}
-		}
 
 		return $filtered;
 	}

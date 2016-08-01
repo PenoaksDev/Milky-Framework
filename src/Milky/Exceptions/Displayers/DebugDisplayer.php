@@ -7,8 +7,6 @@ use Whoops\Run as Whoops;
 
 /**
  * This is the debug displayer class.
- *
- * @author Graham Campbell <graham@alt-three.com>
  */
 class DebugDisplayer implements DisplayerInterface
 {

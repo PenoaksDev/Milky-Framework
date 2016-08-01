@@ -1,7 +1,9 @@
 <?php namespace Milky\Queue;
 
+use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\UniversalBuilder;
+use Milky\Facades\Config;
 use Milky\Framework;
-use Milky\Providers\ServiceProvider;
 use Milky\Queue\Connectors\BeanstalkdConnector;
 use Milky\Queue\Connectors\DatabaseConnector;
 use Milky\Queue\Connectors\NullConnector;
@@ -14,52 +16,47 @@ use Milky\Queue\Console\WorkCommand;
 use Milky\Queue\Failed\DatabaseFailedJobProvider;
 use Milky\Queue\Failed\NullFailedJobProvider;
 
-class QueueServiceProvider extends ServiceProvider
+/**
+ * The MIT License (MIT)
+ * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
+class QueueServiceResolver extends ServiceResolver
 {
-	/**
-	 * Indicates if loading of the provider is deferred.
-	 *
-	 * @var bool
-	 */
-	protected $defer = true;
+	protected $mgr;
+	protected $connection;
+	protected $listener;
+	protected $failer;
+	protected $worker;
 
-	/**
-	 * Register the service provider.
-	 *
-	 * @return void
-	 */
-	public function register()
+	public function __construct()
 	{
-		$manager = new QueueManager();
-		Framework::set( 'queue.mgr', $manager );
+		$this->mgr = new QueueManager();
 
 		foreach ( ['Null', 'Sync', 'Database', 'Beanstalkd', 'Redis', 'Sqs'] as $connector )
-			$this->{"register{$connector}Connector"}( $manager );
+			$this->{"register{$connector}Connector"}( $this->mgr );
 
-		Framework::set( 'queue.connection', $manager->connection() );
+		$this->connection = $this->mgr->connection();
 
-		$listener = new Listener( Framework::fw()->basePath );
-		Framework::set( 'queue.listener', $listener );
+		$this->listener = new Listener( Framework::fw()->basePath );
 
-		$config = Framework::config()->get( 'queue.failed' );
+		$config = Config::get( 'queue.failed' );
 
 		if ( isset( $config['table'] ) )
-			Framework::set( 'queue.failer', $failer = Framework::set( 'queue.failer', new DatabaseFailedJobProvider( Framework::get( 'db' ), $config['database'], $config['table'] ) ) );
+			$this->failer = new DatabaseFailedJobProvider( UniversalBuilder::resolve( 'db' ), $config['database'], $config['table'] );
 		else
-			Framework::set( 'queue.failer', $failer = Framework::set( 'queue.failer', new NullFailedJobProvider ) );
+			$this->failer = new NullFailedJobProvider;
 
-		Framework::set( 'queue.worker', $worker = new Worker( $manager, $failer ) );
+		$this->worker = new Worker( $this->mgr, $this->failer );
 
-		Framework::set( 'command.queue.work', new WorkCommand( $worker ) );
-		$this->commands( 'command.queue.work' );
+		UniversalBuilder::getResolver( 'command' )->queueWork = new WorkCommand( $this->worker );
+		UniversalBuilder::getResolver( 'command' )->queueRestart = new RestartCommand( $this->worker );
+		UniversalBuilder::getResolver( 'command' )->queueListen = new ListenCommand( $this->listener );
 
-		Framework::set( 'command.queue.restart', new RestartCommand );
-		$this->commands( 'command.queue.restart' );
-
-		Framework::set( 'command.queue.listen', new ListenCommand( $listener ) );
-		$this->commands( 'command.queue.listen' );
-
-		Framework::set( 'Milky\Queue\Closure', new IlluminateQueueClosure( Framework::get( 'encrypter' ) ) );
+		// Framework::set( 'Milky\Queue\Closure', new QueueClosure( Framework::get( 'encrypter' ) ) ); WHAT IS THIS?
 	}
 
 	/**
@@ -146,22 +143,8 @@ class QueueServiceProvider extends ServiceProvider
 		} );
 	}
 
-	/**
-	 * Get the services provided by the provider.
-	 *
-	 * @return array
-	 */
-	public function provides()
+	public function key()
 	{
-		return [
-			'queue',
-			'queue.worker',
-			'queue.listener',
-			'queue.failer',
-			'command.queue.work',
-			'command.queue.listen',
-			'command.queue.restart',
-			'queue.connection',
-		];
+		return 'queue';
 	}
 }

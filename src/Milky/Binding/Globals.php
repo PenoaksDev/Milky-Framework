@@ -11,6 +11,9 @@ use Milky\Helpers\Arr;
  * This Source Code is subject to the terms of the MIT License.
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
+ *
+ * @deprecated replaced by ServiceFactory and ServiceResolver
+ * Still need to consider how to storm simple values for later use, maybe another ServiceFactory or Facade?
  */
 trait Globals
 {
@@ -93,8 +96,6 @@ trait Globals
 
 	public static function get( $key )
 	{
-		static::fw()->hooks->trigger( 'binding.get', $key );
-
 		if ( array_key_exists( $key, static::$aliases ) )
 			$key = static::$aliases[$key];
 
@@ -102,15 +103,17 @@ trait Globals
 
 		if ( is_null( $value ) )
 		{
-			Framework::hooks()->trigger( 'binding.failed', ['binding' => $key] );
+			/**
+			 * As an alternative, we will check with the Service Resolvers for an instance.
+			 */
+			$value = UniversalBuilder::resolve( $key );
 
-			$value = Arr::get( static::$globals, $key );
 			if ( is_null( $value ) )
 				throw new BindingException( "There is no binding available for key [" . $key . "]" );
 		}
 
-		if ( $value instanceof \Closure )
-			return BindingBuilder::call( $value );
+		if ( is_callable( $value ) || $value instanceof \Closure )
+			return UniversalBuilder::call( $value );
 		return $value;
 	}
 

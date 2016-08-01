@@ -11,6 +11,7 @@ use Milky\Helpers\Func;
 use Milky\Helpers\Str;
 use Milky\Http\RedirectResponse;
 use Milky\Http\Request;
+use Milky\Http\Routing\Redirector;
 use Milky\Http\Routing\UrlGenerator;
 use Milky\Impl\Collection;
 use Milky\Impl\Htmlable;
@@ -1687,7 +1688,7 @@ if ( !function_exists( 'redirect' ) )
 	 * @param  int $status
 	 * @param  array $headers
 	 * @param  bool $secure
-	 * @return RedirectResponse
+	 * @return Redirector|RedirectResponse
 	 */
 	function redirect( $to = null, $status = 302, $headers = [], $secure = null )
 	{

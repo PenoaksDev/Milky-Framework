@@ -2,6 +2,8 @@
 
 use Closure;
 use InvalidArgumentException;
+use Milky\Facades\Config;
+use Milky\Facades\Hooks;
 use Milky\Framework;
 use Milky\Queue\Connectors\ConnectorInterface;
 
@@ -28,7 +30,7 @@ class QueueManager
 	 */
 	public function before( $callback )
 	{
-		Framework::hooks()->addHook( 'queue.job.processing', $callback );
+		Hooks::addHook( 'queue.job.processing', $callback );
 	}
 
 	/**
@@ -38,7 +40,7 @@ class QueueManager
 	 */
 	public function after( $callback )
 	{
-		Framework::hooks()->addHook( 'queue.job.processed', $callback );
+		Hooks::addHook( 'queue.job.processed', $callback );
 	}
 
 	/**
@@ -48,7 +50,7 @@ class QueueManager
 	 */
 	public function exceptionOccurred( $callback )
 	{
-		Framework::hooks()->addHook( 'queue.job.exception', $callback );
+		Hooks::addHook( 'queue.job.exception', $callback );
 	}
 
 	/**
@@ -58,7 +60,7 @@ class QueueManager
 	 */
 	public function looping( $callback )
 	{
-		Framework::hooks()->addHook( 'queue.looping', $callback );
+		Hooks::addHook( 'queue.looping', $callback );
 	}
 
 	/**
@@ -68,7 +70,7 @@ class QueueManager
 	 */
 	public function failing( $callback )
 	{
-		Framework::hooks()->addHook( 'queue.job.failed', $callback );
+		Hooks::addHook( 'queue.job.failed', $callback );
 	}
 
 	/**
@@ -78,7 +80,7 @@ class QueueManager
 	 */
 	public function stopping( $callback )
 	{
-		Framework::hooks()->addHook( 'queue.worker.stopping', $callback );
+		Hooks::addHook( 'queue.worker.stopping', $callback );
 	}
 
 	/**
@@ -179,7 +181,7 @@ class QueueManager
 		if ( $name === null || $name === 'null' )
 			return ['driver' => 'null'];
 
-		return Framework::config()->get( 'queue.connections.' . $name );
+		return Config::get( 'queue.connections.' . $name );
 	}
 
 	/**
@@ -189,7 +191,7 @@ class QueueManager
 	 */
 	public function getDefaultDriver()
 	{
-		return Framework::config()->get( 'queue.default' );
+		return Config::get( 'queue.default' );
 	}
 
 	/**
@@ -199,7 +201,7 @@ class QueueManager
 	 */
 	public function setDefaultDriver( $name )
 	{
-		Framework::config()->set( 'queue.default', $name );
+		Config::set( 'queue.default', $name );
 	}
 
 	/**

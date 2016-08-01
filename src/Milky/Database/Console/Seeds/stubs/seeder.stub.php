@@ -1,6 +1,4 @@
-<?php
-
-use Milky\Database\Seeder;
+<?php use Milky\Database\Seeder;
 
 class DummyClass extends Seeder
 {

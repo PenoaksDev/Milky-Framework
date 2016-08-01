@@ -1,7 +1,7 @@
 <?php namespace Milky\Database;
 
 use Milky\Console\Command;
-use Milky\Binding\BindingBuilder;
+use Milky\Binding\UniversalBuilder;
 
 abstract class Seeder
 {
@@ -41,7 +41,7 @@ abstract class Seeder
 	 */
 	protected function resolve( $class )
 	{
-		$instance = BindingBuilder::resolveBinding( $class );
+		$instance = UniversalBuilder::resolveClass( $class );
 
 		if ( isset( $this->command ) )
 			$instance->setCommand( $this->command );

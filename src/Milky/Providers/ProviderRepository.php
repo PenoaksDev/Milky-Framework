@@ -1,6 +1,6 @@
 <?php namespace Milky\Providers;
 
-use Milky\Binding\BindingBuilder;
+use Milky\Binding\UniversalBuilder;
 use Milky\Exceptions\ProviderException;
 use Milky\Facades\Log;
 use Milky\Framework;
@@ -140,7 +140,7 @@ class ProviderRepository implements \ArrayAccess
 		{
 			$this->bootedProviders[] = $key;
 			if ( method_exists( $provider, 'boot' ) )
-				BindingBuilder::call( [$provider, 'boot'] );
+				UniversalBuilder::call( [$provider, 'boot'] );
 
 			Framework::fw()->hooks->trigger( 'provider.boot', [$provider] );
 			Log::info( "Booted Service Provider [" . get_class( $provider ) . "]" );

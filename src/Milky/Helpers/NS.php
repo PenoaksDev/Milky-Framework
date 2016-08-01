@@ -1,5 +1,4 @@
-<?php
-namespace Milky\Helpers;
+<?php namespace Milky\Helpers;
 
 use Milky\Account\Permissions\PermissionManager;
 use Milky\Exceptions\FrameworkException;

@@ -1,4 +1,4 @@
-<?php namespace Milky\Builders;
+<?php namespace Milky\Exceptions;
 
 /**
  * The MIT License (MIT)
@@ -8,7 +8,7 @@
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-interface Builder
+class ResolverException extends \Exception
 {
 
 }

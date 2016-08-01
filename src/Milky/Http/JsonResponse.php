@@ -1,7 +1,7 @@
 <?php namespace Milky\Http;
 
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Jsonable;
+use Milky\Impl\Arrayable;
+use Milky\Impl\Jsonable;
 use InvalidArgumentException;
 use JsonSerializable;
 use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;

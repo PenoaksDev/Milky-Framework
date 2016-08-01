@@ -1,4 +1,4 @@
-<?php namespace Milky\Queue\Impl;
+<?php namespace Milky\Exceptions\Queue;
 
 class EntityNotFoundException extends \InvalidArgumentException
 {
