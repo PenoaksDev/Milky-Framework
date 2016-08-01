@@ -1,4 +1,4 @@
-# Penoaks Framework
+# Milky Framework
 
 [![StyleCI](https://styleci.io/repos/6464365/shield?style=flat)](https://styleci.io/repos/6464365)
 [![Build Status](https://travis-ci.org/penoaks/framework.svg)](https://travis-ci.org/penoaks/framework)
@@ -9,7 +9,7 @@
 
 ## Getting Started
 
-Penoaks Framework uses Composer to manage dependencies. So, before using Penoaks Framework, make sure you have Composer installed on your machine.
+Milky Framework uses Composer to manage dependencies. So, before using Milky Framework, make sure you have Composer installed on your machine.
 
 ### Dependencies
 
