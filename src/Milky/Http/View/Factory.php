@@ -6,11 +6,15 @@ use Milky\Binding\BindingBuilder;
 use Milky\Framework;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
+use Milky\Http\View\Compilers\BladeCompiler;
+use Milky\Http\View\Engines\CompilerEngine;
 use Milky\Http\View\Engines\EngineInterface;
 use Milky\Http\View\Engines\EngineResolver;
+use Milky\Http\View\Engines\PhpEngine;
 use Milky\Impl\Arrayable;
+use Milky\Services\ServiceFactory;
 
-class Factory
+class Factory extends ServiceFactory
 {
 	/**
 	 * The engine implementation.
@@ -96,6 +100,42 @@ class Factory
 	 */
 	protected $renderCount = 0;
 
+	public static function build()
+	{
+		$fw = Framework::fw();
+
+		$resolver = new EngineResolver();
+		$fw['view.engine.resolver'] = $resolver;
+
+		$resolver->register( 'php', function ()
+		{
+			return new PhpEngine;
+		} );
+
+		// The Compiler engine requires an instance of the CompilerInterface, which in
+		// this case will be the Blade compiler, so we'll first create the compiler
+		// instance to pass into the engine so it can compile the views properly.
+		$fw['blade.compiler'] = function () use ( $fw )
+		{
+			$cache = $fw->config['view.compiled'];
+
+			return new BladeCompiler( $fw['files'], $cache );
+		};
+
+		$resolver->register( 'blade', function () use ( $fw )
+		{
+			return new CompilerEngine( $fw['blade.compiler'] );
+		} );
+
+		$paths = $fw->config['view.paths'];
+		$finder = new FileViewFinder( $fw['files'], $paths );
+		$fw['view.finder'] = $finder;
+
+		$factory = new Factory( $resolver, $finder );
+		$fw['view.factory'] = $factory;
+		return $factory;
+	}
+
 	/**
 	 * Create a new view factory instance.
 	 *
@@ -105,6 +145,8 @@ class Factory
 	 */
 	public function __construct( EngineResolver $engines, ViewFinderInterface $finder )
 	{
+		parent::__construct();
+
 		$this->finder = $finder;
 		$this->engines = $engines;
 

@@ -13,6 +13,9 @@ use Milky\Http\View\View as BaseView;
  */
 class View extends BaseFacade
 {
+	/**
+	 * @see \Penoaks\View\Factory
+	 */
 	protected function __getResolver()
 	{
 		return 'view.factory';
@@ -30,6 +33,11 @@ class View extends BaseFacade
 	 * @return BaseView
 	 */
 	public static function make( $view, $data = [], $mergeData = [] )
+	{
+		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+	}
+
+	public static function exists( $view )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}

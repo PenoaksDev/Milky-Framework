@@ -1,6 +1,5 @@
 <?php namespace Milky\Auth;
 
-use Milky\Auth\Authenticatable as AuthenticatableContract;
 use Milky\Framework;
 use Milky\Helpers\Str;
 use Milky\Http\Cookies\CookieJar;
@@ -104,9 +103,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 		// return it back immediately. We do not want to fetch the user data on
 		// every call to this method because that would be tremendously slow.
 		if ( !is_null( $this->user ) )
-		{
 			return $this->user;
-		}
 
 		$id = $this->session->get( $this->getName() );
 
@@ -116,9 +113,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 		$user = null;
 
 		if ( !is_null( $id ) )
-		{
 			$user = $this->provider->retrieveById( $id );
-		}
 
 		// If the user is null, but we decrypt a "recaller" cookie we can attempt to
 		// pull the user data on that cookie which serves as a remember cookie on
@@ -153,9 +148,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 		$id = $this->session->get( $this->getName() );
 
 		if ( is_null( $id ) && $this->user() )
-		{
 			$id = $this->user()->getAuthIdentifier();
-		}
 
 		return $id;
 	}
@@ -178,6 +171,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 
 			return $user;
 		}
+
 		return null;
 	}
 
@@ -200,6 +194,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	{
 		if ( $this->validRecaller( $recaller = $this->getRecaller() ) )
 			return head( explode( '|', $recaller ) );
+
 		return null;
 	}
 
@@ -282,6 +277,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 
 		if ( !$this->once( array_merge( $credentials, $extraConditions ) ) )
 			return $this->getBasicResponse();
+
 		return null;
 	}
 
@@ -425,7 +421,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	 * @param  bool $remember
 	 * @return void
 	 */
-	public function login( AuthenticatableContract $user, $remember = false )
+	public function login( Authenticatable $user, $remember = false )
 	{
 		$this->updateSession( $user->getAuthIdentifier() );
 
@@ -519,7 +515,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	 * @param  Authenticatable $user
 	 * @return void
 	 */
-	protected function queueRecallerCookie( AuthenticatableContract $user )
+	protected function queueRecallerCookie( Authenticatable $user )
 	{
 		$value = $user->getAuthIdentifier() . '|' . $user->getRememberToken();
 
@@ -587,7 +583,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	 * @param  Authenticatable $user
 	 * @return void
 	 */
-	protected function refreshRememberToken( AuthenticatableContract $user )
+	protected function refreshRememberToken( Authenticatable $user )
 	{
 		$user->setRememberToken( $token = Str::random( 60 ) );
 
@@ -600,7 +596,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	 * @param  Authenticatable $user
 	 * @return void
 	 */
-	protected function createRememberTokenIfDoesntExist( AuthenticatableContract $user )
+	protected function createRememberTokenIfDoesntExist( Authenticatable $user )
 	{
 		if ( empty( $user->getRememberToken() ) )
 		{
@@ -683,7 +679,7 @@ class SessionGuard implements StatefulGuard, SupportsBasicAuth
 	 * @param  Authenticatable $user
 	 * @return $this
 	 */
-	public function setUser( AuthenticatableContract $user )
+	public function setUser( Authenticatable $user )
 	{
 		$this->user = $user;
 

@@ -3,10 +3,11 @@
 use ErrorException;
 use FilesystemIterator;
 use Milky\Exceptions\FileNotFoundException;
+use Milky\Services\ServiceFactory;
 use Milky\Traits\Macroable;
 use Symfony\Component\Finder\Finder;
 
-class Filesystem
+class Filesystem extends ServiceFactory
 {
 	use Macroable;
 

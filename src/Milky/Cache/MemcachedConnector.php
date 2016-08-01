@@ -1,9 +1,10 @@
 <?php namespace Milky\Cache;
 
 use Memcached;
+use Milky\Services\ServiceFactory;
 use RuntimeException;
 
-class MemcachedConnector
+class MemcachedConnector extends ServiceFactory
 {
 	/**
 	 * Create a new Memcached connection.

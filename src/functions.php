@@ -9,12 +9,16 @@ use Milky\Helpers\Arr;
 use Milky\Helpers\Dumper;
 use Milky\Helpers\Func;
 use Milky\Helpers\Str;
-use Milky\Http\Response;
+use Milky\Http\RedirectResponse;
+use Milky\Http\Request;
+use Milky\Http\Routing\UrlGenerator;
 use Milky\Impl\Collection;
 use Milky\Impl\Htmlable;
 use Milky\Impl\HtmlString;
+use Milky\Validation\Validator;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Translation\TranslatorInterface;
 
 define( 'FRAMEWORK_START', microtime( true ) );
 
@@ -1688,11 +1692,9 @@ if ( !function_exists( 'redirect' ) )
 	function redirect( $to = null, $status = 302, $headers = [], $secure = null )
 	{
 		if ( is_null( $to ) )
-		{
-			return Framework::get( 'redirect' );
-		}
+			return \Milky\Http\Factory::i()->redirector();
 
-		return Framework::get( 'redirect' )->to( $to, $status, $headers, $secure );
+		return \Milky\Http\Factory::i()->redirector()->to( $to, $status, $headers, $secure );
 	}
 }
 
@@ -1708,9 +1710,7 @@ if ( !function_exists( 'request' ) )
 	function request( $key = null, $default = null )
 	{
 		if ( is_null( $key ) )
-		{
 			return Framework::get( 'request' );
-		}
 
 		return Framework::get( 'request' )->input( $key, $default );
 	}
@@ -1830,11 +1830,9 @@ if ( !function_exists( 'trans' ) )
 	function trans( $id = null, $parameters = [], $domain = 'messages', $locale = null )
 	{
 		if ( is_null( $id ) )
-		{
-			return Framework::get( 'translator' );
-		}
+			return \Milky\Translation\Translator::i();
 
-		return Framework::get( 'translator' )->trans( $id, $parameters, $domain, $locale );
+		return \Milky\Translation\Translator::i()->trans( $id, $parameters, $domain, $locale );
 	}
 }
 
@@ -1852,7 +1850,7 @@ if ( !function_exists( 'trans_choice' ) )
 	 */
 	function trans_choice( $id, $number, array $parameters = [], $domain = 'messages', $locale = null )
 	{
-		return Framework::get( 'translator' )->transChoice( $id, $number, $parameters, $domain, $locale );
+		return \Milky\Translation\Translator::i()->transChoice( $id, $number, $parameters, $domain, $locale );
 	}
 }
 
@@ -1869,11 +1867,9 @@ if ( !function_exists( 'url' ) )
 	function url( $path = null, $parameters = [], $secure = null )
 	{
 		if ( is_null( $path ) )
-		{
-			return Framework::get( UrlGenerator::class );
-		}
+			return \Milky\Http\Factory::i()->url();
 
-		return Framework::get( UrlGenerator::class )->to( $path, $parameters, $secure );
+		return \Milky\Http\Factory::i()->url()->to( $path, $parameters, $secure );
 	}
 }
 
@@ -1886,17 +1882,13 @@ if ( !function_exists( 'validator' ) )
 	 * @param  array $rules
 	 * @param  array $messages
 	 * @param  array $customAttributes
-	 * @return Validator
+	 * @return \Milky\Validation\Factory
 	 */
 	function validator( array $data = [], array $rules = [], array $messages = [], array $customAttributes = [] )
 	{
-		$factory = Framework::get( ValidationFactory::class );
-
 		if ( func_num_args() === 0 )
-		{
-			return $factory;
-		}
+			return \Milky\Validation\Factory::i();
 
-		return $factory->make( $data, $rules, $messages, $customAttributes );
+		return \Milky\Validation\Factory::i()->make( $data, $rules, $messages, $customAttributes );
 	}
 }

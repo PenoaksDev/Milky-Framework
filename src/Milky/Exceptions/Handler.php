@@ -1,15 +1,14 @@
 <?php namespace Milky\Exceptions;
 
 use Exception;
-use Milky\Auth\Access\AuthorizationException;
-use Milky\Auth\AuthenticationException;
-use Milky\Database\Eloquent\ModelNotFoundException;
+use Milky\Binding\BindingBuilder;
+use Milky\Exceptions\Http\HttpResponseException;
 use Milky\Facades\Config;
 use Milky\Facades\View;
 use Milky\Framework;
 use Milky\Http\Request;
 use Milky\Http\Response;
-use Milky\Facades\Response as ResponseFacade;
+use Milky\Http\Routing\ResponseFactory;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Debug\Exception\FlattenException;
@@ -21,16 +20,23 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class Handler
 {
 	/**
-	 * A list of the exception types that should not be reported.
+	 * @var ExceptionIdentifier
+	 */
+	private $identifier;
+
+	/**
+	 * A list of the Exception types that should not be reported.
 	 *
 	 * @var array
 	 */
-	protected $dontReport = [];
+	protected $dontReport = [
+		NotFoundHttpException::class,
+	];
 
 	/**
-	 * Report or log an exception.
+	 * Report or log an Exception.
 	 *
-	 * @param  \Exception $e
+	 * @param  Exception $e
 	 * @return void
 	 */
 	public function report( Exception $e )
@@ -44,16 +50,43 @@ class Handler
 		}
 		catch ( Exception $ex )
 		{
-			throw $e; // throw the original exception
+			throw $e; // throw the original Exception
 		}
 
 		$logger->error( $e );
+
+
+		$level = $this->getLevel( $e );
+		$id = $this->identifier()->identify( $e );
+
+		$logger->{$level}( $e, ['identification' => ['id' => $id]] );
+	}
+
+	public function identifier()
+	{
+		return $this->identifier ?: $this->identifier = new ExceptionIdentifier();
 	}
 
 	/**
-	 * Determine if the exception should be reported.
+	 * Get the exception level.
 	 *
-	 * @param  \Exception $e
+	 * @param \Exception $exception
+	 *
+	 * @return string
+	 */
+	protected function getLevel( Exception $exception )
+	{
+		foreach ( array_get( $this->getConfig(), 'levels', [] ) as $class => $level )
+			if ( $exception instanceof $class )
+				return $level;
+
+		return 'error';
+	}
+
+	/**
+	 * Determine if the Exception should be reported.
+	 *
+	 * @param  Exception $e
 	 * @return bool
 	 */
 	public function shouldReport( Exception $e )
@@ -62,9 +95,9 @@ class Handler
 	}
 
 	/**
-	 * Determine if the exception is in the "do not report" list.
+	 * Determine if the Exception is in the "do not report" list.
 	 *
-	 * @param  \Exception $e
+	 * @param  Exception $e
 	 * @return bool
 	 */
 	protected function shouldntReport( Exception $e )
@@ -72,68 +105,44 @@ class Handler
 		$dontReport = array_merge( $this->dontReport, [HttpResponseException::class] );
 
 		foreach ( $dontReport as $type )
-		{
 			if ( $e instanceof $type )
-			{
 				return true;
-			}
-		}
 
 		return false;
 	}
 
 	/**
-	 * Render an exception into a response.
+	 * Render an Exception into a response.
 	 *
 	 * @param  Request $request
-	 * @param  \Exception $e
+	 * @param  Exception $e
 	 * @return Response
 	 */
 	public function render( $request, Exception $e )
 	{
-		try
-		{
-			if ( $e instanceof HttpResponseException )
+		$transformed = $this->getTransformed( $e );
+
+		$response = method_exists( $e, 'getResponse' ) ? $e->getResponse() : null;
+
+		if ( !$response instanceof Response )
+			try
 			{
-				return $e->getResponse();
+				$response = $this->getResponse( $request, $e, $transformed );
 			}
-			elseif ( $e instanceof ModelNotFoundException )
+			catch ( Exception $e )
 			{
-				$e = new NotFoundHttpException( $e->getMessage(), $e );
-			}
-			elseif ( $e instanceof AuthenticationException )
-			{
-				return $this->unauthenticated( $request, $e );
-			}
-			elseif ( $e instanceof AuthorizationException )
-			{
-				$e = new HttpException( 403, $e->getMessage() );
-			}
-			elseif ( $e instanceof ValidationException && $e->getResponse() )
-			{
-				return $e->getResponse();
+				$this->report( $e );
+				$response = new Response( 'Internal server error.', 500 );
 			}
 
-			if ( $this->isHttpException( $e ) )
-			{
-				return $this->toHttpResponse( $this->renderHttpException( $e ), $e );
-			}
-			else
-			{
-				return $this->toHttpResponse( $this->convertExceptionToResponse( $e ), $e );
-			}
-		}
-		catch ( \Throwable $t )
-		{
-			throw $e;
-		}
+		return $this->toIlluminateResponse( $response, $transformed );
 	}
 
 	/**
-	 * Map exception into an illuminate response.
+	 * Map Exception into an response.
 	 *
 	 * @param  Response $response
-	 * @param  \Exception $e
+	 * @param  Exception $e
 	 * @return Response
 	 */
 	protected function toHttpResponse( $response, Exception $e )
@@ -144,10 +153,10 @@ class Handler
 	}
 
 	/**
-	 * Render an exception to the console.
+	 * Render an Exception to the console.
 	 *
 	 * @param  OutputInterface $output
-	 * @param  \Exception $e
+	 * @param  Exception $e
 	 * @return void
 	 */
 	public function renderForConsole( $output, Exception $e )
@@ -165,20 +174,16 @@ class Handler
 	{
 		$status = $e->getStatusCode();
 
-		if ( View::i()->exists( "errors.{$status}" ) )
-		{
-			return ResponseFacade::view( "errors.{$status}", ['exception' => $e], $status, $e->getHeaders() );
-		}
+		if ( View::exists( "errors." . $status ) )
+			return ResponseFactory::i()->view( "errors.{$status}", ['exception' => $e], $status, $e->getHeaders() );
 		else
-		{
 			return $this->convertExceptionToResponse( $e );
-		}
 	}
 
 	/**
-	 * Create a Symfony response for the given exception.
+	 * Create a Symfony response for the given Exception.
 	 *
-	 * @param  \Exception $e
+	 * @param  Exception $e
 	 * @return Response
 	 */
 	protected function convertExceptionToResponse( Exception $e )
@@ -193,7 +198,7 @@ class Handler
 	}
 
 	/**
-	 * Convert an authentication exception into an unauthenticated response.
+	 * Convert an authentication Exception into an unauthenticated response.
 	 *
 	 * @param  Request $request
 	 * @param  AuthenticationException $e
@@ -202,13 +207,9 @@ class Handler
 	protected function unauthenticated( $request, AuthenticationException $e )
 	{
 		if ( $request->ajax() || $request->wantsJson() )
-		{
-			return response( 'Unauthorized.', 401 );
-		}
+			return ResponseFactory::i()->make( 'Unauthorized.', 401 );
 		else
-		{
 			return redirect()->guest( 'login' );
-		}
 	}
 
 	/**
@@ -241,13 +242,128 @@ EOF;
 	}
 
 	/**
-	 * Determine if the given exception is an HTTP exception.
+	 * Determine if the given Exception is an HTTP Exception.
 	 *
-	 * @param  \Exception $e
+	 * @param  Exception $e
 	 * @return bool
 	 */
 	protected function isHttpException( Exception $e )
 	{
 		return $e instanceof HttpException;
+	}
+
+	/**
+	 * Get exceptions configuration
+	 *
+	 * @return array
+	 */
+	public function getConfig()
+	{
+		return Config::get( 'exceptions' );
+	}
+
+	/**
+	 * Get the approprate response object.
+	 *
+	 * @param Request $request
+	 * @param \Exception $transformed
+	 * @param \Exception $exception
+	 *
+	 * @return Response
+	 */
+	protected function getResponse( Request $request, Exception $exception, Exception $transformed )
+	{
+		$id = $this->container->make( ExceptionIdentifier::class )->identify( $exception );
+
+		$flattened = FlattenException::create( $transformed );
+		$code = $flattened->getStatusCode();
+		$headers = $flattened->getHeaders();
+
+		return $this->getDisplayer( $request, $exception, $transformed, $code )->display( $transformed, $id, $code, $headers );
+	}
+
+	/**
+	 * Get the transformed exception.
+	 *
+	 * @param \Exception $exception
+	 *
+	 * @return \Exception
+	 */
+	protected function getTransformed( Exception $exception )
+	{
+		foreach ( $this->make( array_get( $this->config, 'transformers', [] ) ) as $transformer )
+		{
+			$exception = $transformer->transform( $exception );
+		}
+
+		return $exception;
+	}
+
+	/**
+	 * Get the displayer instance.
+	 *
+	 * @param Request $request
+	 * @param \Exception $original
+	 * @param \Exception $transformed
+	 * @param int $code
+	 *
+	 * @return DisplayerInterface
+	 */
+	protected function getDisplayer( Request $request, Exception $original, Exception $transformed, $code )
+	{
+		$displayers = $this->make( array_get( $this->config, 'displayers', [] ) );
+
+		if ( $filtered = $this->getFiltered( $displayers, $request, $original, $transformed, $code ) )
+		{
+			return $filtered[0];
+		}
+
+		return $this->container->make( array_get( $this->config, 'default' ) );
+	}
+
+	/**
+	 * Get the filtered list of displayers.
+	 *
+	 * @param DisplayerInterface[] $displayers
+	 * @param Request $request
+	 * @param \Exception $original
+	 * @param \Exception $transformed
+	 * @param int $code
+	 *
+	 * @return DisplayerInterface[]
+	 */
+	protected function getFiltered( array $displayers, Request $request, Exception $original, Exception $transformed, $code )
+	{
+		foreach ( $this->make( array_get( $this->getConfig(), 'filters', [] ) ) as $filter )
+		{
+			$displayers = $filter->filter( $displayers, $request, $original, $transformed, $code );
+		}
+
+		return array_values( $displayers );
+	}
+
+	/**
+	 * Make multiple objects using the container.
+	 *
+	 * @param string [] $classes
+	 *
+	 * @return object[]
+	 */
+	protected function make( array $classes )
+	{
+		foreach ( $classes as $index => $class )
+		{
+			try
+			{
+				$classes[$index] = BindingBuilder::resolveBinding( $class );
+			}
+			catch ( Exception $e )
+			{
+				unset( $classes[$index] );
+				$this->report( $e );
+			}
+		}
+
+		return array_values( $classes );
 	}
 }

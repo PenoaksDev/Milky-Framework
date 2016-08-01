@@ -1,8 +1,9 @@
 <?php namespace Milky\Hashing;
 
+use Milky\Services\ServiceFactory;
 use RuntimeException;
 
-class BcryptHasher
+class BcryptHasher extends ServiceFactory
 {
 	/**
 	 * Default crypt cost factor.

@@ -1,8 +1,6 @@
 <?php namespace Milky\Auth;
 
 use Milky\Http\Request;
-use Milky\Contracts\Auth\Guard;
-use Milky\Contracts\Auth\UserProvider;
 
 class TokenGuard implements Guard
 {

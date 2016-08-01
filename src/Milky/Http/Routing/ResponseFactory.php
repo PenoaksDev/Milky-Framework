@@ -6,12 +6,14 @@ use Milky\Http\JsonResponse;
 use Milky\Http\RedirectResponse;
 use Milky\Http\Response;
 use Milky\Http\View\Factory;
+use Milky\Http\Factory as HttpFactory;
 use Milky\Impl\Arrayable;
+use Milky\Services\ServiceFactory;
 use Milky\Traits\Macroable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class ResponseFactory
+class ResponseFactory extends ServiceFactory
 {
 	use Macroable;
 
@@ -29,6 +31,11 @@ class ResponseFactory
 	 */
 	protected $redirector;
 
+	public static function build()
+	{
+		return new static( Factory::i(), HttpFactory::i()->redirector() );
+	}
+
 	/**
 	 * Create a new response factory instance.
 	 *
@@ -38,6 +45,8 @@ class ResponseFactory
 	 */
 	public function __construct( Factory $view, Redirector $redirector )
 	{
+		parent::__construct();
+
 		$this->view = $view;
 		$this->redirector = $redirector;
 	}
@@ -66,7 +75,7 @@ class ResponseFactory
 	 */
 	public function view( $view, $data = [], $status = 200, array $headers = [] )
 	{
-		return static::make( $this->view->make( $view, $data ), $status, $headers );
+		return static::make( $this->view->make( $view, $data )->render(), $status, $headers );
 	}
 
 	/**

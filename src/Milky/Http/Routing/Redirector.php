@@ -1,6 +1,7 @@
 <?php namespace Milky\Http\Routing;
 
 use Milky\Http\RedirectResponse;
+use Milky\Http\Session\SessionInterface;
 use Milky\Http\Session\Store;
 
 class Redirector
@@ -15,7 +16,7 @@ class Redirector
 	/**
 	 * The session store instance.
 	 *
-	 * @var Store
+	 * @var SessionInterface
 	 */
 	protected $session;
 
@@ -206,10 +207,10 @@ class Redirector
 	/**
 	 * Set the active session store.
 	 *
-	 * @param  Store $session
+	 * @param  SessionInterface $session
 	 * @return void
 	 */
-	public function setSession( Store $session )
+	public function setSession( SessionInterface $session )
 	{
 		$this->session = $session;
 	}

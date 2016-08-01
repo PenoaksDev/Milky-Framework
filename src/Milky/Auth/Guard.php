@@ -19,7 +19,7 @@ interface Guard
 	/**
 	 * Get the currently authenticated user.
 	 *
-	 * @return \Illuminate\Contracts\Auth\Authenticatable|null
+	 * @return Authenticatable|null
 	 */
 	public function user();
 
@@ -41,7 +41,7 @@ interface Guard
 	/**
 	 * Set the current user.
 	 *
-	 * @param  \Illuminate\Contracts\Auth\Authenticatable $user
+	 * @param  Authenticatable $user
 	 * @return void
 	 */
 	public function setUser( Authenticatable $user );

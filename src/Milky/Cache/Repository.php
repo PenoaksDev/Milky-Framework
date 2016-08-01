@@ -5,7 +5,6 @@ use BadMethodCallException;
 use Carbon\Carbon;
 use Closure;
 use DateTime;
-use Milky\Http\Session\Store;
 use Milky\Traits\Macroable;
 
 class Repository implements ArrayAccess
@@ -73,6 +72,7 @@ class Repository implements ArrayAccess
 
 				return $this->events->fire( new Events\KeyWritten( $payload[0], $payload[1], $payload[2], $payload[3] ) );
 		}
+		return null;
 	}
 
 	/**
@@ -190,6 +190,7 @@ class Repository implements ArrayAccess
 
 			$this->fireCacheEvent( 'write', [$key, $value, $minutes] );
 		}
+		return null;
 	}
 
 	/**
@@ -343,12 +344,6 @@ class Repository implements ArrayAccess
 		if ( method_exists( $this->store, 'tags' ) )
 		{
 			$taggedCache = $this->store->tags( $names );
-
-			if ( !is_null( $this->events ) )
-			{
-				$taggedCache->setEventDispatcher( $this->events );
-			}
-
 			$taggedCache->setDefaultCacheTime( $this->default );
 
 			return $taggedCache;

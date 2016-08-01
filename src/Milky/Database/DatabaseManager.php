@@ -1,13 +1,20 @@
 <?php namespace Milky\Database;
 
 use InvalidArgumentException;
+use Milky\Binding\BindingBuilder;
 use Milky\Database\Connectors\ConnectionFactory;
+use Milky\Database\Eloquent\Model;
+use Milky\Database\Eloquent\QueueEntityResolver;
 use Milky\Framework;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
+use Milky\Queue\Impl\EntityResolver;
+use Milky\Services\ServiceFactory;
+use Milky\Services\ServiceInstance;
+use Milky\Services\ServiceManager;
 use PDO;
 
-class DatabaseManager implements ConnectionResolverInterface
+class DatabaseManager extends ServiceFactory implements ConnectionResolverInterface
 {
 	/**
 	 * The database connection factory instance.
@@ -30,6 +37,15 @@ class DatabaseManager implements ConnectionResolverInterface
 	 */
 	protected $extensions = [];
 
+	public static function build()
+	{
+		Model::clearBootedModels();
+		$db = new DatabaseManager( new ConnectionFactory() );
+		Model::setConnectionResolver( $db );
+
+		return $db;
+	}
+
 	/**
 	 * Create a new database manager instance.
 	 *
@@ -38,7 +54,14 @@ class DatabaseManager implements ConnectionResolverInterface
 	 */
 	public function __construct( ConnectionFactory $factory )
 	{
+		parent::__construct();
+
 		$this->factory = $factory;
+	}
+
+	public function factory()
+	{
+		return $this->factory;
 	}
 
 	/**

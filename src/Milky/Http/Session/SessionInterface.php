@@ -25,4 +25,11 @@ interface SessionInterface extends BaseSessionInterface
 	 * @param  Request $request
 	 */
 	public function setRequestOnHandler( Request $request );
+
+	/**
+	 * Set the "previous" URL in the session.
+	 *
+	 * @param  string $url
+	 */
+	public function setPreviousUrl( $url );
 }

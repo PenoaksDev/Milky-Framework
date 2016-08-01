@@ -1,13 +1,13 @@
 <?php namespace Milky\Cache;
 
-use Milky\Redis\Database as Redis;
+use Milky\Redis\Redis;
 
 class RedisStore extends TaggableStore implements Store
 {
 	/**
 	 * The Redis database connection.
 	 *
-	 * @var Database
+	 * @var Redis
 	 */
 	protected $redis;
 
@@ -28,7 +28,7 @@ class RedisStore extends TaggableStore implements Store
 	/**
 	 * Create a new Redis store.
 	 *
-	 * @param  Database $redis
+	 * @param  Redis $redis
 	 * @param  string $prefix
 	 * @param  string $connection
 	 */
@@ -203,7 +203,7 @@ class RedisStore extends TaggableStore implements Store
 	/**
 	 * Get the Redis database instance.
 	 *
-	 * @return Database
+	 * @return Redis
 	 */
 	public function getRedis()
 	{

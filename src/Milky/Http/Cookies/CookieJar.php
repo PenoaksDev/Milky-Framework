@@ -1,9 +1,10 @@
 <?php namespace Milky\Http\Cookies;
 
 use Milky\Helpers\Arr;
+use Milky\Services\ServiceFactory;
 use Symfony\Component\HttpFoundation\Cookie;
 
-class CookieJar
+class CookieJar extends ServiceFactory
 {
 	/**
 	 * The default path (if specified).

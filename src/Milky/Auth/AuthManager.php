@@ -266,6 +266,9 @@ class AuthManager
 	 */
 	public function __call( $method, $parameters )
 	{
+		if ( !method_exists( $this->guard(), $method ) )
+			throw new \RuntimeException( "Method [" . $method . "] is not found in Guard" );
+
 		return call_user_func_array( [$this->guard(), $method], $parameters );
 	}
 }

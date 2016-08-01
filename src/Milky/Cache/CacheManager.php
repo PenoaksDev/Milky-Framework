@@ -1,15 +1,24 @@
 <?php namespace Milky\Cache;
 
 use Closure;
+use Doctrine\Common\Cache\Cache;
 use InvalidArgumentException;
+use Milky\Database\DatabaseManager;
+use Milky\Encryption\Encrypter;
+use Milky\Facades\Config;
+use Milky\Filesystem\Filesystem;
+use Milky\Framework;
 use Milky\Helpers\Arr;
+use Milky\Services\ServiceFactory;
 
-class CacheManager
+class CacheManager extends ServiceFactory implements Cache
 {
+	// TODO Improve!!!
+
 	/**
 	 * The array of resolved cache stores.
 	 *
-	 * @var array
+	 * @var Store[]
 	 */
 	protected $stores = [];
 
@@ -24,7 +33,7 @@ class CacheManager
 	 * Get a cache store instance by name.
 	 *
 	 * @param  string|null $name
-	 * @return mixed
+	 * @return Store
 	 */
 	public function store( $name = null )
 	{
@@ -77,7 +86,7 @@ class CacheManager
 			$driverMethod = 'create' . ucfirst( $config['driver'] ) . 'Driver';
 
 			if ( method_exists( $this, $driverMethod ) )
-				return $this->{$driverMethod( $config )};
+				return $this->{$driverMethod}( $config );
 			else
 				throw new InvalidArgumentException( "Driver [{$config['driver']}] is not supported." );
 		}
@@ -91,14 +100,14 @@ class CacheManager
 	 */
 	protected function callCustomCreator( array $config )
 	{
-		return $this->customCreators[$config['driver']]( $this->app, $config );
+		return $this->customCreators[$config['driver']]( $config );
 	}
 
 	/**
 	 * Create an instance of the APC cache driver.
 	 *
 	 * @param  array $config
-	 * @return ApcStore
+	 * @return Repository
 	 */
 	protected function createApcDriver( array $config )
 	{
@@ -110,7 +119,7 @@ class CacheManager
 	/**
 	 * Create an instance of the array cache driver.
 	 *
-	 * @return ArrayStore
+	 * @return Repository
 	 */
 	protected function createArrayDriver()
 	{
@@ -121,24 +130,24 @@ class CacheManager
 	 * Create an instance of the file cache driver.
 	 *
 	 * @param  array $config
-	 * @return FileStore
+	 * @return Repository
 	 */
 	protected function createFileDriver( array $config )
 	{
-		return $this->repository( new FileStore( $this->app['files'], $config['path'] ) );
+		return $this->repository( new FileStore( Filesystem::i(), $config['path'] ) );
 	}
 
 	/**
 	 * Create an instance of the Memcached cache driver.
 	 *
 	 * @param  array $config
-	 * @return MemcachedStore
+	 * @return Repository
 	 */
 	protected function createMemcachedDriver( array $config )
 	{
 		$prefix = $this->getPrefix( $config );
 
-		$memcached = $this->app['memcached.connector']->connect( $config['servers'] );
+		$memcached = MemcachedConnector::i()->connect( $config['servers'] );
 
 		return $this->repository( new MemcachedStore( $memcached, $prefix ) );
 	}
@@ -146,7 +155,7 @@ class CacheManager
 	/**
 	 * Create an instance of the Null cache driver.
 	 *
-	 * @return NullStore
+	 * @return Repository
 	 */
 	protected function createNullDriver()
 	{
@@ -157,11 +166,11 @@ class CacheManager
 	 * Create an instance of the Redis cache driver.
 	 *
 	 * @param  array $config
-	 * @return RedisStore
+	 * @return Repository
 	 */
 	protected function createRedisDriver( array $config )
 	{
-		$redis = $this->app['redis'];
+		$redis = Framework::get( 'redis' );
 
 		$connection = Arr::get( $config, 'connection', 'default' );
 
@@ -172,13 +181,11 @@ class CacheManager
 	 * Create an instance of the database cache driver.
 	 *
 	 * @param  array $config
-	 * @return DatabaseStore
+	 * @return Repository
 	 */
 	protected function createDatabaseDriver( array $config )
 	{
-		$connection = $this->app['db']->connection( Arr::get( $config, 'connection' ) );
-
-		return $this->repository( new DatabaseStore( $connection, $this->app['encrypter'], $config['table'], $this->getPrefix( $config ) ) );
+		return $this->repository( new DatabaseStore( DatabaseManager::i()->connection( Arr::get( $config, 'connection' ) ), Encrypter::i(), $config['table'], $this->getPrefix( $config ) ) );
 	}
 
 	/**
@@ -189,14 +196,7 @@ class CacheManager
 	 */
 	public function repository( Store $store )
 	{
-		$repository = new Repository( $store );
-
-		if ( $this->app->bound( 'Illuminate\Contracts\Events\Dispatcher' ) )
-		{
-			$repository->setEventDispatcher( $this->app['Illuminate\Contracts\Events\Dispatcher'] );
-		}
-
-		return $repository;
+		return new Repository( $store );
 	}
 
 	/**
@@ -207,7 +207,7 @@ class CacheManager
 	 */
 	protected function getPrefix( array $config )
 	{
-		return Arr::get( $config, 'prefix' ) ?: $this->app['config']['cache.prefix'];
+		return Arr::get( $config, 'prefix' ) ?: Config::get( 'cache.prefix' );
 	}
 
 	/**
@@ -218,7 +218,7 @@ class CacheManager
 	 */
 	protected function getConfig( $name )
 	{
-		return $this->app['config']["cache.stores.{$name}"];
+		return Config::get( 'cache.stores.' . $name );
 	}
 
 	/**
@@ -228,7 +228,7 @@ class CacheManager
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['cache.default'];
+		return Config::get( 'cache.default' );
 	}
 
 	/**
@@ -238,7 +238,7 @@ class CacheManager
 	 */
 	public function setDefaultDriver( $name )
 	{
-		$this->app['config']['cache.default'] = $name;
+		Config::set( 'cache.default', $name );
 	}
 
 	/**
@@ -265,5 +265,58 @@ class CacheManager
 	public function __call( $method, $parameters )
 	{
 		return call_user_func_array( [$this->store(), $method], $parameters );
+	}
+
+	public function fetch( $id )
+	{
+		return $this->store()->get( $id ) ?: false;
+	}
+
+	public function contains( $id )
+	{
+		return !is_null( $this->store()->get( $id ) );
+	}
+
+	public function save( $id, $data, $lifeTime = 0 )
+	{
+		$this->store()->put( $id, $data, $lifeTime );
+
+		return true;
+	}
+
+	public function delete( $id )
+	{
+		$this->store()->forget( $id );
+
+		return true;
+	}
+
+	/**
+	 * Retrieves cached information from the data store.
+	 *
+	 * The server's statistics array has the following values:
+	 *
+	 * - <b>hits</b>
+	 * Number of keys that have been requested and found present.
+	 *
+	 * - <b>misses</b>
+	 * Number of items that have been requested and not found.
+	 *
+	 * - <b>uptime</b>
+	 * Time that the server is running.
+	 *
+	 * - <b>memory_usage</b>
+	 * Memory used by this server to store items.
+	 *
+	 * - <b>memory_available</b>
+	 * Memory allowed to use for storage.
+	 *
+	 * @since 2.2
+	 *
+	 * @return array|null An associative array with server's statistics if available, NULL otherwise.
+	 */
+	public function getStats()
+	{
+		return null; // FOR NOW
 	}
 }

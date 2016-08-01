@@ -7,8 +7,9 @@ use Milky\Http\Routing\Redirector;
 use Milky\Http\Routing\ResponseFactory;
 use Milky\Http\Routing\Router;
 use Milky\Http\Routing\UrlGenerator;
-use Milky\Http\Session\Middleware\StartSession;
+use Milky\Http\Session\SessionManager;
 use Milky\Pipeline\Pipeline;
+use Milky\Services\ServiceFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 use Zend\Diactoros\Response as PsrResponse;
 
@@ -20,7 +21,7 @@ use Zend\Diactoros\Response as PsrResponse;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class Factory
+class Factory extends ServiceFactory
 {
 	/**
 	 * @var Framework
@@ -53,12 +54,24 @@ class Factory
 	private $response = null;
 
 	/**
+	 * @var Redirector
+	 */
+	private $redirector;
+
+	/**
 	 * @var array
 	 */
 	private $middleware = [];
 
+	public static function build()
+	{
+		return Framework::fw()->newHttpFactory();
+	}
+
 	public function __construct( Framework $fw, Request $request = null )
 	{
+		parent::__construct();
+
 		if ( !$request )
 			$request = Request::capture();
 
@@ -82,9 +95,7 @@ class Factory
 		} );
 
 		$redirector = new Redirector( $url );
-
-		if ( Framework::available( 'session.store' ) )
-			$redirector->setSession( Framework::get( 'session.store' ) );
+		$redirector->setSession( SessionManager::i()->driver() );
 
 		Framework::set( 'router', function ()
 		{
@@ -96,6 +107,7 @@ class Factory
 			return $this->url();
 		} );
 
+		$this->redirector = $redirector;
 		$this->router = $r;
 		$this->url = $url;
 
@@ -105,9 +117,12 @@ class Factory
 
 		Framework::set( 'Psr\Http\Message\ResponseInterface', new PsrResponse() );
 
-		Framework::set( 'http.factory', new ResponseFactory( Framework::get( 'view.factory' ), $redirector ) );
+		new ResponseFactory( Framework::get( 'view.factory' ), $redirector ); // Init Response Factory
+	}
 
-
+	public function redirector()
+	{
+		return $this->redirector;
 	}
 
 	/**
@@ -142,7 +157,7 @@ class Factory
 	{
 		$this->addMiddleware( [
 			new EncryptCookies( Framework::get( 'encrypter' ) ),
-			new StartSession( Framework::get( 'session.mgr' ) ),
+			SessionManager::i(),
 		] );
 
 		$this->router->getRoutes()->refreshNameLookups();
@@ -150,8 +165,8 @@ class Factory
 		$this->response = ( new Pipeline() )->withExceptionHandler( function ( $request, $e )
 		{
 			$handler = Framework::exceptionHandler();
-
 			$handler->report( $e );
+
 			return $handler->render( $request, $e );
 		} )->send( $this->request )->through( $this->middleware )->then( function ( $request )
 		{

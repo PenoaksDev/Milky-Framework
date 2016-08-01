@@ -2,6 +2,9 @@
 
 use Milky\Exceptions\DecryptException;
 use Milky\Exceptions\EncryptException;
+use Milky\Exceptions\FrameworkException;
+use Milky\Facades\Config;
+use Milky\Helpers\Str;
 use RuntimeException;
 
 class Encrypter extends BaseEncrypter
@@ -13,6 +16,20 @@ class Encrypter extends BaseEncrypter
 	 */
 	protected $cipher;
 
+	public static function build()
+	{
+		$config = Config::get( 'app' );
+
+		if ( Str::startsWith( $key = $config['key'], 'base64:' ) )
+			$key = base64_decode( substr( $key, 7 ) );
+		$cipher = $config['cipher'];
+
+		if ( Encrypter::supported( $key, $cipher ) )
+			return new Encrypter( $key, $cipher );
+		else
+			throw new FrameworkException( 'No supported encrypter found. The cipher and / or key length are invalid.' );
+	}
+
 	/**
 	 * Create a new encrypter instance.
 	 *
@@ -23,6 +40,8 @@ class Encrypter extends BaseEncrypter
 	 */
 	public function __construct( $key, $cipher = 'AES-128-CBC' )
 	{
+		parent::__construct();
+
 		$key = (string) $key;
 
 		if ( static::supported( $key, $cipher ) )

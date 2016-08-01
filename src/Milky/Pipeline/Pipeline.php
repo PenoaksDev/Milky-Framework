@@ -198,6 +198,8 @@ class Pipeline
 			}
 			catch ( \Throwable $e )
 			{
+				$e = new PipelineException( $e );
+
 				if ( is_callable( $this->exceptionHandler ) || $this->exceptionHandler instanceof Closure )
 					return BindingBuilder::call( $this->exceptionHandler, compact( 'passable', 'e' ) );
 				else

@@ -247,6 +247,8 @@ class Factory implements FactoryContract
 	 */
 	public function exists( $view )
 	{
+		var_dump( "Exists " . $view );
+
 		try
 		{
 			$this->finder->find( $view );

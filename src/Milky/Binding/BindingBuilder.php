@@ -1,30 +1,10 @@
 <?php namespace Milky\Binding;
 
-use Milky\Auth\Access\Gate;
-use Milky\Auth\Authenticatable;
-use Milky\Auth\AuthManager;
-use Milky\Bus\Dispatcher;
-use Milky\Cache\CacheManager;
 use Milky\Cache\Console\ClearCommand;
-use Milky\Cache\MemcachedConnector;
-use Milky\Encryption\Encrypter;
 use Milky\Exceptions\BindingException;
-use Milky\Exceptions\FrameworkException;
-use Milky\Filesystem\Filesystem;
 use Milky\Framework;
-use Milky\Hashing\BcryptHasher;
-use Milky\Helpers\Str;
-use Milky\Http\Factory;
-use Milky\Http\Session\SessionManager;
-use Milky\Http\View\Compilers\BladeCompiler;
-use Milky\Http\View\Engines\CompilerEngine;
-use Milky\Http\View\Engines\EngineResolver;
-use Milky\Http\View\Engines\PhpEngine;
-use Milky\Http\View\Factory as ViewFactory;
-use Milky\Http\View\FileViewFinder;
-use Milky\Providers\DatabaseServiceProvider;
+use Milky\Http\View\Factory;
 use Milky\Queue\QueueServiceProvider;
-use Milky\Redis\Database;
 
 /**
  * The MIT License (MIT)
@@ -50,153 +30,15 @@ class BindingBuilder
 	{
 		$fw->hooks->addHook( 'binding.failed', [$this, 'findServiceBinding'] );
 
-		static::addServiceBindingResolver( 'encrypter', function () use ( $fw )
-		{
-			$config = $fw->config->get( 'app' );
-
-			if ( Str::startsWith( $key = $config['key'], 'base64:' ) )
-				$key = base64_decode( substr( $key, 7 ) );
-			$cipher = $config['cipher'];
-
-			if ( Encrypter::supported( $key, $cipher ) )
-				$fw['encrypter'] = new Encrypter( $key, $cipher );
-			else
-				throw new FrameworkException( 'No supported encrypter found. The cipher and / or key length are invalid.' );
-		} );
-
-		static::addServiceBindingResolver( 'session.mgr', function ()
-		{
-			return new SessionManager();
-		} );
-
-		static::addServiceBindingResolver( 'session.store', function () use ( $fw )
-		{
-			// First, we will create the session manager which is responsible for the
-			// creation of the various session drivers when they are needed by the
-			// application instance, and will resolve them on a lazy load basis.
-			return $fw['session']->driver();
-		} );
-
-		static::addServiceBindingResolver( 'files', function ()
-		{
-			return new Filesystem;
-		} );
-
-		static::addServiceBindingResolver( 'hash', function ()
-		{
-			return new BcryptHasher;
-		} );
-
-		static::addServiceBindingResolver( 'cache.mgr', function ()
-		{
-			return new CacheManager;
-		} );
-
-		static::addServiceBindingResolver( 'cache.store', function () use ( $fw )
-		{
-			return $fw['cache']->driver();
-		} );
-
-		static::addServiceBindingResolver( 'memcached.connector', function ()
-		{
-			return new MemcachedConnector;
-		} );
-
 		static::addServiceBindingResolver( 'command.cache.clear', function () use ( $fw )
 		{
 			return new ClearCommand( $fw['cache'] );
 			// $this->console->addCommand( 'command.cache.clear' );
 		} );
 
-		static::addServiceBindingResolver( ['db.mgr', 'db.factory', 'db.connection'], function () use ( $fw )
+		static::addServiceBindingResolver( ['view.engine.resolver', 'blade.compiler', 'view.finder', 'blade', 'view.factory'], function () use ( $fw )
 		{
-			$fw->providers->register( new DatabaseServiceProvider() );
-		} );
-
-		static::addServiceBindingResolver( 'auth.mgr', function () use ( $fw )
-		{
-			/* Once the authentication service has actually been requested by the developer
-			 * we will set a variable in the application indicating such. This helps us
-			 * know that we need to set any queued cookies in the after event later. */
-			$fw['auth.loaded'] = true;
-
-			$fw['auth.mgr'] = new AuthManager();
-
-			$fw->hooks->addHook( 'http.factory.create', function ( Factory $factory ) use ( $fw )
-			{
-				$factory->request()->setUserResolver( function ( $guard = null ) use ( $fw )
-				{
-					return call_user_func( $fw['auth.mgr']->userResolver(), $guard );
-				} );
-			} );
-		} );
-
-		static::addServiceBindingResolver( 'auth.driver', function () use ( $fw )
-		{
-			return $fw['auth.mgr']->guard();
-		} );
-
-		static::addServiceBindingResolver( Authenticatable::class, function () use ( $fw )
-		{
-			return call_user_func( $fw['auth.mgr']->userResolver() );
-		} );
-
-		static::addServiceBindingResolver( Gate::class, function () use ( $fw )
-		{
-			return new Gate( function () use ( $fw )
-			{
-				return call_user_func( $fw['auth.mgr']->userResolver() );
-			} );
-		} );
-
-		static::addServiceBindingResolver( ['view.engine.resolver', 'view.factory'], function () use ( $fw )
-		{
-			$resolver = new EngineResolver();
-			$fw['view.engine.resolver'] = $resolver;
-
-			$resolver->register( 'php', function ()
-			{
-				return new PhpEngine;
-			} );
-
-			// The Compiler engine requires an instance of the CompilerInterface, which in
-			// this case will be the Blade compiler, so we'll first create the compiler
-			// instance to pass into the engine so it can compile the views properly.
-			$fw['blade.compiler'] = function () use ( $fw )
-			{
-				$cache = $fw->config['view.compiled'];
-
-				return new BladeCompiler( $fw['files'], $cache );
-			};
-
-			$resolver->register( 'blade', function () use ( $fw )
-			{
-				return new CompilerEngine( $fw['blade.compiler'] );
-			} );
-
-			$fw['view.finder'] = function () use ( $fw )
-			{
-				$paths = $fw->config['view.paths'];
-
-				return new FileViewFinder( $fw['files'], $paths );
-			};
-
-			$finder = $fw['view.finder'];
-
-			$fw['view.factory'] = new ViewFactory( $resolver, $finder );
-		} );
-
-		static::addServiceBindingResolver( 'dispatcher', function () use ( $fw )
-		{
-			return new Dispatcher( function ( $connection = null ) use ( $fw )
-			{
-				return $fw['Milky\Queue\Impl\Factory']->connection( $connection );
-			} );
-		} );
-
-		static::addServiceBindingResolver( 'redis', function () use ( $fw )
-		{
-			return new Database( $fw->config->get( 'database.redis' ) );
+			Factory::build();
 		} );
 
 		static::addServiceBindingResolver( [

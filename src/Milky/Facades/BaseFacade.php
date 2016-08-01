@@ -82,8 +82,8 @@ abstract class BaseFacade
 
 	public static function __callStatic( $method, $args )
 	{
-		self::__do( $method, $args );
-		Log::warning( "Static method [" . $method . "] is not implemented in facade class [" . static::class . "]" );
+		Log::warning( "Static method [" . $method . "] is not implemented in scaffolding class [" . static::class . "]" );
+		return self::__do( $method, $args );
 	}
 
 	protected static function __do( $method, $args )
@@ -94,10 +94,10 @@ abstract class BaseFacade
 			$self->__init();
 
 		if ( is_null( $self->scaffold ) )
-			throw new \RuntimeException( "Something went wrong, the scaffolding is null." );
+			throw new \RuntimeException( "Something went wrong, scaffolding is null for facade [" . static::class . "]." );
 
 		if ( get_class( $self->scaffold ) == get_class( $self ) )
-			throw new \RuntimeException( "Something went wrong, scaffolding is looping." );
+			throw new \RuntimeException( "Something went wrong, scaffolding is looping for facade [" . static::class . "]." );
 
 		try
 		{

@@ -1,12 +1,24 @@
 <?php namespace Milky;
 
+use Faker\Factory as FakerFactory;
+use Faker\Generator as FakerGenerator;
 use Milky\Binding\BindingBuilder;
 use Milky\Binding\Globals;
+use Milky\Bus\Dispatcher;
+use Milky\Cache\CacheManager;
+use Milky\Cache\MemcachedConnector;
 use Milky\Config\Configuration;
 use Milky\Config\ConfigurationBuilder;
+use Milky\Database\DatabaseManager;
+use Milky\Database\Eloquent\Factory as EloquentFactory;
+use Milky\Database\Eloquent\QueueEntityResolver;
+use Milky\Encryption\Encrypter;
 use Milky\Exceptions\FrameworkException;
 use Milky\Exceptions\Handler;
+use Milky\Facades\Config;
 use Milky\Facades\Log;
+use Milky\Filesystem\Filesystem;
+use Milky\Hashing\BcryptHasher;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Hooks\HookDispatcher;
@@ -14,6 +26,9 @@ use Milky\Http\Factory;
 use Milky\Logging\LogBuilder;
 use Milky\Logging\Logger;
 use Milky\Providers\ProviderRepository;
+use Milky\Redis\Redis;
+use Milky\Translation\Translator;
+use Milky\Validation\Factory as ValidationFactory;
 
 /**
  * @Product: Milky Framework
@@ -139,6 +154,8 @@ class Framework implements \ArrayAccess
 
 		$this->registerBindingAlias();
 
+		$this->registerBindings();
+
 		new BindingBuilder( $this );
 
 		$this->hooks->trigger( 'fw.loaded', $this );
@@ -156,6 +173,101 @@ class Framework implements \ArrayAccess
 		$this->addAlias( ['Milky\Bus\Dispatcher'], 'dispatcher' );
 		$this->addAlias( ['Milky\Queue\QueueManager', 'queue'], 'queue.mgr' );
 		$this->addAlias( ['Milky\Http\Routing\UrlGenerator', 'UrlGenerator'], 'url' );
+	}
+
+	public function registerBindings()
+	{
+		$this['encrypter'] = function ()
+		{
+			return Encrypter::i();
+		};
+
+		$this['files'] = function ()
+		{
+			return Filesystem::i();
+		};
+
+		$this['hash'] = function ()
+		{
+			return BcryptHasher::i();
+		};
+
+		$this['cache.mgr'] = function ()
+		{
+			return CacheManager::i();
+		};
+
+		$this['cache.store'] = function ()
+		{
+			return CacheManager::i()->driver();
+		};
+
+		$this['memcached.connector'] = function ()
+		{
+			return MemcachedConnector::i();
+		};
+
+		$this['dispatcher'] = function ()
+		{
+			return Dispatcher::i();
+		};
+
+		$this['redis'] = function ()
+		{
+			return new Redis( Config::get( 'database.redis' ) );
+		};
+
+		$fw['translator'] = function ()
+		{
+			return Translator::i();
+		};
+
+		$fw['translation.loader'] = function ()
+		{
+			return Translator::i()->getLoader();
+		};
+
+		$fw['db.mgr'] = function ()
+		{
+			return DatabaseManager::i();
+		};
+
+		$fw['db.factory'] = function ()
+		{
+			return DatabaseManager::i()->factory();
+		};
+
+		$fw['db.connection'] = function ()
+		{
+			return DatabaseManager::i()->connection();
+		};
+
+		$fw[FakerGenerator::class] = function ()
+		{
+			return FakerFactory::create();
+		};
+
+		$fw[EloquentFactory::class] = function ()
+		{
+			$faker = BindingBuilder::resolveBinding( FakerGenerator::class );
+
+			return EloquentFactory::construct( $faker, $this->buildPath( '__database', 'factories' ) );
+		};
+
+		$fw[FakerGenerator::class] = function ()
+		{
+			return new QueueEntityResolver;
+		};
+
+		$fw['validator'] = function ()
+		{
+			return ValidationFactory::i();
+		};
+
+		$fw['validation.presence'] = function ()
+		{
+			return ValidationFactory::i()->getPresenceVerifier();
+		};
 	}
 
 	/**
@@ -200,6 +312,7 @@ class Framework implements \ArrayAccess
 		$fw = static::fw();
 		if ( is_null( $fw->handler ) )
 			$fw->handler = new Handler();
+
 		return $fw->handler;
 	}
 
@@ -235,7 +348,7 @@ class Framework implements \ArrayAccess
 	{
 		$factory = new Http\Factory( $this, $request );
 		static::set( 'http.factory', $factory );
-		$this->hooks->trigger( 'http.factory.create', compact('factory') );
+		$this->hooks->trigger( 'http.factory.create', compact( 'factory' ) );
 
 		return $factory;
 	}

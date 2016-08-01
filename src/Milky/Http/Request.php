@@ -4,6 +4,8 @@ use ArrayAccess;
 use Closure;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
+use Milky\Http\Routing\Route;
+use Milky\Http\Session\Store;
 use Milky\Impl\Arrayable;
 use Milky\Traits\Macroable;
 use RuntimeException;
@@ -38,11 +40,11 @@ class Request extends SymfonyRequest implements ArrayAccess, Arrayable
 	protected $convertedFiles;
 
 	/**
-	 * The user resolver callback.
+	 * The acct resolver callback.
 	 *
 	 * @var \Closure
 	 */
-	protected $userResolver;
+	protected $acctResolver;
 
 	/**
 	 * The route resolver callback.
@@ -458,9 +460,7 @@ class Request extends SymfonyRequest implements ArrayAccess, Arrayable
 		return array_map( function ( $file )
 		{
 			if ( is_null( $file ) || ( is_array( $file ) && empty( array_filter( $file ) ) ) )
-			{
 				return $file;
-			}
 
 			return is_array( $file ) ? $this->convertUploadedFiles( $file ) : UploadedFile::createFromBase( $file );
 		}, $files );
@@ -773,23 +773,17 @@ class Request extends SymfonyRequest implements ArrayAccess, Arrayable
 		foreach ( $accepts as $accept )
 		{
 			if ( in_array( $accept, ['*/*', '*'] ) )
-			{
 				return $contentTypes[0];
-			}
 
 			foreach ( $contentTypes as $contentType )
 			{
 				$type = $contentType;
 
 				if ( !is_null( $mimeType = $this->getMimeType( $contentType ) ) )
-				{
 					$type = $mimeType;
-				}
 
 				if ( $this->matchesType( $type, $accept ) || $accept === strtok( $type, '/' ) . '/*' )
-				{
 					return $contentType;
-				}
 			}
 		}
 	}
@@ -902,17 +896,6 @@ class Request extends SymfonyRequest implements ArrayAccess, Arrayable
 	}
 
 	/**
-	 * Get the user making the request.
-	 *
-	 * @param  string|null $guard
-	 * @return mixed
-	 */
-	public function user( $guard = null )
-	{
-		return call_user_func( $this->getUserResolver(), $guard );
-	}
-
-	/**
 	 * Get the route handling the request.
 	 *
 	 * @param string|null $param
@@ -948,32 +931,6 @@ class Request extends SymfonyRequest implements ArrayAccess, Arrayable
 		}
 
 		return sha1( implode( '|', $this->route()->methods() ) . '|' . $this->route()->domain() . '|' . $this->route()->uri() . '|' . $this->ip() );
-	}
-
-	/**
-	 * Get the user resolver callback.
-	 *
-	 * @return \Closure
-	 */
-	public function getUserResolver()
-	{
-		return $this->userResolver ?: function ()
-		{
-			//
-		};
-	}
-
-	/**
-	 * Set the user resolver callback.
-	 *
-	 * @param  \Closure $callback
-	 * @return $this
-	 */
-	public function setUserResolver( Closure $callback )
-	{
-		$this->userResolver = $callback;
-
-		return $this;
 	}
 
 	/**

@@ -4,21 +4,22 @@ use Closure;
 use Milky\Pipeline\Pipeline;
 use Milky\Queue\Impl\ShouldQueue;
 use Milky\Queue\Impl\Queue;
+use Milky\Services\ServiceFactory;
 use RuntimeException;
 
-class Dispatcher
+class Dispatcher extends ServiceFactory
 {
 	/**
 	 * The container implementation.
 	 *
-	 * @var \Illuminate\Contracts\Container\Container
+	 * @var Container
 	 */
 	protected $container;
 
 	/**
 	 * The pipeline instance for the bus.
 	 *
-	 * @var \Illuminate\Pipeline\Pipeline
+	 * @var Pipeline
 	 */
 	protected $pipeline;
 
@@ -36,15 +37,24 @@ class Dispatcher
 	 */
 	protected $queueResolver;
 
+	public static function build()
+	{
+		return new Dispatcher( function ( $connection = null ) use ( $fw )
+		{
+			return $fw['Milky\Queue\Impl\Factory']->connection( $connection );
+		} );
+	}
+
 	/**
 	 * Create a new command dispatcher instance.
 	 *
-	 * @param  \Illuminate\Contracts\Container\Container $container
 	 * @param  \Closure|null $queueResolver
 	 * @return void
 	 */
 	public function __construct( Closure $queueResolver = null )
 	{
+		parent::__construct();
+		
 		$this->queueResolver = $queueResolver;
 		$this->pipeline = new Pipeline();
 	}
@@ -118,7 +128,7 @@ class Dispatcher
 	/**
 	 * Push the command onto the given queue instance.
 	 *
-	 * @param  \Illuminate\Contracts\Queue\Queue $queue
+	 * @param  Queue $queue
 	 * @param  mixed $command
 	 * @return mixed
 	 */

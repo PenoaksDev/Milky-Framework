@@ -806,8 +806,6 @@ class Router
 	{
 		$this->current = $route = $this->routes->match( $request );
 
-		// $this->bindings->instance( 'Milky\Http\Routing\Route', $route );
-
 		return $this->substituteBindings( $route );
 	}
 

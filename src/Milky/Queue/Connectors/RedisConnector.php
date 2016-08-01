@@ -1,15 +1,15 @@
 <?php namespace Milky\Queue\Connectors;
 
 use Milky\Helpers\Arr;
-use Milky\Redis\Database;
 use Milky\Queue\RedisQueue;
+use Milky\Redis\Redis;
 
 class RedisConnector implements ConnectorInterface
 {
 	/**
 	 * The Redis database instance.
 	 *
-	 * @var \Database
+	 * @var Redis
 	 */
 	protected $redis;
 
@@ -23,11 +23,11 @@ class RedisConnector implements ConnectorInterface
 	/**
 	 * Create a new Redis queue connector instance.
 	 *
-	 * @param  \Illuminate\Redis\Database  $redis
-	 * @param  string|null  $connection
+	 * @param  Redis $redis
+	 * @param  string|null $connection
 	 * @return void
 	 */
-	public function __construct(Database $redis, $connection = null)
+	public function __construct( Redis $redis, $connection = null )
 	{
 		$this->redis = $redis;
 		$this->connection = $connection;
@@ -36,16 +36,14 @@ class RedisConnector implements ConnectorInterface
 	/**
 	 * Establish a queue connection.
 	 *
-	 * @param  array  $config
+	 * @param  array $config
 	 * @return Queue
 	 */
-	public function connect(array $config)
+	public function connect( array $config )
 	{
-		$queue = new RedisQueue(
-			$this->redis, $config['queue'], Arr::get($config, 'connection', $this->connection)
-		);
+		$queue = new RedisQueue( $this->redis, $config['queue'], Arr::get( $config, 'connection', $this->connection ) );
 
-		$queue->setExpire(Arr::get($config, 'expire', 60));
+		$queue->setExpire( Arr::get( $config, 'expire', 60 ) );
 
 		return $queue;
 	}
