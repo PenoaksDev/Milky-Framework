@@ -3,10 +3,48 @@
 use LogicException;
 use Milky\Helpers\Arr;
 use Milky\Impl\Collection as BaseCollection;
-use Milky\Queue\Impl\QueueableCollection;
+use Milky\Queue\QueueableCollection;
 
 class Collection extends BaseCollection implements QueueableCollection
 {
+	public function toHierarchy()
+	{
+		$dict = $this->getDictionary();
+
+		// Enforce sorting by $orderColumn setting in Baum\Node instance
+		uasort( $dict, function ( $a, $b )
+		{
+			return ( $a->getOrder() >= $b->getOrder() ) ? 1 : -1;
+		} );
+
+		return new BaseCollection( $this->hierarchical( $dict ) );
+	}
+
+	protected function hierarchical( $result )
+	{
+		foreach ( $result as $key => $node )
+			$node->setRelation( 'children', new BaseCollection );
+
+		$nestedKeys = [];
+
+		foreach ( $result as $key => $node )
+		{
+			$parentKey = $node->getParentId();
+
+			if ( !is_null( $parentKey ) && array_key_exists( $parentKey, $result ) )
+			{
+				$result[$parentKey]->children[] = $node;
+
+				$nestedKeys[] = $node->getKey();
+			}
+		}
+
+		foreach ( $nestedKeys as $key )
+			unset( $result[$key] );
+
+		return $result;
+	}
+
 	/**
 	 * Find a model in the collection by key.
 	 *

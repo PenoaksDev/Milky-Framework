@@ -7,10 +7,10 @@ use Milky\Account\Drivers\AccountDriver;
 use Milky\Account\Drivers\SessionDriver;
 use Milky\Account\Drivers\TokenDriver;
 use Milky\Account\Types\EloquentAccount;
-use Milky\Binding\BindingBuilder;
+use Milky\Binding\UniversalBuilder;
 use Milky\Framework;
 use Milky\Helpers\Func;
-use Milky\Http\Factory;
+use Milky\Http\HttpFactory;
 use Milky\Http\Session\SessionManager;
 use Milky\Services\ServiceFactory;
 
@@ -87,21 +87,21 @@ class AccountManager extends ServiceFactory
 	protected function resolveDriver( $class )
 	{
 		$driver = null;
-		switch( strtolower( $class ) )
+		switch ( strtolower( $class ) )
 		{
 			case 'session':
 			{
-				$driver = new SessionDriver( $this->auth, SessionManager::i()->driver(), Factory::i()->request() );
+				$driver = new SessionDriver( $this->auth, SessionManager::i()->driver(), HttpFactory::i()->request() );
 				break;
 			}
 			case 'token':
 			{
-				$driver = new TokenDriver( $this->auth, Factory::i()->request() );
+				$driver = new TokenDriver( $this->auth, HttpFactory::i()->request() );
 				break;
 			}
 			default:
 			{
-				$driver = BindingBuilder::buildBinding( $class );
+				$driver = UniversalBuilder::resolveClass( $class );
 				if ( !is_subclass_of( $driver, AccountDriver::class ) )
 					throw new \InvalidArgumentException( "The account driver [" . $class . "] must extend the AccountDriver class" );
 			}
@@ -122,8 +122,6 @@ class AccountManager extends ServiceFactory
 
 	public function generateAcctId( $seed )
 	{
-		$acctId = "";
-
 		if ( empty( $seed ) )
 			$acctId = "ab123C";
 		else

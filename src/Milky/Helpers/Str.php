@@ -1,5 +1,8 @@
 <?php namespace Milky\Helpers;
 
+use Milky\Exceptions\FrameworkException;
+use Milky\Facades\Log;
+use Milky\Framework;
 use Milky\Traits\Macroable;
 
 /**
@@ -401,14 +404,11 @@ class Str
 		$key = $value;
 
 		if ( isset( static::$snakeCache[$key][$delimiter] ) )
-		{
 			return static::$snakeCache[$key][$delimiter];
-		}
 
 		if ( !ctype_lower( $value ) )
 		{
 			$value = preg_replace( '/\s+/u', '', $value );
-
 			$value = static::lower( preg_replace( '/(.)(?=[A-Z])/u', '$1' . $delimiter, $value ) );
 		}
 
@@ -424,13 +424,12 @@ class Str
 	 */
 	public static function startsWith( $haystack, $needles )
 	{
+		if ( is_array( $haystack ) )
+			throw new FrameworkException( "\$haystack must be a string!" );
+
 		foreach ( (array) $needles as $needle )
-		{
 			if ( $needle != '' && mb_strpos( $haystack, $needle ) === 0 )
-			{
 				return true;
-			}
-		}
 
 		return false;
 	}
@@ -446,9 +445,7 @@ class Str
 		$key = $value;
 
 		if ( isset( static::$studlyCache[$key] ) )
-		{
 			return static::$studlyCache[$key];
-		}
 
 		$value = ucwords( str_replace( ['-', '_'], ' ', $value ) );
 

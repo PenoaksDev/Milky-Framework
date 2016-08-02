@@ -2,8 +2,6 @@
 
 use BadMethodCallException;
 use Closure;
-use Milky\Pagination\LengthAwarePaginator;
-use Milky\Pagination\Paginator;
 use InvalidArgumentException;
 use Milky\Database\Connection;
 use Milky\Database\ConnectionInterface;
@@ -13,6 +11,8 @@ use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Impl\Arrayable;
 use Milky\Impl\Collection;
+use Milky\Pagination\LengthAwarePaginator;
+use Milky\Pagination\Paginator;
 use Milky\Traits\Macroable;
 use RuntimeException;
 
@@ -1480,9 +1480,9 @@ class Builder
 	public function forPageAfterId( $perPage = 15, $lastId = 0, $column = 'id' )
 	{
 		$this->orders = Collection::make( $this->orders )->reject( function ( $order ) use ( $column )
-			{
-				return $order['column'] === $column;
-			} )->values()->all();
+		{
+			return $order['column'] === $column;
+		} )->values()->all();
 
 		return $this->where( $column, '>', $lastId )->orderBy( $column, 'asc' )->take( $perPage );
 	}
@@ -1851,19 +1851,13 @@ class Builder
 	public function each( callable $callback, $count = 1000 )
 	{
 		if ( is_null( $this->orders ) && is_null( $this->unionOrders ) )
-		{
 			throw new RuntimeException( 'You must specify an orderBy clause when using the "each" function.' );
-		}
 
 		return $this->chunk( $count, function ( $results ) use ( $callback )
 		{
 			foreach ( $results as $key => $value )
-			{
 				if ( $callback( $value, $key ) === false )
-				{
 					return false;
-				}
-			}
 		} );
 	}
 
@@ -2020,10 +2014,14 @@ class Builder
 	 *
 	 * @param  string $function
 	 * @param  array $columns
-	 * @return float|int
+	 * @return mixed
 	 */
 	public function aggregate( $function, $columns = ['*'] )
 	{
+		// Postgres doesn't like ORDER BY when there's no GROUP BY clause
+		if ( !isset( $this->groups ) )
+			$this->reOrderBy( null );
+
 		$this->aggregate = compact( 'function', 'columns' );
 
 		$previousColumns = $this->columns;
@@ -2052,6 +2050,8 @@ class Builder
 
 			return $result['aggregate'];
 		}
+
+		return null;
 	}
 
 	/**
@@ -2395,6 +2395,23 @@ class Builder
 	public function useWritePdo()
 	{
 		$this->useWritePdo = true;
+
+		return $this;
+	}
+
+	/**
+	 * Replace the "order by" clause of the current query.
+	 *
+	 * @param  string $column
+	 * @param  string $direction
+	 * @return Builder|static
+	 */
+	public function reOrderBy( $column, $direction = 'asc' )
+	{
+		$this->orders = null;
+
+		if ( !is_null( $column ) )
+			return $this->orderBy( $column, $direction );
 
 		return $this;
 	}

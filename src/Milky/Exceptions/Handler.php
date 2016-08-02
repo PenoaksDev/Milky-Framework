@@ -2,35 +2,127 @@
 
 use Exception;
 use Milky\Binding\UniversalBuilder;
+use Milky\Console\ConsoleFactory;
 use Milky\Exceptions\Displayers\DisplayerInterface;
 use Milky\Exceptions\Http\HttpResponseException;
+use Milky\Exceptions\Validation\ValidationException;
 use Milky\Facades\Config;
 use Milky\Framework;
+use Milky\Http\HttpFactory;
 use Milky\Http\Request;
 use Milky\Http\Response;
+use Milky\Impl\Extendable;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Debug\Exception\FatalErrorException;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler
 {
+	use Extendable;
+
 	/**
 	 * A list of the Exception types that should not be reported.
 	 *
 	 * @var array
 	 */
-	protected $dontReport = [
+	private $dontReport = [
 		NotFoundHttpException::class,
+		HttpResponseException::class,
+		ValidationException::class,
 	];
+
+	public function __construct()
+	{
+		if ( Framework::fw()->environment( 'production' ) )
+		{
+			error_reporting( -1 );
+			ini_set( 'display_errors', 'Off' );
+		}
+
+		set_error_handler( [$this, 'handleError'] );
+
+		set_exception_handler( [$this, 'handleException'] );
+
+		register_shutdown_function( [$this, 'handleShutdown'] );
+	}
+
+	/**
+	 * Adds an exception to not be reported
+	 *
+	 * @param array|string $exceptions
+	 */
+	public function dontReport( $exceptions )
+	{
+		$this->dontReport = array_merge( $this->dontReport, is_array( $exceptions ) ? $exceptions : [$exceptions] );
+	}
+
+	/**
+	 * Convert a PHP error to an ErrorException.
+	 *
+	 * @param  int $level
+	 * @param  string $message
+	 * @param  string $file
+	 * @param  int $line
+	 * @param  array $context
+	 * @return void
+	 *
+	 * @throws \ErrorException
+	 */
+	public function handleError( $level, $message, $file = '', $line = 0, $context = [] )
+	{
+		if ( error_reporting() & $level )
+			throw new \ErrorException( $message, 0, $level, $file, $line );
+	}
+
+	/**
+	 * Handle an uncaught exception from the application.
+	 *
+	 * Note: Most exceptions can be handled via the try / catch block in
+	 * the HTTP and Console kernels. But, fatal error exceptions must
+	 * be handled differently since they are not normal exceptions.
+	 *
+	 * @param  \Throwable $e
+	 */
+	public function handleException( $e )
+	{
+		if ( !$e instanceof Exception )
+			$e = new FatalThrowableError( $e );
+
+		$this->report( $e );
+
+		if ( ConsoleFactory::runningInConsole() )
+			UniversalBuilder::resolve( 'console' )->renderException( new ConsoleOutput, $e );
+		else
+			$this->render( HttpFactory::i()->request(), $e )->send();
+	}
+
+	/**
+	 * Handle the PHP shutdown event.
+	 */
+	public function handleShutdown()
+	{
+		if ( !is_null( $error = error_get_last() ) && in_array( $error['type'], [
+				E_ERROR,
+				E_CORE_ERROR,
+				E_COMPILE_ERROR,
+				E_PARSE
+			] )
+		)
+		{
+			$this->handleException( new FatalErrorException( $error['message'], $error['type'], 0, $error['file'], $error['line'], 0 ) );
+		}
+	}
 
 	/**
 	 * Report or log an Exception.
 	 *
 	 * @param  Exception $e
-	 * @return void
 	 */
 	public function report( Exception $e )
 	{
-		if ( $this->shouldntReport( $e ) )
+		if ( !$this->shouldReport( $e ) )
 			return;
 
 		try
@@ -68,31 +160,18 @@ class Handler
 	}
 
 	/**
-	 * Determine if the Exception should be reported.
-	 *
-	 * @param  Exception $e
-	 * @return bool
-	 */
-	public function shouldReport( Exception $e )
-	{
-		return !$this->shouldntReport( $e );
-	}
-
-	/**
 	 * Determine if the Exception is in the "do not report" list.
 	 *
 	 * @param  Exception $e
 	 * @return bool
 	 */
-	protected function shouldntReport( Exception $e )
+	protected function shouldReport( Exception $e )
 	{
-		$dontReport = array_merge( $this->dontReport, [HttpResponseException::class] );
-
-		foreach ( $dontReport as $type )
+		foreach ( $this->dontReport as $type )
 			if ( $e instanceof $type )
-				return true;
+				return false;
 
-		return false;
+		return true;
 	}
 
 	/**
@@ -147,7 +226,7 @@ class Handler
 	}
 
 	/**
-	 * Get the approprate response object.
+	 * Get the appropriate response object.
 	 *
 	 * @param Request $request
 	 * @param \Exception $transformed
@@ -246,5 +325,13 @@ class Handler
 			}
 
 		return array_values( $classes );
+	}
+
+	/**
+	 * @return $this
+	 */
+	public static function i()
+	{
+		return UniversalBuilder::resolve( 'exceptions.handler' );
 	}
 }

@@ -1,6 +1,7 @@
 <?php namespace Milky\Http\Routing;
 
 use BadMethodCallException;
+use Milky\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -104,5 +105,19 @@ abstract class Controller
 	public function __call( $method, $parameters )
 	{
 		throw new BadMethodCallException( "Method [$method] does not exist." );
+	}
+
+	/**
+	 * Produces a new error response based on if this is an api request or not.
+	 *
+	 * @param int $code
+	 * @param string $msg
+	 * @return JsonResponse|Response
+	 */
+	public function error( $code = 404, $msg = "Resource not found" )
+	{
+		$content = ['error' => $msg];
+
+		return ( request()->ajax() || request()->wantsJson() ) ? new JsonResponse( $content, $code ) : new Response( $content, $code );
 	}
 }

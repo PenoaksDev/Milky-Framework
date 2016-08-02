@@ -4,7 +4,11 @@ use Milky\Binding\Resolvers\ServiceResolver;
 use Milky\Binding\UniversalBuilder;
 use Milky\Database\Connectors\ConnectionFactory;
 use Milky\Database\Console\Seeds\SeedCommand;
+use Milky\Database\Eloquent\Nested\Generators\MigrationGenerator;
+use Milky\Database\Eloquent\Nested\Generators\ModelGenerator;
 use Milky\Database\Eloquent\Model;
+use Milky\Database\Eloquent\Nested\Console\MakeNestedCommand;
+use Milky\Filesystem\Filesystem;
 
 /**
  * The MIT License (MIT)
@@ -29,7 +33,9 @@ class DatabaseServiceResolver extends ServiceResolver
 
 		$this->addClassAlias( DatabaseManager::class, 'db.mgr' );
 
-		UniversalBuilder::getResolver( 'command' )->seed = new SeedCommand( $this->mgr );
+		$command = UniversalBuilder::getResolver( 'command' );
+		$command->seed = new SeedCommand( $this->mgr );
+		$command->makeNested = new MakeNestedCommand( new MigrationGenerator( Filesystem::i() ), new ModelGenerator( Filesystem::i() ) );
 	}
 
 	public function factory()

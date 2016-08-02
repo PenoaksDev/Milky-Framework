@@ -2,7 +2,6 @@
 
 use Faker\Factory as FakerFactory;
 use Faker\Generator as FakerGenerator;
-use Milky\Binding\BindingBuilder;
 use Milky\Binding\Globals;
 use Milky\Binding\UniversalBuilder;
 use Milky\Bus\Dispatcher;
@@ -10,6 +9,8 @@ use Milky\Cache\CacheManager;
 use Milky\Cache\MemcachedConnector;
 use Milky\Config\Configuration;
 use Milky\Config\ConfigurationBuilder;
+use Milky\Console\ConsoleFactory;
+use Milky\Console\ConsoleServiceResolver;
 use Milky\Database\Eloquent\Factory as EloquentFactory;
 use Milky\Database\Eloquent\QueueEntityResolver;
 use Milky\Encryption\Encrypter;
@@ -23,9 +24,11 @@ use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Hooks\HookDispatcher;
 use Milky\Http\Factory;
+use Milky\Http\HttpFactory;
 use Milky\Logging\LogBuilder;
 use Milky\Logging\Logger;
 use Milky\Providers\ProviderRepository;
+use Milky\Queue\ConsoleServiceProvider;
 use Milky\Redis\Redis;
 use Milky\Translation\Translator;
 use Milky\Validation\Factory as ValidationFactory;
@@ -94,11 +97,6 @@ class Framework implements \ArrayAccess
 	 * @var string
 	 */
 	public $basePath;
-
-	/**
-	 * @var Handler
-	 */
-	private $handler = null;
 
 	/**
 	 * @var array
@@ -280,28 +278,6 @@ class Framework implements \ArrayAccess
 	}
 
 	/**
-	 * Set internal exception handler
-	 *
-	 * @param Handler $handler
-	 */
-	public function setExceptionHandler( Handler $handler )
-	{
-		$this->handler = $handler;
-	}
-
-	/**
-	 * @return Handler
-	 */
-	public static function exceptionHandler()
-	{
-		$fw = static::fw();
-		if ( is_null( $fw->handler ) )
-			$fw->handler = new Handler();
-
-		return $fw->handler;
-	}
-
-	/**
 	 * @return bool
 	 */
 	public static function isRunning()
@@ -331,12 +307,13 @@ class Framework implements \ArrayAccess
 
 	public function newConsoleFactory()
 	{
-		return new Console\Factory( $this );
+		UniversalBuilder::registerResolver( new ConsoleServiceResolver() );
+		return UniversalBuilder::resolve( 'console.factory' );
 	}
 
 	public function newHttpFactory( $request = null )
 	{
-		return new Http\Factory( $this, $request );
+		return new HttpFactory( $this, $request );
 	}
 
 	public function getProduct()

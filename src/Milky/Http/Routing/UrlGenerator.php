@@ -164,9 +164,7 @@ class UrlGenerator
 		// try to generate a new one but will simply return the URL as is, which is
 		// convenient since developers do not always have to check if it's valid.
 		if ( $this->isValidUrl( $path ) )
-		{
 			return $path;
-		}
 
 		$scheme = $this->getScheme( $secure );
 
@@ -185,9 +183,7 @@ class UrlGenerator
 			$path = mb_substr( $path, 0, $queryPosition );
 		}
 		else
-		{
 			$query = '';
-		}
 
 		return $this->trimUrl( $root, $path, $tail ) . $query;
 	}
@@ -665,9 +661,7 @@ class UrlGenerator
 	public function isValidUrl( $path )
 	{
 		if ( Str::startsWith( $path, ['#', '//', 'mailto:', 'tel:', 'http://', 'https://'] ) )
-		{
 			return true;
-		}
 
 		return filter_var( $path, FILTER_VALIDATE_URL ) !== false;
 	}

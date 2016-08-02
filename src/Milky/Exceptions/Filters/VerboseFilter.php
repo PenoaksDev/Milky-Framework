@@ -20,8 +20,6 @@ class VerboseFilter
 	 * Create a new verbose filter instance.
 	 *
 	 * @param bool $debug
-	 *
-	 * @return void
 	 */
 	public function __construct( $debug )
 	{
@@ -42,15 +40,9 @@ class VerboseFilter
 	public function filter( array $displayers, Request $request, Exception $original, Exception $transformed, $code )
 	{
 		if ( $this->debug !== true )
-		{
 			foreach ( $displayers as $index => $displayer )
-			{
 				if ( $displayer->isVerbose() )
-				{
 					unset( $displayers[$index] );
-				}
-			}
-		}
 
 		return array_values( $displayers );
 	}

@@ -1,14 +1,16 @@
 <?php namespace Milky\Console;
 
+use Milky\Binding\UniversalBuilder;
 use Milky\Facades\Hooks;
 use Milky\Framework;
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-class Factory extends SymfonyApplication
+class ConsoleFactory extends SymfonyApplication
 {
 	/**
 	 * @var Framework
@@ -101,7 +103,7 @@ class Factory extends SymfonyApplication
 	 */
 	public function resolve( $command )
 	{
-		return $this->add( $this->laravel->make( $command ) );
+		return $this->add( UniversalBuilder::resolve( $command ) );
 	}
 
 	/**
@@ -150,13 +152,14 @@ class Factory extends SymfonyApplication
 		return new InputOption( '--env', null, InputOption::VALUE_OPTIONAL, $message );
 	}
 
+
 	/**
-	 * Get the Laravel application instance.
+	 * Determine if we are running in the console.
 	 *
-	 * @return Application
+	 * @return bool
 	 */
-	public function getLaravel()
+	public static function runningInConsole()
 	{
-		return $this->laravel;
+		return php_sapi_name() == 'cli';
 	}
 }

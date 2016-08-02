@@ -2,6 +2,7 @@
 
 use Closure;
 use Milky\Database\Connection;
+use Milky\Database\Schema\Grammars\Grammar;
 
 class Builder
 {

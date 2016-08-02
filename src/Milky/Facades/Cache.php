@@ -1,6 +1,6 @@
 <?php namespace Milky\Facades;
 
-use Milky\Http\HttpFactory;
+use Milky\Cache\CacheManager;
 
 /**
  * The MIT License (MIT)
@@ -10,10 +10,10 @@ use Milky\Http\HttpFactory;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class Request extends BaseFacade
+class Cache extends BaseFacade
 {
 	protected function __getResolver()
 	{
-		return HttpFactory::i()->request();
+		return CacheManager::i();
 	}
 }

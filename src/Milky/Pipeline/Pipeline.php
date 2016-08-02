@@ -1,7 +1,7 @@
 <?php namespace Milky\Pipeline;
 
 use Closure;
-use Milky\Binding\BindingBuilder;
+use Milky\Binding\UniversalBuilder;
 use Milky\Exceptions\PipelineException;
 use Milky\Framework;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
@@ -191,20 +191,18 @@ class Pipeline
 			catch ( \Exception $e )
 			{
 				if ( is_callable( $this->exceptionHandler ) || $this->exceptionHandler instanceof Closure )
-					return BindingBuilder::call( $this->exceptionHandler, compact( 'passable', 'e' ) );
+					return call_user_func( $this->exceptionHandler, $e, $passable );
 				else
 					throw $e;
-					// throw new PipelineException( $e );
 			}
 			catch ( \Throwable $e )
 			{
-				$e = new PipelineException( $e );
+				$e = new PipelineException( $e->getMessage(), 0, $e );
 
 				if ( is_callable( $this->exceptionHandler ) || $this->exceptionHandler instanceof Closure )
-					return BindingBuilder::call( $this->exceptionHandler, compact( 'passable', 'e' ) );
+					return call_user_func( $this->exceptionHandler, $e, $passable );
 				else
 					throw $e;
-					// throw new PipelineException( $e );
 			}
 		};
 	}

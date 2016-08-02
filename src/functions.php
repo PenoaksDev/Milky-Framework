@@ -2,6 +2,7 @@
 
 use Milky\Auth\Access\Gate;
 use Milky\Database\Eloquent\Factory as EloquentFactory;
+use Milky\Database\Eloquent\FactoryBuilder;
 use Milky\Facades\Config;
 use Milky\Facades\Log;
 use Milky\Framework;
@@ -17,6 +18,7 @@ use Milky\Impl\Collection;
 use Milky\Impl\Htmlable;
 use Milky\Impl\HtmlString;
 use Milky\Validation\Validator;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -94,6 +96,19 @@ function preg_grep_keys( $pattern, $input, $flags = 0 )
 {
 	return array_intersect_key( $input, array_flip( preg_grep( $pattern, array_keys( $input ), $flags ) ) );
 }
+
+/**
+ * Alias all the facades, for easy access.
+ */
+foreach ( Finder::create()->files()->in( __DIR__ . '/Milky/Facades' )->name( '*.php' ) as $file )
+{
+	$class = str_replace( '.php', '', $file->getFilename() );
+	if ( !class_exists( $class ) )
+		class_alias( "\\Milky\\Facades\\" . $class, $class );
+}
+
+class_alias( Str::class, 'Str' );
+class_alias( Arr::class, 'Arr' );
 
 if ( !function_exists( 'append_config' ) )
 {
@@ -1222,6 +1237,14 @@ if ( !function_exists( 'action' ) )
 	}
 }
 
+if ( !function_exists( 'build_path' ) )
+{
+	function build_path()
+	{
+		return fw()->buildPath( func_get_args() );
+	}
+}
+
 if ( !function_exists( 'fw_path' ) )
 {
 	/**
@@ -1232,7 +1255,7 @@ if ( !function_exists( 'fw_path' ) )
 	 */
 	function fw_path( $path = null )
 	{
-		return fw()->buildPath( $path, 'fw' );
+		return fw()->buildPath( '__fw' );
 	}
 }
 
@@ -1316,29 +1339,6 @@ if ( !function_exists( 'bcrypt' ) )
 	}
 }
 
-if ( !function_exists( 'config' ) )
-{
-	/**
-	 * Get / set the specified configuration value.
-	 *
-	 * If an array is passed as the key, we will assume you want to set an array of values.
-	 *
-	 * @param  array|string $key
-	 * @param  mixed $default
-	 * @return mixed
-	 */
-	function config( $key = null, $default = null )
-	{
-		if ( is_null( $key ) )
-			return Framework::get( 'config' );
-
-		if ( is_array( $key ) )
-			return Config::set( $key );
-
-		return Config::get( $key, $default );
-	}
-}
-
 if ( !function_exists( 'config_path' ) )
 {
 	/**
@@ -1349,7 +1349,7 @@ if ( !function_exists( 'config_path' ) )
 	 */
 	function config_path( $path = null )
 	{
-		return fw()->buildPath( $path, 'config' );
+		return fw()->buildPath( '__config', $path );
 	}
 }
 
@@ -1541,22 +1541,6 @@ if ( !function_exists( 'env' ) )
 		}
 
 		return $value;
-	}
-}
-
-if ( !function_exists( 'event' ) )
-{
-	/**
-	 * Fire an event and call the listeners.
-	 *
-	 * @param  string|object $event
-	 * @param  mixed $payload
-	 * @param  bool $halt
-	 * @return array|null
-	 */
-	function event( $event, $payload = [], $halt = false )
-	{
-		return Framework::get( 'events' )->fire( $event, $payload, $halt );
 	}
 }
 
@@ -1868,9 +1852,9 @@ if ( !function_exists( 'url' ) )
 	function url( $path = null, $parameters = [], $secure = null )
 	{
 		if ( is_null( $path ) )
-			return \Milky\Http\Factory::i()->url();
+			return \Milky\Http\HttpFactory::i()->url();
 
-		return \Milky\Http\Factory::i()->url()->to( $path, $parameters, $secure );
+		return \Milky\Http\HttpFactory::i()->url()->to( $path, $parameters, $secure );
 	}
 }
 

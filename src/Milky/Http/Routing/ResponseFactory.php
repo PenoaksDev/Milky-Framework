@@ -6,7 +6,7 @@ use Milky\Http\JsonResponse;
 use Milky\Http\RedirectResponse;
 use Milky\Http\Response;
 use Milky\Http\View\Factory;
-use Milky\Http\Factory as HttpFactory;
+use Milky\Http\HttpFactory;
 use Milky\Impl\Arrayable;
 use Milky\Services\ServiceFactory;
 use Milky\Traits\Macroable;

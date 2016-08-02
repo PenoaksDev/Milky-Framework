@@ -35,6 +35,13 @@ class ServiceResolver
 	protected $classAlias = [];
 
 	/**
+	 * Default
+	 *
+	 * @var string
+	 */
+	protected $def = null;
+
+	/**
 	 * @var \ReflectionClass
 	 */
 	private $reflection;
@@ -55,6 +62,18 @@ class ServiceResolver
 			throw new ResolverException( "Alias must be a string" );
 		foreach ( is_array( $keys ) ? $keys : [$keys] as $key )
 			$this->alias[$key] = $alias;
+	}
+
+	/**
+	 * Sets the default key name for when the root is requested.
+	 *
+	 * @param string $def
+	 */
+	public function setDefault( $def )
+	{
+		if ( !is_string( $def ) )
+			throw new ResolverException( "Default must be a string" );
+		$this->def = $def;
 	}
 
 	/**
@@ -98,6 +117,9 @@ class ServiceResolver
 	{
 		if ( !$key )
 		{
+			if ( !is_null( $this->def ) )
+				return $this->get( $this->def );
+
 			if ( $result = $this->get( 'mgr' ) )
 				return $result;
 
@@ -125,8 +147,8 @@ class ServiceResolver
 	 */
 	public function resolveClass( $class )
 	{
-		 // if ( !is_string( $class ) )
-			// throw new ResolverException( "Class must be a string" );
+		if ( !is_string( $class ) )
+			throw new ResolverException( "Class must be a string" );
 
 		// Check if a class has been mapped to a key
 		if ( array_key_exists( $class, $this->classAlias ) )

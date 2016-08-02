@@ -15,13 +15,13 @@ use Milky\Facades\Config;
  */
 class ExceptionsServiceResolver extends ServiceResolver
 {
-	protected $mgr;
+	protected $handler;
 	protected $identifier;
 	protected $info;
 
 	public function __construct()
 	{
-		$this->mgr = new Handler();
+		$this->handler = Handler::build();
 
 		$this->identifier = new ExceptionIdentifier();
 		$this->info = new ExceptionInfo( realpath( __DIR__ . '/../../../resources/errors.json' ) );
@@ -31,6 +31,8 @@ class ExceptionsServiceResolver extends ServiceResolver
 		$this->addClassAlias( ExceptionInfo::class, 'info' );
 		$this->addClassAlias( HtmlDisplayer::class, 'displayer' );
 		$this->addClassAlias( VerboseFilter::class, 'filter' );
+
+		$this->setDefault( 'handler' );
 	}
 
 	public function displayer()

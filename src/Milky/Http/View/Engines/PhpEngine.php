@@ -40,16 +40,15 @@ class PhpEngine implements EngineInterface
 		// an exception is thrown. This prevents any partial views from leaking.
 		try
 		{
-			//include $__path;
+			// $source = "";
 
-			$source = "";
+			// $source .= "use \\Milky\\Facades\\" . str_replace( '.php', '', $file->getFilename() ) . ";\n";
 
-			foreach ( Finder::create()->files()->in( __DIR__ . '/../../../Facades' )->name( '*.php' ) as $file )
-				$source .= "use \\Milky\\Facades\\" . str_replace( '.php', '', $file->getFilename() ) . ";\n";
+			include $__path;
 
-			$source .= "?>" . file_get_contents( $__path );
+			/* $source .= "?>" . file_get_contents( $__path );
 
-			eval( $source );
+			eval( $source ); */
 		}
 		catch ( Exception $e )
 		{

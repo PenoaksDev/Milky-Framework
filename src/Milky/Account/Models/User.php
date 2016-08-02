@@ -9,7 +9,6 @@ use HolyWorlds\Support\Util;
 use Milky\Auth\Authenticatable;
 use Milky\Auth\Passwords\CanResetPassword;
 use Milky\Database\Eloquent\Model;
-use Slynova\Commentable\Models\Comment;
 
 class User extends Model
 {
@@ -31,41 +30,12 @@ class User extends Model
 		'visited_at'
 	];
 
-	public function profile()
-	{
-		$result = $this->hasOne( UserProfile::class, "id" );
-		if ( !$result->exists() )
-			$result->create( [] );
-
-		return $result;
-	}
-
-	public function auths()
-	{
-		return $this->hasMany( UserAuth::class );
-	}
-
-	public function comments()
-	{
-		return $this->hasMany( Comment::class );
-	}
-
-	public function characters()
-	{
-		return $this->hasMany( Character::class );
-	}
-
 	public function getDisplayNameAttribute()
 	{
 		/*if (!is_null($this->profile->family_name)) {
 			return "{$this->name} ({$this->profile->family_name})";
 		}*/
 		return $this->name;
-	}
-
-	public function getMainCharacterAttribute()
-	{
-		return $this->characters()->where( 'main', 1 )->first();
 	}
 
 	public function getIsNewAttribute()

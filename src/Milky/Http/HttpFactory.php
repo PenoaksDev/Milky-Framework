@@ -1,5 +1,6 @@
 <?php namespace Milky\Http;
 
+use Milky\Binding\UniversalBuilder;
 use Milky\Facades\Hooks;
 use Milky\Framework;
 use Milky\Http\Cookies\CookieJar;
@@ -22,7 +23,7 @@ use Zend\Diactoros\Response as PsrResponse;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class Factory extends ServiceFactory
+class HttpFactory extends ServiceFactory
 {
 	/**
 	 * @var Framework
@@ -165,9 +166,10 @@ class Factory extends ServiceFactory
 
 		$this->router->getRoutes()->refreshNameLookups();
 
-		$this->response = ( new Pipeline() )->withExceptionHandler( function ( $request, $e )
+		$this->response = ( new Pipeline() )->withExceptionHandler( function ( $e, $request )
 		{
-			$handler = Framework::exceptionHandler();
+			$handler = UniversalBuilder::resolve( 'exceptions.handler' );
+
 			$handler->report( $e );
 
 			return $handler->render( $request, $e );
@@ -175,8 +177,6 @@ class Factory extends ServiceFactory
 		{
 			return $this->router->dispatch( $request );
 		} );
-
-		Framework::set( 'http.response', $this->response );
 
 		return $this->response;
 	}

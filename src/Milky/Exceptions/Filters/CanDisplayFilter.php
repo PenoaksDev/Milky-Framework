@@ -23,12 +23,8 @@ class CanDisplayFilter
 	public function filter( array $displayers, Request $request, Exception $original, Exception $transformed, $code )
 	{
 		foreach ( $displayers as $index => $displayer )
-		{
 			if ( !$displayer->canDisplay( $original, $transformed, $code ) )
-			{
 				unset( $displayers[$index] );
-			}
-		}
 
 		return array_values( $displayers );
 	}

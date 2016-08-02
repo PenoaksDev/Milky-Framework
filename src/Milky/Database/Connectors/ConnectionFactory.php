@@ -1,12 +1,11 @@
 <?php namespace Milky\Database\Connectors;
 
 use InvalidArgumentException;
-use Milky\Binding\BindingBuilder;
+use Milky\Database\Connection;
 use Milky\Database\MySqlConnection;
 use Milky\Database\PostgresConnection;
 use Milky\Database\SQLiteConnection;
 use Milky\Database\SqlServerConnection;
-use Milky\Framework;
 use Milky\Helpers\Arr;
 
 class ConnectionFactory
@@ -151,9 +150,6 @@ class ConnectionFactory
 		if ( !isset( $config['driver'] ) )
 			throw new InvalidArgumentException( 'A driver must be specified.' );
 
-		if ( Framework::available( $key = 'db.connection' . $config['driver'] ) )
-			return BindingBuilder::resolveBinding( $key );
-
 		switch ( $config['driver'] )
 		{
 			case 'mysql':
@@ -182,8 +178,6 @@ class ConnectionFactory
 	 */
 	protected function createConnection( $driver, $connection, $database, $prefix = '', array $config = [] )
 	{
-		Framework::set( $key = 'db.connection' . $driver, BindingBuilder::resolveBinding( $key, [$connection, $database, $prefix, $config] )  );
-
 		switch ( $driver )
 		{
 			case 'mysql':

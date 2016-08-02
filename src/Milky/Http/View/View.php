@@ -3,6 +3,7 @@
 use ArrayAccess;
 use BadMethodCallException;
 use Exception;
+use Milky\Exceptions\Handler;
 use Milky\Helpers\MessageBag;
 use Milky\Helpers\Str;
 use Milky\Http\View\Engines\EngineInterface;
@@ -413,6 +414,14 @@ class View implements ArrayAccess
 	 */
 	public function __toString()
 	{
-		return $this->render();
+		try
+		{
+			return $this->render();
+		}
+		catch ( Exception $e )
+		{
+			Handler::i()->handleException( $e );
+			return "";
+		}
 	}
 }

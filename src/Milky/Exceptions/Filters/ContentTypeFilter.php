@@ -23,12 +23,8 @@ class ContentTypeFilter
 	public function filter( array $displayers, Request $request, Exception $original, Exception $transformed, $code )
 	{
 		foreach ( $displayers as $index => $displayer )
-		{
 			if ( !$request->accepts( $displayer->contentType() ) )
-			{
 				unset( $displayers[$index] );
-			}
-		}
 
 		return array_values( $displayers );
 	}

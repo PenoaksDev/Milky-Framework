@@ -1,8 +1,6 @@
 <?php namespace Milky\Console;
 
 use Milky\Binding\Resolvers\ServiceResolver;
-use Milky\Console\Scheduling\Schedule;
-use Milky\Console\Scheduling\ScheduleRunCommand;
 
 /**
  * The MIT License (MIT)
@@ -15,11 +13,6 @@ use Milky\Console\Scheduling\ScheduleRunCommand;
 class CommandServiceResolver extends ServiceResolver
 {
 	// Vary simple, need to add more once the Console is fixed
-
-	public function __construct()
-	{
-		$this->scheduleRunCommand = new ScheduleRunCommand( new Schedule() );
-	}
 
 	protected $commands = [];
 
