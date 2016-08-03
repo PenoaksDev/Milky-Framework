@@ -59,17 +59,6 @@ class Func
 	}
 
 	/**
-	 * Convert the given string to a URL-friendly slug.
-	 *
-	 * @param  string $string
-	 * @return string
-	 */
-	public static function slugify( $string )
-	{
-		return str_slug( str_replace( '&amp;', 'and', $string ), '-' );
-	}
-
-	/**
 	 * Removes characters not matching [^a-zA-Z0-9!#$%&'*+-/=?^_`{|}~@\\. ]
 	 *
 	 * @param $str

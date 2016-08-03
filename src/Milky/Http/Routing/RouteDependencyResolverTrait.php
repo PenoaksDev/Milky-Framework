@@ -1,5 +1,6 @@
 <?php namespace Milky\Http\Routing;
 
+use Milky\Binding\UniversalBuilder;
 use Milky\Helpers\Arr;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
@@ -33,9 +34,7 @@ trait RouteDependencyResolverTrait
 	protected function resolveClassMethodDependencies( array $parameters, $instance, $method )
 	{
 		if ( !method_exists( $instance, $method ) )
-		{
 			return $parameters;
-		}
 
 		return $this->resolveMethodDependencies( $parameters, new ReflectionMethod( $instance, $method ) );
 	}
@@ -56,9 +55,7 @@ trait RouteDependencyResolverTrait
 			$instance = $this->transformDependency( $parameter, $parameters, $originalParameters );
 
 			if ( !is_null( $instance ) )
-			{
 				$this->spliceIntoParameters( $parameters, $key, $instance );
-			}
 		}
 
 		return $parameters;
@@ -80,9 +77,7 @@ trait RouteDependencyResolverTrait
 		// the list of parameters. If it is we will just skip it as it is probably a model
 		// binding and we do not want to mess with those; otherwise, we resolve it here.
 		if ( $class && !$this->alreadyInParameters( $class->name, $parameters ) )
-		{
-			return $this->bindings->make( $class->name );
-		}
+			return UniversalBuilder::resolveClass( $class->name );
 	}
 
 	/**

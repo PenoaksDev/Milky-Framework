@@ -10,6 +10,7 @@ use Milky\Exceptions\ExceptionsServiceResolver;
 use Milky\Exceptions\ResolverException;
 use Milky\Framework;
 use Milky\Helpers\Arr;
+use Milky\Http\HttpServiceResolver;
 use Milky\Http\View\ViewServiceResolver;
 use Milky\Queue\QueueServiceResolver;
 
@@ -30,6 +31,8 @@ class UniversalBuilder
 	 */
 	public function __construct( Framework $fw )
 	{
+		static::registerResolver( new HttpServiceResolver() );
+
 		static::registerResolver( new CommandServiceResolver() );
 
 		static::registerResolver( new DatabaseServiceResolver() );

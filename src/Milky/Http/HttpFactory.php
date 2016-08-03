@@ -65,6 +65,23 @@ class HttpFactory extends ServiceFactory
 	 */
 	private $middleware = [];
 
+	/**
+	 * Should middleware be disabled?
+	 *
+	 * @var bool
+	 */
+	private $disableMiddleware = false;
+
+	public function disableMiddleware( $bool = true )
+	{
+		$this->disableMiddleware = $bool;
+	}
+
+	public function isMiddlewareDisabled()
+	{
+		return $this->disableMiddleware;
+	}
+
 	public static function build()
 	{
 		return Framework::fw()->newHttpFactory();

@@ -1,7 +1,10 @@
 <?php namespace Milky\Http\Routing;
 
+use Milky\Binding\UniversalBuilder;
+use Milky\Http\HttpFactory;
 use Milky\Http\Request;
 use Milky\Impl\Collection;
+use Milky\Pipeline\Pipeline;
 
 class ControllerDispatcher
 {
@@ -50,7 +53,7 @@ class ControllerDispatcher
 	{
 		Controller::setRouter( $this->router );
 
-		return $this->bindings->make( $controller );
+		return UniversalBuilder::buildClass( $controller );
 	}
 
 	/**
@@ -64,14 +67,12 @@ class ControllerDispatcher
 	 */
 	protected function callWithinStack( $instance, $route, $request, $method )
 	{
-		$shouldSkipMiddleware = $this->bindings->bound( 'middleware.disable' ) && $this->bindings->make( 'middleware.disable' ) === true;
-
-		$middleware = $shouldSkipMiddleware ? [] : $this->getMiddleware( $instance, $method );
+		$middleware = HttpFactory::i()->isMiddlewareDisabled() ? [] : $this->getMiddleware( $instance, $method );
 
 		// Here we will make a stack onion instance to execute this request in, which gives
 		// us the ability to define middlewares on controllers. We will return the given
 		// response back out so that "after" filters can be run after the middlewares.
-		return ( new Pipeline( $this->bindings ) )->send( $request )->through( $middleware )->then( function ( $request ) use ( $instance, $route, $method )
+		return ( new Pipeline() )->send( $request )->through( $middleware )->then( function ( $request ) use ( $instance, $route, $method )
 		{
 			return $this->router->prepareResponse( $request, $this->call( $instance, $route, $method ) );
 		} );
@@ -89,12 +90,8 @@ class ControllerDispatcher
 		$results = new Collection;
 
 		foreach ( $instance->getMiddleware() as $name => $options )
-		{
 			if ( !$this->methodExcludedByOptions( $method, $options ) )
-			{
 				$results[] = $this->router->resolveMiddlewareClassName( $name );
-			}
-		}
 
 		return $results->flatten()->all();
 	}

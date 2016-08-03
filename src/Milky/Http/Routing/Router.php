@@ -394,9 +394,7 @@ class Router
 	protected function updateGroupStack( array $attributes )
 	{
 		if ( !empty( $this->groupStack ) )
-		{
 			$attributes = $this->mergeGroup( $attributes, end( $this->groupStack ) );
-		}
 
 		$this->groupStack[] = $attributes;
 	}
@@ -520,9 +518,7 @@ class Router
 		// an acceptable array format before registering it and creating this route
 		// instance itself. We need to build the Closure that will call this out.
 		if ( $this->actionReferencesController( $action ) )
-		{
 			$action = $this->convertToControllerAction( $action );
-		}
 
 		$route = $this->newRoute( $methods, $this->prefix( $uri ), $action );
 
@@ -530,9 +526,7 @@ class Router
 		// route has already been created and is ready to go. After we're done with
 		// the merge we will be ready to return the route back out to the caller.
 		if ( $this->hasGroupStack() )
-		{
 			$this->mergeGroupAttributesIntoRoute( $route );
-		}
 
 		$this->addWhereClausesToRoute( $route );
 

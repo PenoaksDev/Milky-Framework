@@ -113,14 +113,10 @@ class Route
 		$this->action = $this->parseAction( $action );
 
 		if ( in_array( 'GET', $this->methods ) && !in_array( 'HEAD', $this->methods ) )
-		{
 			$this->methods[] = 'HEAD';
-		}
 
 		if ( isset( $this->action['prefix'] ) )
-		{
 			$this->prefix( $this->action['prefix'] );
-		}
 	}
 
 	/**
@@ -553,35 +549,27 @@ class Route
 		// fluent routing. In that case, we set a default closure, to be executed
 		// if the user never explicitly sets an action to handle the given uri.
 		if ( is_null( $action ) )
-		{
 			return [
 				'uses' => function ()
 				{
 					throw new LogicException( "Route for [{$this->uri}] has no action." );
 				}
 			];
-		}
 
 		// If the action is already a Closure instance, we will just set that instance
 		// as the "uses" property, because there is nothing else we need to do when
 		// it is available. Otherwise we will need to find it in the action list.
 		if ( is_callable( $action ) )
-		{
 			return ['uses' => $action];
-		}
 
 		// If no "uses" property has been set, we will dig through the array to find a
 		// Closure instance within this list. We will set the first Closure we come
 		// across into the "uses" property that will get fired off by this route.
 		elseif ( !isset( $action['uses'] ) )
-		{
 			$action['uses'] = $this->findCallable( $action );
-		}
 
 		if ( is_string( $action['uses'] ) && !Str::contains( $action['uses'], '@' ) )
-		{
 			throw new UnexpectedValueException( sprintf( 'Invalid route action: [%s]', $action['uses'] ) );
-		}
 
 		return $action;
 	}
@@ -932,9 +920,7 @@ class Route
 	public function prepareForSerialization()
 	{
 		if ( $this->action['uses'] instanceof Closure )
-		{
 			throw new LogicException( "Unable to prepare route [{$this->uri}] for serialization. Uses Closure." );
-		}
 
 		unset( $this->router, $this->bindings, $this->compiled );
 	}

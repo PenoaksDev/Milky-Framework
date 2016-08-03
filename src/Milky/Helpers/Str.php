@@ -39,6 +39,17 @@ class Str
 	protected static $studlyCache = [];
 
 	/**
+	 * Convert the given string to a URL-friendly slug.
+	 *
+	 * @param  string $string
+	 * @return string
+	 */
+	public static function slugify( $string )
+	{
+		return str_slug( str_replace( '&amp;', 'and', $string ), '-' );
+	}
+
+	/**
 	 * Transliterate a UTF-8 value to ASCII.
 	 *
 	 * @param  string $value
@@ -76,10 +87,8 @@ class Str
 	public static function contains( $haystack, $needles )
 	{
 		foreach ( (array) $needles as $needle )
-		{
 			if ( $needle != '' && mb_strpos( $haystack, $needle ) !== false )
 				return true;
-		}
 
 		return false;
 	}
@@ -94,12 +103,8 @@ class Str
 	public static function endsWith( $haystack, $needles )
 	{
 		foreach ( (array) $needles as $needle )
-		{
 			if ( (string) $needle === static::substr( $haystack, -static::length( $needle ) ) )
-			{
 				return true;
-			}
-		}
 
 		return false;
 	}
@@ -128,9 +133,7 @@ class Str
 	public static function is( $pattern, $value )
 	{
 		if ( $pattern == $value )
-		{
 			return true;
-		}
 
 		$pattern = preg_quote( $pattern, '#' );
 
@@ -164,9 +167,7 @@ class Str
 	public static function limit( $value, $limit = 100, $end = '...' )
 	{
 		if ( mb_strwidth( $value, 'UTF-8' ) <= $limit )
-		{
 			return $value;
-		}
 
 		return rtrim( mb_strimwidth( $value, 0, $limit, '', 'UTF-8' ) ) . $end;
 	}
@@ -195,15 +196,13 @@ class Str
 		preg_match( '/^\s*+(?:\S++\s*+){1,' . $words . '/u', $value, $matches );
 
 		if ( !isset( $matches[0] ) || static::length( $value ) === static::length( $matches[0] ) )
-		{
 			return $value;
-		}
 
 		return rtrim( $matches[0] ) . $end;
 	}
 
 	/**
-	 * Parse a Class@method style callback into class and method.
+	 * Parse a Class @ method style callback into class and method.
 	 *
 	 * @param  string $callback
 	 * @param  string $default
@@ -327,9 +326,7 @@ class Str
 		$position = strrpos( $subject, $search );
 
 		if ( $position !== false )
-		{
 			return substr_replace( $subject, $replace, $position, strlen( $search ) );
-		}
 
 		return $subject;
 	}

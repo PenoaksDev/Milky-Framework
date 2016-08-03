@@ -1,12 +1,15 @@
 <?php namespace Milky\Http\Routing;
 
 use InvalidArgumentException;
+use Milky\Database\Eloquent\Model;
+use Milky\Database\Eloquent\RoutableModel;
 use Milky\Exceptions\UrlGenerationException;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Http\Request;
 use Milky\Http\Session\Store;
 use Milky\Traits\Macroable;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class UrlGenerator
 {
@@ -102,6 +105,11 @@ class UrlGenerator
 		$this->routes = $routes;
 
 		$this->setRequest( $request );
+	}
+
+	public function addRoutableModel( $model )
+	{
+
 	}
 
 	/**
@@ -294,8 +302,36 @@ class UrlGenerator
 	public function forceSchema( $schema )
 	{
 		$this->cachedSchema = null;
-
 		$this->forceSchema = $schema . '://';
+	}
+
+	/**
+	 * Get the URL to a named route.
+	 *
+	 * @param string $name
+	 * @param RoutableModel $model
+	 * @param mixed $parameters
+	 * @param bool $absolute
+	 * @return string
+	 *
+	 * @throws RouteNotFoundException
+	 */
+	public function routeModel( $name, $model, $parameters = [], $absolute = true )
+	{
+		if ( !$model instanceof RoutableModel )
+			throw new UrlGenerationException( "The model [" . $model->name() . "] must implement the RoutableModel interface." );
+
+		if ( !is_null( $route = $this->routes->getByName( $name ) ) )
+		{
+			$appendedUrl = "";
+
+			if ( is_array( $p = $model->appendRoute( $name, $parameters, $appendedUrl ) ) )
+				$parameters = array_merge( $parameters, $p );
+
+			return $this->toRoute( $route, $parameters, $absolute ) . $appendedUrl;
+		}
+
+		throw new RouteNotFoundException( "Route [{$name}] not found." );
 	}
 
 	/**
@@ -306,16 +342,14 @@ class UrlGenerator
 	 * @param  bool $absolute
 	 * @return string
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws RouteNotFoundException
 	 */
 	public function route( $name, $parameters = [], $absolute = true )
 	{
 		if ( !is_null( $route = $this->routes->getByName( $name ) ) )
-		{
 			return $this->toRoute( $route, $parameters, $absolute );
-		}
 
-		throw new InvalidArgumentException( "Route [{$name}] not defined." );
+		throw new RouteNotFoundException( "Route [{$name}] not found." );
 	}
 
 	/**
@@ -337,9 +371,7 @@ class UrlGenerator
 		$uri = $this->addQueryString( $this->trimUrl( $root = $this->replaceRoot( $route, $domain, $parameters ), $this->replaceRouteParameters( $route->uri(), $parameters ) ), $parameters );
 
 		if ( preg_match( '/\{.*?\}/', $uri ) )
-		{
 			throw UrlGenerationException::forMissingParameters( $route );
-		}
 
 		$uri = strtr( rawurlencode( $uri ), $this->dontEncode );
 
