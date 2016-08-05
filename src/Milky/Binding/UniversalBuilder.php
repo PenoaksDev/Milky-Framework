@@ -1,18 +1,26 @@
 <?php namespace Milky\Binding;
 
+use Milky\Account\AccountServiceResolver;
 use Milky\Binding\Resolvers\ServiceResolver;
 use Milky\Cache\CacheManager;
+use Milky\Cache\CacheServiceResolver;
 use Milky\Cache\Console\ClearCommand;
+use Milky\Config\Configuration;
 use Milky\Console\CommandServiceResolver;
 use Milky\Database\DatabaseServiceResolver;
 use Milky\Exceptions\BindingException;
 use Milky\Exceptions\ExceptionsServiceResolver;
+use Milky\Exceptions\Handler;
 use Milky\Exceptions\ResolverException;
 use Milky\Framework;
 use Milky\Helpers\Arr;
+use Milky\Http\HttpFactory;
 use Milky\Http\HttpServiceResolver;
 use Milky\Http\View\ViewServiceResolver;
+use Milky\Logging\Logger;
 use Milky\Queue\QueueServiceResolver;
+use Milky\Translation\TranslationServiceResolver;
+use Milky\Validation\ValidationServiceResolver;
 
 /**
  * The MIT License (MIT)
@@ -31,25 +39,52 @@ class UniversalBuilder
 	 */
 	public function __construct( Framework $fw )
 	{
-		static::registerResolver( new HttpServiceResolver() );
+		static::registerResolver( new ExceptionsServiceResolver() );
 
-		static::registerResolver( new CommandServiceResolver() );
+		static::registerResolver( new HttpServiceResolver() );
 
 		static::registerResolver( new DatabaseServiceResolver() );
 
-		static::getResolver( 'command' )->cacheClear = new ClearCommand( CacheManager::i() );
+		static::registerResolver( new AccountServiceResolver() );
+
+		static::registerResolver( new CommandServiceResolver() );
 
 		static::registerResolver( new QueueServiceResolver() );
 
+		static::registerResolver( new CacheServiceResolver() );
+
 		static::registerResolver( new ViewServiceResolver() );
 
-		static::registerResolver( new ExceptionsServiceResolver() );
+		static::registerResolver( new TranslationServiceResolver() );
+
+		static::registerResolver( new ValidationServiceResolver() );
+
+		// static::getResolver( 'command' )->cacheClear = new ClearCommand( CacheManager::i() );
 	}
+
+	/**
+	 * @var array
+	 */
+	private static $buildStack = [];
 
 	/**
 	 * @var ServiceResolver[]
 	 */
 	protected static $resolvers = [];
+
+	/**
+	 * Are we building this class
+	 *
+	 * @param string $class
+	 * @return bool
+	 */
+	public static function building( $class )
+	{
+		if ( !is_string( $class ) )
+			throw new BindingException( "The \$class must be a string" );
+
+		return in_array( $class, static::$buildStack );
+	}
 
 	/**
 	 * @param ServiceResolver $resolver
@@ -84,11 +119,18 @@ class UniversalBuilder
 		if ( !is_string( $class ) )
 			throw new ResolverException( "Class must be a string" );
 
+		if ( $class == Framework::class )
+			return Framework::fw();
+		if ( $class == Configuration::class )
+			return Framework::config();
+		if ( $class == Logger::class )
+			return Framework::log();
+
+		// TODO Add a few more basic classes
+
 		foreach ( static::$resolvers as $resolver )
-		{
 			if ( false !== ( $result = $resolver->resolveClass( $class ) ) )
 				return $result;
-		}
 
 		if ( $buildOnFailure )
 			return static::buildClass( $class, $parameters );
@@ -109,6 +151,11 @@ class UniversalBuilder
 	{
 		if ( !is_string( $class ) )
 			throw new BindingException( "Class must be a string" );
+
+		if ( static::building( $class ) )
+			throw new BindingException( "The class [" . $class . "] is already being built." );
+
+		static::$buildStack[] = $class;
 
 		try
 		{
@@ -136,10 +183,16 @@ class UniversalBuilder
 
 			$instances = static::getDependencies( $dependencies, $parameters, $class );
 
+			array_pop( static::$buildStack );
+
+			/**/
+
 			return $reflector->newInstanceArgs( $instances );
 		}
 		catch ( \ReflectionException $e )
 		{
+			array_pop( static::$buildStack );
+
 			throw new BindingException( "Failed to build [$class]: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() );
 		}
 	}

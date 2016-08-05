@@ -5,12 +5,13 @@ use InvalidArgumentException;
 use Milky\Binding\UniversalBuilder;
 use Milky\Framework;
 use Milky\Helpers\Arr;
+use Milky\Helpers\Func;
 use Milky\Helpers\Str;
 use Milky\Http\View\Engines\EngineInterface;
 use Milky\Http\View\Engines\EngineResolver;
 use Milky\Impl\Arrayable;
 
-class Factory
+class ViewFactory
 {
 	/**
 	 * The engine implementation.
@@ -98,7 +99,7 @@ class Factory
 
 	public static function i()
 	{
-		return UniversalBuilder::resolve( 'view.factory' );
+		return UniversalBuilder::resolveClass( static::class );
 	}
 
 	/**
@@ -117,11 +118,12 @@ class Factory
 	}
 
 	/**
-	 * Get the evaluated view contents for the given view.
+	 * Get the evaluated view contents for the given file.
 	 *
 	 * @param  string $path
 	 * @param  array $data
 	 * @param  array $mergeData
+	 *
 	 * @return View
 	 */
 	public function file( $path, $data = [], $mergeData = [] )
@@ -139,14 +141,13 @@ class Factory
 	 * @param  string $view
 	 * @param  array $data
 	 * @param  array $mergeData
+	 *
 	 * @return View
 	 */
 	public function make( $view, $data = [], $mergeData = [] )
 	{
 		if ( isset( $this->aliases[$view] ) )
-		{
 			$view = $this->aliases[$view];
-		}
 
 		$view = $this->normalizeName( $view );
 
@@ -163,6 +164,7 @@ class Factory
 	 * Normalize a view name.
 	 *
 	 * @param  string $name
+	 *
 	 * @return string
 	 */
 	protected function normalizeName( $name )
@@ -170,9 +172,7 @@ class Factory
 		$delimiter = ViewFinderInterface::HINT_PATH_DELIMITER;
 
 		if ( strpos( $name, $delimiter ) === false )
-		{
 			return str_replace( '/', '.', $name );
-		}
 
 		list( $namespace, $name ) = explode( $delimiter, $name );
 
@@ -183,6 +183,7 @@ class Factory
 	 * Parse the given data into a raw array.
 	 *
 	 * @param  mixed $data
+	 *
 	 * @return array
 	 */
 	protected function parseData( $data )
@@ -195,6 +196,7 @@ class Factory
 	 *
 	 * @param  string $view
 	 * @param  mixed $data
+	 *
 	 * @return View
 	 */
 	public function of( $view, $data = [] )
@@ -207,7 +209,6 @@ class Factory
 	 *
 	 * @param  string $view
 	 * @param  string $name
-	 *
 	 */
 	public function name( $view, $name )
 	{
@@ -219,7 +220,6 @@ class Factory
 	 *
 	 * @param  string $view
 	 * @param  string $alias
-	 *
 	 */
 	public function alias( $view, $alias )
 	{
@@ -230,6 +230,7 @@ class Factory
 	 * Determine if a given view exists.
 	 *
 	 * @param  string $view
+	 *
 	 * @return bool
 	 */
 	public function exists( $view )
@@ -253,6 +254,7 @@ class Factory
 	 * @param  array $data
 	 * @param  string $iterator
 	 * @param  string $empty
+	 *
 	 * @return string
 	 */
 	public function renderEach( $view, $data, $iterator, $empty = 'raw|' )
@@ -294,6 +296,7 @@ class Factory
 	 * Get the appropriate view engine for the given path.
 	 *
 	 * @param  string $path
+	 *
 	 * @return EngineInterface
 	 *
 	 * @throws \InvalidArgumentException
@@ -314,6 +317,7 @@ class Factory
 	 * Get the extension used by the view file.
 	 *
 	 * @param  string $path
+	 *
 	 * @return string
 	 */
 	protected function getExtension( $path )
@@ -331,6 +335,7 @@ class Factory
 	 *
 	 * @param  array|string $key
 	 * @param  mixed $value
+	 *
 	 * @return mixed
 	 */
 	public function share( $key, $value = null )
@@ -349,6 +354,7 @@ class Factory
 	 *
 	 * @param  array|string $views
 	 * @param  \Closure|string $callback
+	 *
 	 * @return array
 	 */
 	public function creator( $views, $callback )
@@ -367,6 +373,7 @@ class Factory
 	 * Register multiple view composers via an array.
 	 *
 	 * @param  array $composers
+	 *
 	 * @return array
 	 */
 	public function composers( array $composers )
@@ -384,6 +391,7 @@ class Factory
 	 *
 	 * @param  array|string $views
 	 * @param  \Closure|string $callback
+	 *
 	 * @return array
 	 */
 	public function composer( $views, $callback )
@@ -402,6 +410,7 @@ class Factory
 	 * @param  string $view
 	 * @param  \Closure|string $callback
 	 * @param  string $prefix
+	 *
 	 * @return \Closure|null
 	 */
 	protected function addViewEvent( $view, $callback, $prefix = 'composing' )
@@ -426,6 +435,7 @@ class Factory
 	 * @param  string $view
 	 * @param  string $class
 	 * @param  string $prefix
+	 *
 	 * @return \Closure
 	 */
 	protected function addClassEvent( $view, $class, $prefix )
@@ -458,6 +468,7 @@ class Factory
 	 *
 	 * @param  string $class
 	 * @param  string $prefix
+	 *
 	 * @return \Closure
 	 */
 	protected function buildClassEventCallback( $class, $prefix )
@@ -480,6 +491,7 @@ class Factory
 	 *
 	 * @param  string $class
 	 * @param  string $prefix
+	 *
 	 * @return array
 	 */
 	protected function parseClassEvent( $class, $prefix )
@@ -496,7 +508,6 @@ class Factory
 	 * Call the composer for a given view.
 	 *
 	 * @param  View $view
-	 *
 	 */
 	public function callComposer( View $view )
 	{
@@ -507,7 +518,6 @@ class Factory
 	 * Call the creator for a given view.
 	 *
 	 * @param  View $view
-	 *
 	 */
 	public function callCreator( View $view )
 	{
@@ -565,7 +575,9 @@ class Factory
 	 * Stop injecting content into a section.
 	 *
 	 * @param  bool $overwrite
+	 *
 	 * @return string
+	 *
 	 * @throws \InvalidArgumentException
 	 */
 	public function stopSection( $overwrite = false )
@@ -593,6 +605,7 @@ class Factory
 	 * Stop injecting content into a section and append it.
 	 *
 	 * @return string
+	 *
 	 * @throws \InvalidArgumentException
 	 */
 	public function appendSection()
@@ -621,7 +634,6 @@ class Factory
 	 *
 	 * @param  string $section
 	 * @param  string $content
-	 *
 	 */
 	protected function extendSection( $section, $content )
 	{
@@ -638,6 +650,7 @@ class Factory
 	 *
 	 * @param  string $section
 	 * @param  string $default
+	 *
 	 * @return string
 	 */
 	public function yieldContent( $section, $default = '' )
@@ -659,7 +672,6 @@ class Factory
 	 *
 	 * @param  string $section
 	 * @param  string $content
-	 *
 	 */
 	public function startPush( $section, $content = '' )
 	{
@@ -680,6 +692,7 @@ class Factory
 	 * Stop injecting content into a push section.
 	 *
 	 * @return string
+	 *
 	 * @throws \InvalidArgumentException
 	 */
 	public function stopPush()
@@ -701,7 +714,6 @@ class Factory
 	 *
 	 * @param  string $section
 	 * @param  string $content
-	 *
 	 */
 	protected function extendPush( $section, $content )
 	{
@@ -724,6 +736,7 @@ class Factory
 	 *
 	 * @param  string $section
 	 * @param  string $default
+	 *
 	 * @return string
 	 */
 	public function yieldPushContent( $section, $default = '' )
@@ -738,8 +751,6 @@ class Factory
 
 	/**
 	 * Flush all of the section contents.
-	 *
-	 *
 	 */
 	public function flushSections()
 	{
@@ -754,8 +765,6 @@ class Factory
 
 	/**
 	 * Flush all of the section contents if done rendering.
-	 *
-	 *
 	 */
 	public function flushSectionsIfDoneRendering()
 	{
@@ -767,8 +776,6 @@ class Factory
 
 	/**
 	 * Increment the rendering counter.
-	 *
-	 *
 	 */
 	public function incrementRender()
 	{
@@ -777,8 +784,6 @@ class Factory
 
 	/**
 	 * Decrement the rendering counter.
-	 *
-	 *
 	 */
 	public function decrementRender()
 	{
@@ -799,7 +804,6 @@ class Factory
 	 * Add a location to the array of view locations.
 	 *
 	 * @param  string $location
-	 *
 	 */
 	public function addLocation( $location )
 	{
@@ -811,7 +815,6 @@ class Factory
 	 *
 	 * @param  string $namespace
 	 * @param  string|array $hints
-	 *
 	 */
 	public function addNamespace( $namespace, $hints )
 	{
@@ -823,7 +826,6 @@ class Factory
 	 *
 	 * @param  string $namespace
 	 * @param  string|array $hints
-	 *
 	 */
 	public function prependNamespace( $namespace, $hints )
 	{
@@ -836,7 +838,6 @@ class Factory
 	 * @param  string $extension
 	 * @param  string $engine
 	 * @param  \Closure $resolver
-	 *
 	 */
 	public function addExtension( $extension, $engine, $resolver = null )
 	{
@@ -897,6 +898,7 @@ class Factory
 	 *
 	 * @param  string $key
 	 * @param  mixed $default
+	 *
 	 * @return mixed
 	 */
 	public function shared( $key, $default = null )
@@ -918,6 +920,7 @@ class Factory
 	 * Check if section exists.
 	 *
 	 * @param  string $name
+	 *
 	 * @return bool
 	 */
 	public function hasSection( $name )

@@ -6,6 +6,7 @@ use Milky\Database\Eloquent\Model;
 use Milky\Framework;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
+use Milky\Http\HttpFactory;
 use Milky\Http\Request;
 use Milky\Http\Response;
 use Milky\Impl\Collection;
@@ -213,9 +214,7 @@ class Router
 	public function controllers( array $controllers )
 	{
 		foreach ( $controllers as $uri => $controller )
-		{
 			$this->controller( $uri, $controller );
-		}
 	}
 
 	/**
@@ -235,9 +234,7 @@ class Router
 		// the route group. If it has, we will need to prefix it before trying to
 		// reflect into the class instance and pull out the method for routing.
 		if ( !empty( $this->groupStack ) )
-		{
 			$prepended = $this->prependGroupUses( $controller );
-		}
 
 		$routable = ( new ControllerInspector )->getRoutable( $prepended, $uri );
 
@@ -245,12 +242,8 @@ class Router
 		// out all of the routable methods for the controller, then register each
 		// route explicitly for the developers, so reverse routing is possible.
 		foreach ( $routable as $method => $routes )
-		{
 			foreach ( $routes as $route )
-			{
 				$this->registerInspected( $route, $controller, $method, $names );
-			}
-		}
 
 		$this->addFallthroughRoute( $controller, $uri );
 	}
@@ -691,11 +684,7 @@ class Router
 	 */
 	protected function runRouteWithinStack( Route $route, Request $request )
 	{
-		// $shouldSkipMiddleware = $this->bindings->bound( 'middleware.disable' ) && $this->bindings->make( 'middleware.disable' ) === true;
-
-		// $middleware = $shouldSkipMiddleware ? [] : $this->gatherRouteMiddlewares( $route );
-
-		$middleware = $this->gatherRouteMiddlewares( $route );
+		$middleware = HttpFactory::i()->isMiddlewareDisabled() ? [] : $this->gatherRouteMiddlewares( $route );
 
 		return ( new Pipeline() )->send( $request )->through( $middleware )->then( function ( $request ) use ( $route )
 		{

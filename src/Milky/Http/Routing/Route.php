@@ -2,6 +2,7 @@
 
 use Closure;
 use LogicException;
+use Milky\Binding\UniversalBuilder;
 use Milky\Exceptions\HttpResponseException;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
@@ -254,9 +255,9 @@ class Route
 	{
 		list( $class, $method ) = explode( '@', $this->action['uses'] );
 
-		$controller = $this->bindings->make( $class );
+		$controller = UniversalBuilder::resolve( $class );
 
-		return ( new ControllerDispatcher( $this->router, $this->bindings ) )->getMiddleware( $controller, $method );
+		return ( new ControllerDispatcher( $this->router ) )->getMiddleware( $controller, $method );
 	}
 
 	/**

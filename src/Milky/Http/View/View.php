@@ -17,7 +17,7 @@ class View implements ArrayAccess
 	/**
 	 * The view factory instance.
 	 *
-	 * @var Factory
+	 * @var ViewFactory
 	 */
 	protected $factory;
 
@@ -52,14 +52,14 @@ class View implements ArrayAccess
 	/**
 	 * Create a new view instance.
 	 *
-	 * @param  Factory $factory
+	 * @param  ViewFactory $factory
 	 * @param  EngineInterface $engine
 	 * @param  string $view
 	 * @param  string $path
 	 * @param  mixed $data
 	 * @return void
 	 */
-	public function __construct( Factory $factory, EngineInterface $engine, $view, $path, $data = [] )
+	public function __construct( ViewFactory $factory, EngineInterface $engine, $view, $path, $data = [] )
 	{
 		$this->view = $view;
 		$this->path = $path;
@@ -163,12 +163,8 @@ class View implements ArrayAccess
 		$data = array_merge( $this->factory->getShared(), $this->data );
 
 		foreach ( $data as $key => $value )
-		{
 			if ( $value instanceof Renderable )
-			{
 				$data[$key] = $value->render();
-			}
-		}
 
 		return $data;
 	}
@@ -230,9 +226,9 @@ class View implements ArrayAccess
 	/**
 	 * Get the view factory instance.
 	 *
-	 * @return Factory
+	 * @return ViewFactory
 	 */
-	public function getFactory()
+	public function getViewFactory()
 	{
 		return $this->factory;
 	}

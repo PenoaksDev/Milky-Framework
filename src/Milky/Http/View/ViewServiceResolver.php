@@ -18,38 +18,89 @@ use Milky\Http\View\Engines\PhpEngine;
  */
 class ViewServiceResolver extends ServiceResolver
 {
-	protected $engineResolver;
-	protected $bladeCompiler;
-	protected $finder;
-	protected $factory;
+	/**
+	 * @var EngineResolver
+	 */
+	protected $engineResolverInstance;
+
+	/**
+	 * @var BladeCompiler
+	 */
+	protected $bladeCompilerInstance;
+
+	/**
+	 * @var FileViewFinder
+	 */
+	protected $finderInstance;
+
+	/**
+	 * @var ViewFactory
+	 */
+	protected $factoryInstance;
 
 	public function __construct()
 	{
-		$this->engineResolver = new EngineResolver();
-
-		$this->engineResolver->register( 'php', function ()
-		{
-			return new PhpEngine();
-		} );
-
-		// The Compiler engine requires an instance of the CompilerInterface, which in
-		// this case will be the Blade compiler, so we'll first create the compiler
-		// instance to pass into the engine so it can compile the views properly.
-		$this->bladeCompiler = new BladeCompiler( Filesystem::i(), Config::get( 'view.compiled' ) );
-
-		$this->engineResolver->register( 'blade', function ()
-		{
-			return new CompilerEngine( $this->bladeCompiler );
-		} );
-
-		$this->finder = new FileViewFinder( Filesystem::i(), Config::get( 'view.paths' ) );
-
-		$this->factory = new Factory( $this->engineResolver, $this->finder );
+		$this->setDefault( 'factory' );
 
 		$this->addClassAlias( EngineResolver::class, 'engineResolver' );
 		$this->addClassAlias( BladeCompiler::class, 'bladeCompiler' );
 		$this->addClassAlias( FileViewFinder::class, 'finder' );
-		$this->addClassAlias( Factory::class, 'factory' );
+		$this->addClassAlias( ViewFactory::class, 'factory' );
+	}
+
+	/**
+	 * @return EngineResolver
+	 */
+	public function engineResolver()
+	{
+		if ( is_null( $this->engineResolverInstance ) )
+		{
+			$this->engineResolverInstance = new EngineResolver();
+
+			$this->engineResolverInstance->register( 'php', function ()
+			{
+				return new PhpEngine();
+			} );
+		}
+
+		return $this->engineResolverInstance;
+	}
+
+	/**
+	 * @return BladeCompiler
+	 */
+	public function bladeCompiler()
+	{
+		if ( is_null( $this->bladeCompilerInstance ) )
+		{
+			// The Compiler engine requires an instance of the CompilerInterface, which in
+			// this case will be the Blade compiler, so we'll first create the compiler
+			// instance to pass into the engine so it can compile the views properly.
+			$this->bladeCompilerInstance = new BladeCompiler( Filesystem::i(), Config::get( 'view.compiled' ) );
+
+			$this->engineResolver()->register( 'blade', function ()
+			{
+				return new CompilerEngine( $this->bladeCompilerInstance );
+			} );
+		}
+
+		return $this->bladeCompilerInstance;
+	}
+
+	/**
+	 * @return FileViewFinder
+	 */
+	public function finder()
+	{
+		return $this->finderInstance ?: $this->finderInstance = new FileViewFinder( Filesystem::i(), Config::get( 'view.paths' ) );
+	}
+
+	/**
+	 * @return ViewFactory
+	 */
+	public function factory()
+	{
+		return $this->factoryInstance ?: $this->factoryInstance = new ViewFactory( $this->engineResolver(), $this->finder() );
 	}
 
 	public function key()

@@ -85,7 +85,7 @@ class Handler
 	 *
 	 * @param  \Throwable $e
 	 */
-	public function handleException( $e )
+	public function handleException( $e, $request = null )
 	{
 		if ( !$e instanceof Exception )
 			$e = new FatalThrowableError( $e );
@@ -95,7 +95,7 @@ class Handler
 		if ( ConsoleFactory::runningInConsole() )
 			UniversalBuilder::resolve( 'console' )->renderException( new ConsoleOutput, $e );
 		else
-			$this->render( HttpFactory::i()->request(), $e )->send();
+			$this->render( $request ?: HttpFactory::i()->request(), $e )->send();
 	}
 
 	/**
@@ -328,10 +328,10 @@ class Handler
 	}
 
 	/**
-	 * @return $this
+	 * @return Handler
 	 */
 	public static function i()
 	{
-		return UniversalBuilder::resolve( 'exceptions.handler' );
+		return UniversalBuilder::resolve( static::class );
 	}
 }

@@ -1,4 +1,4 @@
-<?php namespace Milky\Auth;
+<?php namespace Milky\Account\Traits;
 
 /**
  * The MIT License (MIT)

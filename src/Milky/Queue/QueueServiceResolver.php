@@ -2,6 +2,7 @@
 
 use Milky\Binding\Resolvers\ServiceResolver;
 use Milky\Binding\UniversalBuilder;
+use Milky\Database\DatabaseManager;
 use Milky\Facades\Config;
 use Milky\Framework;
 use Milky\Queue\Connectors\BeanstalkdConnector;
@@ -46,7 +47,7 @@ class QueueServiceResolver extends ServiceResolver
 		$config = Config::get( 'queue.failed' );
 
 		if ( isset( $config['table'] ) )
-			$this->failer = new DatabaseFailedJobProvider( UniversalBuilder::resolve( 'db' ), $config['database'], $config['table'] );
+			$this->failer = new DatabaseFailedJobProvider( UniversalBuilder::resolveClass( DatabaseManager::class ), $config['database'], $config['table'] );
 		else
 			$this->failer = new NullFailedJobProvider;
 

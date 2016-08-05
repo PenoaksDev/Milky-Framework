@@ -1,22 +1,23 @@
 <?php namespace Milky\Http\View\Middleware;
 
 use Closure;
-use Milky\Support\ViewErrorBag;
-use Milky\Contracts\View\Factory as ViewFactory;
+use Milky\Helpers\ViewErrorBag;
+use Milky\Http\Request;
+use Milky\Http\View\ViewFactory;
 
 class ShareErrorsFromSession
 {
 	/**
 	 * The view factory implementation.
 	 *
-	 * @var \Illuminate\Contracts\View\Factory
+	 * @var ViewFactory
 	 */
 	protected $view;
 
 	/**
 	 * Create a new error binder instance.
 	 *
-	 * @param  \Illuminate\Contracts\View\Factory  $view
+	 * @param  ViewFactory  $view
 	 * @return void
 	 */
 	public function __construct(ViewFactory $view)
@@ -27,7 +28,7 @@ class ShareErrorsFromSession
 	/**
 	 * Handle an incoming request.
 	 *
-	 * @param  \Milky\Http\Request  $request
+	 * @param  Request  $request
 	 * @param  \Closure  $next
 	 * @return mixed
 	 */

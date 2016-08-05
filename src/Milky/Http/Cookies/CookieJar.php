@@ -1,11 +1,14 @@
 <?php namespace Milky\Http\Cookies;
 
+use Milky\Binding\UniversalBuilder;
 use Milky\Helpers\Arr;
-use Milky\Services\ServiceFactory;
+use Milky\Impl\Extendable;
 use Symfony\Component\HttpFoundation\Cookie;
 
-class CookieJar extends ServiceFactory
+class CookieJar
 {
+	use Extendable;
+
 	/**
 	 * The default path (if specified).
 	 *
@@ -35,6 +38,14 @@ class CookieJar extends ServiceFactory
 	protected $queued = [];
 
 	/**
+	 * @return CookieJar
+	 */
+	public static function i()
+	{
+		return UniversalBuilder::resolveClass( static::class );
+	}
+
+	/**
 	 * Create a new cookie instance.
 	 *
 	 * @param  string $name
@@ -49,7 +60,6 @@ class CookieJar extends ServiceFactory
 	public function make( $name, $value, $minutes = 0, $path = null, $domain = null, $secure = false, $httpOnly = true )
 	{
 		list( $path, $domain, $secure ) = $this->getPathAndDomain( $path, $domain, $secure );
-
 		$time = ( $minutes == 0 ) ? 0 : time() + ( $minutes * 60 );
 
 		return new Cookie( $name, $value, $time, $path, $domain, $secure, $httpOnly );
@@ -114,14 +124,10 @@ class CookieJar extends ServiceFactory
 	 */
 	public function queue()
 	{
-		if ( head( func_get_args() ) instanceof Cookie )
-		{
+		if ( reset( func_get_args() ) instanceof Cookie )
 			$cookie = head( func_get_args() );
-		}
 		else
-		{
 			$cookie = call_user_func_array( [$this, 'make'], func_get_args() );
-		}
 
 		$this->queued[$cookie->getName()] = $cookie;
 	}

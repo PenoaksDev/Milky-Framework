@@ -2,6 +2,7 @@
 
 use ArrayAccess;
 use Closure;
+use Milky\Binding\UniversalBuilder;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Http\Routing\Route;
@@ -12,6 +13,7 @@ use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
  * The MIT License (MIT)
@@ -52,6 +54,11 @@ class Request extends SymfonyRequest implements ArrayAccess, Arrayable
 	 * @var \Closure
 	 */
 	protected $routeResolver;
+
+	public static function i()
+	{
+		return UniversalBuilder::resolveClass( static::class );
+	}
 
 	/**
 	 * Create a new Illuminate HTTP request from server variables.
@@ -674,9 +681,7 @@ class Request extends SymfonyRequest implements ArrayAccess, Arrayable
 	protected function getInputSource()
 	{
 		if ( $this->isJson() )
-		{
 			return $this->json();
-		}
 
 		return $this->getMethod() == 'GET' ? $this->query : $this->request;
 	}
@@ -851,23 +856,14 @@ class Request extends SymfonyRequest implements ArrayAccess, Arrayable
 	public static function createFromBase( SymfonyRequest $request )
 	{
 		if ( $request instanceof static )
-		{
 			return $request;
-		}
 
-		$content = $request->content;
+		$new = ( new static )->duplicate( $request->query->all(), $request->request->all(), $request->attributes->all(), $request->cookies->all(), $request->files->all(), $request->server->all() );
 
-		$request = ( new static )->duplicate(
+		$new->content = $request->content;
+		// $new->request = $request->getInputSource();
 
-			$request->query->all(), $request->request->all(), $request->attributes->all(),
-
-			$request->cookies->all(), $request->files->all(), $request->server->all() );
-
-		$request->content = $content;
-
-		$request->request = $request->getInputSource();
-
-		return $request;
+		return $new;
 	}
 
 	/**
@@ -881,16 +877,14 @@ class Request extends SymfonyRequest implements ArrayAccess, Arrayable
 	/**
 	 * Get the session associated with the request.
 	 *
-	 * @return Store
+	 * @return Store|SessionInterface
 	 *
 	 * @throws \RuntimeException
 	 */
 	public function session()
 	{
 		if ( !$this->hasSession() )
-		{
 			throw new RuntimeException( 'Session store not set on request.' );
-		}
 
 		return $this->getSession();
 	}

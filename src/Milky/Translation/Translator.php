@@ -1,19 +1,17 @@
 <?php namespace Milky\Translation;
 
-use Milky\Facades\Config;
-use Milky\Filesystem\Filesystem;
-use Milky\Framework;
+use Milky\Binding\UniversalBuilder;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Impl\Collection;
-use Milky\Services\ServiceFactory;
+use Milky\Impl\Extendable;
 use Milky\Traits\NamespacedItemResolver;
 use Symfony\Component\Translation\MessageSelector;
 use Symfony\Component\Translation\TranslatorInterface;
 
-class Translator extends ServiceFactory implements TranslatorInterface
+class Translator implements TranslatorInterface
 {
-	use NamespacedItemResolver;
+	use NamespacedItemResolver, Extendable;
 
 	/**
 	 * The loader implementation.
@@ -50,17 +48,12 @@ class Translator extends ServiceFactory implements TranslatorInterface
 	 */
 	protected $selector;
 
-	public static function build()
+	/**
+	 * @return Translator
+	 */
+	public static function i()
 	{
-		$loader = new FileLoader( Filesystem::i(), Framework::fw()->buildPath( '__lang' ) );
-
-		// When registering the translator component, we'll need to set the default
-		// locale as well as the fallback locale. So, we'll grab the application
-		// configuration so we can easily get both of these values from there.
-		$translator = new Translator( $loader, Config::get( 'app.locale' ) );
-		$translator->setFallback( Config::get( 'app.fallback_locale' ) );
-
-		return $translator;
+		return UniversalBuilder::resolveClass( static::class );
 	}
 
 	/**
@@ -72,8 +65,6 @@ class Translator extends ServiceFactory implements TranslatorInterface
 	 */
 	public function __construct( LoaderInterface $loader, $locale )
 	{
-		parent::__construct();
-
 		$this->loader = $loader;
 		$this->locale = $locale;
 	}

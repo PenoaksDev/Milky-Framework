@@ -3,7 +3,6 @@
 use Closure;
 use Milky\Binding\UniversalBuilder;
 use Milky\Exceptions\PipelineException;
-use Milky\Framework;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 class Pipeline
@@ -119,14 +118,14 @@ class Pipeline
 					if ( is_callable( $this->exceptionHandler ) )
 						return call_user_func( $this->exceptionHandler, $passable, $e );
 					else
-						throw new PipelineException( $e );
+						throw new PipelineException( $e->getMessage(), 0, $e );
 				}
 				catch ( \Throwable $e )
 				{
 					if ( is_callable( $this->exceptionHandler ) )
 						return call_user_func( $this->exceptionHandler, $passable, new FatalThrowableError( $e ) );
 					else
-						throw new PipelineException( $e );
+						throw new PipelineException( $e->getMessage(), 0, $e );
 				}
 			};
 		};
@@ -157,7 +156,13 @@ class Pipeline
 					// If the pipe is a string we will parse the string and resolve the class out
 					// of the dependency injection container. We can then build a callable and
 					// execute the pipe function giving in the parameters that are required.
-					$pipe = Framework::fw()->get( $name );
+					$pipe = UniversalBuilder::resolve( $name );
+
+					if ( is_null( $pipe ) )
+						$pipe = UniversalBuilder::buildClass( $name );
+
+					if ( is_null( $pipe ) )
+						throw new PipelineException( "Busted pipeline at [" . $name . "]. There is water everywhere and all repairmen have quit because of budget cuts. But I blame the failure to resolve." );
 
 					$parameters = array_merge( [$passable, $stack], $parameters );
 				}
@@ -190,19 +195,17 @@ class Pipeline
 			}
 			catch ( \Exception $e )
 			{
-				if ( is_callable( $this->exceptionHandler ) || $this->exceptionHandler instanceof Closure )
-					return call_user_func( $this->exceptionHandler, $e, $passable );
+				if ( is_callable( $this->exceptionHandler ) )
+					return call_user_func( $this->exceptionHandler, $passable, $e );
 				else
-					throw $e;
+					throw new PipelineException( $e->getMessage(), 0, $e );
 			}
 			catch ( \Throwable $e )
 			{
-				$e = new PipelineException( $e->getMessage(), 0, $e );
-
-				if ( is_callable( $this->exceptionHandler ) || $this->exceptionHandler instanceof Closure )
-					return call_user_func( $this->exceptionHandler, $e, $passable );
+				if ( is_callable( $this->exceptionHandler ) )
+					return call_user_func( $this->exceptionHandler, $passable, new FatalThrowableError( $e ) );
 				else
-					throw $e;
+					throw new PipelineException( $e->getMessage(), 0, $e );
 			}
 		};
 	}

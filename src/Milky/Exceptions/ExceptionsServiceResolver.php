@@ -15,29 +15,39 @@ use Milky\Facades\Config;
  */
 class ExceptionsServiceResolver extends ServiceResolver
 {
-	protected $handler;
-	protected $identifier;
-	protected $info;
+	private $handlerInstance;
+	private $identifierInstance;
+	private $infoInstance;
 
 	public function __construct()
 	{
-		$this->handler = Handler::build();
+		$this->setDefault( 'handler' );
 
-		$this->identifier = new ExceptionIdentifier();
-		$this->info = new ExceptionInfo( realpath( __DIR__ . '/../../../resources/errors.json' ) );
-
-		$this->addClassAlias( Handler::class, 'mgr' );
+		$this->addClassAlias( Handler::class, 'handler' );
 		$this->addClassAlias( ExceptionIdentifier::class, 'identifier' );
 		$this->addClassAlias( ExceptionInfo::class, 'info' );
 		$this->addClassAlias( HtmlDisplayer::class, 'displayer' );
 		$this->addClassAlias( VerboseFilter::class, 'filter' );
+	}
 
-		$this->setDefault( 'handler' );
+	public function handler()
+	{
+		return $this->handlerInstance ?: $this->handlerInstance = Handler::build();
+	}
+
+	public function identifier()
+	{
+		return $this->identifierInstance ?: $this->identifierInstance = new ExceptionIdentifier();
+	}
+
+	public function info()
+	{
+		return $this->infoInstance ?: $this->infoInstance = new ExceptionInfo( realpath( __DIR__ . '/../../../resources/errors.json' ) );
 	}
 
 	public function displayer()
 	{
-		return new HtmlDisplayer( $this->info, realpath( __DIR__ . '/../../../resources/error.html' ) );
+		return new HtmlDisplayer( $this->info(), realpath( __DIR__ . '/../../../resources/error.html' ) );
 	}
 
 	public function filter()

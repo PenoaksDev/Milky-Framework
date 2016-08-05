@@ -1,7 +1,9 @@
 <?php namespace Milky\Binding\Resolvers;
 
 use Milky\Binding\UniversalBuilder;
+use Milky\Exceptions\BindingException;
 use Milky\Exceptions\ResolverException;
+use Milky\Helpers\Func;
 use Milky\Helpers\Str;
 
 /**
@@ -120,14 +122,7 @@ class ServiceResolver
 			if ( !is_null( $this->def ) )
 				return $this->get( $this->def );
 
-			if ( $result = $this->get( 'mgr' ) )
-				return $result;
-
-			if ( $result = $this->get( 'manager' ) )
-				return $result;
-
-			if ( $result = $this->get( 'factory' ) )
-				return $result;
+			throw new BindingException( "The default key was never set for Service Resolver [" . static::class . "]" );
 		}
 
 		if ( !is_string( $key ) )

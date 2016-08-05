@@ -1,4 +1,4 @@
-<?php namespace Milky\Exceptions;
+<?php namespace Milky\Exceptions\Auth;
 
 /**
  * The MIT License (MIT)

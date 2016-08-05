@@ -313,7 +313,7 @@ class Framework implements \ArrayAccess
 
 	public function newHttpFactory( $request = null )
 	{
-		return new HttpFactory( $this, $request );
+		return HttpFactory::build( compact( 'request' ) );
 	}
 
 	public function getProduct()
@@ -465,5 +465,13 @@ class Framework implements \ArrayAccess
 					return $this->namespace = $namespace;
 
 		throw new \RuntimeException( 'Unable to detect application namespace.' );
+	}
+
+	/**
+	 * Unused
+	 */
+	public function terminate()
+	{
+
 	}
 }

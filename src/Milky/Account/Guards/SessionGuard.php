@@ -1,35 +1,35 @@
-<?php namespace Milky\Account\Drivers;
+<?php namespace Milky\Account\Guards;
 
-use Milky\Account\Account;
 use Milky\Account\Auths\AccountAuth;
-use Milky\Framework;
+use Milky\Account\Types\Account;
+use Milky\Facades\Hooks;
 use Milky\Helpers\Str;
 use Milky\Http\Cookies\CookieJar;
-use Milky\Http\Request;
 use Milky\Http\Response;
-use Milky\Http\Session\SessionInterface;
-use Penoaks\Session\Store;
+use Milky\Http\Session\Store;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-/**
- * The MIT License (MIT)
- * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
- *
- * This Source Code is subject to the terms of the MIT License.
- * If a copy of the license was not distributed with this file,
- * You can obtain one at https://opensource.org/licenses/MIT.
- */
-class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBasicAuth
+class SessionGuard extends StatefulGuard implements SupportsBasicAuth
 {
 	/**
-	 * The account we last attempted to retrieve.
+	 * The guard name
+	 *
+	 * @var string
+	 */
+	protected $name;
+
+	/**
+	 * The acct we last attempted to retrieve.
 	 *
 	 * @var Account
 	 */
 	protected $lastAttempted;
 
 	/**
-	 * Indicates if the account was authenticated via a recaller cookie.
+	 * Indicates if the acct was authenticated via a recaller cookie.
 	 *
 	 * @var bool
 	 */
@@ -43,7 +43,7 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	protected $session;
 
 	/**
-	 * The cookie creator service.
+	 * The Illuminate cookie creator service.
 	 *
 	 * @var CookieJar
 	 */
@@ -64,21 +64,33 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	protected $loggedOut = false;
 
 	/**
-	 * Indicates if a token account retrieval has been attempted.
+	 * Indicates if a token acct retrieval has been attempted.
 	 *
 	 * @var bool
 	 */
 	protected $tokenRetrievalAttempted = false;
 
-	public function __construct( AccountAuth $auth, SessionInterface $session, Request $request )
+	/**
+	 * Create a new authentication guard.
+	 *
+	 * @param  string $name
+	 * @param  AccountAuth $auth
+	 * @param  SessionInterface $session
+	 * @param  Request $request
+	 */
+	public function __construct( $name, AccountAuth $auth, SessionInterface $session, Request $request, CookieJar $cookie )
 	{
+		$this->name = $name;
+
 		parent::__construct( $auth );
+
 		$this->session = $session;
 		$this->request = $request;
+		$this->cookie = $cookie;
 	}
 
 	/**
-	 * Get the currently authenticated account.
+	 * Get the currently authenticated acct.
 	 *
 	 * @return Account|null
 	 */
@@ -87,44 +99,43 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 		if ( $this->loggedOut )
 			return null;
 
-		// If we've already retrieved the account for the current request we can just
-		// return it back immediately. We do not want to fetch the account data on
+		// If we've already retrieved the acct for the current request we can just
+		// return it back immediately. We do not want to fetch the acct data on
 		// every call to this method because that would be tremendously slow.
 		if ( !is_null( $this->acct ) )
 			return $this->acct;
 
 		$id = $this->session->get( $this->getName() );
 
-		// First we will try to load the account using the identifier in the session if
+		// First we will try to load the acct using the identifier in the session if
 		// one exists. Otherwise we will check for a "remember me" cookie in this
-		// request, and if one exists, attempt to retrieve the account using that.
-		$account = null;
+		// request, and if one exists, attempt to retrieve the acct using that.
+		$acct = null;
 
 		if ( !is_null( $id ) )
-			$account = $this->auth->retrieveById( $id );
+			$acct = $this->auth->retrieveById( $id );
 
-		// If the account is null, but we decrypt a "recaller" cookie we can attempt to
-		// pull the account data on that cookie which serves as a remember cookie on
-		// the application. Once we have an account we can return it to the caller.
+		// If the acct is null, but we decrypt a "recaller" cookie we can attempt to
+		// pull the acct data on that cookie which serves as a remember cookie on
+		// the application. Once we have a acct we can return it to the caller.
 		$recaller = $this->getRecaller();
 
-		if ( is_null( $account ) && !is_null( $recaller ) )
+		if ( is_null( $acct ) && !is_null( $recaller ) )
 		{
-			$account = $this->getaccountByRecaller( $recaller );
+			$acct = $this->getAcctByRecaller( $recaller );
 
-			if ( $account )
+			if ( $acct )
 			{
-				$this->updateSession( $account->getAuthIdentifier() );
-
-				$this->fireLoginEvent( $account, true );
+				$this->updateSession( $acct->getAuthIdentifier() );
+				$this->fireLoginEvent( $acct, true );
 			}
 		}
 
-		return $this->acct = $account;
+		return $this->acct = $acct;
 	}
 
 	/**
-	 * Get the ID for the currently authenticated account.
+	 * Get the ID for the currently authenticated acct.
 	 *
 	 * @return int|null
 	 */
@@ -142,22 +153,20 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	}
 
 	/**
-	 * Pull an account from the repository by its recaller ID.
+	 * Pull a acct from the repository by its recaller ID.
 	 *
 	 * @param  string $recaller
 	 * @return mixed
 	 */
-	protected function getaccountByRecaller( $recaller )
+	protected function getAcctByRecaller( $recaller )
 	{
 		if ( $this->validRecaller( $recaller ) && !$this->tokenRetrievalAttempted )
 		{
 			$this->tokenRetrievalAttempted = true;
-
 			list( $id, $token ) = explode( '|', $recaller, 2 );
+			$this->viaRemember = !is_null( $acct = $this->auth->retrieveByToken( $id, $token ) );
 
-			$this->viaRemember = !is_null( $account = $this->auth->retrieveByToken( $id, $token ) );
-
-			return $account;
+			return $acct;
 		}
 
 		return null;
@@ -174,7 +183,7 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	}
 
 	/**
-	 * Get the account ID from the recaller cookie.
+	 * Get the acct ID from the recaller cookie.
 	 *
 	 * @return string|null
 	 */
@@ -203,7 +212,7 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	}
 
 	/**
-	 * Log an account into the application without sessions or cookies.
+	 * Log a acct into the application without sessions or cookies.
 	 *
 	 * @param  array $credentials
 	 * @return bool
@@ -212,7 +221,7 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	{
 		if ( $this->validate( $credentials ) )
 		{
-			$this->setAccount( $this->lastAttempted );
+			$this->setAcct( $this->lastAttempted );
 
 			return true;
 		}
@@ -221,7 +230,7 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	}
 
 	/**
-	 * Validate an account's credentials.
+	 * Validate a acct's credentials.
 	 *
 	 * @param  array $credentials
 	 * @return bool
@@ -240,10 +249,10 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	 */
 	public function basic( $field = 'email', $extraConditions = [] )
 	{
-		if ( $this->isAuthenticated() )
+		if ( $this->check() )
 			return null;
 
-		// If an accountname is set on the HTTP basic request, we will return out without
+		// If a acctname is set on the HTTP basic request, we will return out without
 		// interrupting the request lifecycle. Otherwise, we'll need to generate a
 		// request indicating that the given credentials were invalid for login.
 		if ( $this->attemptBasic( $this->getRequest(), $field, $extraConditions ) )
@@ -312,7 +321,7 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	}
 
 	/**
-	 * Attempt to authenticate an account using the given credentials.
+	 * Attempt to authenticate a acct using the given credentials.
 	 *
 	 * @param  array $credentials
 	 * @param  bool $remember
@@ -323,38 +332,38 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	{
 		$this->fireAttemptEvent( $credentials, $remember, $login );
 
-		$this->lastAttempted = $account = $this->auth->retrieveByCredentials( $credentials );
+		$this->lastAttempted = $acct = $this->auth->retrieveByCredentials( $credentials );
 
-		// If an implementation of accountInterface was returned, we'll ask the provider
-		// to validate the account against the given credentials, and if they are in
-		// fact valid we'll log the accounts into the application and return true.
-		if ( $this->hasValidCredentials( $account, $credentials ) )
+		// If an implementation of AcctInterface was returned, we'll ask the provider
+		// to validate the acct against the given credentials, and if they are in
+		// fact valid we'll log the accts into the application and return true.
+		if ( $this->hasValidCredentials( $acct, $credentials ) )
 		{
 			if ( $login )
-				$this->login( $account, $remember );
+				$this->login( $acct, $remember );
 
 			return true;
 		}
 
-		// If the authentication attempt fails we will fire an event so that the account
+		// If the authentication attempt fails we will fire an event so that the acct
 		// may be notified of any suspicious attempts to access their account from
-		// an unrecognized account. A developer may listen to this event as needed.
+		// an unrecognized acct. A developer may listen to this event as needed.
 		if ( $login )
-			$this->fireFailedEvent( $account, $credentials );
+			$this->fireFailedEvent( $acct, $credentials );
 
 		return false;
 	}
 
 	/**
-	 * Determine if the account matches the credentials.
+	 * Determine if the acct matches the credentials.
 	 *
-	 * @param  mixed $account
+	 * @param  mixed $acct
 	 * @param  array $credentials
 	 * @return bool
 	 */
-	protected function hasValidCredentials( $account, $credentials )
+	protected function hasValidCredentials( $acct, $credentials )
 	{
-		return !is_null( $account ) && $this->auth->validateCredentials( $account, $credentials );
+		return !is_null( $acct ) && $this->auth->validateCredentials( $acct, $credentials );
 	}
 
 	/**
@@ -363,82 +372,76 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	 * @param  array $credentials
 	 * @param  bool $remember
 	 * @param  bool $login
-	 * @return void
 	 */
 	protected function fireAttemptEvent( array $credentials, $remember, $login )
 	{
-		Framework::hooks()->trigger( 'acct.attempting', compact( 'credentials', 'remember', 'login' ) );
+		Hooks::trigger( 'acct.attempting', compact( 'credentials', 'remember', 'login' ) );
 	}
 
 	/**
 	 * Fire the failed authentication attempt event with the given arguments.
 	 *
-	 * @param  Account|null $account
+	 * @param  Account|null $acct
 	 * @param  array $credentials
-	 * @return void
 	 */
-	protected function fireFailedEvent( $account, array $credentials )
+	protected function fireFailedEvent( $acct, array $credentials )
 	{
-		Framework::hooks()->trigger( 'acct.failed', compact( 'account', 'credentials' ) );
+		Hooks::trigger( 'acct.failed', compact( 'acct', 'credentials' ) );
 	}
 
 	/**
 	 * Register an authentication attempt event listener.
 	 *
 	 * @param  mixed $callback
-	 * @return void
 	 */
 	public function attempting( $callback )
 	{
-		Framework::hooks()->trigger( 'acct.attempting', compact( 'callback' ) );
+		Hooks::trigger( 'acct.attempting', compact( 'callback' ) );
 	}
 
 	/**
-	 * Log an account into the application.
+	 * Log a acct into the application.
 	 *
-	 * @param  Account $account
+	 * @param  Account $acct
 	 * @param  bool $remember
-	 * @return void
 	 */
-	public function login( Account $account, $remember = false )
+	public function login( Account $acct, $remember = false )
 	{
-		$this->updateSession( $account->getId() );
+		$this->updateSession( $acct->getId() );
 
-		// If the account should be permanently "remembered" by the application we will
-		// queue a permanent cookie that contains the encrypted copy of the account
-		// identifier. We will then decrypt this later to retrieve the accounts.
+		// If the acct should be permanently "remembered" by the application we will
+		// queue a permanent cookie that contains the encrypted copy of the acct
+		// identifier. We will then decrypt this later to retrieve the accts.
 		if ( $remember )
 		{
-			$this->createRememberTokenIfDoesntExist( $account );
+			$this->createRememberTokenIfDoesntExist( $acct );
 
-			$this->queueRecallerCookie( $account );
+			$this->queueRecallerCookie( $acct );
 		}
 
 		// If we have an event dispatcher instance set we will fire an event so that
 		// any listeners will hook into the authentication events and run actions
 		// based on the login and logout events fired from the guard instances.
-		$this->fireLoginEvent( $account, $remember );
+		$this->fireLoginEvent( $acct, $remember );
 
-		$this->setAccount( $account );
+		$this->setAcct( $acct );
 	}
 
 	/**
 	 * Fire the login event if the dispatcher is set.
 	 *
-	 * @param  Account $account
+	 * @param  Account $acct
 	 * @param  bool $remember
-	 * @return void
 	 */
-	protected function fireLoginEvent( $account, $remember = false )
+	protected function fireLoginEvent( $acct, $remember = false )
 	{
-		Framework::hooks()->trigger( 'acct.login', compact( 'account', 'remember' ) );
+		Hooks::trigger( 'acct.login', compact( 'acct', 'remember' ) );
 	}
 
 	/**
 	 * Update the session with the given ID.
 	 *
 	 * @param  string $id
-	 * @return void
 	 */
 	protected function updateSession( $id )
 	{
@@ -448,7 +451,7 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	}
 
 	/**
-	 * Log the given account ID into the application.
+	 * Log the given acct ID into the application.
 	 *
 	 * @param  mixed $id
 	 * @param  bool $remember
@@ -456,31 +459,31 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	 */
 	public function loginUsingId( $id, $remember = false )
 	{
-		$account = $this->auth->retrieveById( $id );
+		$acct = $this->auth->retrieveById( $id );
 
-		if ( !is_null( $account ) )
+		if ( !is_null( $acct ) )
 		{
-			$this->login( $account, $remember );
+			$this->login( $acct, $remember );
 
-			return $account;
+			return $acct;
 		}
 
 		return false;
 	}
 
 	/**
-	 * Log the given account ID into the application without sessions or cookies.
+	 * Log the given acct ID into the application without sessions or cookies.
 	 *
 	 * @param  mixed $id
 	 * @return bool
 	 */
 	public function onceUsingId( $id )
 	{
-		$account = $this->auth->retrieveById( $id );
+		$acct = $this->auth->retrieveById( $id );
 
-		if ( !is_null( $account ) )
+		if ( !is_null( $acct ) )
 		{
-			$this->setAccount( $account );
+			$this->setAcct( $acct );
 
 			return true;
 		}
@@ -491,12 +494,11 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	/**
 	 * Queue the recaller cookie into the cookie jar.
 	 *
-	 * @param  Account $account
-	 * @return void
+	 * @param  Account $acct
 	 */
-	protected function queueRecallerCookie( Account $account )
+	protected function queueRecallerCookie( Account $acct )
 	{
-		$value = $account->getId() . '|' . $account->getRememberToken();
+		$value = $acct->getId() . '|' . $acct->getRememberToken();
 
 		$this->getCookieJar()->queue( $this->createRecaller( $value ) );
 	}
@@ -513,69 +515,65 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	}
 
 	/**
-	 * Log the account out of the application.
+	 * Log the acct out of the application.
 	 *
-	 * @return void
 	 */
 	public function logout()
 	{
-		$account = $this->acct();
+		$acct = $this->acct();
 
-		$this->clearAccountDataFromStorage();
+		// If we have an event dispatcher instance, we can fire off the logout event
+		// so any further processing can be done. This allows the developer to be
+		// listening for anytime a acct signs out of this application manually.
+		$this->clearAcctDataFromStorage();
 
 		if ( !is_null( $this->acct ) )
-			$this->refreshRememberToken( $account );
+			$this->refreshRememberToken( $acct );
 
-		Framework::hooks()->trigger( 'acct.logout', compact( 'account' ) );
+		Hooks::trigger( 'acct.logout', compact( 'acct' ) );
 
-		// Once we have fired the logout event we will clear the accounts out of memory
-		// so they are no longer available as the account is no longer considered as
+		// Once we have fired the logout event we will clear the accts out of memory
+		// so they are no longer available as the acct is no longer considered as
 		// being signed into this application and should not be available here.
 		$this->acct = null;
-
 		$this->loggedOut = true;
 	}
 
 	/**
-	 * Remove the account data from the session and cookies.
+	 * Remove the acct data from the session and cookies.
 	 *
-	 * @return void
 	 */
-	protected function clearAccountDataFromStorage()
+	protected function clearAcctDataFromStorage()
 	{
 		$this->session->remove( $this->getName() );
 
 		if ( !is_null( $this->getRecaller() ) )
 		{
 			$recaller = $this->getRecallerName();
-
 			$this->getCookieJar()->queue( $this->getCookieJar()->forget( $recaller ) );
 		}
 	}
 
 	/**
-	 * Refresh the "remember me" token for the account.
+	 * Refresh the "remember me" token for the acct.
 	 *
-	 * @param  Account $account
-	 * @return void
+	 * @param  Account $acct
 	 */
-	protected function refreshRememberToken( Account $account )
+	protected function refreshRememberToken( Account $acct )
 	{
-		$account->setRememberToken( $token = Str::random( 60 ) );
-
-		$this->auth->updateRememberToken( $account, $token );
+		$acct->setRememberToken( $token = Str::random( 60 ) );
+		$this->auth->updateRememberToken( $acct, $token );
 	}
 
 	/**
-	 * Create a new "remember me" token for the account if one doesn't already exist.
+	 * Create a new "remember me" token for the acct if one does not already exist.
 	 *
-	 * @param  Account $account
-	 * @return void
+	 * @param  Account $acct
 	 */
-	protected function createRememberTokenIfDoesntExist( Account $account )
+	protected function createRememberTokenIfDoesntExist( Account $acct )
 	{
-		if ( empty( $account->getRememberToken() ) )
-			$this->refreshRememberToken( $account );
+		if ( empty( $acct->getRememberToken() ) )
+			$this->refreshRememberToken( $acct );
 	}
 
 	/**
@@ -588,7 +586,7 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	public function getCookieJar()
 	{
 		if ( !isset( $this->cookie ) )
-			throw new \RuntimeException( 'Cookie jar has not been set.' );
+			throw new RuntimeException( 'Cookie jar has not been set.' );
 
 		return $this->cookie;
 	}
@@ -597,7 +595,6 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	 * Set the cookie creator instance used by the guard.
 	 *
 	 * @param  CookieJar $cookie
-	 * @return void
 	 */
 	public function setCookieJar( CookieJar $cookie )
 	{
@@ -615,12 +612,22 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	}
 
 	/**
-	 * Set the current account
+	 * Return the currently cached acct.
 	 *
-	 * @param Account $acct
+	 * @return Account|null
+	 */
+	public function getAcct()
+	{
+		return $this->acct;
+	}
+
+	/**
+	 * Set the current acct.
+	 *
+	 * @param  Account $acct
 	 * @return $this
 	 */
-	public function setAccount( $acct )
+	public function setAcct( Account $acct )
 	{
 		$this->acct = $acct;
 		$this->loggedOut = false;
@@ -635,11 +642,24 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	 */
 	public function getRequest()
 	{
-		return $this->request;
+		return $this->request ?: Request::createFromGlobals();
 	}
 
 	/**
-	 * Get the last account we attempted to authenticate.
+	 * Set the current request instance.
+	 *
+	 * @param  Request $request
+	 * @return $this
+	 */
+	public function setRequest( Request $request )
+	{
+		$this->request = $request;
+
+		return $this;
+	}
+
+	/**
+	 * Get the last acct we attempted to authenticate.
 	 *
 	 * @return Account
 	 */
@@ -655,7 +675,7 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	 */
 	public function getName()
 	{
-		return 'login_session_' . sha1( static::class );
+		return 'login_' . $this->name . '_' . sha1( static::class );
 	}
 
 	/**
@@ -665,16 +685,26 @@ class SessionDriver extends AccountDriver implements StatefulDriver, SupportsBas
 	 */
 	public function getRecallerName()
 	{
-		return 'remember_session_' . sha1( static::class );
+		return 'remember_' . $this->name . '_' . sha1( static::class );
 	}
 
 	/**
-	 * Determine if the account was authenticated via "remember me" cookie.
+	 * Determine if the acct was authenticated via "remember me" cookie.
 	 *
 	 * @return bool
 	 */
 	public function viaRemember()
 	{
 		return $this->viaRemember;
+	}
+
+	/**
+	 * Get the default Guard Name
+	 *
+	 * @return string
+	 */
+	public function name()
+	{
+		return 'session';
 	}
 }

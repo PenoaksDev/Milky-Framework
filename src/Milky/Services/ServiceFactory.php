@@ -20,7 +20,7 @@ abstract class ServiceFactory
 	private static $managers = [];
 
 	/**
-	 * @return $this
+	 * @return mixed
 	 */
 	public static function i()
 	{
@@ -52,6 +52,7 @@ abstract class ServiceFactory
 			throw new ServiceException( "The service factory [" . static::class . "] must have a zero parameter constructor or implement 'public static build()'." );
 
 		self::$managers[static::class] = $i;
+
 		return $i;
 	}
 

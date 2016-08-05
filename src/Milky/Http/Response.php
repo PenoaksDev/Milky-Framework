@@ -3,7 +3,7 @@
 use ArrayObject;
 use Exception;
 use JsonSerializable;
-use Milky\Exceptions\HttpResponseException;
+use Milky\Exceptions\Http\HttpResponseException;
 use Milky\Impl\Jsonable;
 use Milky\Impl\Renderable;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -155,9 +155,7 @@ class Response extends BaseResponse
 	public function withHeaders( array $headers )
 	{
 		foreach ( $headers as $key => $value )
-		{
 			$this->headers->set( $key, $value );
-		}
 
 		return $this;
 	}
@@ -165,27 +163,11 @@ class Response extends BaseResponse
 	/**
 	 * Add a cookie to the response.
 	 *
-	 * @param  Cookie|mixed $cookie
+	 * @param  Cookie $cookie
 	 * @return $this
 	 */
-	public function cookie( $cookie )
+	public function withCookie( Cookie $cookie )
 	{
-		return call_user_func_array( [$this, 'withCookie'], func_get_args() );
-	}
-
-	/**
-	 * Add a cookie to the response.
-	 *
-	 * @param  Cookie|mixed $cookie
-	 * @return $this
-	 */
-	public function withCookie( $cookie )
-	{
-		if ( is_string( $cookie ) && function_exists( 'cookie' ) )
-		{
-			$cookie = call_user_func_array( 'cookie', func_get_args() );
-		}
-
 		$this->headers->setCookie( $cookie );
 
 		return $this;

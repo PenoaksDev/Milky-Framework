@@ -1,6 +1,8 @@
 <?php namespace Milky\Facades;
 
 use Milky\Binding\BindingBuilder;
+use Milky\Binding\UniversalBuilder;
+use Milky\Exceptions\FrameworkException;
 use Milky\Framework;
 
 /**
@@ -71,11 +73,14 @@ abstract class BaseFacade
 	{
 		$resolver = $this->resolver;
 		if ( is_string( $resolver ) )
-			$this->scaffold = Framework::fw()->$resolver;
+			$this->scaffold = UniversalBuilder::resolve( $resolver ); // Framework::fw()->$resolver;
 		else if ( is_callable( $resolver ) )
 			$this->scaffold = call_user_func( $resolver, $this );
 		else
 			$this->scaffold = $resolver;
+
+		if ( is_null( $this->scaffold ) )
+			throw new FrameworkException( "We failed to resolve the scaffolding for facade [" . static::class . "]" );
 	}
 
 	protected abstract function __getResolver();

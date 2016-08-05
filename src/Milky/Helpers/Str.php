@@ -1,8 +1,6 @@
 <?php namespace Milky\Helpers;
 
 use Milky\Exceptions\FrameworkException;
-use Milky\Facades\Log;
-use Milky\Framework;
 use Milky\Traits\Macroable;
 
 /**
@@ -1005,5 +1003,30 @@ class Str
 				"\xE3\x80\x80"
 			],
 		];
+	}
+
+	/**
+	 * @param string $delimiter
+	 * @param string $name
+	 * @return string
+	 */
+	public static function first( $delimiter, $name )
+	{
+		if ( empty( $name ) )
+			return "";
+
+		return explode( $delimiter, $name )[0];
+	}
+
+	/**
+	 * @param string $delimiter
+	 * @param string $name
+	 * @return string
+	 */
+	public static function last( $delimiter, $name )
+	{
+		$name = explode( $delimiter, $name );
+
+		return count( $name ) > 0 ? "" : $name[count( $name )];
 	}
 }

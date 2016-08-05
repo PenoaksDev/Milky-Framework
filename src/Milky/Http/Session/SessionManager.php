@@ -2,6 +2,7 @@
 
 use Carbon\Carbon;
 use Closure;
+use Milky\Binding\UniversalBuilder;
 use Milky\Cache\CacheManager;
 use Milky\Cache\RedisStore;
 use Milky\Database\Connection;
@@ -12,15 +13,13 @@ use Milky\Facades\Config;
 use Milky\Filesystem\Filesystem;
 use Milky\Http\Cookies\CookieJar;
 use Milky\Http\Request;
-use Milky\Http\Response;
-use Milky\Http\Session\Drivers\SessionDriver;
 use Milky\Http\Session\Handlers\CacheBasedSessionHandler;
 use Milky\Http\Session\Handlers\CookieSessionHandler;
 use Milky\Http\Session\Handlers\DatabaseSessionHandler;
 use Milky\Http\Session\Handlers\FileSessionHandler;
-use Milky\Services\ServiceFactory;
 use SessionHandlerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NullSessionHandler;
 
 /**
@@ -31,12 +30,14 @@ use Symfony\Component\HttpFoundation\Session\Storage\Handler\NullSessionHandler;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class SessionManager extends ServiceFactory
+class SessionManager
 {
+	private $configPrefix = 'session';
+
 	/**
 	 * The currently active session drivers
 	 *
-	 * @var SessionDriver[]
+	 * @var Store[]
 	 */
 	protected $drivers = [];
 
@@ -46,6 +47,14 @@ class SessionManager extends ServiceFactory
 	 * @var bool
 	 */
 	protected $sessionHandled = false;
+
+	/**
+	 * @return SessionManager
+	 */
+	public static function i()
+	{
+		return UniversalBuilder::resolve( static::class );
+	}
 
 	/**
 	 * Handle an incoming request.
@@ -120,7 +129,7 @@ class SessionManager extends ServiceFactory
 	 */
 	protected function getDatabaseConnection()
 	{
-		return DatabaseManager::i()->connection( $this->getConfig( 'connection' ) );
+		return DatabaseManager::i()->connection( Config::get( $this->configPrefix . '.connection' ) );
 	}
 
 
@@ -155,24 +164,22 @@ class SessionManager extends ServiceFactory
 	 */
 	protected function collectGarbage( SessionInterface $session )
 	{
-		$config = $this->getConfig();
-
 		// Here we will see if this request hits the garbage collection lottery by hitting
 		// the odds needed to perform garbage collection on any given request. If we do
 		// hit it, we'll call this handler to let it delete all the expired sessions.
-		if ( $this->configHitsLottery( $config ) )
+		if ( $this->configHitsLottery() )
 			$session->getHandler()->gc( $this->getSessionLifetimeInSeconds() );
 	}
 
 	/**
 	 * Determine if the configuration odds hit the lottery.
 	 *
-	 * @param  array $config
 	 * @return bool
 	 */
-	protected function configHitsLottery( array $config )
+	protected function configHitsLottery()
 	{
-		return random_int( 1, $config['lottery'][1] ) <= $config['lottery'][0];
+		$config = Config::get( $this->configPrefix . '.lottery' );
+		return random_int( 1, $config[1] ) <= $config[0];
 	}
 
 	/**
@@ -187,7 +194,7 @@ class SessionManager extends ServiceFactory
 			$this->driver()->save();
 
 		if ( $this->sessionIsPersistent() )
-			$response->headers->setCookie( new Cookie( $session->getName(), $session->getId(), $this->getCookieExpirationDate(), $this->getConfig( 'path' ), $this->getConfig( 'domain' ), $this->getConfig( 'secure', false ), $this->getConfig( 'http_only', true ) ) );
+			$response->headers->setCookie( new Cookie( $session->getName(), $session->getId(), $this->getCookieExpirationDate(), Config::get( $this->configPrefix . '.path' ), Config::get( $this->configPrefix . '.domain' ), Config::get( $this->configPrefix . '.secure', false ), Config::get( $this->configPrefix . '.http_only', true ) ) );
 	}
 
 	/**
@@ -197,17 +204,17 @@ class SessionManager extends ServiceFactory
 	 */
 	protected function getSessionLifetimeInSeconds()
 	{
-		return $this->getConfig( 'lifetime' ) * 60;
+		return Config::get( $this->configPrefix . '.lifetime' ) * 60;
 	}
 
 	/**
 	 * Get the cookie lifetime in seconds.
 	 *
-	 * @return int
+	 * @return int|Carbon
 	 */
 	protected function getCookieExpirationDate()
 	{
-		return $this->getConfig( 'expire_on_close' ) ? 0 : (int) Carbon::now()->addMinutes( $this->getConfig( 'lifetime' ) );
+		return Config::get( $this->configPrefix . '.expire_on_close' ) ? 0 : Carbon::now()->addMinutes( Config::get( $this->configPrefix . '.lifetime' ) );
 	}
 
 	/**
@@ -217,7 +224,7 @@ class SessionManager extends ServiceFactory
 	 */
 	protected function sessionConfigured()
 	{
-		return array_key_exists( 'driver', $this->getConfig() );
+		return Config::has( 'session.driver' );
 	}
 
 	/**
@@ -253,7 +260,7 @@ class SessionManager extends ServiceFactory
 	 * Get a driver instance.
 	 *
 	 * @param string $driver
-	 * @return SessionInterface
+	 * @return Store
 	 */
 	public function driver( $driver = null )
 	{
@@ -270,7 +277,7 @@ class SessionManager extends ServiceFactory
 
 	/**
 	 * @param string $driver
-	 * @return SessionInterface
+	 * @return Store
 	 */
 	private function createDriver( $driver )
 	{
@@ -285,19 +292,19 @@ class SessionManager extends ServiceFactory
 				$handler = $this->createCacheHandler( 'redis' );
 				if ( !$handler->getCache()->getStore() instanceof RedisStore )
 					throw new FrameworkException( "You must use the [" . RedisStore::class . "] cache store to use the redis session driver." );
-				$handler->getCache()->getStore()->setConnection( $this->getConfig( 'connection' ) );
+				$handler->getCache()->getStore()->setConnection( Config::get( $this->configPrefix . '.connection' ) );
 
 				return $this->buildSession( $handler );
 			}
 			case 'array':
 				return $this->buildSession( new NullSessionHandler );
 			case 'cookie':
-				return $this->buildSession( new CookieSessionHandler( CookieJar::i(), $this->getConfig( 'lifetime' ) ) );
+				return $this->buildSession( new CookieSessionHandler( CookieJar::i(), Config::get( $this->configPrefix . '.lifetime' ) ) );
 			case 'file':
 			case 'native':
-				return $this->buildSession( new FileSessionHandler( Filesystem::i(), $this->getConfig( 'files' ), $this->getConfig( 'lifetime' ) ) );
+				return $this->buildSession( new FileSessionHandler( Filesystem::i(), Config::get( $this->configPrefix . '.files' ), Config::get( $this->configPrefix . '.lifetime' ) ) );
 			case 'database':
-				return $this->buildSession( new DatabaseSessionHandler( $this->getDatabaseConnection(), $this->getConfig( 'table' ), $this->getConfig( 'lifetime' ) ) );
+				return $this->buildSession( new DatabaseSessionHandler( $this->getDatabaseConnection(), Config::get( $this->configPrefix . '.table' ), Config::get( $this->configPrefix . '.lifetime' ) ) );
 			default:
 				throw new \InvalidArgumentException( "Driver [$driver] not supported." );
 		}
@@ -311,7 +318,7 @@ class SessionManager extends ServiceFactory
 	 */
 	protected function createCacheHandler( $driver )
 	{
-		return new CacheBasedSessionHandler( clone CacheManager::i()->driver( $driver ), $this->getConfig( 'lifetime' ) );
+		return new CacheBasedSessionHandler( clone CacheManager::i()->driver( $driver ), Config::get( $this->configPrefix . '.lifetime' ) );
 	}
 
 	/**
@@ -322,10 +329,10 @@ class SessionManager extends ServiceFactory
 	 */
 	protected function buildSession( $handler )
 	{
-		if ( $this->getConfig( 'encrypt' ) )
-			return new EncryptedStore( $this->getConfig( 'cookie' ), $handler, Encrypter::i() );
+		if ( Config::get( $this->configPrefix . '.encrypt' ) )
+			return new EncryptedStore( Config::get( $this->configPrefix . '.cookie' ), $handler, Encrypter::i() );
 		else
-			return new Store( $this->getConfig( 'cookie' ), $handler );
+			return new Store( Config::get( $this->configPrefix . '.cookie' ), $handler );
 	}
 
 	/**
@@ -346,17 +353,6 @@ class SessionManager extends ServiceFactory
 	public function setDefaultDriver( $name )
 	{
 		Config::set( 'session.driver', $name );;
-	}
-
-	/**
-	 * Get configuration value
-	 *
-	 * @param null $key
-	 * @return mixed
-	 */
-	public function getConfig( $key = null, $def = null )
-	{
-		return Config::get( 'session' . ( $key ? '.' . $key : '' ), $key ? $def : null );
 	}
 
 	/**

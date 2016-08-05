@@ -55,7 +55,7 @@ class EloquentAuth implements AccountAuth
 	 */
 	public function retrieveById( $identifier )
 	{
-		return new EloquentAccount( $this->createModel()->newQuery()->find( $identifier ) );
+		return new EloquentAccount( $this->createUsrModel()->newQuery()->find( $identifier ) );
 	}
 
 	/**
@@ -67,7 +67,7 @@ class EloquentAuth implements AccountAuth
 	 */
 	public function retrieveByToken( $identifier, $token )
 	{
-		$model = $this->createModel();
+		$model = $this->createUsrModel();
 
 		return new EloquentAccount( $model->newQuery()->where( 'id', $identifier )->where( 'remember_token', $token )->first() );
 	}
@@ -99,13 +99,15 @@ class EloquentAuth implements AccountAuth
 		// First we will add each credential element to the query as a where clause.
 		// Then we can execute the query and, if we found a user, return it in a
 		// Eloquent User "model" that will be utilized by the Guard instances.
-		$query = $this->createModel()->newQuery();
+		$query = $this->createUsrModel()->newQuery();
 
 		foreach ( $credentials as $key => $value )
 			if ( !Str::contains( $key, 'password' ) )
 				$query->where( $key, $value );
 
-		return new EloquentAccount( $query->first() );
+		$result = $query->first();
+
+		return is_null( $result ) ? null : new EloquentAccount( $query->first() );
 	}
 
 	/**
@@ -123,13 +125,25 @@ class EloquentAuth implements AccountAuth
 	}
 
 	/**
-	 * Create a new instance of the model.
+	 * Create a new instance of the user model
 	 *
 	 * @return Model
 	 */
-	public function createModel()
+	public function createUsrModel()
 	{
-		$class = '\\' . ltrim( $this->model, '\\' );
+		$class = '\\' . ltrim( $this->usrModel, '\\' );
+
+		return new $class;
+	}
+
+	/**
+	 * Create a new instance of the group model
+	 *
+	 * @return Model
+	 */
+	public function createGrpModel()
+	{
+		$class = '\\' . ltrim( $this->grpModel, '\\' );
 
 		return new $class;
 	}
@@ -162,9 +176,9 @@ class EloquentAuth implements AccountAuth
 	 *
 	 * @return string
 	 */
-	public function getModel()
+	public function getUsrModel()
 	{
-		return $this->model;
+		return $this->usrModel;
 	}
 
 	/**
@@ -173,9 +187,32 @@ class EloquentAuth implements AccountAuth
 	 * @param  string $model
 	 * @return $this
 	 */
-	public function setModel( $model )
+	public function setUsrModel( $usrModel )
 	{
-		$this->model = $model;
+		$this->usrModel = $usrModel;
+
+		return $this;
+	}
+
+	/**
+	 * Gets the name of the Eloquent group model.
+	 *
+	 * @return string
+	 */
+	public function getGrpModel()
+	{
+		return $this->grpModel;
+	}
+
+	/**
+	 * Sets the name of the Eloquent group model.
+	 *
+	 * @param  string $model
+	 * @return $this
+	 */
+	public function setGrpModel( $grpModel )
+	{
+		$this->grpModel = $grpModel;
 
 		return $this;
 	}

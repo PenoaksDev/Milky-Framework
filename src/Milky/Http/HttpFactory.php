@@ -1,19 +1,17 @@
 <?php namespace Milky\Http;
 
 use Milky\Binding\UniversalBuilder;
+use Milky\Exceptions\Handler;
 use Milky\Facades\Hooks;
 use Milky\Framework;
-use Milky\Http\Cookies\CookieJar;
 use Milky\Http\Middleware\EncryptCookies;
 use Milky\Http\Routing\Redirector;
-use Milky\Http\Routing\ResponseFactory;
 use Milky\Http\Routing\Router;
 use Milky\Http\Routing\UrlGenerator;
 use Milky\Http\Session\SessionManager;
+use Milky\Http\View\Middleware\ShareErrorsFromSession;
+use Milky\Impl\Extendable;
 use Milky\Pipeline\Pipeline;
-use Milky\Services\ServiceFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
-use Zend\Diactoros\Response as PsrResponse;
 
 /**
  * The MIT License (MIT)
@@ -23,8 +21,10 @@ use Zend\Diactoros\Response as PsrResponse;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class HttpFactory extends ServiceFactory
+class HttpFactory
 {
+	use Extendable;
+
 	/**
 	 * @var Framework
 	 */
@@ -34,11 +34,6 @@ class HttpFactory extends ServiceFactory
 	 * @var Router
 	 */
 	private $router;
-
-	/**
-	 * @var CookieJar
-	 */
-	private $cookies;
 
 	/**
 	 * @var Request
@@ -72,37 +67,38 @@ class HttpFactory extends ServiceFactory
 	 */
 	private $disableMiddleware = false;
 
+	/**
+	 * @param bool $bool
+	 */
 	public function disableMiddleware( $bool = true )
 	{
 		$this->disableMiddleware = $bool;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function isMiddlewareDisabled()
 	{
 		return $this->disableMiddleware;
 	}
 
-	public static function build()
+	/**
+	 * @return HttpFactory
+	 */
+	public static function i()
 	{
-		return Framework::fw()->newHttpFactory();
+		return UniversalBuilder::resolve( 'http.factory' );
 	}
 
 	public function __construct( Framework $fw, Request $request = null )
 	{
-		parent::__construct();
-
 		Hooks::trigger( 'http.factory.create', ['factory' => $this] );
 
-		if ( !$request )
-			$request = Request::capture();
-
-		$this->request = $request;
-		Framework::set( 'http.request', $request );
+		$this->request = $request ?: $request = Request::capture();
+		$this->request->setSession( SessionManager::i()->driver() );
 
 		$this->fw = $fw;
-
-		$config = $fw->config['config']['session'];
-		$this->cookies = ( new CookieJar() )->setDefaultPathAndDomain( $config['path'], $config['domain'], $config['secure'] );
 
 		$r = new Router();
 
@@ -118,29 +114,14 @@ class HttpFactory extends ServiceFactory
 		$redirector = new Redirector( $url );
 		$redirector->setSession( SessionManager::i()->driver() );
 
-		Framework::set( 'router', function ()
-		{
-			return $this->router();
-		} );
-
-		Framework::set( 'url', function ()
-		{
-			return $this->url();
-		} );
-
 		$this->redirector = $redirector;
 		$this->router = $r;
 		$this->url = $url;
-
-		Framework::set( 'redirect', $redirector );
-
-		Framework::set( 'Psr\Http\Message\ServerRequestInterface', ( new DiactorosFactory() )->createRequest( $request ) );
-
-		Framework::set( 'Psr\Http\Message\ResponseInterface', new PsrResponse() );
-
-		new ResponseFactory( Framework::get( 'view.factory' ), $redirector ); // Init Response Factory
 	}
 
+	/**
+	 * @return Redirector
+	 */
 	public function redirector()
 	{
 		return $this->redirector;
@@ -169,33 +150,52 @@ class HttpFactory extends ServiceFactory
 		return $this->router;
 	}
 
-	public function cookieJar()
-	{
-		return $this->cookies;
-	}
-
 	public function routeRequest()
 	{
 		$this->addMiddleware( [
 			new EncryptCookies( Framework::get( 'encrypter' ) ),
 			SessionManager::i(),
+			ShareErrorsFromSession::class,
 		] );
 
 		$this->router->getRoutes()->refreshNameLookups();
 
-		$this->response = ( new Pipeline() )->withExceptionHandler( function ( $e, $request )
+		$this->response = ( new Pipeline() )->withExceptionHandler( function ( $request, $e )
 		{
-			$handler = UniversalBuilder::resolve( 'exceptions.handler' );
-
-			$handler->report( $e );
-
-			return $handler->render( $request, $e );
+			Handler::i()->handleException( $e, $request );
+			die();
 		} )->send( $this->request )->through( $this->middleware )->then( function ( $request )
 		{
 			return $this->router->dispatch( $request );
 		} );
 
 		return $this->response;
+	}
+
+	public function terminate( $request = null, $response = null )
+	{
+		$request = $request ?: $this->request;
+		$response = $response ?: $this->response;
+
+		$middlewares = $this->isMiddlewareDisabled() ? [] : array_merge( $this->gatherRouteMiddlewares( $request ), $this->middleware );
+
+		foreach ( $middlewares as $middleware )
+		{
+			if ( is_object( $middleware ) )
+				$instance = $middleware;
+			else
+			{
+				list( $name, $parameters ) = $this->parseMiddleware( $middleware );
+				$instance = UniversalBuilder::resolve( $name );
+			}
+
+			if ( method_exists( $instance, 'terminate' ) )
+				$instance->terminate( $request, $response );
+		}
+
+		Hooks::trigger( 'app.terminate' );
+
+		Framework::fw()->terminate();
 	}
 
 	/**
@@ -238,5 +238,35 @@ class HttpFactory extends ServiceFactory
 	public function addRouteMiddleware( $key, array $middleware )
 	{
 		$this->router->middleware( $key, $middleware );
+	}
+
+	/**
+	 * Gather the route middleware for the given request.
+	 *
+	 * @param  Request $request
+	 *
+	 * @return array
+	 */
+	protected function gatherRouteMiddlewares( Request $request )
+	{
+		if ( $route = $request->route() )
+			return $this->router()->gatherRouteMiddlewares( $route );
+	}
+
+	/**
+	 * Parse a middleware string to get the name and parameters.
+	 *
+	 * @param  string $middleware
+	 *
+	 * @return array
+	 */
+	protected function parseMiddleware( $middleware )
+	{
+		list( $name, $parameters ) = array_pad( explode( ':', $middleware, 2 ), 2, [] );
+
+		if ( is_string( $parameters ) )
+			$parameters = explode( ',', $parameters );
+
+		return [$name, $parameters];
 	}
 }

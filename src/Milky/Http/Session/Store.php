@@ -1,9 +1,9 @@
 <?php namespace Milky\Http\Session;
 
+use InvalidArgumentException;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use SessionHandlerInterface;
-use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionBagInterface;
 use Symfony\Component\HttpFoundation\Session\Storage\MetadataBag;
@@ -90,9 +90,7 @@ class Store implements SessionInterface
 		$this->loadSession();
 
 		if ( !$this->has( '_token' ) )
-		{
 			$this->regenerateToken();
-		}
 
 		return $this->started = true;
 	}
@@ -109,7 +107,6 @@ class Store implements SessionInterface
 		foreach ( array_merge( $this->bags, [$this->metaBag] ) as $bag )
 		{
 			$this->initializeLocalBag( $bag );
-
 			$bag->initialize( $this->bagData[$bag->getStorageKey()] );
 		}
 	}
@@ -172,9 +169,7 @@ class Store implements SessionInterface
 	public function setId( $id )
 	{
 		if ( !$this->isValidId( $id ) )
-		{
 			$id = $this->generateSessionId();
-		}
 
 		$this->id = $id;
 	}
@@ -187,7 +182,7 @@ class Store implements SessionInterface
 	 */
 	public function isValidId( $id )
 	{
-		return is_string( $id ) && preg_match( '/^[a-f0-9]{40$/', $id );
+		return is_string( $id ) && preg_match( '/^[a-f0-9]{40}$/', $id );
 	}
 
 	/**
@@ -299,8 +294,6 @@ class Store implements SessionInterface
 
 	/**
 	 * Age the flash data for the session.
-	 *
-	 * @return void
 	 */
 	public function ageFlashData()
 	{

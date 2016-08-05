@@ -138,11 +138,11 @@ trait ValidatesRequests
 	/**
 	 * Get a validation factory instance.
 	 *
-	 * @return Factory
+	 * @return ValidationFactory
 	 */
 	protected function getValidationFactory()
 	{
-		return UniversalBuilder::resolveClass( Factory::class );
+		return UniversalBuilder::resolveClass( ValidationFactory::class );
 	}
 
 	/**

@@ -144,10 +144,14 @@ if ( !function_exists( 'args_with_keys' ) )
 	 * @param $method
 	 * @param $args
 	 * @param bool $includeOptional
-	 * @return mixed
+	 *
+	 * @return array
 	 */
 	function args_with_keys( array $args, $class = null, $method = null, $includeOptional = false )
 	{
+		if ( count( $args ) == 0 )
+			return [];
+
 		if ( is_null( $class ) || is_null( $method ) )
 		{
 			$trace = debug_backtrace()[1];
@@ -779,20 +783,6 @@ if ( !function_exists( 'ends_with' ) )
 	}
 }
 
-if ( !function_exists( 'head' ) )
-{
-	/**
-	 * Get the first element of an array. Useful for method chaining.
-	 *
-	 * @param  array $array
-	 * @return mixed
-	 */
-	function head( $array )
-	{
-		return reset( $array );
-	}
-}
-
 if ( !function_exists( 'last' ) )
 {
 	/**
@@ -1274,27 +1264,6 @@ if ( !function_exists( 'asset' ) )
 	}
 }
 
-if ( !function_exists( 'auth' ) )
-{
-	/**
-	 * Get the available auth instance.
-	 *
-	 * @param  string|null $guard
-	 * @return \Milky\Auth\AuthManager
-	 */
-	function auth( $guard = null )
-	{
-		if ( is_null( $guard ) )
-		{
-			return Framework::get( 'auth.mgr' );
-		}
-		else
-		{
-			return Framework::get( 'auth.mgr' )->guard( $guard );
-		}
-	}
-}
-
 if ( !function_exists( 'back' ) )
 {
 	/**
@@ -1350,65 +1319,6 @@ if ( !function_exists( 'config_path' ) )
 	function config_path( $path = null )
 	{
 		return fw()->buildPath( '__config', $path );
-	}
-}
-
-if ( !function_exists( 'cookie' ) )
-{
-	/**
-	 * Create a new cookie instance.
-	 *
-	 * @param  string $name
-	 * @param  string $value
-	 * @param  int $minutes
-	 * @param  string $path
-	 * @param  string $domain
-	 * @param  bool $secure
-	 * @param  bool $httpOnly
-	 * @return Cookie
-	 */
-	function cookie( $name = null, $value = null, $minutes = 0, $path = null, $domain = null, $secure = false, $httpOnly = true )
-	{
-		$cookie = Framework::get( 'http.factory' )->cookies;
-		if ( is_null( $name ) )
-			return $cookie;
-
-		return $cookie->make( $name, $value, $minutes, $path, $domain, $secure, $httpOnly );
-	}
-}
-
-if ( !function_exists( 'csrf_field' ) )
-{
-	/**
-	 * Generate a CSRF token form field.
-	 *
-	 * @return HtmlString
-	 */
-	function csrf_field()
-	{
-		return new HtmlString( '<input type="hidden" name="_token" value="' . csrf_token() . '">' );
-	}
-}
-
-if ( !function_exists( 'csrf_token' ) )
-{
-	/**
-	 * Get the CSRF token value.
-	 *
-	 * @return string
-	 *
-	 * @throws \RuntimeException
-	 */
-	function csrf_token()
-	{
-		$session = Framework::get( 'session' );
-
-		if ( isset( $session ) )
-		{
-			return $session->getToken();
-		}
-
-		throw new RuntimeException( 'Application session store not set.' );
 	}
 }
 
@@ -1618,21 +1528,6 @@ if ( !function_exists( 'method_field' ) )
 	}
 }
 
-if ( !function_exists( 'old' ) )
-{
-	/**
-	 * Retrieve an old input item.
-	 *
-	 * @param  string $key
-	 * @param  mixed $default
-	 * @return mixed
-	 */
-	function old( $key = null, $default = null )
-	{
-		return Framework::get( 'request' )->old( $key, $default );
-	}
-}
-
 if ( !function_exists( 'policy' ) )
 {
 	/**
@@ -1660,26 +1555,6 @@ if ( !function_exists( 'public_path' ) )
 	function public_path( $path = null )
 	{
 		return fw()->buildPath( $path, 'public' );
-	}
-}
-
-if ( !function_exists( 'redirect' ) )
-{
-	/**
-	 * Get an instance of the redirector.
-	 *
-	 * @param  string|null $to
-	 * @param  int $status
-	 * @param  array $headers
-	 * @param  bool $secure
-	 * @return Redirector|RedirectResponse
-	 */
-	function redirect( $to = null, $status = 302, $headers = [], $secure = null )
-	{
-		if ( is_null( $to ) )
-			return \Milky\Http\Factory::i()->redirector();
-
-		return \Milky\Http\Factory::i()->redirector()->to( $to, $status, $headers, $secure );
 	}
 }
 
@@ -1712,22 +1587,6 @@ if ( !function_exists( 'resource_path' ) )
 	function resource_path( $path = null )
 	{
 		return fw()->buildPath( $path, 'storage' );
-	}
-}
-
-if ( !function_exists( 'route' ) )
-{
-	/**
-	 * Generate a URL to a named route.
-	 *
-	 * @param  string $name
-	 * @param  array $parameters
-	 * @param  bool $absolute
-	 * @return string
-	 */
-	function route( $name, $parameters = [], $absolute = true )
-	{
-		return Framework::get( 'url' )->route( $name, $parameters, $absolute );
 	}
 }
 

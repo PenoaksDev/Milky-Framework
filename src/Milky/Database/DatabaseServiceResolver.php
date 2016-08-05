@@ -9,6 +9,7 @@ use Milky\Database\Eloquent\Nested\Generators\ModelGenerator;
 use Milky\Database\Eloquent\Model;
 use Milky\Database\Eloquent\Nested\Console\MakeNestedCommand;
 use Milky\Filesystem\Filesystem;
+use Milky\Helpers\Func;
 
 /**
  * The MIT License (MIT)
@@ -20,32 +21,47 @@ use Milky\Filesystem\Filesystem;
  */
 class DatabaseServiceResolver extends ServiceResolver
 {
-	protected $mgr;
+	/**
+	 * @var DatabaseManager
+	 */
+	protected $mgrInstance;
 
 	public function __construct()
 	{
-		$this->mgr = new DatabaseManager( new ConnectionFactory() );
-
 		// TODO THIS! -- Framework::set( 'seeder', BindingBuilder::resolveBinding( Seeder::class ) );
 
-		Model::clearBootedModels();
-		Model::setConnectionResolver( $this->mgr );
+		$this->addClassAlias( DatabaseManager::class, 'mgr' );
+		$this->setDefault( 'mgr' );
+	}
 
-		$this->addClassAlias( DatabaseManager::class, 'db.mgr' );
+	/**
+	 * @return DatabaseManager
+	 */
+	public function mgr()
+	{
+		if ( is_null( $this->mgrInstance ) )
+		{
+			$this->mgrInstance = new DatabaseManager( new ConnectionFactory() );
 
-		$command = UniversalBuilder::getResolver( 'command' );
-		$command->seed = new SeedCommand( $this->mgr );
-		$command->makeNested = new MakeNestedCommand( new MigrationGenerator( Filesystem::i() ), new ModelGenerator( Filesystem::i() ) );
+			Model::clearBootedModels();
+			Model::setConnectionResolver( $this->mgrInstance );
+
+			$command = UniversalBuilder::getResolver( 'command' );
+			$command->seed = new SeedCommand( $this->mgrInstance );
+			$command->makeNested = new MakeNestedCommand( new MigrationGenerator( Filesystem::i() ), new ModelGenerator( Filesystem::i() ) );
+		}
+
+		return $this->mgrInstance;
 	}
 
 	public function factory()
 	{
-		return $this->mgr->factory();
+		return $this->mgr()->factory();
 	}
 
 	public function connection()
 	{
-		return $this->mgr->connection();
+		return $this->mgr()->connection();
 	}
 
 	public function key()

@@ -3,11 +3,12 @@
 use Closure;
 use Milky\Database\DatabaseManager;
 use Milky\Helpers\Str;
+use Milky\Impl\Extendable;
 use Milky\Services\ServiceFactory;
 use Milky\Translation\Translator;
 use Symfony\Component\Translation\TranslatorInterface;
 
-class Factory extends ServiceFactory
+class ValidationFactory
 {
 	/**
 	 * The Translator implementation.
@@ -58,18 +59,6 @@ class Factory extends ServiceFactory
 	 */
 	protected $resolver;
 
-	public static function build()
-	{
-		$validator = new Factory( Translator::i() );
-
-		// The validation presence verifier is responsible for determining the existence
-		// of values in a given data collection, typically a relational database or
-		// other persistent data stores. And it is used to check for uniqueness.
-		$validator->setPresenceVerifier( new DatabasePresenceVerifier( DatabaseManager::i() ) );
-
-		return $validator;
-	}
-
 	/**
 	 * Create a new Validator factory instance.
 	 *
@@ -79,8 +68,6 @@ class Factory extends ServiceFactory
 	 */
 	public function __construct( TranslatorInterface $translator )
 	{
-		parent::__construct();
-
 		$this->translator = $translator;
 	}
 
@@ -144,9 +131,7 @@ class Factory extends ServiceFactory
 	protected function resolve( array $data, array $rules, array $messages, array $customAttributes )
 	{
 		if ( is_null( $this->resolver ) )
-		{
 			return new Validator( $this->translator, $data, $rules, $messages, $customAttributes );
-		}
 
 		return call_user_func( $this->resolver, $this->translator, $data, $rules, $messages, $customAttributes );
 	}

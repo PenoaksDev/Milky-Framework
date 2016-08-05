@@ -3,16 +3,20 @@
 use Milky\Account\Auths\AccountAuth;
 use Milky\Account\Auths\DatabaseAuth;
 use Milky\Account\Auths\EloquentAuth;
-use Milky\Account\Drivers\AccountDriver;
-use Milky\Account\Drivers\SessionDriver;
-use Milky\Account\Drivers\TokenDriver;
+use Milky\Account\Guards\Guard;
+use Milky\Account\Guards\RequestGuard;
+use Milky\Account\Guards\SessionGuard;
+use Milky\Account\Guards\StatefulGuard;
+use Milky\Account\Guards\TokenGuard;
 use Milky\Account\Types\EloquentAccount;
 use Milky\Binding\UniversalBuilder;
-use Milky\Framework;
+use Milky\Exceptions\Auth\AccountException;
+use Milky\Facades\Config;
 use Milky\Helpers\Func;
-use Milky\Http\HttpFactory;
+use Milky\Http\Cookies\CookieJar;
+use Milky\Http\Request;
 use Milky\Http\Session\SessionManager;
-use Milky\Services\ServiceFactory;
+use Milky\Impl\Extendable;
 
 /**
  * The MIT License (MIT)
@@ -22,102 +26,148 @@ use Milky\Services\ServiceFactory;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class AccountManager extends ServiceFactory
+class AccountManager
 {
-	/**
-	 * The Account auth handler
-	 *
-	 * @var AccountAuth
-	 */
-	private $auth;
+	use Extendable;
 
 	/**
-	 * The Account storage driver
-	 *
-	 * @var AccountDriver
+	 * @var Guard[]
 	 */
-	private $driver;
+	private $guards = [];
 
 	/**
-	 * AccountManager constructor.
-	 *
-	 * @param AccountAuth $auth
-	 * @param string $driver
+	 * @return AccountManager
 	 */
-	public function __construct( $auth = null, $driver = null )
+	public static function i()
 	{
-		parent::__construct();
-
-		if ( is_null( $auth ) || is_string( $auth ) )
-			$this->resolveAuth( $auth ?: $this->getDefaultAuth() );
-		else
-			$this->auth = $auth;
-
-		if ( is_null( $driver ) || is_string( $driver ) )
-			$this->resolveDriver( $driver ?: $this->getDefaultDriver() );
-		else
-			$this->driver = $driver;
-	}
-
-	protected function resolveAuth( $auth )
-	{
-		$config = Framework::config()->get( 'acct.auths.' . $auth );
-
-		switch ( $auth )
-		{
-			case 'database':
-			{
-				$this->auth = new DatabaseAuth( $config['table'] );
-				break;
-			}
-			case 'eloquent':
-			{
-				$this->auth = new EloquentAuth( $config['usrModel'], $config['grpModel'] );
-				EloquentAccount::setConfig( $config );
-				break;
-			}
-			default:
-				throw new \InvalidArgumentException( "Account authentication [{$auth}] is not defined." );
-		}
+		return UniversalBuilder::resolve( 'account.mgr' );
 	}
 
 	/**
-	 * @param string $class
+	 * Attempt to get the guard from the local cache.
+	 *
+	 * @param string $name
+	 * @return Guard|StatefulGuard
 	 */
-	protected function resolveDriver( $class )
+	public function guard( $name = null )
 	{
-		$driver = null;
-		switch ( strtolower( $class ) )
+		$name = $name ?: $this->getDefaultGuard();
+
+		return array_key_exists( $name, $this->guards ) ? $this->guards[$name] : $this->guards[$name] = $this->resolveGuard( $name );
+	}
+
+	/**
+	 * Resolve the implemented Account Guard
+	 *
+	 * @param string $name
+	 */
+	protected function resolveGuard( $name )
+	{
+		$config = Config::get( 'auth.guards.' . $name );
+
+		if ( is_null( $config ) )
+			throw new AccountException( "Auth guard [" . $name . "] is not defined in the configuration" );
+
+		$uses = $config['uses'];
+		$auth = $this->resolveAuth( $config['auth'] ?: $this->getDefaultAuth() );
+
+		$guard = null;
+		switch ( $uses )
 		{
 			case 'session':
 			{
-				$driver = new SessionDriver( $this->auth, SessionManager::i()->driver(), HttpFactory::i()->request() );
+				$guard = new SessionGuard( $name, $auth, SessionManager::i()->driver(), Request::i(), CookieJar::i() );
 				break;
 			}
 			case 'token':
 			{
-				$driver = new TokenDriver( $this->auth, HttpFactory::i()->request() );
+				$guard = new TokenGuard( $auth, Request::i() );
 				break;
 			}
 			default:
 			{
-				$driver = UniversalBuilder::resolveClass( $class );
-				if ( !is_subclass_of( $driver, AccountDriver::class ) )
-					throw new \InvalidArgumentException( "The account driver [" . $class . "] must extend the AccountDriver class" );
+				$guard = UniversalBuilder::resolve( $uses );
+
+				if ( is_null( $guard ) )
+					throw new AccountException( "We could not resolve the guard [" . $uses . "]" );
+
+				if ( !is_subclass_of( $guard, Guard::class ) )
+					throw new \InvalidArgumentException( "The guard [" . $uses . "] must extend the [" . Guard::class . "] class" );
 			}
 		}
 
-		$this->driver = $driver;
+		return $guard;
+	}
+
+	/**
+	 * Resolve the implemented Account Auth
+	 *
+	 * @param string $auth
+	 * @return AccountAuth
+	 */
+	protected function resolveAuth( $auth )
+	{
+		$config = Config::get( 'auth.auths.' . $auth );
+
+		$uses = $config['uses'];
+
+		switch ( $uses )
+		{
+			case 'database':
+			{
+				$auth = new DatabaseAuth( $config['table'] );
+				break;
+			}
+			case 'eloquent':
+			{
+				$auth = new EloquentAuth( $config['usrModel'], $config['grpModel'] );
+				EloquentAccount::setConfig( $config );
+				break;
+			}
+			default:
+			{
+				$auth = UniversalBuilder::resolve( $uses );
+
+				if ( is_null( $auth ) )
+					throw new AccountException( "We could not resolve the auth [" . $uses . "]" );
+
+				if ( !is_subclass_of( $auth, AccountAuth::class ) )
+					throw new \InvalidArgumentException( "The auth [" . $uses . "] must extend the [" . AccountAuth::class . "] class" );
+			}
+		}
+
+		return $auth;
+	}
+
+	public function setDefaultGuard( $name )
+	{
+		Config::set( 'auth.defaults.guard', $name );
+	}
+
+	public function setDefaultAuth( $name )
+	{
+		Config::set( 'auth.defaults.auth', $name );
+	}
+
+	public function getDefaultGuard()
+	{
+		return Config::get( 'auth.defaults.guard', 'web' );
 	}
 
 	public function getDefaultAuth()
 	{
-		return Framework::config()->get( 'acct.defaults.auth', 'database' );
+		return Config::get( 'auth.defaults.auth', 'users' );
 	}
 
-	public function getDefaultDriver()
+	/**
+	 * Register a callback based guard
+	 *
+	 * @param $name
+	 * @param callable $callback
+	 */
+	public function viaRequest( $name, callable $callback )
 	{
-		return Framework::config()->get( 'acct.defaults.driver', 'session' );
+		$this->guards[$name] = new RequestGuard( $callback, Request::i() );
 	}
 
 	public function generateAcctId( $seed )
@@ -137,6 +187,8 @@ class AccountManager extends ServiceFactory
 		if ( empty( $acctId ) )
 			$acctId = "ab123C";
 
+		$auth = $this->guard()->getAuth();
+
 		$tries = 1;
 		do
 		{
@@ -151,29 +203,14 @@ class AccountManager extends ServiceFactory
 
 			$tries++;
 		}
-		while ( $this->auth->retrieveById( $acctId ) != null );
+		while ( $auth->retrieveById( $acctId ) != null );
 
 		return $acctId;
 	}
 
-	public function auth()
+	public function __call( $method, $parameters )
 	{
-		return $this->auth;
-	}
-
-	public function driver()
-	{
-		return $this->driver;
-	}
-
-	/**
-	 * Get the account configuration.
-	 *
-	 * @param string $name
-	 * @return array
-	 */
-	protected function getConfig( $name )
-	{
-		return Framework::config()->get( 'acct.' . $name );
+		// TODO Add method not found exception
+		return call_user_func_array( [$this->guard(), $method], $parameters );
 	}
 }

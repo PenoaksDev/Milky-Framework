@@ -103,12 +103,8 @@ class EncryptCookies
 		$decrypted = [];
 
 		foreach ( $cookie as $key => $value )
-		{
 			if ( is_string( $value ) )
-			{
 				$decrypted[$key] = $this->encrypter->decrypt( $value );
-			}
-		}
 
 		return $decrypted;
 	}

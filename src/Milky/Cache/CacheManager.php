@@ -3,6 +3,7 @@
 use Closure;
 use Doctrine\Common\Cache\Cache;
 use InvalidArgumentException;
+use Milky\Binding\UniversalBuilder;
 use Milky\Database\DatabaseManager;
 use Milky\Encryption\Encrypter;
 use Milky\Facades\Config;
@@ -11,10 +12,8 @@ use Milky\Framework;
 use Milky\Helpers\Arr;
 use Milky\Services\ServiceFactory;
 
-class CacheManager extends ServiceFactory implements Cache
+class CacheManager implements Cache
 {
-	// TODO Improve!!!
-
 	/**
 	 * The array of resolved cache stores.
 	 *
@@ -28,6 +27,11 @@ class CacheManager extends ServiceFactory implements Cache
 	 * @var array
 	 */
 	protected $customCreators = [];
+
+	public static function i()
+	{
+		return UniversalBuilder::resolveClass( static::class );
+	}
 
 	/**
 	 * Get a cache store instance by name.
@@ -43,21 +47,10 @@ class CacheManager extends ServiceFactory implements Cache
 	}
 
 	/**
-	 * Get a cache driver instance.
-	 *
-	 * @param  string $driver
-	 * @return mixed
-	 */
-	public function driver( $driver = null )
-	{
-		return $this->store( $driver );
-	}
-
-	/**
 	 * Attempt to get the store from the local cache.
 	 *
 	 * @param  string $name
-	 * @return Repository
+	 * @return Store
 	 */
 	protected function get( $name )
 	{
@@ -68,7 +61,7 @@ class CacheManager extends ServiceFactory implements Cache
 	 * Resolve the given store.
 	 *
 	 * @param  string $name
-	 * @return Repository
+	 * @return Store
 	 *
 	 * @throws \InvalidArgumentException
 	 */
@@ -107,41 +100,41 @@ class CacheManager extends ServiceFactory implements Cache
 	 * Create an instance of the APC cache driver.
 	 *
 	 * @param  array $config
-	 * @return Repository
+	 * @return Store
 	 */
 	protected function createApcDriver( array $config )
 	{
 		$prefix = $this->getPrefix( $config );
 
-		return $this->repository( new ApcStore( new ApcWrapper, $prefix ) );
+		return new ApcStore( new ApcWrapper, $prefix );
 	}
 
 	/**
 	 * Create an instance of the array cache driver.
 	 *
-	 * @return Repository
+	 * @return Store
 	 */
 	protected function createArrayDriver()
 	{
-		return $this->repository( new ArrayStore );
+		return new ArrayStore;
 	}
 
 	/**
 	 * Create an instance of the file cache driver.
 	 *
 	 * @param  array $config
-	 * @return Repository
+	 * @return Store
 	 */
 	protected function createFileDriver( array $config )
 	{
-		return $this->repository( new FileStore( Filesystem::i(), $config['path'] ) );
+		return new FileStore( Filesystem::i(), $config['path'] );
 	}
 
 	/**
 	 * Create an instance of the Memcached cache driver.
 	 *
 	 * @param  array $config
-	 * @return Repository
+	 * @return Store
 	 */
 	protected function createMemcachedDriver( array $config )
 	{
@@ -149,24 +142,24 @@ class CacheManager extends ServiceFactory implements Cache
 
 		$memcached = MemcachedConnector::i()->connect( $config['servers'] );
 
-		return $this->repository( new MemcachedStore( $memcached, $prefix ) );
+		return new MemcachedStore( $memcached, $prefix );
 	}
 
 	/**
 	 * Create an instance of the Null cache driver.
 	 *
-	 * @return Repository
+	 * @return Store
 	 */
 	protected function createNullDriver()
 	{
-		return $this->repository( new NullStore );
+		return new NullStore;
 	}
 
 	/**
 	 * Create an instance of the Redis cache driver.
 	 *
 	 * @param  array $config
-	 * @return Repository
+	 * @return Store
 	 */
 	protected function createRedisDriver( array $config )
 	{
@@ -174,18 +167,18 @@ class CacheManager extends ServiceFactory implements Cache
 
 		$connection = Arr::get( $config, 'connection', 'default' );
 
-		return $this->repository( new RedisStore( $redis, $this->getPrefix( $config ), $connection ) );
+		return new RedisStore( $redis, $this->getPrefix( $config ), $connection );
 	}
 
 	/**
 	 * Create an instance of the database cache driver.
 	 *
 	 * @param  array $config
-	 * @return Repository
+	 * @return Store
 	 */
 	protected function createDatabaseDriver( array $config )
 	{
-		return $this->repository( new DatabaseStore( DatabaseManager::i()->connection( Arr::get( $config, 'connection' ) ), Encrypter::i(), $config['table'], $this->getPrefix( $config ) ) );
+		return new DatabaseStore( DatabaseManager::i()->connection( Arr::get( $config, 'connection' ) ), Encrypter::i(), $config['table'], $this->getPrefix( $config ) );
 	}
 
 	/**
@@ -194,9 +187,9 @@ class CacheManager extends ServiceFactory implements Cache
 	 * @param  Store $store
 	 * @return Repository
 	 */
-	public function repository( Store $store )
+	public function repository( Store $store = null )
 	{
-		return new Repository( $store );
+		return new Repository( $store ?: $this->store() );
 	}
 
 	/**
@@ -255,18 +248,6 @@ class CacheManager extends ServiceFactory implements Cache
 		return $this;
 	}
 
-	/**
-	 * Dynamically call the default driver instance.
-	 *
-	 * @param  string $method
-	 * @param  array $parameters
-	 * @return mixed
-	 */
-	public function __call( $method, $parameters )
-	{
-		return call_user_func_array( [$this->store(), $method], $parameters );
-	}
-
 	public function fetch( $id )
 	{
 		return $this->store()->get( $id ) ?: false;
@@ -318,5 +299,22 @@ class CacheManager extends ServiceFactory implements Cache
 	public function getStats()
 	{
 		return null; // FOR NOW
+	}
+
+	/**
+	 * Dynamically call the default driver instance.
+	 *
+	 * @param  string $method
+	 * @param  array $parameters
+	 * @return mixed
+	 */
+	public function __call( $method, $parameters )
+	{
+		$repo = $this->repository( $this->store() );
+
+		if ( !method_exists( $repo, $method ) )
+			throw new InvalidArgumentException( "The method [" . $method . "] in CacheManager or Repository does not exist." );
+
+		return call_user_func_array( [$repo, $method], $parameters );
 	}
 }

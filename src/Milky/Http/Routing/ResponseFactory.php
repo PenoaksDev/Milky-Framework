@@ -1,26 +1,25 @@
 <?php namespace Milky\Http\Routing;
 
 use JsonSerializable;
+use Milky\Binding\UniversalBuilder;
 use Milky\Helpers\Str;
 use Milky\Http\JsonResponse;
 use Milky\Http\RedirectResponse;
 use Milky\Http\Response;
-use Milky\Http\View\Factory;
-use Milky\Http\HttpFactory;
+use Milky\Http\View\ViewFactory;
 use Milky\Impl\Arrayable;
-use Milky\Services\ServiceFactory;
 use Milky\Traits\Macroable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class ResponseFactory extends ServiceFactory
+class ResponseFactory
 {
 	use Macroable;
 
 	/**
 	 * The view factory instance.
 	 *
-	 * @var Factory
+	 * @var ViewFactory
 	 */
 	protected $view;
 
@@ -31,22 +30,19 @@ class ResponseFactory extends ServiceFactory
 	 */
 	protected $redirector;
 
-	public static function build()
+	public static function i()
 	{
-		return new static( Factory::i(), HttpFactory::i()->redirector() );
+		return UniversalBuilder::resolveClass( static::class );
 	}
 
 	/**
 	 * Create a new response factory instance.
 	 *
-	 * @param  Factory $view
+	 * @param  ViewFactory $view
 	 * @param  Redirector $redirector
-	 * @return void
 	 */
-	public function __construct( Factory $view, Redirector $redirector )
+	public function __construct( ViewFactory $view, Redirector $redirector )
 	{
-		parent::__construct();
-
 		$this->view = $view;
 		$this->redirector = $redirector;
 	}

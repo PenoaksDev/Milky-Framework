@@ -1,15 +1,17 @@
 <?php namespace Milky\Http\Middleware;
 
 use Closure;
+use Milky\Http\Request;
+use Milky\Http\Response;
 
 class FrameGuard
 {
 	/**
 	 * Handle the given request and get the response.
 	 *
-	 * @param  \Milky\Http\Request $request
+	 * @param  Request $request
 	 * @param  \Closure $next
-	 * @return \Milky\Http\Response
+	 * @return Response
 	 */
 	public function handle( $request, Closure $next )
 	{

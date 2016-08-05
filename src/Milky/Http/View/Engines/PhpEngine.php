@@ -2,6 +2,7 @@
 
 use Exception;
 use Milky\Framework;
+use Milky\Helpers\Func;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Symfony\Component\Finder\Finder;
 use Throwable;
@@ -40,15 +41,7 @@ class PhpEngine implements EngineInterface
 		// an exception is thrown. This prevents any partial views from leaking.
 		try
 		{
-			// $source = "";
-
-			// $source .= "use \\Milky\\Facades\\" . str_replace( '.php', '', $file->getFilename() ) . ";\n";
-
 			include $__path;
-
-			/* $source .= "?>" . file_get_contents( $__path );
-
-			eval( $source ); */
 		}
 		catch ( Exception $e )
 		{

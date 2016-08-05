@@ -1,9 +1,7 @@
 <?php namespace Milky\Facades;
 
-use Milky\Database\Eloquent\RoutableModel;
-use Milky\Http\Routing\RouteCollection;
-use Milky\Http\Routing\UrlGenerator;
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Milky\Translation\Translator;
+use Symfony\Component\Translation\MessageSelector;
 
 /**
  * The MIT License (MIT)
@@ -13,125 +11,89 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class URL extends BaseFacade
+class Lang extends BaseFacade
 {
 	protected function __getResolver()
 	{
-		return UrlGenerator::class;
+		return Translator::class;
 	}
 
-	public static function full()
+	public static function hasForLocale( $key, $locale = null )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function current()
+	public static function has( $key, $locale = null, $fallback = true )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function previous( $fallback = false )
+	public static function get( $key, array $replace = [], $locale = null, $fallback = true )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function to( $path, $extra = [], $secure = null )
+	public static function choice( $key, $number, array $replace = [], $locale = null )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function secure( $path, $parameters = [] )
+	public static function trans( $id, array $parameters = [], $domain = 'messages', $locale = null )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function asset( $path, $secure = null )
+	public static function transChoice( $id, $number, array $parameters = [], $domain = 'messages', $locale = null )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function assetFrom( $root, $path, $secure = null )
+	public static function load( $namespace, $group, $locale )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function secureAsset( $path )
+	public static function addNamespace( $namespace, $hint )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function forceSchema( $schema )
+	public static function getSelector()
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	/**
-	 * Get the URL to a named route.
-	 *
-	 * @param string $name
-	 * @param RoutableModel $model
-	 * @param mixed $parameters
-	 * @param bool $absolute
-	 * @return string
-	 *
-	 * @throws RouteNotFoundException
-	 */
-	public static function routeModel( $name, $model, $parameters = [], $absolute = true )
+	public static function setSelector( MessageSelector $selector )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	/**
-	 * Get the URL to a named route.
-	 *
-	 * @param  string $name
-	 * @param  mixed $parameters
-	 * @param  bool $absolute
-	 * @return string
-	 *
-	 * @throws RouteNotFoundException
-	 */
-	public static function route( $name, $parameters = [], $absolute = true )
+	public static function getLoader()
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function action( $action, $parameters = [], $absolute = true )
+	public static function locale()
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function forceRootUrl( $root )
+	public static function getLocale()
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function isValidUrl( $path )
+	public static function setLocale( $locale )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function getRequest()
+	public static function getFallback()
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}
 
-	public static function setRequest( Request $request )
-	{
-		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
-	}
-
-	public static function setRoutes( RouteCollection $routes )
-	{
-		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
-	}
-
-	public static function setSessionResolver( callable $sessionResolver )
-	{
-		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
-	}
-
-	public static function setRootControllerNamespace( $rootNamespace )
+	public static function setFallback( $fallback )
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
 	}

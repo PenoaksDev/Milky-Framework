@@ -14,7 +14,7 @@ class Acct extends BaseFacade
 {
 	protected function __getResolver()
 	{
-		return static::auth()->driver()->acct();
+		return static::auth()->guard()->acct();
 	}
 
 	private static function auth()
@@ -27,17 +27,17 @@ class Acct extends BaseFacade
 		if ( is_null( $id ) )
 			return AccountManager::i()->auth()->retrieveById( $id );
 		else
-			return AccountManager::i()->driver()->acct();
+			return AccountManager::i()->guard()->acct();
 	}
 
 	public static function check()
 	{
-		return static::auth()->driver()->isAuthenticated();
+		return static::auth()->guard()->isAuthenticated();
 	}
 
 	public static function isGuest()
 	{
-		return !static::auth()->driver()->isAuthenticated();
+		return !static::auth()->guard()->isAuthenticated();
 	}
 
 	public static function isAdmin()
@@ -48,5 +48,10 @@ class Acct extends BaseFacade
 	public static function isOp()
 	{
 		return false; // TODO implement OP feature -- OPs are authorized on all permission nodes
+	}
+
+	public static function guard( $guard = null )
+	{
+		return static::auth()->guard( $guard );
 	}
 }

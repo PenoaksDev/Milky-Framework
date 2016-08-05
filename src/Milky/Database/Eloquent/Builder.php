@@ -297,7 +297,7 @@ class Builder
 	 * Execute the query and get the first result.
 	 *
 	 * @param  array $columns
-	 * @return Model|static|null
+	 * @return Model|null
 	 */
 	public function first( $columns = ['*'] )
 	{

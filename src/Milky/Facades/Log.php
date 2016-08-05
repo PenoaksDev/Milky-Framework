@@ -1,5 +1,7 @@
 <?php namespace Milky\Facades;
 
+use Milky\Logging\Logger;
+
 /**
  * The MIT License (MIT)
  * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
@@ -12,7 +14,7 @@ class Log extends BaseFacade
 {
 	public function __getResolver()
 	{
-		return 'log';
+		return Logger::class;
 	}
 
 	/**

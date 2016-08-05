@@ -1,18 +1,10 @@
-<?php namespace Milky\Account\Drivers;
+<?php namespace Milky\Account\Guards;
 
-use Milky\Account\Account;
 use Milky\Account\Auths\AccountAuth;
+use Milky\Account\Types\Account;
 use Milky\Http\Request;
 
-/**
- * The MIT License (MIT)
- * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
- *
- * This Source Code is subject to the terms of the MIT License.
- * If a copy of the license was not distributed with this file,
- * You can obtain one at https://opensource.org/licenses/MIT.
- */
-class TokenDriver extends AccountDriver
+class TokenGuard extends Guard
 {
 	/**
 	 * The request instance.
@@ -35,9 +27,17 @@ class TokenDriver extends AccountDriver
 	 */
 	protected $storageKey;
 
+	/**
+	 * Create a new authentication guard.
+	 *
+	 * @param  AccountAuth $provider
+	 * @param  Request $request
+	 * @return void
+	 */
 	public function __construct( AccountAuth $auth, Request $request )
 	{
 		parent::__construct( $auth );
+
 		$this->request = $request;
 		$this->inputKey = 'api_token';
 		$this->storageKey = 'api_token';
@@ -76,14 +76,10 @@ class TokenDriver extends AccountDriver
 		$token = $this->request->input( $this->inputKey );
 
 		if ( empty( $token ) )
-		{
 			$token = $this->request->bearerToken();
-		}
 
 		if ( empty( $token ) )
-		{
 			$token = $this->request->getPassword();
-		}
 
 		return $token;
 	}
@@ -102,5 +98,28 @@ class TokenDriver extends AccountDriver
 			return true;
 
 		return false;
+	}
+
+	/**
+	 * Set the current request instance.
+	 *
+	 * @param  Request $request
+	 * @return $this
+	 */
+	public function setRequest( Request $request )
+	{
+		$this->request = $request;
+
+		return $this;
+	}
+
+	/**
+	 * Get the default Guard Name
+	 *
+	 * @return string
+	 */
+	public function name()
+	{
+		return 'token';
 	}
 }
