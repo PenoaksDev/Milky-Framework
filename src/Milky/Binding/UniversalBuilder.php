@@ -18,6 +18,7 @@ use Milky\Http\HttpFactory;
 use Milky\Http\HttpServiceResolver;
 use Milky\Http\View\ViewServiceResolver;
 use Milky\Logging\Logger;
+use Milky\Mail\MailerServiceResolver;
 use Milky\Queue\QueueServiceResolver;
 use Milky\Translation\TranslationServiceResolver;
 use Milky\Validation\ValidationServiceResolver;
@@ -58,6 +59,8 @@ class UniversalBuilder
 		static::registerResolver( new TranslationServiceResolver() );
 
 		static::registerResolver( new ValidationServiceResolver() );
+
+		static::registerResolver( new MailerServiceResolver() );
 
 		// static::getResolver( 'command' )->cacheClear = new ClearCommand( CacheManager::i() );
 	}

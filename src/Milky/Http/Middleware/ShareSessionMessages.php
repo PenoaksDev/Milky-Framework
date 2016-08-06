@@ -1,11 +1,11 @@
-<?php namespace Milky\Http\View\Middleware;
+<?php namespace Milky\Http\Middleware;
 
 use Closure;
 use Milky\Helpers\ViewErrorBag;
 use Milky\Http\Request;
 use Milky\Http\View\ViewFactory;
 
-class ShareErrorsFromSession
+class ShareSessionMessages
 {
 	/**
 	 * The view factory implementation.
@@ -39,6 +39,10 @@ class ShareErrorsFromSession
 		// without having to bind. An empty bag is set when there aren't errors.
 		$this->view->share(
 			'errors', $request->session()->get('errors') ?: new ViewErrorBag
+		);
+
+		$this->view->share(
+			'messages', $request->session()->get('messages') ?: new ViewErrorBag
 		);
 
 		// Putting the errors in the view for every view allows the developer to just

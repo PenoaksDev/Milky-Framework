@@ -181,7 +181,7 @@ trait AuthenticatesUsers
 	{
 		Acct::guard( $this->getGuard() )->logout();
 
-		return Redirect::to( property_exists( $this, 'redirectAfterLogout' ) ? $this->redirectAfterLogout : '/' )->withErrors( 'success', "You are now logged out." );
+		return Redirect::to( property_exists( $this, 'redirectAfterLogout' ) ? $this->redirectAfterLogout : '/' )->withMessages( [ 'success' => "You are now logged out." ] );
 	}
 
 	/**

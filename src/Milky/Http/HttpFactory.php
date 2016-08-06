@@ -5,11 +5,11 @@ use Milky\Exceptions\Handler;
 use Milky\Facades\Hooks;
 use Milky\Framework;
 use Milky\Http\Middleware\EncryptCookies;
+use Milky\Http\Middleware\ShareSessionMessages;
 use Milky\Http\Routing\Redirector;
 use Milky\Http\Routing\Router;
 use Milky\Http\Routing\UrlGenerator;
 use Milky\Http\Session\SessionManager;
-use Milky\Http\View\Middleware\ShareErrorsFromSession;
 use Milky\Impl\Extendable;
 use Milky\Pipeline\Pipeline;
 
@@ -155,7 +155,7 @@ class HttpFactory
 		$this->addMiddleware( [
 			new EncryptCookies( Framework::get( 'encrypter' ) ),
 			SessionManager::i(),
-			ShareErrorsFromSession::class,
+			ShareSessionMessages::class,
 		] );
 
 		$this->router->getRoutes()->refreshNameLookups();

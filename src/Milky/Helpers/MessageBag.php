@@ -182,9 +182,7 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 		$all = [];
 
 		foreach ( $this->messages as $key => $messages )
-		{
 			$all = array_merge( $all, $this->transform( $messages, $format, $key ) );
-		}
 
 		return $all;
 	}
@@ -218,9 +216,7 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
 		$replace = [':message', ':key'];
 
 		foreach ( $messages as &$message )
-		{
 			$message = str_replace( $replace, [$message, $messageKey], $format );
-		}
 
 		return $messages;
 	}

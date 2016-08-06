@@ -39,9 +39,7 @@ class RedirectResponse extends BaseRedirectResponse
 		$key = is_array( $key ) ? $key : [$key => $value];
 
 		foreach ( $key as $k => $v )
-		{
 			$this->session->flash( $k, $v );
-		}
 
 		return $this;
 	}
@@ -124,16 +122,32 @@ class RedirectResponse extends BaseRedirectResponse
 	}
 
 	/**
+	 * Flash a container of messages to the session.
+	 *
+	 * @param  MessageProvider|array|string $provider
+	 * @param  string $key
+	 *
+	 * @return RedirectResponse
+	 */
+	public function withMessages( $provider, $key = 'default' )
+	{
+		$value = $this->parseProvider( $provider );
+		$this->session->flash( 'messages', $this->session->get( 'messages', new ViewErrorBag )->put( $key, $value ) );
+
+		return $this;
+	}
+
+	/**
 	 * Flash a container of errors to the session.
 	 *
 	 * @param  MessageProvider|array|string $provider
 	 * @param  string $key
+	 *
 	 * @return RedirectResponse
 	 */
 	public function withErrors( $provider, $key = 'default' )
 	{
-		$value = $this->parseErrors( $provider );
-
+		$value = $this->parseProvider( $provider );
 		$this->session->flash( 'errors', $this->session->get( 'errors', new ViewErrorBag )->put( $key, $value ) );
 
 		return $this;
@@ -145,12 +159,10 @@ class RedirectResponse extends BaseRedirectResponse
 	 * @param  MessageProvider|array|string $provider
 	 * @return MessageBag
 	 */
-	protected function parseErrors( $provider )
+	protected function parseProvider( $provider )
 	{
 		if ( $provider instanceof MessageProvider )
-		{
 			return $provider->getMessageBag();
-		}
 
 		return new MessageBag( (array) $provider );
 	}
