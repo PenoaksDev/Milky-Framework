@@ -1264,21 +1264,6 @@ if ( !function_exists( 'asset' ) )
 	}
 }
 
-if ( !function_exists( 'back' ) )
-{
-	/**
-	 * Create a new redirect response to the previous location.
-	 *
-	 * @param  int $status
-	 * @param  array $headers
-	 * @return RedirectResponse
-	 */
-	function back( $status = 302, $headers = [] )
-	{
-		return Framework::get( 'redirect' )->back( $status, $headers );
-	}
-}
-
 if ( !function_exists( 'base_path' ) )
 {
 	/**
@@ -1616,33 +1601,6 @@ if ( !function_exists( 'secure_url' ) )
 	function secure_url( $path, $parameters = [] )
 	{
 		return url( $path, $parameters, true );
-	}
-}
-
-if ( !function_exists( 'session' ) )
-{
-	/**
-	 * Get / set the specified session value.
-	 *
-	 * If an array is passed as the key, we will assume you want to set an array of values.
-	 *
-	 * @param  array|string $key
-	 * @param  mixed $default
-	 * @return mixed
-	 */
-	function session( $key = null, $default = null )
-	{
-		if ( is_null( $key ) )
-		{
-			return Framework::get( 'session' );
-		}
-
-		if ( is_array( $key ) )
-		{
-			return Framework::get( 'session' )->put( $key );
-		}
-
-		return Framework::get( 'session' )->get( $key, $default );
 	}
 }
 

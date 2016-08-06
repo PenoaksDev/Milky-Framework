@@ -123,7 +123,7 @@ trait AuthenticatesUsers
 			$this->clearLoginAttempts( $request );
 
 		if ( method_exists( $this, 'authenticated' ) )
-			return $this->authenticated( $request, Acct::guard( $this->getGuard() )->user() );
+			return $this->authenticated( $request, Acct::guard( $this->getGuard() )->acct() );
 
 		return Redirect::intended( $this->redirectPath() );
 	}
@@ -181,7 +181,7 @@ trait AuthenticatesUsers
 	{
 		Acct::guard( $this->getGuard() )->logout();
 
-		return Redirect::to( property_exists( $this, 'redirectAfterLogout' ) ? $this->redirectAfterLogout : '/' );
+		return Redirect::to( property_exists( $this, 'redirectAfterLogout' ) ? $this->redirectAfterLogout : '/' )->withErrors( 'success', "You are now logged out." );
 	}
 
 	/**

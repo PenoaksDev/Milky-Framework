@@ -8,33 +8,37 @@
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-interface Account
+interface Account extends \ArrayAccess
 {
 	/**
 	 * Compiles a human readable display name, e.g., John Smith
 	 *
 	 * @return string A human readable display name
 	 */
-	function getDisplayName();
+	public function getDisplayName();
 
 	/**
 	 * Returns the AcctId for this Account
 	 *
 	 * @return string Account Id
 	 */
-	function getId();
+	public function getId();
 
 	/**
 	 * Get the password for the user.
 	 *
 	 * @return string
 	 */
-	function getAuthPassword();
+	public function getAuthPassword();
 
 	/**
 	 * @return string
 	 */
-	function getRememberToken();
+	public function getRememberToken();
 
-	function setRememberToken( $token );
+	public function setRememberToken( $token );
+
+	public function save();
+
+	public function isActivated();
 }

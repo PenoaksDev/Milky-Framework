@@ -51,11 +51,11 @@ class EloquentAuth implements AccountAuth
 	 * Retrieve a user by their unique identifier.
 	 *
 	 * @param  mixed $identifier
-	 * @return EloquentAccount|null
+	 * @return User|null
 	 */
 	public function retrieveById( $identifier )
 	{
-		return new EloquentAccount( $this->createUsrModel()->newQuery()->find( $identifier ) );
+		return $this->createUsrModel()->newQuery()->find( $identifier )->first();
 	}
 
 	/**
@@ -63,13 +63,13 @@ class EloquentAuth implements AccountAuth
 	 *
 	 * @param  mixed $identifier
 	 * @param  string $token
-	 * @return EloquentAccount|null
+	 * @return User|null
 	 */
 	public function retrieveByToken( $identifier, $token )
 	{
 		$model = $this->createUsrModel();
 
-		return new EloquentAccount( $model->newQuery()->where( 'id', $identifier )->where( 'remember_token', $token )->first() );
+		return $model->newQuery()->where( 'id', $identifier )->where( 'remember_token', $token )->first();
 	}
 
 	/**
@@ -89,7 +89,7 @@ class EloquentAuth implements AccountAuth
 	 * Retrieve a user by the given credentials.
 	 *
 	 * @param  array $credentials
-	 * @return EloquentAccount|null
+	 * @return User|null
 	 */
 	public function retrieveByCredentials( array $credentials )
 	{
@@ -105,9 +105,7 @@ class EloquentAuth implements AccountAuth
 			if ( !Str::contains( $key, 'password' ) )
 				$query->where( $key, $value );
 
-		$result = $query->first();
-
-		return is_null( $result ) ? null : new EloquentAccount( $query->first() );
+		return $query->first();
 	}
 
 	/**
@@ -127,7 +125,7 @@ class EloquentAuth implements AccountAuth
 	/**
 	 * Create a new instance of the user model
 	 *
-	 * @return Model
+	 * @return User
 	 */
 	public function createUsrModel()
 	{
@@ -139,7 +137,7 @@ class EloquentAuth implements AccountAuth
 	/**
 	 * Create a new instance of the group model
 	 *
-	 * @return Model
+	 * @return Group
 	 */
 	public function createGrpModel()
 	{

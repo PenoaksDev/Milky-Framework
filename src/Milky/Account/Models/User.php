@@ -6,11 +6,12 @@ use HolyWorlds\Middleware\Permissions;
 use HolyWorlds\Support\Traits\Authorizable;
 use HolyWorlds\Support\Traits\UuidAsKey;
 use HolyWorlds\Support\Util;
+use Milky\Account\Types\Account;
 use Milky\Auth\Authenticatable;
 use Milky\Auth\Passwords\CanResetPassword;
 use Milky\Database\Eloquent\Model;
 
-class User extends Model
+class User extends Model implements Account
 {
 	use Authenticatable, Authorizable, CanResetPassword, Notifable, UuidAsKey;
 
@@ -30,13 +31,13 @@ class User extends Model
 		'visited_at'
 	];
 
-	public function getDisplayNameAttribute()
+	/*public function getDisplayNameAttribute()
 	{
 		/*if (!is_null($this->profile->family_name)) {
 			return "{$this->name} ({$this->profile->family_name})";
-		}*/
+		}/
 		return $this->name;
-	}
+	}*/
 
 	public function getIsNewAttribute()
 	{
@@ -197,22 +198,48 @@ class User extends Model
 	}
 
 	/**
-	 * Returns the AcctId for this Account
-	 *
-	 * @return string Account Id
-	 */
-	function getId()
-	{
-		return $this->userId;
-	}
-
-	/**
 	 * Compiles a human readable display name, e.g., John Smith
 	 *
 	 * @return string A human readable display name
 	 */
-	function getDisplayName()
+	public function getDisplayName()
 	{
 		return $this->name;
+	}
+
+	/**
+	 * Returns the AcctId for this Account
+	 *
+	 * @return string Account Id
+	 */
+	public function getId()
+	{
+		return $this->id;
+	}
+
+	/**
+	 * Get the password for the user.
+	 *
+	 * @return string
+	 */
+	public function getAuthPassword()
+	{
+		return $this->password;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getRememberToken()
+	{
+		return $this->remember_token;
+	}
+
+	/**
+	 * @param string $token
+	 */
+	public function setRememberToken( $token )
+	{
+		$this->remember_token = $token;
 	}
 }

@@ -121,7 +121,6 @@ class AccountManager
 			case 'eloquent':
 			{
 				$auth = new EloquentAuth( $config['usrModel'], $config['grpModel'] );
-				EloquentAccount::setConfig( $config );
 				break;
 			}
 			default:

@@ -101,4 +101,34 @@ class GenericAccount implements Account
 	{
 		unset( $this->properties[$key] );
 	}
+
+	public function offsetExists( $offset )
+	{
+		return array_key_exists( $this->properties, $offset );
+	}
+
+	public function offsetGet( $offset )
+	{
+		return $this->properties[$offset];
+	}
+
+	public function offsetSet( $offset, $value )
+	{
+		$this->properties[$offset] = $value;
+	}
+
+	public function offsetUnset( $offset )
+	{
+		unset( $this->properties[$offset] );
+	}
+
+	public function save()
+	{
+		// TODO Implement??
+	}
+
+	public function isActivated()
+	{
+		return true;
+	}
 }
