@@ -269,7 +269,10 @@ class Framework
 		else if ( !Str::startsWith( $slugs[0], '/' ) )
 			$slugs = Arr::prepend( $slugs, $this->basePath );
 
-		return implode( DIRECTORY_SEPARATOR, $slugs );
+		$path = implode( DIRECTORY_SEPARATOR, $slugs );
+		mkdir( $path, 755, true );
+
+		return $path;
 	}
 
 	/**
