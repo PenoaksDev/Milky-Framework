@@ -1,80 +1,4 @@
 {
-<<<<<<< HEAD
-	"name": "penoaks/framework",
-	"description": "The Penoaks Framework",
-	"keywords": ["framework", "penoaks"],
-	"license": "MIT",
-	"homepage": "http://penoaks.com/development/framework",
-	"support": {
-		"issues": "https://github.com/PenoaksDev/Framework/issues",
-		"source": "https://github.com/PenoaksDev/Framework"
-	},
-	"authors": [
-		{
-			"name": "Chiori-chan",
-			"email": "me@chiorichan.com"
-		},
-		{
-			"name": "Penoaks Publishing Co.",
-			"email": "admin@penoaks.com"
-		}
-	],
-	"require": {
-		"php": ">=5.5.9",
-		"ext-mbstring": "*",
-		"ext-openssl": "*",
-		"penoaks/framework-installer": "*",
-		"classpreloader/classpreloader": "~3.0",
-		"doctrine/inflector": "~1.0",
-		"jeremeamia/superclosure": "~2.2",
-		"league/flysystem": "~1.0",
-		"monolog/monolog": "~1.11",
-		"mtdowling/cron-expression": "~1.0",
-		"nesbot/carbon": "~1.20",
-		"paragonie/random_compat": "~1.4",
-		"psy/psysh": "0.7.*",
-		"swiftmailer/swiftmailer": "~5.1",
-		"symfony/console": "2.8.*|3.0.*",
-		"symfony/debug": "2.8.*|3.0.*",
-		"symfony/finder": "2.8.*|3.0.*",
-		"symfony/http-foundation": "2.8.*|3.0.*",
-		"symfony/http-kernel": "2.8.*|3.0.*",
-		"symfony/polyfill-php56": "~1.0",
-		"symfony/process": "2.8.*|3.0.*",
-		"symfony/routing": "2.8.*|3.0.*",
-		"symfony/translation": "2.8.*|3.0.*",
-		"symfony/var-dumper": "2.8.*|3.0.*",
-		"vlucas/phpdotenv": "~2.2"
-	},
-	"require-dev": {
-		"fzaninotto/faker": "~1.4",
-		"mockery/mockery": "0.9.*",
-		"phpunit/phpunit": "~4.0",
-		"symfony/css-selector": "2.8.*|3.0.*",
-		"symfony/dom-crawler": "2.8.*|3.0.*"
-	},
-	"suggest": {
-		"aws/aws-sdk-php": "Required to use the SQS queue driver and SES mail driver (~3.0).",
-		"doctrine/dbal": "Required to rename columns and drop SQLite columns (~2.4).",
-		"fzaninotto/faker": "Required to use the eloquent factory builder (~1.4).",
-		"guzzlehttp/guzzle": "Required to use the Mailgun and Mandrill mail drivers and the ping methods on schedules (~5.3|~6.0).",
-		"league/flysystem-aws-s3-v3": "Required to use the Flysystem S3 driver (~1.0).",
-		"league/flysystem-rackspace": "Required to use the Flysystem Rackspace driver (~1.0).",
-		"pda/pheanstalk": "Required to use the beanstalk queue driver (~3.0).",
-		"predis/predis": "Required to use the redis cache and queue drivers (~1.0).",
-		"pusher/pusher-php-server": "Required to use the Pusher broadcast driver (~2.0).",
-		"symfony/css-selector": "Required to use some of the crawler integration testing tools (2.8.*|3.0.*).",
-		"symfony/dom-crawler": "Required to use most of the crawler integration testing tools (2.8.*|3.0.*).",
-		"symfony/psr-http-message-bridge": "Required to psr7 bridging features (0.2.*)."
-	},
-	"type": "framework",
-	"minimum-stability": "dev",
-	"perfer-stable": true,
-	"config": {
-		"preferred-install": "dist",
-		"vendor-dir": "composer"
-	}
-=======
   "name": "penoaks/milky-framework",
   "description": "The Milky Framework",
   "keywords": [
@@ -162,5 +86,4 @@
     "preferred-install": "dist",
     "prefer-stable": true
   }
->>>>>>> bleeding
 }
