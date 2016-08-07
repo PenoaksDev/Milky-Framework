@@ -1,15 +1,14 @@
 <?php namespace Milky\Database;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 use Milky\Binding\UniversalBuilder;
 use Milky\Database\Connectors\ConnectionFactory;
 use Milky\Database\Console\Seeds\SeedCommand;
-use Milky\Database\Eloquent\Nested\Generators\MigrationGenerator;
-use Milky\Database\Eloquent\Nested\Generators\ModelGenerator;
 use Milky\Database\Eloquent\Model;
 use Milky\Database\Eloquent\Nested\Console\MakeNestedCommand;
+use Milky\Database\Eloquent\Nested\Generators\MigrationGenerator;
+use Milky\Database\Eloquent\Nested\Generators\ModelGenerator;
 use Milky\Filesystem\Filesystem;
-use Milky\Helpers\Func;
 
 /**
  * The MIT License (MIT)

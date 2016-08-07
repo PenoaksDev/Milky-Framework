@@ -1,6 +1,6 @@
 <?php namespace Milky\Console;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 use Milky\Console\Scheduling\Schedule;
 use Milky\Console\Scheduling\ScheduleRunCommand;
 use Milky\Framework;

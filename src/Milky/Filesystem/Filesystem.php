@@ -2,14 +2,20 @@
 
 use ErrorException;
 use FilesystemIterator;
+use Milky\Binding\UniversalBuilder;
 use Milky\Exceptions\FileNotFoundException;
 use Milky\Services\ServiceFactory;
 use Milky\Traits\Macroable;
 use Symfony\Component\Finder\Finder;
 
-class Filesystem extends ServiceFactory
+class Filesystem
 {
 	use Macroable;
+
+	public static function i()
+	{
+		return UniversalBuilder::resolveClass( static::class );
+	}
 
 	/**
 	 * Determine if a file or directory exists.

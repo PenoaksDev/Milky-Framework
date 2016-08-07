@@ -1,11 +1,13 @@
 <?php namespace Milky\Http;
 
 use Milky\Binding\UniversalBuilder;
+use Milky\Encryption\Encrypter;
 use Milky\Exceptions\Handler;
 use Milky\Facades\Hooks;
 use Milky\Framework;
 use Milky\Http\Middleware\EncryptCookies;
 use Milky\Http\Middleware\ShareSessionMessages;
+use Milky\Http\Middleware\VerifyCsrfToken;
 use Milky\Http\Routing\Redirector;
 use Milky\Http\Routing\Router;
 use Milky\Http\Routing\UrlGenerator;
@@ -152,12 +154,6 @@ class HttpFactory
 
 	public function routeRequest()
 	{
-		$this->addMiddleware( [
-			new EncryptCookies( Framework::get( 'encrypter' ) ),
-			SessionManager::i(),
-			ShareSessionMessages::class,
-		] );
-
 		$this->router->getRoutes()->refreshNameLookups();
 
 		$this->response = ( new Pipeline() )->withExceptionHandler( function ( $request, $e )

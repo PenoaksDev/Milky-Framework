@@ -1,20 +1,15 @@
 <?php namespace Milky\Binding;
 
 use Milky\Account\AccountServiceResolver;
-use Milky\Binding\Resolvers\ServiceResolver;
-use Milky\Cache\CacheManager;
 use Milky\Cache\CacheServiceResolver;
-use Milky\Cache\Console\ClearCommand;
 use Milky\Config\Configuration;
 use Milky\Console\CommandServiceResolver;
 use Milky\Database\DatabaseServiceResolver;
 use Milky\Exceptions\BindingException;
 use Milky\Exceptions\ExceptionsServiceResolver;
-use Milky\Exceptions\Handler;
 use Milky\Exceptions\ResolverException;
 use Milky\Framework;
 use Milky\Helpers\Arr;
-use Milky\Http\HttpFactory;
 use Milky\Http\HttpServiceResolver;
 use Milky\Http\View\ViewServiceResolver;
 use Milky\Logging\Logger;
@@ -40,6 +35,8 @@ class UniversalBuilder
 	 */
 	public function __construct( Framework $fw )
 	{
+		static::registerResolver( new FrameworkServiceResolver() );
+
 		static::registerResolver( new ExceptionsServiceResolver() );
 
 		static::registerResolver( new HttpServiceResolver() );
@@ -76,6 +73,11 @@ class UniversalBuilder
 	protected static $resolvers = [];
 
 	/**
+	 * @var array
+	 */
+	protected static $resolversAlias = [];
+
+	/**
 	 * Are we building this class
 	 *
 	 * @param string $class
@@ -96,7 +98,16 @@ class UniversalBuilder
 	public static function registerResolver( ServiceResolver $resolver, $key = null )
 	{
 		$key = $key ?: $resolver->key();
+		$alias = $resolver->getKeyAliases() ?: [];
+		if ( is_array( $key ) )
+		{
+			$alias = array_merge( $alias, array_slice( $key, 1 ) );
+			$key = $key[0];
+		}
+
 		Arr::set( static::$resolvers, $key, $resolver );
+		foreach ( $resolver->getKeyAliases() as $alias )
+			Arr::set( static::$resolversAlias, $alias, $key );
 	}
 
 	/**
@@ -105,7 +116,30 @@ class UniversalBuilder
 	 */
 	public static function getResolver( $name )
 	{
-		return Arr::get( static::$resolvers, $name );
+		if ( $resolver = Arr::get( static::$resolvers, $name ) )
+			return $resolver;
+		else if ( $alias = Arr::get( static::$resolversAlias, $name ) )
+			return Arr::get( static::$resolvers, $alias );
+		return null;
+	}
+
+	/**
+	 * Attempts to locate a instance or value from the registered resolvers.
+	 *
+	 * @param $key
+	 * @return mixed|null|object
+	 */
+	public static function resolve( $key )
+	{
+		if ( strpos( $key, '\\' ) !== false )
+			return static::resolveClass( $key );
+
+		$key = explode( '.', $key );
+
+		if ( $resolver = static::getResolver( $key[0] ) )
+			return $resolver->resolve( $key[0], implode( '.', array_slice( $key, 1 ) ) );
+
+		return null;
 	}
 
 	/**
@@ -198,19 +232,6 @@ class UniversalBuilder
 
 			throw new BindingException( "Failed to build [$class]: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() );
 		}
-	}
-
-	public static function resolve( $key )
-	{
-		if ( strpos( $key, '\\' ) !== false )
-			return static::resolveClass( $key );
-
-		$key = explode( '.', $key );
-
-		if ( $resolver = static::getResolver( $key[0] ) )
-			return $resolver->resolve( $key[0], implode( '.', array_slice( $key, 1 ) ) );
-
-		return null;
 	}
 
 	/**
@@ -324,6 +345,8 @@ class UniversalBuilder
 				else
 				{
 					$depend = static::resolveClass( $parameter->getClass()->name );
+					if ( is_null( $depend ) )
+						throw new BindingException();
 					if ( is_array( $depend ) )
 					{
 						if ( array_key_exists( $parameter->name, $depend ) )

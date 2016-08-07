@@ -1,20 +1,20 @@
 <?php namespace Milky\Database\Eloquent;
 
 use Closure;
-use Milky\Pagination\LengthAwarePaginator;
-use Milky\Pagination\Paginator;
 use Milky\Database\Eloquent\Relations\Relation;
 use Milky\Database\Query\Builder as QueryBuilder;
 use Milky\Database\Query\Expression;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
+use Milky\Pagination\LengthAwarePaginator;
+use Milky\Pagination\Paginator;
 
 class Builder
 {
 	/**
 	 * The base query builder instance.
 	 *
-	 * @var Builder
+	 * @var QueryBuilder
 	 */
 	protected $query;
 
@@ -102,9 +102,7 @@ class Builder
 		$this->scopes[$identifier] = $scope;
 
 		if ( method_exists( $scope, 'extend' ) )
-		{
 			$scope->extend( $this );
-		}
 
 		return $this;
 	}
@@ -167,14 +165,12 @@ class Builder
 	 *
 	 * @param  mixed $id
 	 * @param  array $columns
-	 * @return Collection|static[]|static|null
+	 * @return Model|Collection|null
 	 */
 	public function find( $id, $columns = ['*'] )
 	{
 		if ( is_array( $id ) )
-		{
 			return $this->findMany( $id, $columns );
-		}
 
 		$this->query->where( $this->model->getQualifiedKeyName(), '=', $id );
 
@@ -191,9 +187,7 @@ class Builder
 	public function findMany( $ids, $columns = ['*'] )
 	{
 		if ( empty( $ids ) )
-		{
 			return $this->model->newCollection();
-		}
 
 		$this->query->whereIn( $this->model->getQualifiedKeyName(), $ids );
 
@@ -287,7 +281,6 @@ class Builder
 	public function updateOrCreate( array $attributes, array $values = [] )
 	{
 		$instance = $this->firstOrNew( $attributes );
-
 		$instance->fill( $values )->save();
 
 		return $instance;
@@ -315,9 +308,7 @@ class Builder
 	public function firstOrFail( $columns = ['*'] )
 	{
 		if ( !is_null( $model = $this->first( $columns ) ) )
-		{
 			return $model;
-		}
 
 		throw ( new ModelNotFoundException )->setModel( get_class( $this->model ) );
 	}
@@ -355,10 +346,7 @@ class Builder
 	{
 		$result = $this->first( [$column] );
 
-		if ( $result )
-		{
-			return $result->{$column};
-		}
+		return $result ? $result->{$column} : null;
 	}
 
 	/**
@@ -810,15 +798,11 @@ class Builder
 		if ( $column instanceof Closure )
 		{
 			$query = $this->model->newQueryWithoutScopes();
-
 			call_user_func( $column, $query );
-
 			$this->query->addNestedWhereQuery( $query->getQuery(), $boolean );
 		}
 		else
-		{
 			call_user_func_array( [$this->query, 'where'], func_get_args() );
-		}
 
 		return $this;
 	}

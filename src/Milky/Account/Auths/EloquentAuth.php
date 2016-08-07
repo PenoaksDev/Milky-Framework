@@ -51,11 +51,11 @@ class EloquentAuth implements AccountAuth
 	 * Retrieve a user by their unique identifier.
 	 *
 	 * @param  mixed $identifier
-	 * @return User|null
+	 * @return User|Model|null
 	 */
 	public function retrieveById( $identifier )
 	{
-		return $this->createUsrModel()->newQuery()->find( $identifier )->first();
+		return $this->createUsrModel()->newQuery()->find( $identifier );
 	}
 
 	/**
@@ -63,13 +63,13 @@ class EloquentAuth implements AccountAuth
 	 *
 	 * @param  mixed $identifier
 	 * @param  string $token
-	 * @return User|null
+	 * @return User|Model|null
 	 */
 	public function retrieveByToken( $identifier, $token )
 	{
 		$model = $this->createUsrModel();
 
-		return $model->newQuery()->where( 'id', $identifier )->where( 'remember_token', $token )->first();
+		return $model->newQuery()->where( $model->getAuthIdentifierName(), $identifier )->where( $model->getRememberTokenName(), $token )->first();
 	}
 
 	/**

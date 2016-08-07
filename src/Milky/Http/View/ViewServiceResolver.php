@@ -1,6 +1,6 @@
 <?php namespace Milky\Http\View;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 use Milky\Facades\Config;
 use Milky\Filesystem\Filesystem;
 use Milky\Http\View\Compilers\BladeCompiler;

@@ -2,6 +2,7 @@
 
 use Closure;
 use InvalidArgumentException;
+use Milky\Encryption\Encrypter;
 use Milky\Facades\Config;
 use Milky\Facades\Hooks;
 use Milky\Framework;
@@ -111,7 +112,7 @@ class QueueManager
 		{
 			$this->connections[$name] = $this->resolve( $name );
 
-			$this->connections[$name]->setEncrypter( Framework::get( 'encrypter' ) );
+			$this->connections[$name]->setEncrypter( Encrypter::i() );
 		}
 
 		return $this->connections[$name];

@@ -1,9 +1,9 @@
 <?php namespace Milky\Hashing;
 
-use Milky\Services\ServiceFactory;
+use Milky\Binding\UniversalBuilder;
 use RuntimeException;
 
-class BcryptHasher extends ServiceFactory
+class BcryptHasher
 {
 	/**
 	 * Default crypt cost factor.
@@ -11,6 +11,11 @@ class BcryptHasher extends ServiceFactory
 	 * @var int
 	 */
 	protected $rounds = 10;
+
+	public static function i()
+	{
+		return UniversalBuilder::resolveClass( static::class );
+	}
 
 	/**
 	 * Hash the given value.

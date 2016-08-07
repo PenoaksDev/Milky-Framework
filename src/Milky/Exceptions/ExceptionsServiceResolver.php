@@ -1,6 +1,6 @@
 <?php namespace Milky\Exceptions;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 use Milky\Exceptions\Displayers\HtmlDisplayer;
 use Milky\Exceptions\Filters\VerboseFilter;
 use Milky\Facades\Config;

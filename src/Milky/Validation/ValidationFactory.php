@@ -1,11 +1,7 @@
 <?php namespace Milky\Validation;
 
 use Closure;
-use Milky\Database\DatabaseManager;
 use Milky\Helpers\Str;
-use Milky\Impl\Extendable;
-use Milky\Services\ServiceFactory;
-use Milky\Translation\Translator;
 use Symfony\Component\Translation\TranslatorInterface;
 
 class ValidationFactory
@@ -13,14 +9,14 @@ class ValidationFactory
 	/**
 	 * The Translator implementation.
 	 *
-	 * @var \Symfony\Component\Translation\TranslatorInterface
+	 * @var TranslatorInterface
 	 */
 	protected $translator;
 
 	/**
 	 * The Presence Verifier implementation.
 	 *
-	 * @var \Milky\Validation\PresenceVerifierInterface
+	 * @var PresenceVerifierInterface
 	 */
 	protected $verifier;
 
@@ -62,8 +58,7 @@ class ValidationFactory
 	/**
 	 * Create a new Validator factory instance.
 	 *
-	 * @param  \Symfony\Component\Translation\TranslatorInterface $translator
-	 * @param  \Illuminate\Contracts\Container\Container $container
+	 * @param  TranslatorInterface $translator
 	 * @return void
 	 */
 	public function __construct( TranslatorInterface $translator )
@@ -78,7 +73,7 @@ class ValidationFactory
 	 * @param  array $rules
 	 * @param  array $messages
 	 * @param  array $customAttributes
-	 * @return \Milky\Validation\Validator
+	 * @return Validator
 	 */
 	public function make( array $data, array $rules, array $messages = [], array $customAttributes = [] )
 	{
@@ -100,7 +95,7 @@ class ValidationFactory
 	/**
 	 * Add the extensions to a validator instance.
 	 *
-	 * @param  \Milky\Validation\Validator $validator
+	 * @param  Validator $validator
 	 * @return void
 	 */
 	protected function addExtensions( Validator $validator )
@@ -126,7 +121,7 @@ class ValidationFactory
 	 * @param  array $rules
 	 * @param  array $messages
 	 * @param  array $customAttributes
-	 * @return \Milky\Validation\Validator
+	 * @return Validator
 	 */
 	protected function resolve( array $data, array $rules, array $messages, array $customAttributes )
 	{
@@ -198,7 +193,7 @@ class ValidationFactory
 	/**
 	 * Get the Translator implementation.
 	 *
-	 * @return \Symfony\Component\Translation\TranslatorInterface
+	 * @return TranslatorInterface
 	 */
 	public function getTranslator()
 	{
@@ -208,7 +203,7 @@ class ValidationFactory
 	/**
 	 * Get the Presence Verifier implementation.
 	 *
-	 * @return \Milky\Validation\PresenceVerifierInterface
+	 * @return PresenceVerifierInterface
 	 */
 	public function getPresenceVerifier()
 	{
@@ -218,7 +213,7 @@ class ValidationFactory
 	/**
 	 * Set the Presence Verifier implementation.
 	 *
-	 * @param  \Milky\Validation\PresenceVerifierInterface $presenceVerifier
+	 * @param  PresenceVerifierInterface $presenceVerifier
 	 * @return void
 	 */
 	public function setPresenceVerifier( PresenceVerifierInterface $presenceVerifier )

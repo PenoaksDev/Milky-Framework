@@ -3,7 +3,7 @@
 use Milky\Exceptions\DecryptException;
 use Milky\Services\ServiceFactory;
 
-abstract class BaseEncrypter extends ServiceFactory
+abstract class BaseEncrypter
 {
 	/**
 	 * The encryption key.

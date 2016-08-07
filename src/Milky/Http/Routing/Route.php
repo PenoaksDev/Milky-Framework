@@ -3,7 +3,7 @@
 use Closure;
 use LogicException;
 use Milky\Binding\UniversalBuilder;
-use Milky\Exceptions\HttpResponseException;
+use Milky\Exceptions\Http\HttpResponseException;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Http\Request;
@@ -131,9 +131,7 @@ class Route
 		try
 		{
 			if ( !is_string( $this->action['uses'] ) )
-			{
 				return $this->runCallable( $request );
-			}
 
 			return $this->runController( $request );
 		}
@@ -232,14 +230,10 @@ class Route
 	public function middleware( $middleware = null )
 	{
 		if ( is_null( $middleware ) )
-		{
 			return (array) Arr::get( $this->action, 'middleware', [] );
-		}
 
 		if ( is_string( $middleware ) )
-		{
 			$middleware = [$middleware];
-		}
 
 		$this->action['middleware'] = array_merge( (array) Arr::get( $this->action, 'middleware', [] ), $middleware );
 
@@ -273,13 +267,10 @@ class Route
 		if ( is_string( $action['uses'] ) )
 		{
 			list( $class, $method ) = explode( '@', $action['uses'] );
-
 			$parameters = ( new ReflectionMethod( $class, $method ) )->getParameters();
 		}
 		else
-		{
 			$parameters = ( new ReflectionFunction( $action['uses'] ) )->getParameters();
-		}
 
 		return is_null( $subClass ) ? $parameters : array_filter( $parameters, function ( $p ) use ( $subClass )
 		{
@@ -597,9 +588,7 @@ class Route
 	public static function getValidators()
 	{
 		if ( isset( static::$validators ) )
-		{
 			return static::$validators;
-		}
 
 		// To match the route, we will use a chain of responsibility pattern with the
 		// validator implementations. We will spin through each one making sure it
@@ -849,9 +838,7 @@ class Route
 		$groupStack = last( $this->router->getGroupStack() );
 
 		if ( isset( $groupStack['namespace'] ) && strpos( $action, '\\' ) !== 0 )
-		{
 			return $groupStack['namespace'] . '\\' . $action;
-		}
 
 		return $action;
 	}

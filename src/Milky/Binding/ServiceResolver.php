@@ -1,9 +1,7 @@
-<?php namespace Milky\Binding\Resolvers;
+<?php namespace Milky\Binding;
 
-use Milky\Binding\UniversalBuilder;
 use Milky\Exceptions\BindingException;
 use Milky\Exceptions\ResolverException;
-use Milky\Helpers\Func;
 use Milky\Helpers\Str;
 
 /**
@@ -37,6 +35,11 @@ class ServiceResolver
 	protected $classAlias = [];
 
 	/**
+	 * @var array
+	 */
+	protected $keyAlias = [];
+
+	/**
 	 * Default
 	 *
 	 * @var string
@@ -64,6 +67,19 @@ class ServiceResolver
 			throw new ResolverException( "Alias must be a string" );
 		foreach ( is_array( $keys ) ? $keys : [$keys] as $key )
 			$this->alias[$key] = $alias;
+	}
+
+	/**
+	 * @param array|string $keys
+	 */
+	public function addKeyAlias( $keys )
+	{
+		$this->keyAlias = array_merge( $this->keyAlias, is_array( $keys ) ? $keys : [$keys] );
+	}
+
+	public function getKeyAliases()
+	{
+		return $this->keyAlias;
 	}
 
 	/**

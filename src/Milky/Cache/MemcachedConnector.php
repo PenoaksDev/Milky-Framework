@@ -1,11 +1,19 @@
 <?php namespace Milky\Cache;
 
 use Memcached;
-use Milky\Services\ServiceFactory;
+use Milky\Binding\UniversalBuilder;
 use RuntimeException;
 
-class MemcachedConnector extends ServiceFactory
+class MemcachedConnector
 {
+	/**
+	 * @return MemcachedConnector
+	 */
+	public static function i()
+	{
+		return UniversalBuilder::resolveClass( static::class );
+	}
+
 	/**
 	 * Create a new Memcached connection.
 	 *
@@ -22,21 +30,15 @@ class MemcachedConnector extends ServiceFactory
 		// the server to the Memcached connection. Once we have added all of these
 		// servers we'll verify the connection is successful and return it back.
 		foreach ( $servers as $server )
-		{
 			$memcached->addServer( $server['host'], $server['port'], $server['weight'] );
-		}
 
 		$memcachedStatus = $memcached->getVersion();
 
 		if ( !is_array( $memcachedStatus ) )
-		{
 			throw new RuntimeException( 'No Memcached servers added.' );
-		}
 
 		if ( in_array( '255.255.255', $memcachedStatus ) && count( array_unique( $memcachedStatus ) ) === 1 )
-		{
 			throw new RuntimeException( 'Could not establish Memcached connection.' );
-		}
 
 		return $memcached;
 	}

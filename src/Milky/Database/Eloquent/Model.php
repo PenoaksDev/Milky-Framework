@@ -1875,9 +1875,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 		$builder = $this->newQueryWithoutScopes();
 
 		foreach ( $this->getGlobalScopes() as $identifier => $scope )
-		{
 			$builder->withGlobalScope( $identifier, $scope );
-		}
 
 		return $builder;
 	}
@@ -1898,7 +1896,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 	/**
 	 * Get a new query builder that doesn't have any global scopes.
 	 *
-	 * @return Builder|static
+	 * @return Builder
 	 */
 	public function newQueryWithoutScopes()
 	{
@@ -1913,8 +1911,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 	/**
 	 * Create a new Eloquent query builder for the model.
 	 *
-	 * @param Builder $query
-	 * @return Builder|static
+	 * @param QueryBuilder $query
+	 * @return Builder
 	 */
 	public function newEloquentBuilder( $query )
 	{

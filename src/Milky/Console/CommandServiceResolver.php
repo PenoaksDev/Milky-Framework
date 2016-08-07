@@ -1,6 +1,6 @@
 <?php namespace Milky\Console;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 
 /**
  * The MIT License (MIT)

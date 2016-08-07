@@ -2,7 +2,7 @@
 
 use Milky\Account\Auths\AccountAuth;
 use Milky\Account\Guards\Guard;
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 
 /**
  * The MIT License (MIT)

@@ -1,6 +1,6 @@
 <?php namespace Milky\Validation;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 use Milky\Database\DatabaseManager;
 use Milky\Translation\Translator;
 
@@ -21,6 +21,7 @@ class ValidationServiceResolver extends ServiceResolver
 		$this->setDefault( 'factory' );
 
 		$this->addClassAlias( ValidationFactory::class, 'factory' );
+		$this->addClassAlias( PresenceVerifierInterface::class, 'presence' );
 	}
 
 	/**
@@ -41,8 +42,16 @@ class ValidationServiceResolver extends ServiceResolver
 		return $this->factoryInstance;
 	}
 
+	/**
+	 * @return PresenceVerifierInterface
+	 */
+	public function presence()
+	{
+		return $this->factory()->getPresenceVerifier();
+	}
+
 	public function key()
 	{
-		return 'validation';
+		return ['validation', 'validator'];
 	}
 }

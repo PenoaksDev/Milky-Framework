@@ -1,6 +1,6 @@
 <?php namespace Milky\Queue;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 use Milky\Binding\UniversalBuilder;
 use Milky\Database\DatabaseManager;
 use Milky\Facades\Config;

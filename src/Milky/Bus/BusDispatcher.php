@@ -1,21 +1,14 @@
 <?php namespace Milky\Bus;
 
 use Closure;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Milky\Binding\UniversalBuilder;
 use Milky\Pipeline\Pipeline;
-use Milky\Queue\Impl\ShouldQueue;
-use Milky\Queue\Impl\Queue;
-use Milky\Services\ServiceFactory;
+use Milky\Queue\Queue;
 use RuntimeException;
 
-class Dispatcher extends ServiceFactory
+class BusDispatcher
 {
-	/**
-	 * The container implementation.
-	 *
-	 * @var Container
-	 */
-	protected $container;
-
 	/**
 	 * The pipeline instance for the bus.
 	 *
@@ -37,12 +30,9 @@ class Dispatcher extends ServiceFactory
 	 */
 	protected $queueResolver;
 
-	public static function build()
+	public static function i()
 	{
-		return new Dispatcher( function ( $connection = null ) use ( $fw )
-		{
-			return $fw['Milky\Queue\Impl\Factory']->connection( $connection );
-		} );
+		return UniversalBuilder::resolveClass( static::class );
 	}
 
 	/**
@@ -53,8 +43,6 @@ class Dispatcher extends ServiceFactory
 	 */
 	public function __construct( Closure $queueResolver = null )
 	{
-		parent::__construct();
-		
 		$this->queueResolver = $queueResolver;
 		$this->pipeline = new Pipeline();
 	}
@@ -68,13 +56,9 @@ class Dispatcher extends ServiceFactory
 	public function dispatch( $command )
 	{
 		if ( $this->queueResolver && $this->commandShouldBeQueued( $command ) )
-		{
 			return $this->dispatchToQueue( $command );
-		}
 		else
-		{
 			return $this->dispatchNow( $command );
-		}
 	}
 
 	/**
@@ -87,7 +71,7 @@ class Dispatcher extends ServiceFactory
 	{
 		return $this->pipeline->send( $command )->through( $this->pipes )->then( function ( $command )
 		{
-			return $this->container->call( [$command, 'handle'] );
+			UniversalBuilder::call( [$command, 'handle'] );
 		} );
 	}
 

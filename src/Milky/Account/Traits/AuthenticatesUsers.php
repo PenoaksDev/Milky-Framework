@@ -80,7 +80,7 @@ trait AuthenticatesUsers
 		{
 			$this->fireLockoutEvent( $request );
 
-			return $this->sendLockoutResponse( $request );
+			// return $this->sendLockoutResponse( $request );
 		}
 
 		$credentials = $this->getCredentials( $request );

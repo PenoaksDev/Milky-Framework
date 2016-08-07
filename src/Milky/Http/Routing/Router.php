@@ -559,7 +559,6 @@ class Router
 	protected function addWhereClausesToRoute( $route )
 	{
 		$where = isset( $route->getAction()['where'] ) ? $route->getAction()['where'] : [];
-
 		$route->where( array_merge( $this->patterns, $where ) );
 
 		return $route;

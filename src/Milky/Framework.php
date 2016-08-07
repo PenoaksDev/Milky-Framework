@@ -1,37 +1,18 @@
 <?php namespace Milky;
 
-use Faker\Factory as FakerFactory;
-use Faker\Generator as FakerGenerator;
-use Milky\Binding\Globals;
 use Milky\Binding\UniversalBuilder;
-use Milky\Bus\Dispatcher;
-use Milky\Cache\CacheManager;
-use Milky\Cache\MemcachedConnector;
 use Milky\Config\Configuration;
 use Milky\Config\ConfigurationBuilder;
-use Milky\Console\ConsoleFactory;
 use Milky\Console\ConsoleServiceResolver;
-use Milky\Database\Eloquent\Factory as EloquentFactory;
-use Milky\Database\Eloquent\QueueEntityResolver;
-use Milky\Encryption\Encrypter;
 use Milky\Exceptions\FrameworkException;
-use Milky\Exceptions\Handler;
-use Milky\Facades\Config;
 use Milky\Facades\Log;
-use Milky\Filesystem\Filesystem;
-use Milky\Hashing\BcryptHasher;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 use Milky\Hooks\HookDispatcher;
-use Milky\Http\Factory;
 use Milky\Http\HttpFactory;
 use Milky\Logging\LogBuilder;
 use Milky\Logging\Logger;
 use Milky\Providers\ProviderRepository;
-use Milky\Queue\ConsoleServiceProvider;
-use Milky\Redis\Redis;
-use Milky\Translation\Translator;
-use Milky\Validation\Factory as ValidationFactory;
 
 /**
  * @Product: Milky Framework
@@ -50,18 +31,26 @@ use Milky\Validation\Factory as ValidationFactory;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class Framework implements \ArrayAccess
+class Framework
 {
-	use Globals;
-
 	const PRODUCT = "Milky Framework";
-	const VERSION = "v6.0.0 (Polkadot)";
+	const VERSION = "v6.0 (Polkadot)";
 	const COPYRIGHT = "Copyright © 2016 Penoaks Publishing Co.";
 
 	/**
 	 * @var bool
 	 */
 	private $isBooted = false;
+
+	/**
+	 * @var string
+	 */
+	private $namespace;
+
+	/**
+	 * @var Framework
+	 */
+	private static $fw;
 
 	/**
 	 * The Hook Dispatcher
@@ -112,12 +101,16 @@ class Framework implements \ArrayAccess
 
 	/**
 	 * Framework Constructor
+	 *
+	 * @param string $basePath
+	 *
+	 * @throws FrameworkException
 	 */
 	public function __construct( $basePath )
 	{
-		if ( $this->offsetExists( 'fw' ) )
+		if ( !is_null( static::$fw ) )
 			throw new FrameworkException( "Framework is already running." );
-		$this['fw'] = $this;
+		static::$fw = $this;
 
 		$this->basePath = $basePath;
 
@@ -150,107 +143,10 @@ class Framework implements \ArrayAccess
 		foreach ( $this->config->get( 'app.providers', [] ) as $provider )
 			$this->providers->register( $provider );
 
-		$this->registerBindingAlias();
-
-		$this->registerBindings();
-
 		new UniversalBuilder( $this );
 
 		$this->hooks->trigger( 'fw.loaded', $this );
 		$this->log->info( "Milky Framework Loaded" );
-	}
-
-	public function registerBindingAlias()
-	{
-		$this->addAlias( ['Milky\Encryption\Encrypter'], 'encrypter' );
-		$this->addAlias( ['Milky\Http\View\Factory', 'view'], 'view.factory' );
-		$this->addAlias( ['Milky\Auth\AuthManager', 'auth'], 'auth.mgr' );
-		$this->addAlias( ['Milky\Database\DatabaseManager', 'db'], 'db.mgr' );
-		$this->addAlias( ['Milky\Cache\CacheManager', 'cache'], 'cache.mgr' );
-		$this->addAlias( ['Milky\Http\Session\SessionManager', 'session'], 'session.mgr' );
-		$this->addAlias( ['Milky\Bus\Dispatcher'], 'dispatcher' );
-		$this->addAlias( ['Milky\Queue\QueueManager', 'queue'], 'queue.mgr' );
-		$this->addAlias( ['Milky\Http\Routing\UrlGenerator', 'UrlGenerator'], 'url' );
-	}
-
-	public function registerBindings()
-	{
-		$this['encrypter'] = function ()
-		{
-			return Encrypter::i();
-		};
-
-		$this['files'] = function ()
-		{
-			return Filesystem::i();
-		};
-
-		$this['hash'] = function ()
-		{
-			return BcryptHasher::i();
-		};
-
-		$this['cache.mgr'] = function ()
-		{
-			return CacheManager::i();
-		};
-
-		$this['cache.store'] = function ()
-		{
-			return CacheManager::i()->driver();
-		};
-
-		$this['memcached.connector'] = function ()
-		{
-			return MemcachedConnector::i();
-		};
-
-		$this['dispatcher'] = function ()
-		{
-			return Dispatcher::i();
-		};
-
-		$this['redis'] = function ()
-		{
-			return new Redis( Config::get( 'database.redis' ) );
-		};
-
-		$fw['translator'] = function ()
-		{
-			return Translator::i();
-		};
-
-		$fw['translation.loader'] = function ()
-		{
-			return Translator::i()->getLoader();
-		};
-
-		$fw[FakerGenerator::class] = function ()
-		{
-			return FakerFactory::create();
-		};
-
-		$fw[EloquentFactory::class] = function ()
-		{
-			$faker = UniversalBuilder::resolveClass( FakerGenerator::class );
-
-			return EloquentFactory::construct( $faker, $this->buildPath( '__database', 'factories' ) );
-		};
-
-		$fw[FakerGenerator::class] = function ()
-		{
-			return new QueueEntityResolver;
-		};
-
-		$fw['validator'] = function ()
-		{
-			return ValidationFactory::i();
-		};
-
-		$fw['validation.presence'] = function ()
-		{
-			return ValidationFactory::i()->getPresenceVerifier();
-		};
 	}
 
 	/**
@@ -258,7 +154,7 @@ class Framework implements \ArrayAccess
 	 */
 	public static function fw()
 	{
-		return static::$globals['fw'];
+		return static::$fw;
 	}
 
 	/**
@@ -282,7 +178,7 @@ class Framework implements \ArrayAccess
 	 */
 	public static function isRunning()
 	{
-		return array_key_exists( 'fw', static::$globals );
+		return !is_null( static::$fw );
 	}
 
 	public function boot()
@@ -335,6 +231,8 @@ class Framework implements \ArrayAccess
 	 * Append args to the base path
 	 *
 	 * @return string
+	 *
+	 * @throws FrameworkException
 	 */
 	public function buildPath()
 	{
@@ -428,9 +326,9 @@ class Framework implements \ArrayAccess
 	 * @param  mixed
 	 * @return string
 	 */
-	public function environment()
+	public static function environment()
 	{
-		$env = $this->config->get( 'app.env', 'production' );
+		$env = static::fw()->config->get( 'app.env', 'production' );
 
 		if ( func_num_args() > 0 )
 		{
@@ -468,7 +366,7 @@ class Framework implements \ArrayAccess
 	}
 
 	/**
-	 * Unused
+	 * Unused... for now
 	 */
 	public function terminate()
 	{

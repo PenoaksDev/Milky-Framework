@@ -108,7 +108,6 @@ class AccountManager
 	protected function resolveAuth( $auth )
 	{
 		$config = Config::get( 'auth.auths.' . $auth );
-
 		$uses = $config['uses'];
 
 		switch ( $uses )

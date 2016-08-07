@@ -1,9 +1,8 @@
 <?php namespace Milky\Database\Eloquent;
 
-use Milky\Queue\EntityNotFoundException;
-use Milky\Queue\EntityResolver as EntityResolverContract;
+use Milky\Exceptions\Queue\EntityNotFoundException;
 
-class QueueEntityResolver implements EntityResolverContract
+class QueueEntityResolver
 {
 	/**
 	 * Resolve the entity for the given ID.
@@ -19,9 +18,7 @@ class QueueEntityResolver implements EntityResolverContract
 		$instance = ( new $type )->find( $id );
 
 		if ( $instance )
-		{
 			return $instance;
-		}
 
 		throw new EntityNotFoundException( $type, $id );
 	}

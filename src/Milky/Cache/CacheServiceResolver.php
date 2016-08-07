@@ -1,6 +1,6 @@
 <?php namespace Milky\Cache;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 
 /**
  * The MIT License (MIT)
@@ -20,12 +20,18 @@ class CacheServiceResolver extends ServiceResolver
 		$this->setDefault( 'mgr' );
 
 		$this->addClassAlias( CacheManager::class, 'mgr' );
+		$this->addClassAlias( Store::class, 'store' );
 		$this->addClassAlias( RateLimiter::class, 'limiter' );
 	}
 
 	public function mgr()
 	{
 		return $this->mgrInstance ?: $this->mgrInstance = new CacheManager();
+	}
+
+	public function store()
+	{
+		return $this->mgr()->store();
 	}
 
 	public function limiter()

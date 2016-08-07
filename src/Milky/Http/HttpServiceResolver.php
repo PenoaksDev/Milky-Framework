@@ -1,6 +1,6 @@
 <?php namespace Milky\Http;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 use Milky\Facades\Config;
 use Milky\Http\Cookies\CookieJar;
 use Milky\Http\Routing\Redirector;

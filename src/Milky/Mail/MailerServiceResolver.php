@@ -1,6 +1,6 @@
 <?php namespace Milky\Mail;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 use Milky\Binding\UniversalBuilder;
 use Milky\Facades\Config;
 use Milky\Http\View\ViewFactory;

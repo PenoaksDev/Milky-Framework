@@ -1,6 +1,6 @@
 <?php namespace Milky\Translation;
 
-use Milky\Binding\Resolvers\ServiceResolver;
+use Milky\Binding\ServiceResolver;
 use Milky\Facades\Config;
 use Milky\Filesystem\Filesystem;
 use Milky\Framework;
@@ -22,8 +22,12 @@ class TranslationServiceResolver extends ServiceResolver
 		$this->setDefault( 'translator' );
 
 		$this->addClassAlias( Translator::class, 'translator' );
+		$this->addClassAlias( LoaderInterface::class, 'loader' );
 	}
 
+	/**
+	 * @return Translator
+	 */
 	public function translator()
 	{
 		if ( is_null( $this->translatorInstance ) )
@@ -40,8 +44,16 @@ class TranslationServiceResolver extends ServiceResolver
 		return $this->translatorInstance;
 	}
 
+	/**
+	 * @return LoaderInterface
+	 */
+	public function loader()
+	{
+		return $this->translator()->getLoader();
+	}
+
 	public function key()
 	{
-		return 'translation';
+		return ['translation', 'translator'];
 	}
 }
