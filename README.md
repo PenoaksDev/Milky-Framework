@@ -1,17 +1,15 @@
-# Penoaks Framework
+# Milky Framework
 
-[![StyleCI](https://styleci.io/repos/7548986/shield?style=flat)](https://styleci.io/repos/7548986)
-[![Build Status](https://travis-ci.org/penoaks/framework.svg)](https://travis-ci.org/penoaks/framework)
-[![Total Downloads](https://poser.pugx.org/penoaks/framework/d/total.svg)](https://packagist.org/packages/penoaks/framework)
-[![Latest Stable Version](https://poser.pugx.org/penoaks/framework/v/stable.svg)](https://packagist.org/packages/penoaks/framework)
-[![Latest Unstable Version](https://poser.pugx.org/penoaks/framework/v/unstable.svg)](https://packagist.org/packages/penoaks/framework)
-[![License](https://poser.pugx.org/penoaks/framework/license.svg)](https://packagist.org/packages/penoaks/framework)
-
-> **Note:** This repository contains the core code of the Penoaks Framework. If you want to build an application using Penoaks 5, visit the main [Penoaks repository](https://github.com/penoaks/penoaks).
+[![StyleCI](https://styleci.io/repos/6464365/shield?style=flat)](https://styleci.io/repos/6464365)
+[![Build Status](https://travis-ci.org/penoaks/framework.svg)](https://travis-ci.org/penoaks/milky-framework)
+[![Total Downloads](https://poser.pugx.org/penoaks/framework/d/total.svg)](https://packagist.org/packages/penoaks/milky-framework)
+[![Latest Stable Version](https://poser.pugx.org/penoaks/framework/v/stable.svg)](https://packagist.org/packages/penoaks/milky-framework)
+[![Latest Unstable Version](https://poser.pugx.org/penoaks/framework/v/unstable.svg)](https://packagist.org/packages/penoaks/milky-framework)
+[![License](https://poser.pugx.org/penoaks/framework/license.svg)](https://packagist.org/packages/penoaks/milky-framework)
 
 ## Getting Started
 
-Penoaks Framework uses Composer to manage dependencies. So, before using Penoaks Framework, make sure you have Composer installed on your machine.
+Milky Framework uses Composer to manage dependencies. So, before using Milky Framework, make sure you have Composer installed on your machine.
 
 ### Dependencies
 
@@ -25,23 +23,24 @@ Be sure you have the following dependencies installed.
 
 ### Install with Composer
 
-You can simply install Penoaks Framework by issuing the Composer `create-project` command in your terminal:
+You can simply install Milky Framework by issuing the Composer `create-project` command in your terminal:
 
 ```bash
-composer create-project --prefer-dist penoaks/framework framework
+composer create-project --prefer-dist penoaks/milky-framework framework
 ```
 
-You can also alternatively install the Framework by simply cloning our repository and issuing the Composer `update` command in your terminal.
+You can also alternatively install the Framework by simply requiring our repository in your composer project, remember to at least reference our framework-project for example project files.
 
 ```bash
+composer require penoaks/milky-framework
 composer update
 ```
 
 ### Your First Project
 
-With Penoaks Framework, no application or user files are kept in the framework directory. Instead views, controllers, etc, are kept in the `src` (customizable) directory found in your webroot. Because of this you can simply update your installation by deleting the old framework directory and reinstalling. You should only need the `index.php` and `.htaccess` files to setup proper routing from there. Be sure you have the `mod_rewrite` apache module enabled.
+With Milky Framework, no application or user files are kept in the framework directory. Instead views, controllers, etc, are kept in the `src` (customizable) directory found in your webroot. Because of this you can simply update your installation by deleting the old framework directory and reinstalling. You should only need the `index.php` and `.htaccess` files to setup proper routing from there. Be sure you have the `mod_rewrite` apache module enabled.
 
-`.htaccess`
+#### .htaccess
 
 ```
 <IfModule mod_rewrite.c>
@@ -69,7 +68,7 @@ With Penoaks Framework, no application or user files are kept in the framework d
 </IfModule>
 ```
 
-`index.php`
+#### index.php
 
 ```php
 <?php

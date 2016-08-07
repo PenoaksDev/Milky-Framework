@@ -1,0 +1,178 @@
+<?php namespace Milky\Database\Eloquent\Nested;
+
+use Closure;
+use Milky\Impl\Arrayable;
+
+class SetMapper
+{
+	/**
+	 * Node instance for reference
+	 *
+	 * @var NestedModel
+	 */
+	protected $model = null;
+
+	/**
+	 * Children key name
+	 *
+	 * @var string
+	 */
+	protected $childrenKeyName = 'children';
+
+	/**
+	 * Create a new SetBuilder class instance.
+	 *
+	 * @param   NestedModel $model
+	 * @return  void
+	 */
+	public function __construct( $model, $childrenKeyName = 'children' )
+	{
+		$this->model = $model;
+
+		$this->childrenKeyName = $childrenKeyName;
+	}
+
+	/**
+	 * Maps a tree structure into the database. Unguards & wraps in transaction.
+	 *
+	 * @param   array|Arrayable
+	 * @return  boolean
+	 */
+	public function map( $modelList )
+	{
+		$self = $this;
+
+		return $this->wrapInTransaction( function () use ( $self, $modelList )
+		{
+			forward_static_call( [get_class( $self->model ), 'unguard'] );
+
+			$result = $self->mapTree( $modelList );
+
+			forward_static_call( [get_class( $self->model ), 'reguard'] );
+
+			return $result;
+		} );
+	}
+
+	/**
+	 * Maps a tree structure into the database without unguarding nor wrapping
+	 * inside a transaction.
+	 *
+	 * @param   array|Arrayable
+	 * @return  boolean
+	 */
+	public function mapTree( $modelList )
+	{
+		$tree = $modelList instanceof Arrayable ? $modelList->toArray() : $modelList;
+
+		$affectedKeys = [];
+
+		$result = $this->mapTreeRecursive( $tree, $this->model->getKey(), $affectedKeys );
+
+		if ( $result && count( $affectedKeys ) > 0 )
+			$this->deleteUnaffected( $affectedKeys );
+
+		return $result;
+	}
+
+	/**
+	 * Returns the children key name to use on the mapping array
+	 *
+	 * @return string
+	 */
+	public function getChildrenKeyName()
+	{
+		return $this->childrenKeyName;
+	}
+
+	/**
+	 * Maps a tree structure into the database
+	 *
+	 * @param   array $tree
+	 * @param   mixed $parent
+	 * @return  boolean
+	 */
+	protected function mapTreeRecursive( array $tree, $parentKey = null, &$affectedKeys = [] )
+	{
+		// For every attribute entry: We'll need to instantiate a new node either
+		// from the database (if the primary key was supplied) or a new instance. Then,
+		// append all the remaining data attributes (including the `parent_id` if
+		// present) and save it. Finally, tail-recurse performing the same
+		// operations for any child node present. Setting the `parent_id` property at
+		// each level will take care of the nesting work for us.
+		foreach ( $tree as $attributes )
+		{
+			$model = $this->firstOrNew( $this->getSearchAttributes( $attributes ) );
+
+			$data = $this->getDataAttributes( $attributes );
+			if ( !is_null( $parentKey ) )
+				$data[$model->getParentColumnName()] = $parentKey;
+
+			$model->fill( $data );
+
+			$result = $model->save();
+
+			if ( !$result )
+				return false;
+
+			$affectedKeys[] = $model->getKey();
+
+			if ( array_key_exists( $this->getChildrenKeyName(), $attributes ) )
+			{
+				$children = $attributes[$this->getChildrenKeyName()];
+
+				if ( count( $children ) > 0 )
+				{
+					$result = $this->mapTreeRecursive( $children, $model->getKey(), $affectedKeys );
+
+					if ( !$result )
+						return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	protected function getSearchAttributes( $attributes )
+	{
+		$searchable = [$this->model->getKeyName()];
+
+		return array_only( $attributes, $searchable );
+	}
+
+	protected function getDataAttributes( $attributes )
+	{
+		$exceptions = [$this->model->getKeyName(), $this->getChildrenKeyName()];
+
+		return array_except( $attributes, $exceptions );
+	}
+
+	protected function firstOrNew( $attributes )
+	{
+		$className = get_class( $this->model );
+
+		if ( count( $attributes ) === 0 )
+			return new $className;
+
+		return forward_static_call( [$className, 'firstOrNew'], $attributes );
+	}
+
+	protected function pruneScope()
+	{
+		if ( $this->model->exists )
+			return $this->model->descendants();
+
+		return $this->model->newNestedSetQuery();
+	}
+
+	protected function deleteUnaffected( $keys = [] )
+	{
+		return $this->pruneScope()->whereNotIn( $this->model->getKeyName(), $keys )->delete();
+	}
+
+	protected function wrapInTransaction( Closure $callback )
+	{
+		return $this->model->getConnection()->transaction( $callback );
+	}
+}
