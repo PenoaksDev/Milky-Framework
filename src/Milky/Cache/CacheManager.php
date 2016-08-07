@@ -1,8 +1,8 @@
 <?php namespace Milky\Cache;
 
 use Closure;
-use Doctrine\Common\Cache\Cache;
 use InvalidArgumentException;
+use Milky\Annotations\Cache;
 use Milky\Binding\UniversalBuilder;
 use Milky\Database\DatabaseManager;
 use Milky\Encryption\Encrypter;
@@ -10,7 +10,6 @@ use Milky\Facades\Config;
 use Milky\Filesystem\Filesystem;
 use Milky\Framework;
 use Milky\Helpers\Arr;
-use Milky\Services\ServiceFactory;
 
 class CacheManager implements Cache
 {

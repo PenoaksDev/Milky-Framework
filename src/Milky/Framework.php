@@ -269,10 +269,13 @@ class Framework
 		else if ( !Str::startsWith( $slugs[0], '/' ) )
 			$slugs = Arr::prepend( $slugs, $this->basePath );
 
-		$path = implode( DIRECTORY_SEPARATOR, $slugs );
-		mkdir( $path, 755, true );
+		$dir = strpos( last( $slugs ), '.' ) !== false ? implode( DIRECTORY_SEPARATOR, array_slice( $slugs, 0, count( $slugs ) - 1 ) ) : implode( DIRECTORY_SEPARATOR, $slugs );
 
-		return $path;
+		if ( !file_exists( $dir ) )
+			if ( !mkdir( $dir, 0755, true ) )
+				throw new FrameworkException( "The directory [" . $dir . "] does not exist and we failed to create it" );
+
+		return implode( DIRECTORY_SEPARATOR, $slugs );
 	}
 
 	/**

@@ -1,7 +1,6 @@
 <?php namespace Milky\Account\Models;
 
 use Carbon\Carbon;
-use Fenos\Notifynder\Notifable;
 use HolyWorlds\Middleware\Permissions;
 use HolyWorlds\Support\Traits\Authorizable;
 use HolyWorlds\Support\Traits\UuidAsKey;
@@ -13,7 +12,7 @@ use Milky\Database\Eloquent\Model;
 
 class User extends Model implements Account
 {
-	use Authenticatable, Authorizable, CanResetPassword, Notifable, UuidAsKey;
+	use Authenticatable, Authorizable, CanResetPassword, UuidAsKey;
 
 	protected $hidden = ["password", "remember_token", "activation_token"];
 	public $incrementing = false;

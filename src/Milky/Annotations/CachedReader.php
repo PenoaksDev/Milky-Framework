@@ -1,7 +1,5 @@
 <?php namespace Milky\Annotations;
 
-use Doctrine\Common\Cache\Cache;
-
 /**
  * A cache aware annotation reader.
  *

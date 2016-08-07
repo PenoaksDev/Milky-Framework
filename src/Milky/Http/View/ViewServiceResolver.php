@@ -3,6 +3,7 @@
 use Milky\Binding\ServiceResolver;
 use Milky\Facades\Config;
 use Milky\Filesystem\Filesystem;
+use Milky\Framework;
 use Milky\Http\View\Compilers\BladeCompiler;
 use Milky\Http\View\Engines\CompilerEngine;
 use Milky\Http\View\Engines\EngineResolver;

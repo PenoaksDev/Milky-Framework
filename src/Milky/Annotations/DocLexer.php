@@ -1,7 +1,5 @@
 <?php namespace Milky\Annotations;
 
-use Doctrine\Common\Lexer\AbstractLexer;
-
 /**
  * Simple lexer for docblock annotations.
  *

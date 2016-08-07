@@ -530,8 +530,6 @@ final class DocParser
 		// fully qualified names must start with a \
 		$originalName = $name;
 
-		var_dump( $name );
-
 		if ( '\\' !== $name[0] )
 		{
 			$alias = ( false === $pos = strpos( $name, '\\' ) ) ? $name : substr( $name, 0, $pos );
