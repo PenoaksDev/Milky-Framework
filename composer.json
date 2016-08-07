@@ -80,7 +80,7 @@
       "Milky\\": "src/Milky/"
     }
   },
-  "type": "framework",
+  "type": "library",
   "minimum-stability": "dev",
   "config": {
     "preferred-install": "dist",
