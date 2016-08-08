@@ -32,8 +32,11 @@ error_reporting( E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED );
 /**
  * Super simple exception handler, should never be seen if framework is operating normally
  */
-set_exception_handler( function ( Throwable $e )
+set_exception_handler( function ( $e )
 {
+	if ( !$e instanceof Exception )
+		$e = new \Symfony\Component\Debug\Exception\FatalThrowableError( $e );
+
 	echo( "<h1 style='margin-bottom: 0;'>Uncaught Exception</h1><br />\n" );
 	echo( "<b>" . ( new ReflectionClass( $e ) )->getShortName() . ": " . $e->getMessage() . "</b><br />\n" );
 	echo( "<p>at " . $e->getFile() . " on line " . $e->getLine() . "</p>\n" );

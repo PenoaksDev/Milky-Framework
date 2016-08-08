@@ -9,6 +9,7 @@ use Milky\Account\Types\Account;
 use Milky\Auth\Authenticatable;
 use Milky\Auth\Passwords\CanResetPassword;
 use Milky\Database\Eloquent\Model;
+use Milky\Database\Eloquent\Relations\HasMany;
 
 class User extends Model implements Account
 {
@@ -53,20 +54,23 @@ class User extends Model implements Account
 		return url( "user/{$this->id}-{$this->slug}" );
 	}
 
+	/**
+	 * @return Group[]
+	 */
 	public function groups()
 	{
 		$groups = [];
-		foreach ( $this->inheritance as $heir )
-		{
+		foreach ( $this->inheritance() as $heir )
 			if ( false === array_search( $heir->group, $groups ) )
-			{
 				$groups[] = $heir->group;
-			}
-		}
 
 		return $groups;
 	}
 
+	/**
+	 * @param Group|string $group
+	 * @return bool
+	 */
 	public function hasGroup( $group )
 	{
 		return $this->inheritance()->where( [
@@ -75,16 +79,25 @@ class User extends Model implements Account
 		] )->exists();
 	}
 
+	/**
+	 * @param Group|string $parent
+	 */
 	public function addGroup( $parent )
 	{
 		$this->inheritance()->create( ["parent" => ( $parent instanceof Group ) ? $parent->id : $parent, "type" => 1] );
 	}
 
+	/**
+	 * @return HasMany
+	 */
 	public function inheritance()
 	{
 		return $this->hasMany( GroupInheritance::class, "child" );
 	}
 
+	/**
+	 * @return HasMany
+	 */
 	public function permissions()
 	{
 		return $this->hasMany( PermissionAssigned::class, "name" );
@@ -98,16 +111,10 @@ class User extends Model implements Account
 		$registered = 0;
 
 		foreach ( $result as $user )
-		{
 			if ( $user->isActivated() )
-			{
 				$activated++;
-			}
 			else
-			{
 				$registered++;
-			}
-		}
 
 		$stats = [];
 		$stats[] = ["label" => "Registered", "data" => $activated];
@@ -125,9 +132,7 @@ class User extends Model implements Account
 	public function activate()
 	{
 		if ( $this->isActivated() )
-		{
 			return;
-		}
 
 		$this->activation_token = null;
 		$this->activation_updated = new Carbon();
@@ -186,11 +191,18 @@ class User extends Model implements Account
 		} );
 	}
 
+	/**
+	 * @param string $permission
+	 * @return bool
+	 */
 	public function checkPermission( $permission )
 	{
 		return Permissions::checkPermission( $permission, $this );
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function isAdmin()
 	{
 		return Permissions::checkPermission( 'sys.admin', $this );

@@ -1,5 +1,8 @@
 <?php namespace Milky\Account\Permissions;
 
+use Milky\Binding\UniversalBuilder;
+use Milky\Helpers\Arr;
+use Milky\Helpers\Str;
 use Milky\Services\ServiceFactory;
 
 /**
@@ -10,7 +13,7 @@ use Milky\Services\ServiceFactory;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class PermissionManager extends ServiceFactory
+class PermissionManager
 {
 	/**
 	 * Are operator users allowed? TODO CONFIG
@@ -27,15 +30,55 @@ class PermissionManager extends ServiceFactory
 	protected $loadedPermissions = [];
 
 	/**
+	 * @var Policy[]
+	 */
+	protected $loadedPolicies = [];
+
+	/**
+	 * @var array
+	 */
+	protected $loadedPoliciesNested = [];
+
+	public static function i()
+	{
+		return UniversalBuilder::resolveClass( static::class );
+	}
+
+	/**
 	 * Adds a new policy checker.
 	 *
 	 * Policies are checked for permissions before they are checked by the general permission backend
 	 *
 	 * @param Policy $policy
 	 */
-	public static function policy( $policy )
+	public function policy( Policy $policy )
 	{
+		$this->loadedPolicies[] = $policy;
 
+		// Caches the policy nodes as a nestable tree
+		foreach ( $policy->getNodes() as $nodeKey => $nodeValue )
+			Arr::set( $this->loadedPoliciesNested, $nodeKey . '.__def', $nodeValue );
+	}
+
+	public function checkPolicies( $namespace, $entity )
+	{
+		$steps = explode( '.', $namespace );
+		$result = true;
+
+		$ns = null;
+		$next = $steps[0];
+
+		do
+		{
+			$ns = implode( '.', [$ns, $next] );
+
+			if ( $node = Arr::get( $this->loadedPoliciesNested, $ns . ".__def" ) )
+			{
+				$result = UniversalBuilder::call( $node, ['entity' => $entity] );
+				var_dump( $ns . ".__def" . " --> " . $result );
+			}
+		}
+		while ( $result && $next = next( $steps ) );
 	}
 
 	public function has( $permission )
@@ -51,20 +94,21 @@ class PermissionManager extends ServiceFactory
 	public function parseNode( $permission )
 	{
 		// Everyone
-		if ( $permission == null || empty( $permission.isEmpty() ) || $permission == "-1" || $permission == "everybody" || $permission == "everyone" )
-			$permission = PermissionDefault.EVERYBODY.getNameSpace();
+		if ( is_null( $permission ) || empty( $permission ) || $permission == "-1" || Str::equalsIgnoreCase( $permission, 'everybody' ) || Str::equalsIgnoreCase( $permission, 'everyone' ) )
+			$permission = PermissionDefault::EVERYBODY()->getNameSpace();
 
 		// OP Only
-		if ( $permission.equals( "0" ) || $permission.equalsIgnoreCase( "op" ) || $permission.equalsIgnoreCase( "root" ) )
-			$permission = PermissionDefault.OP.getNameSpace();
+		if ( $permission == "0" || Str::equalsIgnoreCase( $permission, 'op' ) || Str::equalsIgnoreCase( $permission, 'root' ) )
+			$permission = PermissionDefault::OP()->getNameSpace();
 
-		if ( $permission.equalsIgnoreCase( "admin" ) )
-			$permission = PermissionDefault.ADMIN.getNameSpace();
+		if ( Str::equalsIgnoreCase( $permission, 'admin' ) )
+			$permission = PermissionDefault::ADMIN()->getNameSpace();
 
 		return $permission;
 	}
 
 	private function getNode( $getNamespace )
 	{
+
 	}
 }

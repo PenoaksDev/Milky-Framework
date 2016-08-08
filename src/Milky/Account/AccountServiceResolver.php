@@ -2,6 +2,7 @@
 
 use Milky\Account\Auths\AccountAuth;
 use Milky\Account\Guards\Guard;
+use Milky\Account\Permissions\PermissionManager;
 use Milky\Binding\ServiceResolver;
 
 /**
@@ -19,18 +20,35 @@ class AccountServiceResolver extends ServiceResolver
 	 */
 	protected $mgrInstance;
 
+	/**
+	 * @var PermissionManager
+	 */
+	protected $permissionMgrInstance;
+
 	public function __construct()
 	{
 		$this->setDefault( 'mgr' );
 
 		$this->addClassAlias( AccountManager::class, 'mgr' );
+		$this->addClassAlias( PermissionManager::class, 'perm' );
 		$this->addClassAlias( Guard::class, 'guard' );
 		$this->addClassAlias( AccountAuth::class, 'auth' );
 	}
 
+	/**
+	 * @return AccountManager
+	 */
 	public function mgr()
 	{
 		return $this->mgrInstance ?: $this->mgrInstance = AccountManager::build();
+	}
+
+	/**
+	 * @return PermissionManager
+	 */
+	public function perm()
+	{
+		return $this->permissionMgrInstance ?: $this->permissionMgrInstance = new PermissionManager();
 	}
 
 	/**

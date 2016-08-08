@@ -12,6 +12,9 @@ class Filesystem
 {
 	use Macroable;
 
+	/**
+	 * @return Filesystem
+	 */
 	public static function i()
 	{
 		return UniversalBuilder::resolveClass( static::class );

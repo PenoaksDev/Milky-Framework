@@ -1029,4 +1029,16 @@ class Str
 
 		return count( $name ) > 0 ? "" : $name[count( $name )];
 	}
+
+	/**
+	 * Compare two string non-case sensitive.
+	 *
+	 * @param string $str1
+	 * @param string $str2
+	 * @return bool
+	 */
+	public static function equalsIgnoreCase( $str1, $str2 )
+	{
+		return strtolower( $str1 ) == strtolower( $str2 );
+	}
 }

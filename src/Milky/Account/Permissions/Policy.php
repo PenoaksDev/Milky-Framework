@@ -3,6 +3,7 @@
 use Milky\Annotations\AnnotationReader;
 use Milky\Annotations\CachedReader;
 use Milky\Cache\CacheManager;
+use Milky\Exceptions\Auth\PolicyException;
 
 /**
  * The MIT License (MIT)
@@ -25,12 +26,31 @@ abstract class Policy
 	 * The protected string $prefix will be automatically prefixed to the permission key.
 	 */
 
+	/**
+	 * Defines the permission namespace prefix.
+	 * Prefix will be prefixed to the namespace for the below methods.
+	 *
+	 * @var string
+	 */
 	protected $prefix = '';
 
+	/**
+	 * The permission nodes.
+	 * Args available: $entity -> passed by arg name
+	 * Permission => Callable Method
+	 *
+	 * @var array
+	 */
 	protected $nodes = [];
 
+	/**
+	 * Policy constructor.
+	 */
 	public function __construct()
 	{
+		if ( is_null( $this->prefix ) || !is_string( $this->prefix ) )
+			throw new PolicyException( "The policy [" . static::class . "] prefix must be a string." );
+
 		$reader = new AnnotationReader();
 
 		$reader->addImports( ['\Milky\Account\Permissions\PermissionMethod'] );
@@ -40,12 +60,28 @@ abstract class Policy
 		$class = new \ReflectionClass( static::class );
 
 		foreach ( $class->getMethods() as $method )
-			$reader->getMethodAnnotations( $method );
-			// var_dump( $class->name . "#" . $method->name . " -- " . var_export( $reader->getMethodAnnotations( $method ), true ) );
+		{
+			if ( $anno = $reader->getMethodAnnotation( $method, PermissionMethod::class ) )
+			{
+				$namespace = ( empty( $this->prefix ) ? '' : $this->prefix . '.' ) . $anno->namespace;
+				$this->nodes[$namespace] = [$this, $method->name];
+			}
+		}
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getPrefix()
 	{
 		return $this->prefix;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getNodes()
+	{
+		return $this->nodes;
 	}
 }

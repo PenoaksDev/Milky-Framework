@@ -15,7 +15,7 @@ class PermissionDefault
 	public static function ADMIN()
 	{
 		if ( !array_key_exists( 'admin', static::$defaults ) )
-			static::$defaults['admin'] = new static( 'sys.admin' );
+			static::$defaults['admin'] = new static( 'admin', 'sys.admin' );
 		return static::$defaults['admin'];
 	}
 
