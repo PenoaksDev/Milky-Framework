@@ -1,9 +1,11 @@
 <?php namespace Milky\Account\Permissions;
 
+use HolyWorlds\Support\Util;
+use Milky\Account\Models\PermissionDefaults;
 use Milky\Binding\UniversalBuilder;
+use Milky\Facades\Acct;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
-use Milky\Services\ServiceFactory;
 
 /**
  * The MIT License (MIT)
@@ -110,5 +112,61 @@ class PermissionManager
 	private function getNode( $getNamespace )
 	{
 
+	}
+
+	public static function checkPermission( $permission, $entity = null )
+	{
+		if ( empty( $permission ) )
+			return true;
+
+		if ( $entity === null )
+		{
+			if ( !Acct::check() )
+				return false;
+			$entity = Acct::acct();
+		}
+
+		$def = PermissionDefaults::find( $permission );
+
+		foreach ( $entity->permissions as $p )
+		{
+			if ( empty( $p->permission ) )
+				// Ignore empty permissions
+				continue;
+
+			try
+			{
+				if ( preg_match( static::prepareExpression( $p->permission ), $permission ) )
+					return empty( $p->value ) ? ( $def === null ? true : $def->value_assigned ) : $p->value;
+			}
+			catch ( \Exception $e )
+			{
+				// Ignore preg_match() exceptions
+			}
+		}
+
+		foreach ( $entity->groups() as $group )
+		{
+			$result = self::checkPermission( $permission, $group ); // TODO Compare group results and sort by weight
+			if ( $result !== false )
+				return $result;
+		}
+
+		return $def === null ? false : $def->value_default;
+	}
+
+	public static function prepareExpression( $perm )
+	{
+		if ( Util::startsWith( $perm, '$' ) )
+			return substr( $perm, 1 );
+
+		$perm = str_replace( '.', '\.', $perm );
+		$perm = str_replace( '*', '(.*)', $perm );
+
+		if ( preg_match( '/(\d+)-(\d+)/', $perm, $matches, PREG_OFFSET_CAPTURE ) )
+			foreach ( $matches as $match )
+				$perm = str_replace( $match[0], '(' . implode( '|', range( $match[1], $match[2] ) ) . ')' );
+
+		return '/' . $perm . '/';
 	}
 }

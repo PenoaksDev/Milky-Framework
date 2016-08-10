@@ -1,5 +1,6 @@
 <?php namespace Milky\Http\View\Compilers;
 
+use Milky\Exceptions\FrameworkException;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 
@@ -66,7 +67,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 *
 	 * @var string
 	 */
-	protected $echoFormat = 'e(%s)';
+	protected $echoFormat = 'View::escape(%s)';
 
 	/**
 	 * Array of footer lines to be added to template.
@@ -293,32 +294,20 @@ class BladeCompiler extends Compiler implements CompilerInterface
 		{
 			// Ensure the longest tags are processed first
 			if ( $methods[$method1] > $methods[$method2] )
-			{
 				return -1;
-			}
 			if ( $methods[$method1] < $methods[$method2] )
-			{
 				return 1;
-			}
 
 			// Otherwise give preference to raw tags (assuming they've overridden)
 			if ( $method1 === 'compileRawEchos' )
-			{
 				return -1;
-			}
 			if ( $method2 === 'compileRawEchos' )
-			{
 				return 1;
-			}
 
 			if ( $method1 === 'compileEscapedEchos' )
-			{
 				return -1;
-			}
 			if ( $method2 === 'compileEscapedEchos' )
-			{
 				return 1;
-			}
 		} );
 
 		return $methods;
@@ -335,17 +324,11 @@ class BladeCompiler extends Compiler implements CompilerInterface
 		$callback = function ( $match )
 		{
 			if ( Str::contains( $match[1], '@' ) )
-			{
 				$match[0] = isset( $match[3] ) ? $match[1] . $match[3] : $match[1];
-			}
 			elseif ( isset( $this->customDirectives[$match[1]] ) )
-			{
 				$match[0] = call_user_func( $this->customDirectives[$match[1]], Arr::get( $match, 3 ) );
-			}
 			elseif ( method_exists( $this, $method = 'compile' . ucfirst( $match[1] ) ) )
-			{
 				$match[0] = $this->$method( Arr::get( $match, 3 ) );
-			}
 
 			return isset( $match[3] ) ? $match[0] : $match[0] . $match[2];
 		};
@@ -409,7 +392,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
 		{
 			$whitespace = empty( $matches[3] ) ? '' : $matches[3] . $matches[3];
 
-			return $matches[1] ? $matches[0] : '<?php echo e(' . $this->compileEchoDefaults( $matches[2] ) . '); ?>' . $whitespace;
+			return $matches[1] ? $matches[0] : '<?php echo View::escape(' . $this->compileEchoDefaults( $matches[2] ) . '); ?>' . $whitespace;
 		};
 
 		return preg_replace_callback( $pattern, $callback, $value );
@@ -445,9 +428,22 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 */
 	protected function compileInject( $expression )
 	{
-		$segments = explode( ',', preg_replace( "/[\(\)\\\"\']/", '', $expression ) );
+		$segments = $this->parseSegments( $expression, 2 );
 
 		return '<?php $' . trim( $segments[0] ) . " = app('" . trim( $segments[1] ) . "'); ?>";
+	}
+
+	/**
+	 * Compile the yield choice
+	 *
+	 * @param $expression
+	 * @return string
+	 */
+	protected function compileYieldChoice( $expression )
+	{
+		$segments = $this->parseSegments( $expression, 2 );
+
+		return "<?php echo ( \$__env->yieldContent('{$segments[0]}') ?: \$__env->yieldContent('{$segments[1]}') ); ?>";
 	}
 
 	/**
@@ -1080,5 +1076,23 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	public function setEchoFormat( $format )
 	{
 		$this->echoFormat = $format;
+	}
+
+	/**
+	 * Parses out a blade directive arguments
+	 *
+	 * @param $expression
+	 * @param $requiredSegmentCount
+	 * @return array
+	 * @throws FrameworkException
+	 */
+	protected function parseSegments( $expression, $requiredSegmentCount )
+	{
+		$segments = explode( ',', preg_replace( "/[ \(\)\\\"\']/", '', $expression ) );
+
+		if ( $requiredSegmentCount > count( $segments ) )
+			throw new FrameworkException( "Blade directive is short the required number of segments of " . $requiredSegmentCount );
+
+		return $segments;
 	}
 }

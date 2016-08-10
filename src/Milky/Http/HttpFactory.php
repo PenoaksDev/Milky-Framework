@@ -229,11 +229,11 @@ class HttpFactory
 
 	/**
 	 * @param string $key
-	 * @param array $middleware
+	 * @param array|string $middleware
 	 */
-	public function addRouteMiddleware( $key, array $middleware )
+	public function addRouteMiddleware( $key, $middleware )
 	{
-		$this->router->middleware( $key, $middleware );
+		$this->router->middleware( $key, is_array( $middleware ) ? $middleware : [$middleware] );
 	}
 
 	/**

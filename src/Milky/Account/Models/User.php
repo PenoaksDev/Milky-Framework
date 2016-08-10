@@ -1,22 +1,24 @@
 <?php namespace Milky\Account\Models;
 
 use Carbon\Carbon;
-use HolyWorlds\Middleware\Permissions;
+use HolyWorlds\Models\Setting;
 use HolyWorlds\Support\Traits\Authorizable;
 use HolyWorlds\Support\Traits\UuidAsKey;
 use HolyWorlds\Support\Util;
+use Milky\Account\Permissions\PermissionManager;
 use Milky\Account\Types\Account;
 use Milky\Auth\Authenticatable;
 use Milky\Auth\Passwords\CanResetPassword;
-use Milky\Database\Eloquent\Model;
 use Milky\Database\Eloquent\Relations\HasMany;
+use Milky\Database\Eloquent\RoutableModel;
+use Milky\Facades\URL;
 
-class User extends Model implements Account
+class User extends Group implements Account, RoutableModel
 {
 	use Authenticatable, Authorizable, CanResetPassword, UuidAsKey;
 
 	protected $hidden = ["password", "remember_token", "activation_token"];
-	public $incrementing = false;
+	public $timestamps = true;
 	protected $fillable = [
 		'id',
 		'oldid',
@@ -31,17 +33,9 @@ class User extends Model implements Account
 		'visited_at'
 	];
 
-	/*public function getDisplayNameAttribute()
-	{
-		/*if (!is_null($this->profile->family_name)) {
-			return "{$this->name} ({$this->profile->family_name})";
-		}/
-		return $this->name;
-	}*/
-
 	public function getIsNewAttribute()
 	{
-		return Permissions::checkPermission( Setting::get( 'default_group' ) );
+		return PermissionManager::checkPermission( Setting::get( 'default_group' ) );
 	}
 
 	public function getSlugAttribute()
@@ -51,7 +45,12 @@ class User extends Model implements Account
 
 	public function getProfileUrlAttribute()
 	{
-		return url( "user/{$this->id}-{$this->slug}" );
+		return URL::routeModel( 'account.profile', $this );
+	}
+
+	public function getDisplayNameAttribute()
+	{
+		return $this->name;
 	}
 
 	/**
@@ -60,7 +59,8 @@ class User extends Model implements Account
 	public function groups()
 	{
 		$groups = [];
-		foreach ( $this->inheritance() as $heir )
+
+		foreach ( $this->inheritance as $heir )
 			if ( false === array_search( $heir->group, $groups ) )
 				$groups[] = $heir->group;
 
@@ -197,7 +197,7 @@ class User extends Model implements Account
 	 */
 	public function checkPermission( $permission )
 	{
-		return Permissions::checkPermission( $permission, $this );
+		return PermissionManager::checkPermission( $permission, $this );
 	}
 
 	/**
@@ -205,7 +205,7 @@ class User extends Model implements Account
 	 */
 	public function isAdmin()
 	{
-		return Permissions::checkPermission( 'sys.admin', $this );
+		return PermissionManager::checkPermission( 'sys.admin', $this );
 	}
 
 	/**
@@ -252,5 +252,11 @@ class User extends Model implements Account
 	public function setRememberToken( $token )
 	{
 		$this->remember_token = $token;
+	}
+
+	public function appendRoute( $route, &$parameters, &$appendedUrl )
+	{
+		$parameters['id'] = $this->id;
+		$parameters['name'] = $this->slug;
 	}
 }

@@ -10,7 +10,6 @@ class Group extends Model
 
 	public function inheritance()
 	{
-		// What groups am I a member of?
 		return $this->hasMany(GroupInheritance::class, "child");
 	}
 

@@ -671,25 +671,6 @@ if ( !function_exists( 'dd' ) )
 	}
 }
 
-if ( !function_exists( 'e' ) )
-{
-	/**
-	 * Escape HTML entities in a string.
-	 *
-	 * @param  Htmlable|string $value
-	 * @return string
-	 */
-	function e( $value )
-	{
-		if ( $value instanceof Htmlable )
-		{
-			return $value->toHtml();
-		}
-
-		return htmlentities( $value, ENT_QUOTES, 'UTF-8', false );
-	}
-}
-
 if ( !function_exists( 'ends_with' ) )
 {
 	/**
@@ -702,20 +683,6 @@ if ( !function_exists( 'ends_with' ) )
 	function ends_with( $haystack, $needles )
 	{
 		return Str::endsWith( $haystack, $needles );
-	}
-}
-
-if ( !function_exists( 'last' ) )
-{
-	/**
-	 * Get the last element from an array.
-	 *
-	 * @param  array $array
-	 * @return mixed
-	 */
-	function last( $array )
-	{
-		return end( $array );
 	}
 }
 
@@ -732,16 +699,12 @@ if ( !function_exists( 'object_get' ) )
 	function object_get( $object, $key, $default = null )
 	{
 		if ( is_null( $key ) || trim( $key ) == '' )
-		{
 			return $object;
-		}
 
 		foreach ( explode( '.', $key ) as $segment )
 		{
 			if ( !is_object( $object ) || !isset( $object->{$segment} ) )
-			{
 				return value( $default );
-			}
 
 			$object = $object->{$segment};
 		}

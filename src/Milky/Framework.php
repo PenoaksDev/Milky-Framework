@@ -269,7 +269,7 @@ class Framework
 		else if ( !Str::startsWith( $slugs[0], '/' ) )
 			$slugs = Arr::prepend( $slugs, $this->basePath );
 
-		$dir = strpos( last( $slugs ), '.' ) !== false ? implode( DIRECTORY_SEPARATOR, array_slice( $slugs, 0, count( $slugs ) - 1 ) ) : implode( DIRECTORY_SEPARATOR, $slugs );
+		$dir = strpos( end( $slugs ), '.' ) !== false ? implode( DIRECTORY_SEPARATOR, array_slice( $slugs, 0, count( $slugs ) - 1 ) ) : implode( DIRECTORY_SEPARATOR, $slugs );
 
 		if ( !file_exists( $dir ) )
 			if ( !mkdir( $dir, 0755, true ) )

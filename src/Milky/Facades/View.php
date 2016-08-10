@@ -3,6 +3,7 @@
 use Milky\Http\View\Engines\EngineInterface;
 use Milky\Http\View\Engines\EngineResolver;
 use Milky\Http\View\ViewFactory;
+use Milky\Impl\Htmlable;
 
 /**
  * The MIT License (MIT)
@@ -477,5 +478,19 @@ class View extends BaseFacade
 	public static function getNames()
 	{
 		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+	}
+
+	/**
+	 * Escape HTML entities in a string.
+	 *
+	 * @param  Htmlable|string $value
+	 * @return string
+	 */
+	public static function escape( $value )
+	{
+		if ( $value instanceof Htmlable )
+			return $value->toHtml();
+
+		return htmlentities( $value, ENT_QUOTES, 'UTF-8', false );
 	}
 }
