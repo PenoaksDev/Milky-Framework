@@ -2,6 +2,7 @@
 
 use Closure;
 use InvalidArgumentException;
+use Milky\Binding\UniversalBuilder;
 
 class EngineResolver
 {
@@ -18,6 +19,14 @@ class EngineResolver
 	 * @var array
 	 */
 	protected $resolved = [];
+
+	/**
+	 * @return EngineResolver
+	 */
+	public static function i()
+	{
+		return UniversalBuilder::resolveClass( static::class );
+	}
 
 	/**
 	 * Register a new engine resolver.

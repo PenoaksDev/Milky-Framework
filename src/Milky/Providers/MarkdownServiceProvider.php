@@ -11,15 +11,25 @@
 
 namespace Milky\Providers;
 
+use League\CommonMark\Converter;
+use League\CommonMark\Environment;
+use Milky\Binding\MarkdownServiceResolver;
+use Milky\Binding\UniversalBuilder;
 use Milky\Config\Builder\ConfigurationBuilder;
 use Milky\Config\ConfigurationLoader;
 use Milky\Facades\Config;
+use Milky\Facades\View;
+use Milky\Http\View\Compilers\MarkdownCompiler;
+use Milky\Http\View\Compilers\PhpMarkdownEngine;
+use Milky\Http\View\Engines\BladeMarkdownEngine;
+use Milky\Http\View\Engines\CompilerEngine;
+use Milky\Http\View\Engines\EngineResolver;
 
 class MarkdownServiceProvider extends ServiceProvider
 {
 	public function boot()
 	{
-		if ( true || !Config::has( 'markdown' ) )
+		if ( !Config::has( 'markdown' ) )
 		{
 			$md = new ConfigurationBuilder( 'markdown' );
 
@@ -33,7 +43,7 @@ class MarkdownServiceProvider extends ServiceProvider
 			$md->add( 'extensions', [] )->withComment( [
 				"This option specifies what extensions will be automatically enabled.",
 				"Simply provide your extension class names here.",
-			], "CommonMark Extenstions" );
+			], "Extenstions" );
 
 			$md->add( 'renderer', [
 				'block_separator' => '\n',
@@ -65,6 +75,33 @@ class MarkdownServiceProvider extends ServiceProvider
 			], "Safe Mode" );
 
 			ConfigurationLoader::create( $md );
+		}
+
+		UniversalBuilder::registerResolver( new MarkdownServiceResolver() );
+
+		if ( Config::get( 'markdown.views' ) )
+		{
+			$markdown = UniversalBuilder::resolveClass( Converter::class );
+			$compiler = UniversalBuilder::resolveClass( MarkdownCompiler::class );
+
+			EngineResolver::i()->register( 'md', function () use ( $compiler )
+			{
+				return new CompilerEngine( $compiler );
+			} );
+
+			EngineResolver::i()->register( 'phpmd', function () use ( $markdown )
+			{
+				return new PhpMarkdownEngine( $markdown );
+			});
+
+			EngineResolver::i()->register( 'blademd', function () use ( $compiler, $markdown )
+			{
+				return new BladeMarkdownEngine( $compiler, $markdown );
+			});
+
+			View::addExtension( 'md', 'md' );
+			View::addExtension( 'md.php', 'phpmd' );
+			View::addExtension( 'md.blade.php', 'blademd' );
 		}
 	}
 }
