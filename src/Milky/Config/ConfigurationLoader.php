@@ -1,6 +1,7 @@
 <?php namespace Milky\Config;
 
-use Milky\Builders\Builder;
+use Milky\Config\Builder\ConfigurationBuilder;
+use Milky\Exceptions\FrameworkException;
 use Milky\Framework;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -14,13 +15,13 @@ use Symfony\Component\Yaml\Yaml;
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class ConfigurationBuilder
+class ConfigurationLoader
 {
 	/**
 	 * @param Framework $fw
 	 * @param Configuration $config
 	 */
-	public static function build( Framework $fw )
+	public static function load( Framework $fw )
 	{
 		$items = [];
 
@@ -69,7 +70,7 @@ class ConfigurationBuilder
 				if ( ends_with( $file->getFilename(), '.json' ) )
 					$config->set( $nesting . basename( $file->getRealPath(), '.json' ), json_decode( file_get_contents( $file ) ) );
 
-				if ( ends_with( $file->getFilename(), '.php' ) && is_array( $array = include_once( $file->getRealPath() ) ) )
+				if ( ends_with( $file->getFilename(), '.php' ) && is_array( $array = include( $file->getRealPath() ) ) )
 					$config->set( $nesting . basename( $file->getRealPath(), '.php' ), $array );
 			}
 			catch ( \Throwable $e )
@@ -95,5 +96,29 @@ class ConfigurationBuilder
 			$tree = str_replace( DIRECTORY_SEPARATOR, '.', $tree ) . '.';
 
 		return $tree;
+	}
+
+	/**
+	 * Saves a builder to the filesystem
+	 *
+	 * @param ConfigurationBuilder $builder
+	 *
+	 * @throws FrameworkException
+	 */
+	public static function create( ConfigurationBuilder $builder  )
+	{
+		// TODO Currently only supports PHP files, need to add optional json and yaml support.
+
+		$configPath = Framework::fw()->buildPath( '__config' );
+		$configFile = $configPath . __ . $builder->key() . ".php";
+
+		if ( file_put_contents( $configFile, $builder->toPhp( true ) ) === false || !is_array( $data = include( $configFile ) ) )
+		{
+			@unlink( $configFile );
+
+			throw new FrameworkException( "Configuration error, either failed to write config file to [" . $configFile . "] or returned data is not an array." );
+		}
+
+		Framework::config()->set( $builder->key(), $data );
 	}
 }

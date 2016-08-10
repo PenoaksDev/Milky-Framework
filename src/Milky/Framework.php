@@ -2,7 +2,7 @@
 
 use Milky\Binding\UniversalBuilder;
 use Milky\Config\Configuration;
-use Milky\Config\ConfigurationBuilder;
+use Milky\Config\ConfigurationLoader;
 use Milky\Console\ConsoleServiceResolver;
 use Milky\Exceptions\FrameworkException;
 use Milky\Facades\Log;
@@ -130,7 +130,7 @@ class Framework
 			'logs' => ['__storage', 'logs'],
 		];
 
-		$this->config = ConfigurationBuilder::build( $this );
+		$this->config = ConfigurationLoader::load( $this );
 
 		$this->paths = array_merge( $this->paths, $this->config->get( 'app.paths', [] ) );
 

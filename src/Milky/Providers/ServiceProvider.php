@@ -27,18 +27,6 @@ abstract class ServiceProvider
 	protected static $publishGroups = [];
 
 	/**
-	 * Merge the given configuration with the existing configuration.
-	 *
-	 * @param  string $path
-	 * @param  string $key
-	 */
-	protected function mergeConfigFrom( $path, $key )
-	{
-		$config = Framework::fw()->config->get( $key, [] );
-		Framework::fw()->set( $key, array_merge( require $path, $config ) );
-	}
-
-	/**
 	 * Register a view file namespace.
 	 *
 	 * @param  string $path
@@ -74,18 +62,14 @@ abstract class ServiceProvider
 		$class = static::class;
 
 		if ( !array_key_exists( $class, static::$publishes ) )
-		{
 			static::$publishes[$class] = [];
-		}
 
 		static::$publishes[$class] = array_merge( static::$publishes[$class], $paths );
 
 		if ( $group )
 		{
 			if ( !array_key_exists( $group, static::$publishGroups ) )
-			{
 				static::$publishGroups[$group] = [];
-			}
 
 			static::$publishGroups[$group] = array_merge( static::$publishGroups[$group], $paths );
 		}
@@ -103,34 +87,24 @@ abstract class ServiceProvider
 		if ( $provider && $group )
 		{
 			if ( empty( static::$publishes[$provider] ) || empty( static::$publishGroups[$group] ) )
-			{
 				return [];
-			}
 
 			return array_intersect_key( static::$publishes[$provider], static::$publishGroups[$group] );
 		}
 
 		if ( $group && array_key_exists( $group, static::$publishGroups ) )
-		{
 			return static::$publishGroups[$group];
-		}
 
 		if ( $provider && array_key_exists( $provider, static::$publishes ) )
-		{
 			return static::$publishes[$provider];
-		}
 
 		if ( $group || $provider )
-		{
 			return [];
-		}
 
 		$paths = [];
 
 		foreach ( static::$publishes as $class => $publish )
-		{
 			$paths = array_merge( $paths, $publish );
-		}
 
 		return $paths;
 	}

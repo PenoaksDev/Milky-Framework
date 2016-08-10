@@ -1041,4 +1041,46 @@ class Str
 	{
 		return strtolower( $str1 ) == strtolower( $str2 );
 	}
+
+	/**
+	 * Indents each line
+	 *
+	 * @param string $lines
+	 * @param int $cnt
+	 *
+	 * @return string
+	 */
+	public static function indent( $lines, $cnt = 1 )
+	{
+		$new = [];
+		$lines = str_contains( $lines, '\r\n' ) ? explode( "\r\n", $lines ) : explode( "\n", $lines );
+
+		foreach ( $lines as $line )
+			$new[] = str_repeat( "\t", $cnt ) . $line;
+
+		return implode( "\n", $new );
+	}
+
+	/**
+	 * Prepends each line
+	 *
+	 * @param string $lines
+	 * @param string $prepend
+	 * $param bool $prependFirstLine
+	 *
+	 * @return string
+	 */
+	public static function prependLines( $lines, $prepend, $prependFirstLine = false )
+	{
+		$new = [];
+		$lines = str_contains( $lines, '\r\n' ) ? explode( "\r\n", $lines ) : explode( "\n", $lines );
+
+		if ( !$prependFirstLine )
+			$new[] = $lines[0];
+
+		for ( $i = $prependFirstLine ? 0 : 1; $i < count( $lines ); $i++ )
+			$new[] = $prepend . $lines[$i];
+
+		return implode( "\n", $new );
+	}
 }

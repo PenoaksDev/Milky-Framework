@@ -57,6 +57,7 @@
   },
   "suggest": {
     "penoaks/framework-project": "Provides a basic project example for Penoaks Framework",
+    "league/commonmark": "Required to use the markdown features of Milky Framework",
     "aws/aws-sdk-php": "Required to use the SQS queue driver and SES mail driver (~3.0).",
     "doctrine/dbal": "Required to rename columns and drop SQLite columns (~2.4).",
     "fzaninotto/faker": "Required to use the eloquent factory builder (~1.4).",
