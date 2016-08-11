@@ -11,6 +11,4 @@
 interface RoutableModel
 {
 	public function appendRoute( $route, &$parameters, &$appendedUrl );
-
-	public function name();
 }

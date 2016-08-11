@@ -1,8 +1,13 @@
 <?php namespace Milky\Account\Models;
 
+use HolyWorlds\Support\Util;
+use Milky\Account\Models\Group as BaseGroup;
+use Milky\Account\Permissions\PermissionManager;
 use Milky\Database\Eloquent\Model;
+use Milky\Database\Eloquent\RoutableModel;
+use Milky\Facades\URL;
 
-class Group extends Model
+class Group extends Model implements RoutableModel
 {
 	protected $fillable = ["id", "name", "description"];
 	public $timestamps = false;
@@ -13,12 +18,22 @@ class Group extends Model
 		return $this->hasMany(GroupInheritance::class, "child");
 	}
 
-	public function groups()
+	public function getProfileUrlAttribute()
 	{
-		$groups = array();
-		foreach( $this->inheritance as $heir )
-			$groups[] = $heir->group;
-		return $groups;
+		return URL::routeModel( 'group.show', $this );
+	}
+
+	public function getDisplayNameAttribute()
+	{
+		return $this->name;
+	}
+
+	public function getGroupsAttribute()
+	{
+		$result = [];
+		foreach ( $this->inheritance()->getResults() as $parent )
+			$result[] = $parent->group()->getResults();
+		return $result;
 	}
 
 	public function hasGroups()
@@ -65,8 +80,35 @@ class Group extends Model
 		return $this->hasMany(GroupInheritance::class, "parent");
 	}
 
+	public function getChildUsersAttribute()
+	{
+		$result = [];
+		foreach ( $this->children()->where( 'type', 1 )->getResults() as $child )
+			$result[] = $child->assignedTo()->getResults();
+		return $result;
+	}
+
+	public function getChildGroupsAttribute()
+	{
+		$result = [];
+		foreach ( $this->children()->where( 'type', 0 )->getResults() as $child )
+			$result[] = $child->assignedTo()->getResults;
+		return $result;
+	}
+
 	public function checkPermission( $permission )
 	{
-		return Permissions::checkPermission( $permission, $this );
+		return PermissionManager::checkPermission( $permission, $this );
+	}
+
+	public function getSlugAttribute()
+	{
+		return Util::slugify( $this->name );
+	}
+
+	public function appendRoute( $route, &$parameters, &$appendedUrl )
+	{
+		$parameters['id'] = $this->id;
+		$parameters['slug'] = $this->slug;
 	}
 }

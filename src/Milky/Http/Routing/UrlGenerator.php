@@ -319,7 +319,7 @@ class UrlGenerator
 	public function routeModel( $name, $model, $parameters = [], $absolute = true )
 	{
 		if ( !$model instanceof RoutableModel )
-			throw new UrlGenerationException( "The model [" . $model->name() . "] must implement the RoutableModel interface." );
+			throw new UrlGenerationException( "The model [" . get_class( $model ) . "] must implement the RoutableModel interface." );
 
 		if ( !is_null( $route = $this->routes->getByName( $name ) ) )
 		{

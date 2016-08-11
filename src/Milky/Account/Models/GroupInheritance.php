@@ -19,5 +19,6 @@ class GroupInheritance extends Model
             return $this->belongsTo( Group::class, "child" );
         if ( $this->type == 1 )
             return $this->belongsTo( User::class, "child" );
+	    throw new \InvalidArgumentException( "The [GroupInheritance] type must be either 0 (group) or 1 (user). Got [" . $this->type . "]." );
     }
 }

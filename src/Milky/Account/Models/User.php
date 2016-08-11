@@ -38,14 +38,9 @@ class User extends Group implements Account, RoutableModel
 		return PermissionManager::checkPermission( Setting::get( 'default_group' ) );
 	}
 
-	public function getSlugAttribute()
-	{
-		return Util::slugify( $this->name );
-	}
-
 	public function getProfileUrlAttribute()
 	{
-		return URL::routeModel( 'account.profile', $this );
+		return URL::routeModel( 'user.show', $this );
 	}
 
 	public function getDisplayNameAttribute()
@@ -254,9 +249,14 @@ class User extends Group implements Account, RoutableModel
 		$this->remember_token = $token;
 	}
 
+	public function getSlugAttribute()
+	{
+		return Util::slugify( $this->name );
+	}
+
 	public function appendRoute( $route, &$parameters, &$appendedUrl )
 	{
 		$parameters['id'] = $this->id;
-		$parameters['name'] = $this->slug;
+		$parameters['slug'] = $this->slug;
 	}
 }
