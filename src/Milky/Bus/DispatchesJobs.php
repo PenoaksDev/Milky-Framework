@@ -18,7 +18,7 @@ trait DispatchesJobs
 	 */
 	protected function dispatch( $job )
 	{
-		return Dispatcher::i()->dispatch( $job );
+		return BusDispatcher::i()->dispatch( $job );
 	}
 
 	/**
@@ -29,6 +29,6 @@ trait DispatchesJobs
 	 */
 	public function dispatchNow( $job )
 	{
-		return Dispatcher::i()->dispatchNow( $job );
+		return BusDispatcher::i()->dispatchNow( $job );
 	}
 }

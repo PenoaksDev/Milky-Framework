@@ -10,6 +10,7 @@
  */
 
 use Milky\Helpers\Arr;
+use Milky\Helpers\Breadcrumbs;
 use Milky\Helpers\Str;
 use Symfony\Component\Finder\Finder;
 
@@ -91,6 +92,7 @@ foreach ( Finder::create()->files()->in( __DIR__ . '/Milky/Facades' )->name( '*.
 
 class_alias( Str::class, 'Str' );
 class_alias( Arr::class, 'Arr' );
+class_alias( Breadcrumbs::class, 'Breadcrumbs' );
 
 /**
  * @return \Milky\Framework

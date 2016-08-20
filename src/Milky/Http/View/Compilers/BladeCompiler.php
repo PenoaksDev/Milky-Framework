@@ -1,5 +1,7 @@
 <?php namespace Milky\Http\View\Compilers;
 
+use Milky\Account\Permissions\PermissionManager;
+use Milky\Auth\Access\Gate;
 use Milky\Exceptions\FrameworkException;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
@@ -259,6 +261,11 @@ class BladeCompiler extends Compiler implements CompilerInterface
 		$pattern = sprintf( '/%s--(.*?)--%s/s', $this->contentTags[0], $this->contentTags[1] );
 
 		return preg_replace( $pattern, '<?php /*$1*/ ?>', $value );
+	}
+
+	protected function compileBreadcrumbs( $value )
+	{
+		return "<?php echo Breadcrumbs::render(); ?>";
 	}
 
 	/**
@@ -643,8 +650,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 */
 	protected function compileCan( $expression )
 	{
-		// app('Illuminate\\Contracts\\Auth\\Access\\Gate')->check{$expression}
-		return "<?php if ( false ): ?>";
+		return "<?php if ( Permissions::checkPolicies{$expression} ): ?>";
 	}
 
 	/**
@@ -655,8 +661,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 */
 	protected function compileElsecan( $expression )
 	{
-		// app('Illuminate\\Contracts\\Auth\\Access\\Gate')->check{$expression}
-		return "<?php elseif ( false ): ?>";
+		return "<?php elseif ( Permissions::checkPolicies{$expression} ): ?>";
 	}
 
 	/**
@@ -667,8 +672,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 */
 	protected function compileCannot( $expression )
 	{
-		// app('Illuminate\\Contracts\\Auth\\Access\\Gate')->denies{$expression}
-		return "<?php if ( true ): ?>";
+		return "<?php if ( !Permissions::checkPolicies{$expression} ): ?>";
 	}
 
 	/**
@@ -679,8 +683,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 */
 	protected function compileElsecannot( $expression )
 	{
-		// app('Illuminate\\Contracts\\Auth\\Access\\Gate')->denies{$expression}
-		return "<?php elseif ( true ): ?>";
+		return "<?php elseif ( !Permissions::checkPolicies{$expression} ): ?>";
 	}
 
 	/**

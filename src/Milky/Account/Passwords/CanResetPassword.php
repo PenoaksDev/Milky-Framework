@@ -1,4 +1,4 @@
-<?php namespace Milky\Auth\Passwords;
+<?php namespace Milky\Account\Passwords;
 
 trait CanResetPassword
 {

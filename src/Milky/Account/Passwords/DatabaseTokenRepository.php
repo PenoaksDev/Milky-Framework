@@ -1,9 +1,9 @@
-<?php namespace Milky\Auth\Passwords;
+<?php namespace Milky\Account\Passwords;
 
 use Carbon\Carbon;
-use Milky\Helpers\Str;
 use Milky\Database\ConnectionInterface;
-use Milky\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Milky\Database\Query\Builder;
+use Milky\Helpers\Str;
 
 class DatabaseTokenRepository implements TokenRepositoryInterface
 {
@@ -58,7 +58,7 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
 	 * @param  CanResetPassword $user
 	 * @return string
 	 */
-	public function create( CanResetPasswordContract $user )
+	public function create( CanResetPassword $user )
 	{
 		$email = $user->getEmailForPasswordReset();
 
@@ -80,7 +80,7 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
 	 * @param  CanResetPassword $user
 	 * @return int
 	 */
-	protected function deleteExisting( CanResetPasswordContract $user )
+	protected function deleteExisting( CanResetPassword $user )
 	{
 		return $this->getTable()->where( 'email', $user->getEmailForPasswordReset() )->delete();
 	}
@@ -104,7 +104,7 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
 	 * @param  string $token
 	 * @return bool
 	 */
-	public function exists( CanResetPasswordContract $user, $token )
+	public function exists( CanResetPassword $user, $token )
 	{
 		$email = $user->getEmailForPasswordReset();
 

@@ -66,6 +66,14 @@ class Mailer
 	protected $failedRecipients = [];
 
 	/**
+	 * @return Mailer
+	 */
+	public static function i()
+	{
+		return UniversalBuilder::resolveClass( static::class );
+	}
+
+	/**
 	 * Create a new Mailer instance.
 	 *
 	 * @param  ViewFactory $views

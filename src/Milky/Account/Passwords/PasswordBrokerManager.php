@@ -1,35 +1,20 @@
-<?php namespace Milky\Auth\Passwords;
+<?php namespace Milky\Account\Passwords;
 
-use Milky\Helpers\Str;
 use InvalidArgumentException;
-use Milky\Contracts\Auth\PasswordBrokerFactory as FactoryContract;
+use Milky\Account\AccountManager;
+use Milky\Database\DatabaseManager;
+use Milky\Facades\Config;
+use Milky\Helpers\Str;
+use Milky\Mail\Mailer;
 
-class PasswordBrokerManager implements FactoryContract
+class PasswordBrokerManager
 {
-	/**
-	 * The application instance.
-	 *
-	 * @var Application
-	 */
-	protected $app;
-
 	/**
 	 * The array of created "drivers".
 	 *
 	 * @var array
 	 */
 	protected $brokers = [];
-
-	/**
-	 * Create a new PasswordBroker manager instance.
-	 *
-	 * @param  Application $app
-	 * @return void
-	 */
-	public function __construct( $app )
-	{
-		$this->app = $app;
-	}
 
 	/**
 	 * Attempt to get the broker from the local cache.
@@ -57,14 +42,12 @@ class PasswordBrokerManager implements FactoryContract
 		$config = $this->getConfig( $name );
 
 		if ( is_null( $config ) )
-		{
 			throw new InvalidArgumentException( "Password resetter [{$name}] is not defined." );
-		}
 
 		// The password broker uses a token repository to validate tokens and send user
 		// password e-mails, as well as validating that password reset process as an
 		// aggregate service of sorts providing a convenient interface for resets.
-		return new PasswordBroker( $this->createTokenRepository( $config ), $this->app['auth']->createUserProvider( $config['provider'] ), $this->app['mailer'], $config['email'] );
+		return new PasswordBroker( $this->createTokenRepository( $config ), AccountManager::i()->resolveAuth( $config['provider'] ), Mailer::i(), $config['email'] );
 	}
 
 	/**
@@ -75,16 +58,14 @@ class PasswordBrokerManager implements FactoryContract
 	 */
 	protected function createTokenRepository( array $config )
 	{
-		$key = $this->app['config']['app.key'];
+		$key = Config::get( 'app.key' );
 
 		if ( Str::startsWith( $key, 'base64:' ) )
-		{
 			$key = base64_decode( substr( $key, 7 ) );
-		}
 
 		$connection = isset( $config['connection'] ) ? $config['connection'] : null;
 
-		return new DatabaseTokenRepository( $this->app['db']->connection( $connection ), $config['table'], $key, $config['expire'] );
+		return new DatabaseTokenRepository( DatabaseManager::i()->connection( $connection ), $config['table'], $key, $config['expire'] );
 	}
 
 	/**
@@ -95,7 +76,7 @@ class PasswordBrokerManager implements FactoryContract
 	 */
 	protected function getConfig( $name )
 	{
-		return $this->app['config']["auth.passwords.{$name}"];
+		return Config::get( "auth.passwords.{$name}" );
 	}
 
 	/**
@@ -105,7 +86,7 @@ class PasswordBrokerManager implements FactoryContract
 	 */
 	public function getDefaultDriver()
 	{
-		return $this->app['config']['auth.defaults.passwords'];
+		return Config::get( 'auth.defaults.passwords' );
 	}
 
 	/**
@@ -116,7 +97,7 @@ class PasswordBrokerManager implements FactoryContract
 	 */
 	public function setDefaultDriver( $name )
 	{
-		$this->app['config']['auth.defaults.passwords'] = $name;
+		Config::set('auth.defaults.passwords', $name);
 	}
 
 	/**

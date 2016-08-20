@@ -2,6 +2,7 @@
 
 use Closure;
 use Milky\Binding\BindingBuilder;
+use Milky\Binding\UniversalBuilder;
 use Milky\Database\Eloquent\Model;
 use Milky\Framework;
 use Milky\Helpers\Arr;
@@ -954,7 +955,7 @@ class Router
 			// For model binders, we will attempt to retrieve the models using the first
 			// method on the model instance. If we cannot retrieve the models we'll
 			// throw a not found exception otherwise we will return the instance.
-			$instance = BindingBuilder::resolveBinding( $class );
+			$instance = UniversalBuilder::resolve( $class );
 
 			if ( $model = $instance->where( $instance->getRouteKeyName(), $value )->first() )
 				return $model;
@@ -978,9 +979,7 @@ class Router
 	public function bind( $key, $binder )
 	{
 		if ( is_string( $binder ) )
-		{
 			$binder = $this->createClassBinding( $binder );
-		}
 
 		$this->binders[str_replace( '-', '_', $key )] = $binder;
 	}

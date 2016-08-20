@@ -44,6 +44,36 @@ abstract class Policy
 	protected $nodes = [];
 
 	/**
+	 * The next permission check
+	 *
+	 * @var callable
+	 */
+	protected $next = null;
+
+	/**
+	 * Set the next permission check method
+	 *
+	 * @param callable $callable
+	 */
+	protected function setNext( callable $callable )
+	{
+		$this->next = $callable;
+	}
+
+	/**
+	 * Call the next permission check method
+	 *
+	 * @return bool
+	 */
+	public function next()
+	{
+		$result = is_null( $this->next ) ? false : call_user_func( $this->next );
+		$this->next = null;
+
+		return $result;
+	}
+
+	/**
 	 * Policy constructor.
 	 */
 	public function __construct()
@@ -60,13 +90,11 @@ abstract class Policy
 		$class = new \ReflectionClass( static::class );
 
 		foreach ( $class->getMethods() as $method )
-		{
 			if ( $anno = $reader->getMethodAnnotation( $method, PermissionMethod::class ) )
 			{
 				$namespace = ( empty( $this->prefix ) ? '' : $this->prefix . '.' ) . $anno->namespace;
 				$this->nodes[$namespace] = [$this, $method->name];
 			}
-		}
 	}
 
 	/**

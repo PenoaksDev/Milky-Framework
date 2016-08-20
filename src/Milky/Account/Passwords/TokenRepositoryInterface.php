@@ -1,6 +1,4 @@
-<?php namespace Milky\Auth\Passwords;
-
-use Milky\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+<?php namespace Milky\Account\Passwords;
 
 interface TokenRepositoryInterface
 {
@@ -10,7 +8,7 @@ interface TokenRepositoryInterface
 	 * @param  CanResetPassword $user
 	 * @return string
 	 */
-	public function create( CanResetPasswordContract $user );
+	public function create( CanResetPassword $user );
 
 	/**
 	 * Determine if a token record exists and is valid.
@@ -19,7 +17,7 @@ interface TokenRepositoryInterface
 	 * @param  string $token
 	 * @return bool
 	 */
-	public function exists( CanResetPasswordContract $user, $token );
+	public function exists( CanResetPassword $user, $token );
 
 	/**
 	 * Delete a token record.

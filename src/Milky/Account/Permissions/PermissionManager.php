@@ -4,6 +4,7 @@ use HolyWorlds\Support\Util;
 use Milky\Account\Models\PermissionDefaults;
 use Milky\Binding\UniversalBuilder;
 use Milky\Facades\Acct;
+use Milky\Facades\Config;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 
@@ -41,6 +42,9 @@ class PermissionManager
 	 */
 	protected $loadedPoliciesNested = [];
 
+	/**
+	 * @return PermissionManager
+	 */
 	public static function i()
 	{
 		return UniversalBuilder::resolveClass( static::class );
@@ -64,6 +68,8 @@ class PermissionManager
 
 	public function checkPolicies( $namespace, $entity )
 	{
+		$namespace = $this->getAlias( $namespace );
+
 		$steps = explode( '.', $namespace );
 		$result = true;
 
@@ -81,6 +87,13 @@ class PermissionManager
 			}
 		}
 		while ( $result && $next = next( $steps ) );
+	}
+
+	public function getAlias( $name )
+	{
+		if ( $perm = Config::get( 'permissions.alias.' . $name ) )
+			return $perm;
+		return $name;
 	}
 
 	public function has( $permission )

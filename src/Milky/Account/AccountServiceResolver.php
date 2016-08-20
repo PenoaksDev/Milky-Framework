@@ -2,6 +2,7 @@
 
 use Milky\Account\Auths\AccountAuth;
 use Milky\Account\Guards\Guard;
+use Milky\Account\Passwords\PasswordBrokerManager;
 use Milky\Account\Permissions\PermissionManager;
 use Milky\Binding\ServiceResolver;
 
@@ -18,12 +19,17 @@ class AccountServiceResolver extends ServiceResolver
 	/**
 	 * @var AccountManager
 	 */
-	protected $mgrInstance;
+	private $mgrInstance;
 
 	/**
 	 * @var PermissionManager
 	 */
-	protected $permissionMgrInstance;
+	private $permissionMgrInstance;
+
+	/**
+	 * @var PasswordBrokerManager
+	 */
+	private $passwordInstance;
 
 	public function __construct()
 	{
@@ -33,6 +39,16 @@ class AccountServiceResolver extends ServiceResolver
 		$this->addClassAlias( PermissionManager::class, 'perm' );
 		$this->addClassAlias( Guard::class, 'guard' );
 		$this->addClassAlias( AccountAuth::class, 'auth' );
+	}
+
+	public function password()
+	{
+		return $this->passwordInstance ?: $this->passwordInstance = new PasswordBrokerManager();
+	}
+
+	public function passwordBroker()
+	{
+		return $this->password()->broker();
 	}
 
 	/**

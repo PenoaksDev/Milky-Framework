@@ -61,7 +61,7 @@ class AccountManager
 	 *
 	 * @param string $name
 	 */
-	protected function resolveGuard( $name )
+	public function resolveGuard( $name )
 	{
 		$config = Config::get( 'auth.guards.' . $name );
 
@@ -105,7 +105,7 @@ class AccountManager
 	 * @param string $auth
 	 * @return AccountAuth
 	 */
-	protected function resolveAuth( $auth )
+	public function resolveAuth( $auth )
 	{
 		$config = Config::get( 'auth.auths.' . $auth );
 		$uses = $config['uses'];
