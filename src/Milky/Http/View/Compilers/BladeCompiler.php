@@ -1,7 +1,5 @@
 <?php namespace Milky\Http\View\Compilers;
 
-use Milky\Account\Permissions\PermissionManager;
-use Milky\Auth\Access\Gate;
 use Milky\Exceptions\FrameworkException;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;

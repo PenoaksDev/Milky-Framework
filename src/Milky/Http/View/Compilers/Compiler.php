@@ -1,7 +1,9 @@
 <?php namespace Milky\Http\View\Compilers;
 
 use InvalidArgumentException;
+use Milky\Facades\Log;
 use Milky\Filesystem\Filesystem;
+use Milky\Framework;
 
 abstract class Compiler
 {
@@ -45,7 +47,25 @@ abstract class Compiler
 	 */
 	public function getCompiledPath( $path )
 	{
-		return $this->cachePath . '/' . sha1( $path ) . '.php';
+		$views = Framework::fw()->buildPath( "__views" );
+
+		if ( starts_with($path, $views) )
+			$path = substr( $path, strlen( $views ) + 1 );
+
+		if ( !ends_with( $path, '.php' ) )
+			$path .= '.php';
+
+		// $path = substr( $path, 0, strrpos( $path, "." ) );
+
+		$path = $this->cachePath . DIRECTORY_SEPARATOR . $path;
+
+		@mkdir( dirname( $path ), 0755, true );
+
+		return $path;
+
+		// return $this->cachePath . '/' . str_replace( ["/", "\\"], "-", dirname( $path ) ) . '-' . basename( $path ) . '.php';
+
+		// return $this->cachePath . '/' . sha1( $path ) . '.php';
 	}
 
 	/**

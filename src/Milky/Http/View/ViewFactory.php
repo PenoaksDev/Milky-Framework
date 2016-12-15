@@ -698,9 +698,7 @@ class ViewFactory
 	public function stopPush()
 	{
 		if ( empty( $this->pushStack ) )
-		{
 			throw new InvalidArgumentException( 'Cannot end a section without first starting one.' );
-		}
 
 		$last = array_pop( $this->pushStack );
 

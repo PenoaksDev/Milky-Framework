@@ -17,7 +17,7 @@ use Milky\Providers\ProviderRepository;
 /**
  * @Product: Milky Framework
  * @Version 6.0.0 (Polkadot)
- * @Last Updated: August 2016
+ * @Last Updated: December 2016
  * @PHP Version: 5.5.9 or Newer
  *
  * @Author: Penoaks Publishing Co.
@@ -25,7 +25,7 @@ use Milky\Providers\ProviderRepository;
  * @Website: http://penoaks.com
  *
  * The MIT License (MIT)
- * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ * Copyright 2017 Penoaks Publishing Ltd. <development@penoaks.org>
  *
  * This Source Code is subject to the terms of the MIT License.
  * If a copy of the license was not distributed with this file,
@@ -35,7 +35,7 @@ class Framework
 {
 	const PRODUCT = "Milky Framework";
 	const VERSION = "v6.0 (Polkadot)";
-	const COPYRIGHT = "Copyright © 2016 Penoaks Publishing Co.";
+	const COPYRIGHT = "Copyright © 2017 Penoaks Publishing Ltd.";
 
 	/**
 	 * @var bool

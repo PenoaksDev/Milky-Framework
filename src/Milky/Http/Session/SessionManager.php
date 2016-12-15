@@ -24,7 +24,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\Handler\NullSessionHandler;
 
 /**
  * The MIT License (MIT)
- * Copyright 2016 Penoaks Publishing Co. <development@penoaks.org>
+ * Copyright 2017 Penoaks Publishing Ltd. <development@penoaks.org>
  *
  * This Source Code is subject to the terms of the MIT License.
  * If a copy of the license was not distributed with this file,
