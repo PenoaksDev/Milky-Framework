@@ -3,7 +3,6 @@
 use Milky\Binding\ServiceResolver;
 use Milky\Facades\Config;
 use Milky\Filesystem\Filesystem;
-use Milky\Framework;
 use Milky\Http\View\Compilers\BladeCompiler;
 use Milky\Http\View\Engines\CompilerEngine;
 use Milky\Http\View\Engines\EngineResolver;
@@ -62,6 +61,11 @@ class ViewServiceResolver extends ServiceResolver
 			{
 				return new PhpEngine();
 			} );
+
+			$this->engineResolverInstance->register( 'blade', function ()
+			{
+				return new CompilerEngine( $this->bladeCompiler() );
+			} );
 		}
 
 		return $this->engineResolverInstance;
@@ -72,18 +76,11 @@ class ViewServiceResolver extends ServiceResolver
 	 */
 	public function bladeCompiler()
 	{
+		// The Compiler engine requires an instance of the CompilerInterface, which in
+		// this case will be the Blade compiler, so we'll first create the compiler
+		// instance to pass into the engine so it can compile the views properly.
 		if ( is_null( $this->bladeCompilerInstance ) )
-		{
-			// The Compiler engine requires an instance of the CompilerInterface, which in
-			// this case will be the Blade compiler, so we'll first create the compiler
-			// instance to pass into the engine so it can compile the views properly.
 			$this->bladeCompilerInstance = new BladeCompiler( Filesystem::i(), Config::get( 'view.compiled' ) );
-
-			$this->engineResolver()->register( 'blade', function ()
-			{
-				return new CompilerEngine( $this->bladeCompilerInstance );
-			} );
-		}
 
 		return $this->bladeCompilerInstance;
 	}

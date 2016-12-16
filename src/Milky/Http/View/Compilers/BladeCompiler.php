@@ -646,9 +646,9 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 * @param  string $expression
 	 * @return string
 	 */
-	protected function compileCan( $expression )
+	protected function compilePermission( $expression )
 	{
-		return "<?php if ( Permissions::checkPolicies{$expression} ): ?>";
+		return "<?php if ( Permissions::check{$expression} ): ?>";
 	}
 
 	/**
@@ -657,31 +657,9 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 * @param  string $expression
 	 * @return string
 	 */
-	protected function compileElsecan( $expression )
+	protected function compileElsepermission( $expression )
 	{
-		return "<?php elseif ( Permissions::checkPolicies{$expression} ): ?>";
-	}
-
-	/**
-	 * Compile the cannot statements into valid PHP.
-	 *
-	 * @param  string $expression
-	 * @return string
-	 */
-	protected function compileCannot( $expression )
-	{
-		return "<?php if ( !Permissions::checkPolicies{$expression} ): ?>";
-	}
-
-	/**
-	 * Compile the else-can statements into valid PHP.
-	 *
-	 * @param  string $expression
-	 * @return string
-	 */
-	protected function compileElsecannot( $expression )
-	{
-		return "<?php elseif ( !Permissions::checkPolicies{$expression} ): ?>";
+		return "<?php elseif ( Permissions::check{$expression} ): ?>";
 	}
 
 	/**

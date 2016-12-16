@@ -304,9 +304,7 @@ class ViewFactory
 	public function getEngineFromPath( $path )
 	{
 		if ( !$extension = $this->getExtension( $path ) )
-		{
 			throw new InvalidArgumentException( "Unrecognized extension in file: $path" );
-		}
 
 		$engine = $this->extensions[$extension];
 
@@ -842,9 +840,7 @@ class ViewFactory
 		$this->finder->addExtension( $extension );
 
 		if ( isset( $resolver ) )
-		{
 			$this->engines->register( $engine, $resolver );
-		}
 
 		unset( $this->extensions[$extension] );
 
