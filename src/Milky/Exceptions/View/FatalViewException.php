@@ -1,4 +1,4 @@
-<?php namespace Milky\Exceptions\Auth;
+<?php namespace Milky\Exceptions\View;
 
 /**
  * The MIT License (MIT)
@@ -8,7 +8,7 @@
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-class PermissionException extends \Exception
+class FatalViewException
 {
 
 }

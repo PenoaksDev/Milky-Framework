@@ -2,7 +2,7 @@
 
 use Exception;
 use Milky\Exceptions\ExceptionInfo;
-use Milky\Http\View\Factory;
+use Milky\Http\View\ViewFactory;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -20,7 +20,7 @@ class ViewDisplayer implements DisplayerInterface
 	/**
 	 * The view factory instance.
 	 *
-	 * @var Factory
+	 * @var ViewFactory
 	 */
 	protected $factory;
 
@@ -28,11 +28,9 @@ class ViewDisplayer implements DisplayerInterface
 	 * Create a new view displayer instance.
 	 *
 	 * @param ExceptionInfo $info
-	 * @param Factory $factory
-	 *
-	 * @return void
+	 * @param ViewFactory $factory
 	 */
-	public function __construct( ExceptionInfo $info, Factory $factory )
+	public function __construct( ExceptionInfo $info, ViewFactory $factory )
 	{
 		$this->info = $info;
 		$this->factory = $factory;

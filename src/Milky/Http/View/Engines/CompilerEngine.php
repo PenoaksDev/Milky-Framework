@@ -2,7 +2,9 @@
 
 use ErrorException;
 use Exception;
+use Milky\Facades\Log;
 use Milky\Http\View\Compilers\CompilerInterface;
+use Throwable;
 
 class CompilerEngine extends PhpEngine
 {
@@ -46,9 +48,7 @@ class CompilerEngine extends PhpEngine
 		// it was last compiled, we will re-compile the views so we can evaluate a
 		// fresh copy of the view. We'll pass the compiler the path of the view.
 		if ( $this->compiler->isExpired( $path ) )
-		{
 			$this->compiler->compile( $path );
-		}
 
 		$compiled = $this->compiler->getCompiledPath( $path );
 
@@ -71,11 +71,11 @@ class CompilerEngine extends PhpEngine
 	 *
 	 * @throws $e
 	 */
-	protected function handleViewException( Exception $e, $obLevel )
+	protected function handleViewException( Throwable $e )
 	{
 		$e = new ErrorException( $this->getMessage( $e ), 0, 1, $e->getFile(), $e->getLine(), $e );
 
-		parent::handleViewException( $e, $obLevel );
+		parent::handleViewException( $e );
 	}
 
 	/**
@@ -84,7 +84,7 @@ class CompilerEngine extends PhpEngine
 	 * @param  \Exception $e
 	 * @return string
 	 */
-	protected function getMessage( Exception $e )
+	protected function getMessage( Throwable $e )
 	{
 		return $e->getMessage() . ' (View: ' . realpath( end( $this->lastCompiled ) ) . ')';
 	}

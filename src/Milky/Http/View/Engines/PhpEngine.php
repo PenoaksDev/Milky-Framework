@@ -1,12 +1,16 @@
 <?php namespace Milky\Http\View\Engines;
 
 use Exception;
-use Milky\Framework;
-use Milky\Helpers\Func;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
-use Symfony\Component\Finder\Finder;
 use Throwable;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2017 Penoaks Publishing Ltd. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class PhpEngine implements EngineInterface
 {
 	/**
@@ -45,14 +49,22 @@ class PhpEngine implements EngineInterface
 		}
 		catch ( Exception $e )
 		{
-			$this->handleViewException( $e, $obLevel );
+			$this->handleViewException0( $e, $obLevel );
 		}
 		catch ( Throwable $e )
 		{
-			$this->handleViewException( new FatalThrowableError( $e ), $obLevel );
+			$this->handleViewException0( $e, $obLevel );
 		}
 
 		return ltrim( ob_get_clean() );
+	}
+
+	private function handleViewException0( Throwable $t, $obLevel )
+	{
+		while ( ob_get_level() > $obLevel )
+			ob_end_clean();
+
+		$this->handleViewException( $t );
 	}
 
 	/**
@@ -64,14 +76,10 @@ class PhpEngine implements EngineInterface
 	 *
 	 * @throws $e
 	 */
-	protected function handleViewException( Exception $e, $obLevel )
+	protected function handleViewException( Throwable $t )
 	{
-		while ( ob_get_level() > $obLevel )
-		{
-			ob_end_clean();
-			// echo( ob_get_clean() ); // TODO Output ob config option
-		}
+		// XXX I think there is know issues with throwing Throwables in older version of PHP, might want to wrap the throwable for such cases.
 
-		throw $e;
+		throw $t;
 	}
 }

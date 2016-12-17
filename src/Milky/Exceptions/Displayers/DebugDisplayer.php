@@ -1,12 +1,18 @@
 <?php namespace Milky\Exceptions\Displayers;
 
 use Exception;
+use Milky\Exceptions\View\FatalViewError;
 use Symfony\Component\HttpFoundation\Response;
 use Whoops\Handler\PrettyPageHandler as Handler;
 use Whoops\Run as Whoops;
 
 /**
- * This is the debug displayer class.
+ * The MIT License (MIT)
+ * Copyright 2017 Penoaks Publishing Ltd. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
  */
 class DebugDisplayer implements DisplayerInterface
 {

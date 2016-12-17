@@ -1,8 +1,11 @@
 <?php namespace Milky\Http\Routing;
 
 use BadMethodCallException;
+use Milky\Exceptions\Http\HttpResponseException;
+use Milky\Facades\Redirect;
+use Milky\Http\HttpFactory;
 use Milky\Http\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
+use Milky\Http\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 abstract class Controller
@@ -114,8 +117,11 @@ abstract class Controller
 	 */
 	public function error( $code = 404, $msg = "Resource not found" )
 	{
-		$content = ['error' => $msg];
+		$request = HttpFactory::i()->request();
 
-		return ( request()->ajax() || request()->wantsJson() ) ? new JsonResponse( $content, $code ) : new Response( $content, $code );
+		if ( $request->ajax() || $request->wantsJson() )
+			return new JsonResponse( ['error' => $msg] );
+		else
+			return new Response( Redirect::back()->withInput( $request->input() )->withErrors( ['error' => $msg] ) );
 	}
 }

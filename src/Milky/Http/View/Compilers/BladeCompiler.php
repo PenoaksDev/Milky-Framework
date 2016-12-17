@@ -1,6 +1,7 @@
 <?php namespace Milky\Http\View\Compilers;
 
 use Milky\Exceptions\FrameworkException;
+use Milky\Facades\Log;
 use Milky\Helpers\Arr;
 use Milky\Helpers\Str;
 
@@ -646,8 +647,10 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 * @param  string $expression
 	 * @return string
 	 */
-	protected function compilePermission( $expression )
+	protected function compilePerm( $expression )
 	{
+		Log::debug( "Checking permission expression [" . $expression . "]" );
+
 		return "<?php if ( Permissions::check{$expression} ): ?>";
 	}
 
@@ -657,7 +660,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
 	 * @param  string $expression
 	 * @return string
 	 */
-	protected function compileElsepermission( $expression )
+	protected function compileElseperm( $expression )
 	{
 		return "<?php elseif ( Permissions::check{$expression} ): ?>";
 	}
