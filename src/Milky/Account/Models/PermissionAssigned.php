@@ -5,7 +5,7 @@ use Milky\Database\Eloquent\Model;
 class PermissionAssigned extends Model
 {
 	protected $table = "permissions_assigned";
-	protected $fillable = ["name", "type", "permission", "value"];
+	protected $fillable = ["weight", "name", "type", "permission", "value"];
 	public $timestamps = false;
 
 	public function assignedTo()

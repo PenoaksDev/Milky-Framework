@@ -78,7 +78,7 @@ class URL extends BaseFacade
 	 */
 	public static function routeModel( $name, $model, $parameters = [], $absolute = true )
 	{
-		return static::__do( __FUNCTION__, args_with_keys( func_get_args(), __CLASS__, __FUNCTION__ ) );
+		return static::__do( __FUNCTION__, compact('name', 'model', 'parameters', 'absolute') );
 	}
 
 	/**

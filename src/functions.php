@@ -10,6 +10,7 @@ use Milky\Helpers\Arr;
 use Milky\Helpers\Dumper;
 use Milky\Helpers\Func;
 use Milky\Helpers\Str;
+use Milky\Http\HttpFactory;
 use Milky\Http\Request;
 use Milky\Http\Routing\UrlGenerator;
 use Milky\Impl\Collection;
@@ -1425,24 +1426,6 @@ if ( !function_exists( 'public_path' ) )
 	function public_path( $path = null )
 	{
 		return fw()->buildPath( $path, 'public' );
-	}
-}
-
-if ( !function_exists( 'request' ) )
-{
-	/**
-	 * Get an instance of the current request or an input item from the request.
-	 *
-	 * @param  string $key
-	 * @param  mixed $default
-	 * @return Request|string|array
-	 */
-	function request( $key = null, $default = null )
-	{
-		if ( is_null( $key ) )
-			return Framework::get( 'request' );
-
-		return Framework::get( 'request' )->input( $key, $default );
 	}
 }
 

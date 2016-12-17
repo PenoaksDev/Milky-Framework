@@ -16,4 +16,14 @@ class Request extends BaseFacade
 	{
 		return HttpFactory::i()->request();
 	}
+
+	public static function ajax()
+	{
+		return static::__do( __FUNCTION__, [] );
+	}
+
+	public static function pjax()
+	{
+		return static::__do( __FUNCTION__, [] );
+	}
 }

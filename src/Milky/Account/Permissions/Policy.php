@@ -4,6 +4,7 @@ use Milky\Annotations\AnnotationReader;
 use Milky\Annotations\CachedReader;
 use Milky\Cache\CacheManager;
 use Milky\Exceptions\Auth\PolicyException;
+use Milky\Facades\Log;
 
 /**
  * The MIT License (MIT)
@@ -16,14 +17,17 @@ use Milky\Exceptions\Auth\PolicyException;
 abstract class Policy
 {
 	/*
-	 * When implemented this class selectively overrides the internal permission checking of the framework.
-	 * To implement, extend this [Policy] and create a protected array named nodes, e.g., protected $nodes = [];
+	 * When implemented this class selectively supplements the internal permission checking of the framework.
+	 * To implement, extend this [Policy] and create a protected array named prefix, e.g., 'protected $prefix = 'permission.prefix';'
 	 *
-	 * The nodes key will be the permission being defined and the value will be the method used to check the permission.
-	 * The value must be callable (Closure, class@method, [class, method]) or a simple method string which must exist locally.
-	 * e.g., 'articles.edit' => 'editArticles'
+	 * The prefix will be appended the each policy methods namespace. For each node you wish to supplement, add the annotation
+	 * PolicyOptions to the phpdoc of each method, e.g., '@PolicyOptions( namespace="methodNode" )'.
 	 *
-	 * The protected string $prefix will be automatically prefixed to the permission key.
+	 * Define the desired arguments in your method, which will be injected by the framework's UniversalBuilder.
+	 * Additionally arguments my be passed from the call to check the permission, e.g.,
+	 * 'Permissions::check("permission.prefix.methodNode")' OR '@permission( "permission.prefix.methodNode" )' for blade templates.
+	 *
+	 * The method `before`
 	 */
 
 	/**
@@ -35,7 +39,7 @@ abstract class Policy
 	protected $prefix = '';
 
 	/**
-	 * The permission nodes.
+	 * The policy nodes.
 	 * Args available: $entity -> passed by arg name
 	 * Permission => Callable Method
 	 *
@@ -44,55 +48,25 @@ abstract class Policy
 	protected $nodes = [];
 
 	/**
-	 * The next permission check
-	 *
-	 * @var callable
-	 */
-	protected $next = null;
-
-	/**
-	 * Set the next permission check method
-	 *
-	 * @param callable $callable
-	 */
-	protected function setNext( callable $callable )
-	{
-		$this->next = $callable;
-	}
-
-	/**
-	 * Call the next permission check method
-	 *
-	 * @return bool
-	 */
-	public function next()
-	{
-		$result = is_null( $this->next ) ? false : call_user_func( $this->next );
-		$this->next = null;
-
-		return $result;
-	}
-
-	/**
 	 * Policy constructor.
 	 */
 	public function __construct()
 	{
 		if ( is_null( $this->prefix ) || !is_string( $this->prefix ) )
-			throw new PolicyException( "The policy [" . static::class . "] prefix must be a string." );
+			throw new PolicyException( "The policy [" . static::class . "] prefix must be a string, e.g., 'protected \$prefix = \"fw.prefix\";'" );
 
 		$reader = new AnnotationReader();
 
-		$reader->addImports( ['\Milky\Account\Permissions\PermissionMethod'] );
+		$reader->addImports( [PolicyOptions::class] );
 
 		$reader = new CachedReader( $reader, CacheManager::i() );
 
 		$class = new \ReflectionClass( static::class );
 
 		foreach ( $class->getMethods() as $method )
-			if ( $anno = $reader->getMethodAnnotation( $method, PermissionMethod::class ) )
+			if ( $options = $reader->getMethodAnnotation( $method, PolicyOptions::class ) )
 			{
-				$namespace = ( empty( $this->prefix ) ? '' : $this->prefix . '.' ) . $anno->namespace;
+				$namespace = ( empty( $this->prefix ) ? '' : $this->prefix . '.' ) . $options->namespace;
 				$this->nodes[$namespace] = [$this, $method->name];
 			}
 	}

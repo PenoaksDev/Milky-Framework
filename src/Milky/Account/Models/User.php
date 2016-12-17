@@ -13,6 +13,14 @@ use Milky\Database\Eloquent\Relations\HasMany;
 use Milky\Database\Eloquent\RoutableModel;
 use Milky\Facades\URL;
 
+/**
+ * The MIT License (MIT)
+ * Copyright 2017 Penoaks Publishing Ltd. <development@penoaks.org>
+ *
+ * This Source Code is subject to the terms of the MIT License.
+ * If a copy of the license was not distributed with this file,
+ * You can obtain one at https://opensource.org/licenses/MIT.
+ */
 class User extends Group implements Account, RoutableModel
 {
 	use Authenticatable, Authorizable, CanResetPassword, UuidAsKey;
@@ -87,7 +95,7 @@ class User extends Group implements Account, RoutableModel
 	 */
 	public function inheritance()
 	{
-		return $this->hasMany( GroupInheritance::class, "child" );
+		return $this->hasMany( GroupInheritance::class, "child" )->orderBy( "weight" );
 	}
 
 	/**
@@ -95,7 +103,7 @@ class User extends Group implements Account, RoutableModel
 	 */
 	public function permissions()
 	{
-		return $this->hasMany( PermissionAssigned::class, "name" );
+		return $this->hasMany( PermissionAssigned::class, "name" )->orderBy( "weight" );
 	}
 
 	public static function stats()

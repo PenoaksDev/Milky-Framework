@@ -10,7 +10,7 @@
  *
  * @Annotation
  */
-class PermissionMethod
+class PolicyOptions
 {
 	public $namespace;
 }

@@ -5,7 +5,7 @@ use Milky\Database\Eloquent\Model;
 class GroupInheritance extends Model
 {
     protected $table = "group_inheritance";
-    protected $fillable = ["child", "parent", "type"];
+    protected $fillable = ["weight", "child", "parent", "type"];
     public $timestamps = false;
 
     public function group()

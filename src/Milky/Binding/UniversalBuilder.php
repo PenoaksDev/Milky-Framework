@@ -149,7 +149,7 @@ class UniversalBuilder
 	 * @param string $class
 	 * @param bool $buildOnFailure
 	 * @param array $parameters
-	 * @return null|object
+	 * @return mixed|null|object
 	 */
 	public static function resolveClass( $class, $buildOnFailure = false, $parameters = [] )
 	{

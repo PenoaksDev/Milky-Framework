@@ -1,7 +1,6 @@
 <?php namespace Milky\Account\Permissions;
 
-use Milky\Exceptions\AccountException;
-use Milky\Helpers\NS;
+use Milky\Exceptions\Auth\PermissionException;
 
 /**
  * The MIT License (MIT)
@@ -13,15 +12,16 @@ use Milky\Helpers\NS;
  */
 class Permission
 {
-	/**
-	 * @var Permission[]
-	 */
-	private $children = [];
+	const EVERYBODY = "sys.everybody";
+	const OP = "sys.op";
+	const ADMIN = "sys.admin";
+	const BANNED = "sys.banned";
+	const WHITELISTED = "sys.whitelisted";
 
 	/**
-	 * @var PermissionModel
+	 * @var PermissionManager
 	 */
-	private $model;
+	private $mgr;
 
 	/**
 	 * @var string
@@ -29,87 +29,17 @@ class Permission
 	private $localName;
 
 	/**
-	 * @var Permission
+	 * @var Callable[]
 	 */
-	private $parent;
+	private $policyMethods = [];
 
-	public function __construct( $localName, $parent = null, $type = null )
+	public function __construct( $mgr, $localName )
 	{
-		if ( !preg_match( "[a-z0-9_]*", $localName ) )
-			throw new AccountException( "The permission local name [$localName] can only contain the characters a-z, 0-9, and _." );
+		if ( !preg_match( "/[a-z0-9_]*/", $localName ) )
+			throw new PermissionException( "The permission name [$localName] can only contain the characters a-z, 0-9, and _." );
 
+		$this->mgr = $mgr;
 		$this->localName = $localName;
-		$this->parent = $parent;
-
-		$this->model = new PermissionModel( $localName, $type, $this );
-		PermissionManager::i()->addPermission( $this );
-	}
-
-	public function addChild( Permission $node )
-	{
-		$this->children[$node->getLocalName()] = $node;
-	}
-
-	public function getChild( $name )
-	{
-		if ( !array_key_exists( strtolower( $name ), $this->children ) )
-			return null;
-
-		return $this->children[strtolower( $name )];
-	}
-
-	public function getChildren()
-	{
-		return $this->children;
-	}
-
-	public function getChildrenRecursive( $includeParents = false, &$array = [] )
-	{
-		if ( $includeParents || !$this->hasChildren() )
-			$array[] = $this;
-
-		foreach ( $this->children as $child )
-			$child->getChildrenRecursive( $includeParents, $array );
-
-		return $array;
-	}
-
-	public function commit()
-	{
-		// Save changes
-	}
-
-	/**
-	 * @return NS
-	 */
-	public function getNamespace()
-	{
-		$ns = [];
-		$ladder = $this;
-
-		do
-		{
-			$ns[] = $ladder->getLocalName();
-			$ladder = $ladder->getParent();
-		}
-		while ( !is_null( $ladder ) );
-
-		return new NS( array_reverse( $ns ) );
-	}
-
-	public function compare( Permission $perm )
-	{
-		if ( $this->getNamespace() == $perm->getNamespace() )
-			return 0;
-
-		$ns1 = $this->getNamespace();
-		$ns2 = $perm->getNamespace();
-
-		for ( $i = 0; $i < min( $ns1->getNodeCount(), $ns2->getNodeCount() ); $i++ )
-			if ( $ns1->getNode( $i ) != $ns2->getNode( $i ) )
-				return strcmp( $ns1->getNode( $i ), $ns2->getNode( $i ) );
-
-		return $ns1->getNodeCount() > $ns2->getNodeCount() ? -1 : 1;
 	}
 
 	public function getLocalName()
@@ -117,33 +47,18 @@ class Permission
 		return strtolower( $this->localName );
 	}
 
-	public function getModel()
-	{
-		return $this->model;
-	}
-
-	public function getParent()
-	{
-		return $this->parent;
-	}
-
-	public function getType()
-	{
-		return $this->model->getType();
-	}
-
-	public function hasChildren()
-	{
-		return count( $this->children ) > 0;
-	}
-
-	public function hasParent()
-	{
-		return !is_null( $this->parent );
-	}
-
 	public function __toString()
 	{
-		return "Permission(name={$this->localName},parent={$this->parent},model={$this->model})";
+		return "Permission(name={$this->localName})";
+	}
+
+	public function addPolicyMethod( Callable $callable )
+	{
+		$this->policyMethods[] = $callable;
+	}
+
+	public function getPolicyMethods()
+	{
+		return $this->policyMethods;
 	}
 }

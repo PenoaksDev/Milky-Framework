@@ -1,5 +1,7 @@
 <?php namespace Milky\Account\Types;
 
+use Milky\Account\Models\PermissibleEntity;
+
 /**
  * The MIT License (MIT)
  * Copyright 2017 Penoaks Publishing Ltd. <development@penoaks.org>
@@ -8,7 +10,7 @@
  * If a copy of the license was not distributed with this file,
  * You can obtain one at https://opensource.org/licenses/MIT.
  */
-interface Account extends \ArrayAccess
+interface Account extends \ArrayAccess, PermissibleEntity
 {
 	/**
 	 * Compiles a human readable display name, e.g., John Smith
